@@ -72,20 +72,19 @@ android {
 
 
 dependencies {
-    implementation 'vn.vihat.omicall:omisdk:0.9.10'
-//    implementation project(path: ':OmiSDK')
-//
-//    implementation 'androidx.core:core-ktx:1.7.0'
-//    implementation 'androidx.fragment:fragment-ktx:1.4.0'
-//    implementation 'androidx.activity:activity-ktx:1.4.0'
-//    implementation 'androidx.appcompat:appcompat:1.5.0'
-//    implementation 'com.google.android.material:material:1.6.1'
-//    implementation 'com.google.firebase:firebase-messaging-ktx:23.0.8'
-//    implementation 'com.google.android.flexbox:flexbox:3.0.0'
-//    implementation "com.google.code.gson:gson:2.8.6"
-//    def lifecycle_version = "2.4.0"
-//    implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
-//    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
-//    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2'
-//    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.4.0"
+    implementation 'vn.vihat.omicall:omi-sdk:0.9.10'
+
+    implementation 'androidx.core:core-ktx:1.7.0'
+    implementation 'androidx.fragment:fragment-ktx:1.4.0'
+    implementation 'androidx.activity:activity-ktx:1.4.0'
+    implementation 'androidx.appcompat:appcompat:1.5.0'
+    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'com.google.firebase:firebase-messaging-ktx:23.0.8'
+    implementation 'com.google.android.flexbox:flexbox:3.0.0'
+    implementation "com.google.code.gson:gson:2.8.6"
+    def lifecycle_version = "2.4.0"
+    implementation "androidx.lifecycle:lifecycle-viewmodel:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2'
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.4.0"
 }
