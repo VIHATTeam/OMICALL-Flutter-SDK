@@ -13,12 +13,6 @@ class MethodChannelOmicallsdk extends OmicallsdkPlatform {
   final methodChannel = const MethodChannel('omicallsdk');
 
   @override
-  Future<String?> getPlatformVersion() async {
-    final version = await methodChannel.invokeMethod<String>('getPlatformVersion');
-    return version;
-  }
-
-  @override
   Future<dynamic> action(ActionModel action) async {
     final response = await methodChannel.invokeMethod<String>('action',jsonEncode(action.toJson()));
     return response;
