@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:omicallsdk/model/action_model.dart';
+import 'package:omikit/model/action_model.dart';
 
 import 'omicallsdk_platform_interface.dart';
 

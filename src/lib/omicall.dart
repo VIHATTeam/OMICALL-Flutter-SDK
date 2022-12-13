@@ -1,8 +1,8 @@
 import 'dart:async';
 
-import 'package:omicallsdk/constant/enums.dart';
-import 'package:omicallsdk/model/action_model.dart';
-import 'package:omicallsdk/omicallsdk.dart';
+import 'package:omikit/constant/enums.dart';
+import 'package:omikit/model/action_model.dart';
+import 'package:omikit/omicallsdk.dart';
 
 class OmiChannel {
   final Omicallsdk _micallsdk = Omicallsdk();
