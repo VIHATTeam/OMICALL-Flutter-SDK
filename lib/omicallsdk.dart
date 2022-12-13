@@ -9,3 +9,4 @@ class Omicallsdk {
     return OmicallsdkPlatform.instance.action(action);
   }
 }
+

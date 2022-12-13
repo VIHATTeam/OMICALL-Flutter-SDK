@@ -22,6 +22,7 @@ abstract class OmicallsdkPlatform extends PlatformInterface {
   static set instance(OmicallsdkPlatform instance) {
     PlatformInterface.verifyToken(instance, _token);
     _instance = instance;
+
   }
 
   Future<String?> getPlatformVersion() {
@@ -33,5 +34,9 @@ abstract class OmicallsdkPlatform extends PlatformInterface {
     throw UnimplementedError('action has not been implemented.');
   }
 
+  void listenerEvent(Function(ActionModel) callback) {
+    throw UnimplementedError('action has not been implemented.');
+
+  }
 
 }

@@ -11,6 +11,7 @@ class ActionName {
   static const String DECLINE = "DECLINE";
   static const String FORWARD_CALL_TO = "FORWARD_CALL_TO";
   static const String HANGUP = "HANGUP";
+  static const String PICK_UP = "PICK_UP";
   static const String ON_CALL_STARTED = "ON_CALL_STARTED";
   static const String ON_HOLD = "ON_HOLD";
   static const String ON_IN_COMING_RECEIVE = "ON_IN_COMING_RECEIVE";
@@ -21,6 +22,16 @@ class ActionName {
   static const String UPDATE_PUSH_TOKEN = "UPDATE_PUSH_TOKEN";
 }
 
+class ListenEvent {
+  static const String onCallEnd = "onCallEnd";
+  static const String incomingReceived = "incomingReceived";
+  static const String onCallEstablished = "onCallEstablished";
+  static const String onConnectionTimeout = "onConnectionTimeout";
+  static const String onHold = "onHold";
+  static const String onMuted = "onMuted";
+  static const String onRinging = "onRinging";
+
+}
 enum DeviceType {
   ANDROID,IOS
 

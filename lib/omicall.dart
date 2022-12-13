@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:omikit/constant/enums.dart';
 import 'package:omikit/model/action_model.dart';
 import 'package:omikit/omicallsdk.dart';
+import 'package:omikit/omicallsdk_platform_interface.dart';
 
 class OmiChannel {
   final Omicallsdk _micallsdk = Omicallsdk();
@@ -11,6 +12,9 @@ class OmiChannel {
     return _micallsdk.action(action);
   }
 
+  void listerEvent(Function(ActionModel) callback) {
+    OmicallsdkPlatform.instance.listenerEvent(callback);
+  }
 }
 
 class OmiAction {
@@ -37,7 +41,7 @@ class OmiAction {
     });
   }
 
-  static ActionModel endCall(String phoneNumber) {
+  static ActionModel endCall() {
     return ActionModel(actionName: ActionName.END_CALL, data: {});
   }
 
@@ -46,8 +50,7 @@ class OmiAction {
   }
 
   static ActionModel toggleMute() {
-    return ActionModel(
-        actionName: ActionName.TOGGLE_MUTE, data: {});
+    return ActionModel(actionName: ActionName.TOGGLE_MUTE, data: {});
   }
 
   static ActionModel toggleSpeaker(bool useSpeaker) {
@@ -60,14 +63,24 @@ class OmiAction {
   }
 
   static ActionModel hangUp(int callId) {
-    return ActionModel(actionName: ActionName.HANGUP, data: {'callId':callId});
+    return ActionModel(actionName: ActionName.HANGUP, data: {'callId': callId});
   }
 
   static ActionModel onMute(bool isMute) {
-    return ActionModel(actionName: ActionName.ON_MUTE, data: {'isMute':isMute});
+    return ActionModel(
+        actionName: ActionName.ON_MUTE, data: {'isMute': isMute});
   }
 
   static ActionModel onHold(bool isHold) {
-    return ActionModel(actionName: ActionName.ON_HOLD, data: {'isHold':isHold});
+    return ActionModel(
+        actionName: ActionName.ON_HOLD, data: {'isHold': isHold});
+  }
+
+  /*
+  * This action using only for android
+  * */
+  static ActionModel pickUp(bool isHold) {
+    return ActionModel(
+        actionName: ActionName.ON_HOLD, data: {'isHold': isHold});
   }
 }
