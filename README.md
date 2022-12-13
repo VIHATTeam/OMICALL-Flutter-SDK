@@ -1,15 +1,15 @@
-# omicallsdk
+# OMICALL Flutter SDK
 
-A new Flutter project.
+The OmiKit pod exposes the <a href="http://www.omicall.com/">OMICALL</a> library as Pub.
 
-## Getting Started
+The most important part of the framework is :
+- Help to easy integrate with Omicall.
+- Easy custom Call UI/UX.
+- By default they are included for all iOS architectures.
+- Optimize codec voip for u.
+- Full inteface to interactive with core function like sound/ringtone/codec.
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+## Status
+Currently active maintained
 
-For help getting started with Flutter development, view the
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
+### Usage:
