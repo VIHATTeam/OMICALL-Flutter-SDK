@@ -12,6 +12,8 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import vn.vihat.omicall.omicallsdk.constants.*
 import vn.vihat.omicall.omisdk.OmiClient
+import vn.vihat.omicall.omisdk.OmiSDKUtils
+import java.util.*
 
 /** OmicallsdkPlugin */
 class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
@@ -43,7 +45,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             INIT_CALL -> {
                 val userName = dataOmi["userName"] as String
                 val password = dataOmi["password"] as String
-                val realm = dataOmi["password"] as String
+                val realm = dataOmi["realm"] as String
                 OmiClient.instance.register(userName, password, realm)
             }
             UPDATE_TOKEN -> {
@@ -58,7 +60,12 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     appId
                 );
             }
-            START_OMI_SERVICE -> {}
+            START_OMI_SERVICE -> {
+                activity?.let {
+                    OmiSDKUtils.startOmiService(it)
+
+                }
+            }
             START_CALL -> {
                 val phoneNumber = dataOmi["phoneNumber"] as String
                 val isTransfer = dataOmi["isTransfer"] as Boolean
@@ -100,7 +107,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
             ON_OUT_GOING -> {}
             REGISTER -> {}
-            UPDATE_PUSH_TOKEN -> {}
         }
 
         result.success(true)
