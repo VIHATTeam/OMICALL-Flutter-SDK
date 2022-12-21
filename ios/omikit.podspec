@@ -3,8 +3,8 @@
 # Run `pod lib lint omicallsdk.podspec` to validate before publishing.
 #
 Pod::Spec.new do |s|
-  s.name             = 'omicallsdk'
-  s.version          = '0.0.2'
+  s.name             = 'omikit'
+  s.version          = '0.0.3'
   s.summary          = 'A new Flutter project.'
   s.description      = <<-DESC
 A new Flutter project.
