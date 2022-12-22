@@ -12,7 +12,7 @@ Omikit plugin for flutter.
                        DESC
   s.homepage         = 'http://example.com'
   s.license          = { :file => '../LICENSE' }
-  s.author           = { 'Stringee' => 'info@stringee.com' }
+  s.author           = { 'Omikit' => 'developers@vihatgroup.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
   s.public_header_files = 'Classes/**/*.h'
