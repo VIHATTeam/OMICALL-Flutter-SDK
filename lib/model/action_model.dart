@@ -1,11 +1,13 @@
-
-class ActionModel{
+class ActionModel {
   final String actionName;
-  final Map<String,dynamic> data;
-  ActionModel({required this.actionName, required this.data});
+  final Map<String, dynamic> data;
 
-  Map<String, dynamic> toJson() =>
-      {
+  ActionModel({
+    required this.actionName,
+    required this.data,
+  });
+
+  Map<String, dynamic> toJson() => {
         'actionName': actionName,
         'data': data,
       };

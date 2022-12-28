@@ -1,4 +1,4 @@
-import 'package:omikit/model/action_model.dart';
+import 'package:omicall_flutter_plugin/model/action_model.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'omicallsdk_method_channel.dart';

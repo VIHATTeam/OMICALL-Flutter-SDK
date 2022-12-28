@@ -20,6 +20,7 @@ class ActionName {
   static const String ON_OUT_GOING_STARTED = "ON_OUT_GOING";
   static const String REGISTER = "REGISTER";
   static const String UPDATE_PUSH_TOKEN = "UPDATE_PUSH_TOKEN";
+  static const String SEND_DTMF = "SEND_DTMF";
 }
 
 class ListenEvent {

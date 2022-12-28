@@ -2,21 +2,23 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:omikit/constant/enums.dart';
-import 'package:omikit/model/action_model.dart';
+import 'package:omicall_flutter_plugin/constant/enums.dart';
+import 'package:omicall_flutter_plugin/model/action_model.dart';
 
 import 'omicallsdk_platform_interface.dart';
 
 /// An implementation of [OmicallsdkPlatform] that uses method channels.
 class MethodChannelOmicallsdk extends OmicallsdkPlatform {
   /// The method channel used to interact with the native platform.
-  @visibleForTesting
-  final methodChannel = const MethodChannel('omicallsdk');
+
+  static const methodChannel = MethodChannel('omicallsdk');
 
   @override
   Future<dynamic> action(ActionModel action) async {
-    final response = await methodChannel.invokeMethod<String>(
-        'action', jsonEncode(action.toJson()));
+    final response = await methodChannel.invokeMethod<dynamic>(
+      'action',
+      action.toJson(),
+    );
     return response;
   }
 
@@ -25,13 +27,17 @@ class MethodChannelOmicallsdk extends OmicallsdkPlatform {
     methodChannel.setMethodCallHandler((call) async {
       switch (call.method) {
         case "onCallEnd":
-          callback.call(
-              ActionModel(actionName: ListenEvent.onCallEnd, data: {}));
+          callback
+              .call(ActionModel(actionName: ListenEvent.onCallEnd, data: {}));
           break;
         case "incomingReceived":
           final data = call.arguments as Map<String, dynamic>;
-          callback.call(ActionModel(actionName: ListenEvent.incomingReceived,
-              data: {"callerId": data["callerId"] as int, "phoneNumber": data["callerId"] as String}));
+          callback.call(ActionModel(
+              actionName: ListenEvent.incomingReceived,
+              data: {
+                "callerId": data["callerId"] as int,
+                "phoneNumber": data["callerId"] as String
+              }));
           break;
         case "onCallEstablished":
           callback.call(
@@ -45,20 +51,23 @@ class MethodChannelOmicallsdk extends OmicallsdkPlatform {
           break;
         case "onHold":
           final data = call.arguments as Map<String, dynamic>;
-          callback.call(ActionModel(actionName: ListenEvent.onHold, data: {"isHold" : data["isHold"] as bool }));
+          callback.call(ActionModel(
+              actionName: ListenEvent.onHold,
+              data: {"isHold": data["isHold"] as bool}));
 
           break;
         case "onMuted":
           final data = call.arguments as Map<String, dynamic>;
-          callback.call(ActionModel(actionName: ListenEvent.onMuted, data: {"isMuted" : data["isMuted"] as bool }));
+          callback.call(ActionModel(
+              actionName: ListenEvent.onMuted,
+              data: {"isMuted": data["isMuted"] as bool}));
           break;
         case "onRinging":
-          callback.call(
-              ActionModel(actionName: ListenEvent.onRinging, data: {}));
+          callback
+              .call(ActionModel(actionName: ListenEvent.onRinging, data: {}));
 
           break;
       }
     });
   }
-
 }

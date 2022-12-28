@@ -1,7 +1,12 @@
 package vn.vihat.omicall.omicallsdk
 
+import android.Manifest
 import android.app.Activity
+import android.content.Context
+import android.util.Log
 import androidx.annotation.NonNull
+import androidx.core.app.ActivityCompat
+import io.flutter.embedding.android.FlutterActivity
 
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -12,19 +17,21 @@ import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import vn.vihat.omicall.omicallsdk.constants.*
 import vn.vihat.omicall.omisdk.OmiClient
+import vn.vihat.omicall.omisdk.OmiListener
 import vn.vihat.omicall.omisdk.OmiSDKUtils
 import java.util.*
 
 /** OmicallsdkPlugin */
-class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
+class   OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiListener {
 
     private lateinit var channel: MethodChannel
-    private var activity: Activity? = null
+    private var activity: FlutterActivity? = null
+    private var applicationContext: Context? = null
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
+        applicationContext = flutterPluginBinding.applicationContext
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "omicallsdk")
         channel.setMethodCallHandler(this)
-
     }
 
 
@@ -46,7 +53,16 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 val userName = dataOmi["userName"] as String
                 val password = dataOmi["password"] as String
                 val realm = dataOmi["realm"] as String
-                OmiClient.instance.register(userName, password, realm)
+                OmiClient.register(applicationContext!!, userName, password, realm)
+                OmiClient.instance.setListener(this)
+                ActivityCompat.requestPermissions(activity!!,  arrayOf(
+                    Manifest.permission.USE_SIP,
+                    Manifest.permission.CALL_PHONE,
+                    Manifest.permission.CAMERA,
+                    Manifest.permission.MODIFY_AUDIO_SETTINGS,
+                    Manifest.permission.RECORD_AUDIO,
+                ), 0)
+
             }
             UPDATE_TOKEN -> {
                 val deviceTokenAndroid = dataOmi["deviceTokenAndroid"] as String
@@ -107,6 +123,19 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
             ON_OUT_GOING -> {}
             REGISTER -> {}
+            SEND_DTMF -> {
+                val character = dataOmi["character"] as String
+                var characterCode : Int? = character.toIntOrNull()
+                if (character == "*") {
+                    characterCode = 10
+                }
+                if (character == "#") {
+                    characterCode = 11
+                }
+                if (characterCode != null) {
+                    OmiClient.instance.sendDtmf(characterCode)
+                }
+            }
         }
 
         result.success(true)
@@ -119,7 +148,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-        this.activity = binding.activity
+        this.activity = binding.activity as FlutterActivity
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
@@ -132,5 +161,56 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     override fun onDetachedFromActivity() {
 
+    }
+
+    override fun onCallEstablished() {
+
+        channel.invokeMethod("onCallEstablished", null)
+
+        Log.d("omikit", "onCallEstablished: ")
+
+    }
+
+    override fun onCallEnd() {
+        channel.invokeMethod("onCallEnd", null)
+    }
+
+    override fun incomingReceived(callerId: Int, phoneNumber: String?) {
+        Log.d("omikit", "incomingReceived: ")
+
+    }
+
+    override fun onRinging() {
+        Log.d("omikit", "onRinging: ")
+
+    }
+
+    override fun onConnectionTimeout() {
+        Log.d("omikit", "onConnectionTimeout: ")
+
+    }
+
+    override fun onHold(isHold: Boolean) {
+        Log.d("omikit", "onHold: ")
+
+    }
+
+    override fun onMuted(isMuted: Boolean) {
+
+    }
+
+    companion object {
+        fun onDestroy() {
+            OmiClient.instance.disconnect()
+        }
+
+        fun onRequestPermissionsResult(
+            requestCode: Int,
+            permissions: Array<out String>,
+            grantResults: IntArray,
+            act: FlutterActivity,
+        ) {
+            OmiSDKUtils.handlePermissionRequest(requestCode, permissions, grantResults, act)
+        }
     }
 }

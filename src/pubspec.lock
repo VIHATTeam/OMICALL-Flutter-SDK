@@ -95,13 +95,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.8.0"
-  omicallsdk:
+  omikit:
     dependency: "direct main"
     description:
-      path: ".."
-      relative: true
-    source: path
-    version: "0.0.1"
+      path: "."
+      ref: HEAD
+      resolved-ref: "3de7e5649282d04beb14ed773a5d0cc5096657de"
+      url: "https://github.com/VIHATTeam/OMICALL-Flutter-SDK.git"
+    source: git
+    version: "1.0.1"
   path:
     dependency: transitive
     description:

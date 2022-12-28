@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:omikit/constant/enums.dart';
-import 'package:omikit/model/action_model.dart';
-import 'package:omikit/omicallsdk.dart';
-import 'package:omikit/omicallsdk_platform_interface.dart';
+import 'package:omicall_flutter_plugin/constant/enums.dart';
+import 'package:omicall_flutter_plugin/model/action_model.dart';
+import 'package:omicall_flutter_plugin/omicallsdk.dart';
+import 'package:omicall_flutter_plugin/omicallsdk_platform_interface.dart';
 
 class OmiChannel {
   final Omicallsdk _micallsdk = Omicallsdk();

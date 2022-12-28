@@ -1,6 +1,6 @@
 
 
-import 'package:omikit/model/action_model.dart';
+import 'package:omicall_flutter_plugin/model/action_model.dart';
 
 import 'omicallsdk_platform_interface.dart';
 

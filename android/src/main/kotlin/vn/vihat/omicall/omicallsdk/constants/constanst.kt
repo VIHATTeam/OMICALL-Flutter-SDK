@@ -18,3 +18,4 @@ package vn.vihat.omicall.omicallsdk.constants
  const val ON_OUT_GOING = "ON_OUT_GOING";
  const val ON_OUT_GOING_STARTED = "ON_OUT_GOING";
  const val REGISTER = "REGISTER";
+const val SEND_DTMF = "SEND_DTMF";

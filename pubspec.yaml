@@ -1,10 +1,10 @@
-name: omikit
+name: omicall_flutter_plugin
 description: OmiKit Flutter is wrapper SDK for OmiCall for Application easy integrate features of Omicall Like Call App2App/App2Phone, Video Call.
-version: 1.0.4
+version: 1.0.9
 homepage: https://github.com/VIHATTeam/OMICALL-Flutter-SDK
 
 environment:
-  sdk: '>=2.15.1 <3.0.0'
+  sdk: '>=2.18.1 <3.0.0'
   flutter: ">=2.5.0"
 
 dependencies:
@@ -38,7 +38,7 @@ flutter:
         package: vn.vihat.omicall.omicallsdk
         pluginClass: OmicallsdkPlugin
       ios:
-        pluginClass: OmicallsdkPlugin
+        pluginClass: OmikitPlugin
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
