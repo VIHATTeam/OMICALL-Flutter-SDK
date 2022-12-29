@@ -3,18 +3,20 @@ import UIKit
 import CallKit
 import AVFoundation
 import OmiKit
+import PushKit
+import UserNotifications
 
 public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
 
     @objc public static var instance: SwiftOmikitPlugin!
     static let OMICallStateChangedNotification = "OMICallStateChangedNotification";
-    
+
     private var channel: FlutterMethodChannel!
     private var callManager: CallManager? = nil
     private var sharedProvider: CXProvider? = nil
     private var data: Data?
     private var isFromPushKit: Bool = false
-    
+
 
   public static func register(with registrar: FlutterPluginRegistrar) {
       if (instance == nil) {
@@ -23,12 +25,12 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       instance!.channel = FlutterMethodChannel(name: "omicallsdk", binaryMessenger: registrar.messenger())
       registrar.addMethodCallDelegate(instance, channel: instance!.channel)
   }
-    
-    
+
+
   func sendEvent(_ event: String, _ body: [String : Any]) {
       channel.invokeMethod(event, arguments: body)
   }
-    
+
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
       if(call.method != "action") {
@@ -82,7 +84,7 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
 
 class EventCallbackHandler: FlutterStreamHandler {
     private var eventSink: FlutterEventSink?
-    
+
     public func send(_ event: String, _ body: Any) {
         let data: [String : Any] = [
             "event": event,
@@ -90,14 +92,41 @@ class EventCallbackHandler: FlutterStreamHandler {
         ]
         eventSink?(data)
     }
-    
+
     func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
         self.eventSink = events
         return nil
     }
-    
+
     func onCancel(withArguments arguments: Any?) -> FlutterError? {
         self.eventSink = nil
         return nil
     }
+}
+
+
+@objc public extension FlutterAppDelegate {
+    func registerOmicall(enviroment: String, supportVideoCall: Bool = false) -> PushKitManager? {
+        OmiClient.setEnviroment(enviroment)
+        _ = CallKitProviderDelegate.init(callManager: OMISIPLib.sharedInstance().callManager)
+        let voipRegistry = PKPushRegistry.init(queue: DispatchQueue.main)
+        let result = PushKitManager.init(voipRegistry: voipRegistry)
+        UserDefaults.standard.set("vh.omicrm.com", forKey: "SIPProxy")
+        OmiClient.startOmiService(supportVideoCall)
+        requestNotification()
+        return result
+    }
+
+    func requestNotification() {
+        let center = UNUserNotificationCenter.current()
+        center.requestAuthorization(options:[.badge, .alert, .sound]) { (granted, error) in
+            if (granted) {
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+            }
+        }
+        UIApplication.shared.registerForRemoteNotifications()
+    }
+
 }
