@@ -66,6 +66,26 @@ We have 2 environment variables:
 //supportForVideo is TRUE, if you need to support video call or else.
 ```
 
+- Save token for `OmiClient`:
+
+```
+- (void)application:(UIApplication*)app didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)devToken
+{
+    // parse token bytes to string
+    const char *data = [devToken bytes];
+    NSMutableString *token = [NSMutableString string];
+    for (NSUInteger i = 0; i < [devToken length]; i++)
+    {
+        [token appendFormat:@"%02.2hhX", data[i]];
+    }
+    
+    // print the token in the console.
+    NSLog(@"Push Notification Token: %@", [token copy]);
+    [OmiClient setUserPushNotificationToken:[token copy]];
+}
+
+```
+
 - For more information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/ios-sdk/khoi-tao-sdk">Omicall for iOS</a>
 
 ## Implement
@@ -90,6 +110,21 @@ final action = OmiAction.initCall(
   userName.text,
   password.text,
   'thaonguyennguyen1197',
+);
+omiChannel.action(action: action);
+```
+* Action list:
+* `OmiAction.initCall` : register and init OmiCall
+* `OmiAction.updateToken` : update token for Android
+* `OmiAction.startCall` : start Call
+* `OmiAction.endCall` : end Call
+* `OmiAction.toggleMute` : toggle the microphone status
+* `OmiAction.toggleSpeaker` : toggle the voice status
+* You can init action with another way.
+```
+final action = ActionModel(
+    actionName: ActionName.SEND_DTMF,
+    data: {"character": value},
 );
 omiChannel.action(action: action);
 ```
