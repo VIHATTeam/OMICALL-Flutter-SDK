@@ -114,12 +114,13 @@ final action = OmiAction.initCall(
 omiChannel.action(action: action);
 ```
 * Action list:
-* `OmiAction.initCall` : register and init OmiCall
-* `OmiAction.updateToken` : update token for Android
-* `OmiAction.startCall` : start Call
-* `OmiAction.endCall` : end Call
-* `OmiAction.toggleMute` : toggle the microphone status
-* `OmiAction.toggleSpeaker` : toggle the voice status
+    * `OmiAction.initCall` : register and init OmiCall
+    * `OmiAction.updateToken` : update token for Android
+    * `OmiAction.startCall` : start Call
+    * `OmiAction.endCall` : end Call
+    * `OmiAction.toggleMute` : toggle the microphone status
+    * `OmiAction.toggleSpeaker` : toggle the voice status
+
 * You can init action with another way.
 ```
 final action = ActionModel(
@@ -127,4 +128,20 @@ final action = ActionModel(
     data: {"character": value},
 );
 omiChannel.action(action: action);
+```
+
+* Event listener:
+
+```
+omiChannel.listerEvent((action) {
+  if (action.actionName == "onCallEstablished") {
+    _setDuration();
+  }
+  if (action.actionName == "onCallEnd") {
+    Navigator.pop(context);
+  }
+});
+///Now, we just support 2 events
+- onCallEstablished: Trigger when user accept call
+- onCallEnd: Trigger when user cancel/ignore call
 ```
