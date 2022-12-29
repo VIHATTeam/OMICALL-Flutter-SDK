@@ -53,80 +53,16 @@ apply plugin: 'com.google.gms.google-services'
 
 
 #### iOS:
-- Set up enviroment:
+
+- Set up environment and library:
 
 ```
-[OmiClient setEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX];
+#import <omicall_flutter_plugin/omicall_flutter_plugin-Swift.h>
+
+[self registerOmicallWithEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX supportVideoCall:supportForVideo];
 We have 2 environment variables:
 - KEY_OMI_APP_ENVIROMENT_SANDBOX //Support for testing
 - KEY_OMI_APP_ENVIROMENT_PRODUCTION //Supprt for production
-```
-- Set up VOIP PUSH:
-
-```
-provider = [[CallKitProviderDelegate alloc] initWithCallManager: [OMISIPLib sharedInstance].callManager ];
-voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
-pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
-```
-- Set up push notification:
-
-```
-- (void)requestPushNotificationPermissions
-{
-    // iOS 10+
-    UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
-    [center getNotificationSettingsWithCompletionHandler:^(UNNotificationSettings * _Nonnull settings) {
-        switch (settings.authorizationStatus)
-        {
-            // User hasn't accepted or rejected permissions yet. This block shows the allow/deny dialog
-            case UNAuthorizationStatusNotDetermined:
-            {
-                center.delegate = self;
-                [center requestAuthorizationWithOptions:(UNAuthorizationOptionSound | UNAuthorizationOptionAlert | UNAuthorizationOptionBadge) completionHandler:^(BOOL granted, NSError * _Nullable error)
-                 {
-                     if(granted)
-                     {
-                         dispatch_async(dispatch_get_main_queue(), ^{
-                             [[UIApplication sharedApplication] registerForRemoteNotifications];
-                         });
-                     }
-                     else
-                     {
-                         // notify user to enable push notification permission in settings
-                     }
-                 }];
-                break;
-            }
-            case UNAuthorizationStatusAuthorized:
-            {
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [[UIApplication sharedApplication] registerForRemoteNotifications];
-                });
-                break;
-            }
-            default:
-                break;
-        }
-    }];
-}
-
-- (void)application:(UIApplication*)app didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)devToken
-{
-    // parse token bytes to string
-    const char *data = [devToken bytes];
-    NSMutableString *token = [NSMutableString string];
-    for (NSUInteger i = 0; i < [devToken length]; i++)
-    {
-        [token appendFormat:@"%02.2hhX", data[i]];
-    }
-    [OmiClient setUserPushNotificationToken:[token copy]];
-}
-```
-
-- Init libary:
-
-```
-[OmiClient startOmiService: supportForVideo];
 //supportForVideo is TRUE, if you need to support video call or else.
 ```
 
