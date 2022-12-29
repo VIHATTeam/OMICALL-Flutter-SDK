@@ -8,3 +8,8 @@ All notable changes to this project will be documented in this file.
 
 Released on Tuesday, Dec 13, 2022.
 
+
+## 1.0.10
+
+* Improve for iOS
+
