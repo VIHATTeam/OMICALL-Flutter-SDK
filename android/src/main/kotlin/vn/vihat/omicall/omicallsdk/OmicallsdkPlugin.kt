@@ -165,38 +165,46 @@ class   OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiL
 
     override fun onCallEstablished() {
 
-        channel.invokeMethod("onCallEstablished", null)
+        channel.invokeMethod(onCallEstablished, null)
 
         Log.d("omikit", "onCallEstablished: ")
 
     }
 
     override fun onCallEnd() {
-        channel.invokeMethod("onCallEnd", null)
+        channel.invokeMethod(onCallEnd, null)
     }
 
     override fun incomingReceived(callerId: Int, phoneNumber: String?) {
+        channel.invokeMethod(incomingReceived, mapOf(
+            "callerId" to callerId,
+            "phoneNumber" to phoneNumber,
+        ))
         Log.d("omikit", "incomingReceived: ")
 
     }
 
     override fun onRinging() {
+        channel.invokeMethod(onRinging, null)
         Log.d("omikit", "onRinging: ")
 
     }
 
     override fun onConnectionTimeout() {
+        channel.invokeMethod(onConnectionTimeout, null)
         Log.d("omikit", "onConnectionTimeout: ")
 
     }
 
     override fun onHold(isHold: Boolean) {
-        Log.d("omikit", "onHold: ")
+        channel.invokeMethod(onHold, isHold)
+        Log.d("omikit", "onHold: $isHold")
 
     }
 
     override fun onMuted(isMuted: Boolean) {
-
+        channel.invokeMethod(onHold, isMuted)
+        Log.d("omikit", "onMuted: $isMuted")
     }
 
     companion object {
