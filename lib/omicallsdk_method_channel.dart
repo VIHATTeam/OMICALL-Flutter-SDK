@@ -33,7 +33,7 @@ class MethodChannelOmicallSDK extends OmicallSDKPlatform {
             );
             break;
           case "INCOMING_RECEIVED":
-            final data = call.arguments as Map<String, dynamic>;
+            final data = call.arguments;
             callback.call(
               ActionModel(
                 actionName: OmiEventList.incomingReceived,
@@ -63,7 +63,7 @@ class MethodChannelOmicallSDK extends OmicallSDKPlatform {
 
             break;
           case "HOLD":
-            final data = call.arguments as Map<String, dynamic>;
+            final data = call.arguments;
             callback.call(
               ActionModel(
                 actionName: OmiEventList.onHold,
@@ -75,7 +75,7 @@ class MethodChannelOmicallSDK extends OmicallSDKPlatform {
 
             break;
           case "MUTED":
-            final data = call.arguments as Map<String, dynamic>;
+            final data = call.arguments;
             callback.call(
               ActionModel(
                 actionName: OmiEventList.onMuted,

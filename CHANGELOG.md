@@ -13,3 +13,7 @@ Released on Tuesday, Dec 13, 2022.
 
 * Improve for iOS
 
+## 1.0.11
+
+* Add more event list
+* Refactor code
