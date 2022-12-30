@@ -27,3 +27,15 @@ let ON_OUT_GOING = "ON_OUT_GOING"
 let ON_OUT_GOING_STARTED = "ON_OUT_GOING"
 let REGISTER = "REGISTER"
 let SEND_DTMF = "SEND_DTMF"
+
+
+//LISTENER
+let onCallEstablished = "CALL_ESTABLISHED"
+let onCallEnd = "CALL_END"
+let incomingReceived = "INCOMING_RECEIVED"
+let onRinging = "RINGING"
+let onConnectionTimeout = "CONNECTION_TIMEOUT"
+let onHold = "HOLD"
+let onMuted = "MUTED"
+
+

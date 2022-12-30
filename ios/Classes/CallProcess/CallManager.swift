@@ -57,6 +57,7 @@ class CallManager {
         case .calling:
             if (!call.isIncoming) {
                 NSLog("Outgoing call, in CALLING state, with UUID \(call.uuid)")
+                SwiftOmikitPlugin.instance?.sendEvent(onRinging, [:])
             }
             break
         case .early:
@@ -72,7 +73,8 @@ class CallManager {
         case .confirmed:
             if (!call.isIncoming) {
                 NSLog("Outgoing call, in CONFIRMED state, with UUID: \(call.uuid)")
-                SwiftOmikitPlugin.instance?.sendEvent("onCallEstablished", [:])
+                SwiftOmikitPlugin.instance?.sendEvent(onCallEstablished, [:])
+                
                 currentConfirmedCall = call
             }
             break
@@ -85,20 +87,27 @@ class CallManager {
             print(omiLib.getCurrentCall()?.uuid.uuidString)
             print(call.uuid.uuidString)
             if let currentActiveCall = currentConfirmedCall, currentActiveCall.uuid.uuidString == call.uuid.uuidString {
-                SwiftOmikitPlugin.instance?.sendEvent("onCallEnd", [:])
+                SwiftOmikitPlugin.instance?.sendEvent(onCallEnd, [:])
                 currentConfirmedCall = nil
                 break
             }
             if currentConfirmedCall == nil {
-                SwiftOmikitPlugin.instance?.sendEvent("onCallEnd", [:])
+                SwiftOmikitPlugin.instance?.sendEvent(onCallEnd, [:])
                 break
             }
             print(omiLib.getNewestCall()?.uuid.uuidString)
             break
-        case .null:
-            break
         case .incoming:
+            SwiftOmikitPlugin.instance?.sendEvent(incomingReceived, [
+                "callerId": call.callId,
+                "phoneNumber": call.callerNumber
+            ])
             break
+        case .muted:
+            SwiftOmikitPlugin.instance?.sendEvent(onMuted, ["isMutes": call.muted])
+            break
+        case .hold:
+            SwiftOmikitPlugin.instance?.sendEvent(onHold, ["isHold": call.onHold])
         @unknown default:
             NSLog("Default call state")
         }
@@ -188,11 +197,11 @@ class CallManager {
     /// Toogle speaker
     func toogleSpeaker() {
         do{
-            if(!isSpeaker){
+            if (!isSpeaker) {
                 isSpeaker = true
                 try AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
                 
-            }else{
+            } else {
                 isSpeaker = true
                 try AVAudioSession.sharedInstance().overrideOutputAudioPort(.none)
             }

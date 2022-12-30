@@ -7,8 +7,10 @@ class ActionModel {
     required this.data,
   });
 
-  Map<String, dynamic> toJson() => {
-        'actionName': actionName,
-        'data': data,
-      };
+  Map<String, dynamic> toJson() {
+    return {
+      'actionName': actionName,
+      'data': data,
+    };
+  }
 }
