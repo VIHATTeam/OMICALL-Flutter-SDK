@@ -74,7 +74,7 @@ class CallManager {
             if (!call.isIncoming) {
                 NSLog("Outgoing call, in CONFIRMED state, with UUID: \(call.uuid)")
                 SwiftOmikitPlugin.instance?.sendEvent(onCallEstablished, [:])
-                
+                SwiftOmikitPlugin.instance?.sendEvent(onMuted, ["isMuted": call.muted])
                 currentConfirmedCall = call
             }
             break
@@ -104,7 +104,7 @@ class CallManager {
             ])
             break
         case .muted:
-            SwiftOmikitPlugin.instance?.sendEvent(onMuted, ["isMutes": call.muted])
+            SwiftOmikitPlugin.instance?.sendEvent(onMuted, ["isMuted": call.muted])
             break
         case .hold:
             SwiftOmikitPlugin.instance?.sendEvent(onHold, ["isHold": call.onHold])
