@@ -47,9 +47,11 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.google.gms.google-services'
 ```
 
+Push Notification:
+
 - Add `google-service.json` in `android/app` (For more information, you can refer <a href="https://firebase.flutter.dev/docs/manual-installation/android">Firebase core</a>)
 
-- For more setting information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/android-sdk/cau-hinh-sdk">Omicall for Android</a>
+- For more setting information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/android-sdk/cau-hinh-push-notification">Omicall Config Push for Android</a>
 
 
 #### iOS:
@@ -85,8 +87,10 @@ We have 2 environment variables:
 }
 
 ```
+Push Notification:
+Omicall need 2 certificate: VOIP Push Certificate & User Push Notification Certificate
 
-- For more information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/ios-sdk/khoi-tao-sdk">Omicall for iOS</a>
+- For more information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/ios-sdk/cau-hinh-push-notification">Omicall Push Notification for iOS</a>
 
 ## Implement
 - Set up for Firebase:
