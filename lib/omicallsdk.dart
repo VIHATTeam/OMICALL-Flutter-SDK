@@ -1,12 +1,10 @@
-
-
 import 'package:omicall_flutter_plugin/model/action_model.dart';
 
 import 'omicallsdk_platform_interface.dart';
 
-class Omicallsdk {
+class OmicallSDK {
   Future<dynamic> action(ActionModel action) {
-    return OmicallsdkPlatform.instance.action(action);
+    return OmicallSDKPlatform.instance.action(action);
   }
 }
 

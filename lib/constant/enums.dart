@@ -1,5 +1,5 @@
 
-class ActionName {
+class OmiActionName {
   static const String INIT_CALL = "INIT_CALL";
   static const String UPDATE_TOKEN = "UPDATE_TOKEN";
   static const String START_OMI_SERVICE = "START_OMI_SERVICE";
@@ -23,7 +23,7 @@ class ActionName {
   static const String SEND_DTMF = "SEND_DTMF";
 }
 
-class ListenEvent {
+class OmiEventList {
   static const String onCallEnd = "onCallEnd";
   static const String incomingReceived = "incomingReceived";
   static const String onCallEstablished = "onCallEstablished";

@@ -197,13 +197,17 @@ class   OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiL
     }
 
     override fun onHold(isHold: Boolean) {
-        channel.invokeMethod(onHold, isHold)
+        channel.invokeMethod(onHold, mapOf(
+            "isHold" to isHold,
+        ))
         Log.d("omikit", "onHold: $isHold")
 
     }
 
     override fun onMuted(isMuted: Boolean) {
-        channel.invokeMethod(onHold, isMuted)
+        channel.invokeMethod(onMuted, mapOf(
+            "isMuted" to isMuted,
+        ))
         Log.d("omikit", "onMuted: $isMuted")
     }
 

@@ -21,7 +21,7 @@ const val REGISTER = "REGISTER";
 const val SEND_DTMF = "SEND_DTMF";
 
 //LISTENER
-const val onCallEstablished = "CALLE_STABLISHED"
+const val onCallEstablished = "CALL_ESTABLISHED"
 const val onCallEnd = "CALL_END"
 const val incomingReceived = "INCOMING_RECEIVED"
 const val onRinging = "RINGING"
