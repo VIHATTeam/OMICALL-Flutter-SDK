@@ -118,12 +118,13 @@ final action = OmiAction.initCall(
 omiChannel.action(action: action);
 ```
 * Action list:
-    * `OmiAction.initCall` : register and init OmiCall
-    * `OmiAction.updateToken` : update token for Android
-    * `OmiAction.startCall` : start Call
-    * `OmiAction.endCall` : end Call
-    * `OmiAction.toggleMute` : toggle the microphone status
-    * `OmiAction.toggleSpeaker` : toggle the voice status
+  * `OmiAction.initCall` : register and init OmiCall
+  * `OmiAction.updateToken` : update token for Android
+  * `OmiAction.startCall` : start Call
+  * `OmiAction.endCall` : end Call
+  * `OmiAction.toggleMute` : toggle the microphone status
+  * `OmiAction.toggleSpeaker` : toggle the voice status
+  * `OmiAction.sendDTMF` : send DTMF for call server
 
 * You can init action with another way.
 ```
@@ -138,14 +139,13 @@ omiChannel.action(action: action);
 
 ```
 omiChannel.listerEvent((action) {
-  if (action.actionName == "onCallEstablished") {
-    _setDuration();
-  }
-  if (action.actionName == "onCallEnd") {
-    Navigator.pop(context);
-  }
+  
 });
-///Now, we just support 2 events
-- onCallEstablished: Trigger when user accept call
-- onCallEnd: Trigger when user cancel/ignore call
 ```
+
+* Event List: `We support 5 events`
+  * `OmiEventList.onCallEnd`: Trigger when end the call.
+  * `OmiEventList.onCallEstablished`: Trigger when we created the call.
+  * `OmiEventList.onRinging`: Trigger when the phone is ringing.
+  * `OmiEventList.onHold`: Trigger when user hold the call. From parameters, you can reviceved correct status from server through `isHold`
+  * `OmiEventList.onMuted`: Trigger when user muted the call. From parameters, you can reviceved correct status from server through `isMuted`
