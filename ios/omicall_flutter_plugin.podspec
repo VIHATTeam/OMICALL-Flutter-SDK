@@ -15,7 +15,7 @@ A new Flutter project.
   s.source           = { :path => '.' }
   s.source_files     = 'Classes/**/*'
   s.public_header_files = 'Classes/*.h'
-  s.ios.deployment_target = '13.0'
+  s.ios.deployment_target = '11.0'
   s.dependency 'OmiKit'
   s.dependency 'Flutter'
  s.static_framework = true
