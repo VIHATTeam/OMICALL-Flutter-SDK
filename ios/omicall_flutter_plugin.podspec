@@ -18,7 +18,7 @@ A new Flutter project.
   s.ios.deployment_target = '11.0'
   s.dependency 'OmiKit'
   s.dependency 'Flutter'
- s.static_framework = true
+  s.static_framework = true
   # s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES', 'VALID_ARCHS[sdk=iphonesimulator*]' => 'x86_64' }
   # s.swift_version = '5.0'
 end
