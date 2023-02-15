@@ -43,15 +43,30 @@ class FLLocalCameraView: NSObject, FlutterPlatformView {
     ) {
         _view = UIView()
         super.init()
-        // iOS views can be created here
-        createNativeView(view: _view)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {[weak self] in
+            guard let self = self else { return }
+            self.setupViews()
+        })
     }
 
     func view() -> UIView {
         return _view
     }
 
-    func createNativeView(view _view: UIView){
-        _view.backgroundColor = .red
+    func setupViews() {
+        let child = UIView()
+        _view.addSubview(child)
+        child.frame = _view.bounds
+        let topView = UIView()
+        child.addSubview(topView)
+        let height = child.bounds.height
+        let width = child.bounds.width
+        topView.frame = CGRect(x: 0, y: 0, width: width, height: height / 2)
+        topView.backgroundColor = .yellow
+        let bottomView = UIView()
+        child.addSubview(bottomView)
+        bottomView.frame = CGRect(x: 0, y: height / 2, width: width, height: height / 2)
+        bottomView.backgroundColor = .red
     }
+    
 }
