@@ -24,6 +24,9 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       }
       instance!.channel = FlutterMethodChannel(name: "omicallsdk", binaryMessenger: registrar.messenger())
       registrar.addMethodCallDelegate(instance, channel: instance!.channel)
+      let factory = FLLocalCameraFactory(messenger: registrar.messenger())
+      registrar.register(factory, withId: "local_camera_view")
+      
   }
 
 

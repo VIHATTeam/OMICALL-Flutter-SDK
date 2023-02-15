@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:calling/main.dart';
-import 'package:calling/screens/dialScreen/dial_screen.dart';
+import 'package:calling/screens/videoCallScreen/video_call_screen.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -221,20 +221,23 @@ class _HomeScreenState extends State<HomeScreen> {
     BuildContext context, {
     String? phone,
   }) async {
-    var params = <String, dynamic>{
-      'phoneNumber': phone ?? phoneNumber.text,
-    };
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => DialScreen(
-          param: params,
-        ),
-      ),
-    );
-    final action = OmiAction.startCall(
-      phone ?? phoneNumber.text,
-      true,
-    );
-    omiChannel.action(action: action);
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+      return VideoCallScreen();
+    }));
+    // var params = <String, dynamic>{
+    //   'phoneNumber': phone ?? phoneNumber.text,
+    // };
+    // Navigator.of(context).push(
+    //   MaterialPageRoute(
+    //     builder: (_) => DialScreen(
+    //       param: params,
+    //     ),
+    //   ),
+    // );
+    // final action = OmiAction.startCall(
+    //   phone ?? phoneNumber.text,
+    //   true,
+    // );
+    // omiChannel.action(action: action);
   }
 }

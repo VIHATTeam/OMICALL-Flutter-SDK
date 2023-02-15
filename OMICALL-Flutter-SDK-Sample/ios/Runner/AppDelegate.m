@@ -14,7 +14,7 @@
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [FIRApp configure];
   [GeneratedPluginRegistrant registerWithRegistry:self];
-  [self registerOmicallWithEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX supportVideoCall:FALSE];
+  [self registerOmicallWithEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX supportVideoCall:TRUE];
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 
