@@ -1,7 +1,6 @@
 package vn.vihat.omicall.omicallsdk
 
 import android.Manifest
-import android.app.Activity
 import android.content.Context
 import android.util.Log
 import androidx.annotation.NonNull
@@ -16,13 +15,14 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import vn.vihat.omicall.omicallsdk.constants.*
+import vn.vihat.omicall.omicallsdk.video_call.FLLocalCameraFactory
 import vn.vihat.omicall.omisdk.OmiClient
 import vn.vihat.omicall.omisdk.OmiListener
 import vn.vihat.omicall.omisdk.OmiSDKUtils
 import java.util.*
 
 /** OmicallsdkPlugin */
-class   OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiListener {
+class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiListener {
 
     private lateinit var channel: MethodChannel
     private var activity: FlutterActivity? = null
@@ -32,6 +32,9 @@ class   OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiL
         applicationContext = flutterPluginBinding.applicationContext
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "omicallsdk")
         channel.setMethodCallHandler(this)
+        flutterPluginBinding
+            .platformViewRegistry
+            .registerViewFactory("local_camera_view", FLLocalCameraFactory())
     }
 
 
@@ -55,13 +58,17 @@ class   OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiL
                 val realm = dataOmi["realm"] as String
                 OmiClient.register(applicationContext!!, userName, password, realm)
                 OmiClient.instance.setListener(this)
-                ActivityCompat.requestPermissions(activity!!,  arrayOf(
-                    Manifest.permission.USE_SIP,
-                    Manifest.permission.CALL_PHONE,
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.MODIFY_AUDIO_SETTINGS,
-                    Manifest.permission.RECORD_AUDIO,
-                ), 0)
+                ActivityCompat.requestPermissions(
+                    activity!!,
+                    arrayOf(
+                        Manifest.permission.USE_SIP,
+                        Manifest.permission.CALL_PHONE,
+                        Manifest.permission.CAMERA,
+                        Manifest.permission.MODIFY_AUDIO_SETTINGS,
+                        Manifest.permission.RECORD_AUDIO,
+                    ),
+                    0,
+                )
 
             }
             UPDATE_TOKEN -> {
@@ -74,7 +81,7 @@ class   OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiL
                     deviceTokenAndroid,
                     deviceId,
                     appId
-                );
+                )
             }
             START_OMI_SERVICE -> {
                 activity?.let {
@@ -125,7 +132,7 @@ class   OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiL
             REGISTER -> {}
             SEND_DTMF -> {
                 val character = dataOmi["character"] as String
-                var characterCode : Int? = character.toIntOrNull()
+                var characterCode: Int? = character.toIntOrNull()
                 if (character == "*") {
                     characterCode = 10
                 }
@@ -176,10 +183,12 @@ class   OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiL
     }
 
     override fun incomingReceived(callerId: Int, phoneNumber: String?) {
-        channel.invokeMethod(incomingReceived, mapOf(
-            "callerId" to callerId,
-            "phoneNumber" to phoneNumber,
-        ))
+        channel.invokeMethod(
+            incomingReceived, mapOf(
+                "callerId" to callerId,
+                "phoneNumber" to phoneNumber,
+            )
+        )
         Log.d("omikit", "incomingReceived: ")
 
     }
@@ -197,17 +206,21 @@ class   OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiL
     }
 
     override fun onHold(isHold: Boolean) {
-        channel.invokeMethod(onHold, mapOf(
-            "isHold" to isHold,
-        ))
+        channel.invokeMethod(
+            onHold, mapOf(
+                "isHold" to isHold,
+            )
+        )
         Log.d("omikit", "onHold: $isHold")
 
     }
 
     override fun onMuted(isMuted: Boolean) {
-        channel.invokeMethod(onMuted, mapOf(
-            "isMuted" to isMuted,
-        ))
+        channel.invokeMethod(
+            onMuted, mapOf(
+                "isMuted" to isMuted,
+            )
+        )
         Log.d("omikit", "onMuted: $isMuted")
     }
 
