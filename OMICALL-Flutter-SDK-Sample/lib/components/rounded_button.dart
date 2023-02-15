@@ -35,7 +35,6 @@ class RoundedButton extends StatelessWidget {
         onPressed: press,
         child: SvgPicture.asset(
           iconSrc,
-          color: iconColor,
         ),
       ),
     );

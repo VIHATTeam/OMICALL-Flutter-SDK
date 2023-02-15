@@ -30,7 +30,6 @@ class DialButton extends StatelessWidget {
           children: [
             SvgPicture.asset(
               iconSrc,
-              color:color ?? Colors.white,
               height: 36,
             ),
             VerticalSpacing(of: 5),
