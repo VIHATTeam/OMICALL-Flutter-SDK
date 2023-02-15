@@ -21,6 +21,13 @@ class VideoCallState extends State<VideoCallScreen> {
             child: LocalCameraView(
               width: double.infinity,
               height: double.infinity,
+              onLocalCameraCreated: (controller) {
+                controller.addListener(
+                  (event, arguments) {
+                    debugPrint("aaa");
+                  },
+                );
+              },
             ),
           ),
         ],
