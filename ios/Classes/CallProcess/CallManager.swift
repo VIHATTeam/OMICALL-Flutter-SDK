@@ -23,6 +23,7 @@ class CallManager {
     private let omiLib = OMISIPLib.sharedInstance()
     private var isSpeaker = false
     var currentConfirmedCall : OMICall?
+    var videoManager: OMIVideoViewManager?
     
     
     /// Get instance
@@ -34,10 +35,18 @@ class CallManager {
     }
     
     
-    public func initEndpoint(params: [String: String]){
-        OmiClient.initWithUsername(params["userName"]!, password: params["password"]!, realm: params["realm"]!)
+    public func initEndpoint(params: [String: Any]){
+        var isSupportVideoCall = false
+        OmiClient.initWithUsername(params["userName"] as! String, password: params["password"] as! String, realm: params["realm"] as! String)
+        if let isVideoCall = params["isVideo"] as? Bool {
+            isSupportVideoCall = isVideoCall
+        }
         omiLib.callManager.audioController.configureAudioSession()
-//        OmiClient.startOmiService(true)
+        OmiClient.startOmiService(isSupportVideoCall)
+        if (isSupportVideoCall) {
+            OmiClient.registerAccount()
+            videoManager = OMIVideoViewManager.init()
+        }
         NotificationCenter.default.addObserver(self,
                                                selector: #selector(callStateChanged(_:)),
                                                name: NSNotification.Name(rawValue: SwiftOmikitPlugin.OMICallStateChangedNotification),
@@ -114,7 +123,11 @@ class CallManager {
     }
     
     /// Start call
-    func startCall(_ phoneNumber: String) {
+    func startCall(_ phoneNumber: String, isVideo: Bool) {
+        if (isVideo) {
+            OmiClient.startVideoCall(phoneNumber)
+            return
+        }
         OmiClient.startCall(phoneNumber);
     }
     
@@ -208,6 +221,44 @@ class CallManager {
         }catch (let error){
             NSLog("Error toogleSpeaker current call: \(error)")
 
+        }
+    }
+    
+    
+    //video call
+    func toggleCamera() {
+        if let videoManager = videoManager {
+            videoManager.toggleCamera()
+        }
+    }
+    
+    func switchCamera() {
+        if let videoManager = videoManager {
+            videoManager.switchCamera()
+        }
+    }
+    
+    func getLocalPreviewView(callback: @escaping (UIView) -> Void) {
+        DispatchQueue.main.async {[weak self] in
+            guard let self = self, let videoManager = self.videoManager  else { return }
+            videoManager.localView {previewView in
+                if (previewView != nil) {
+                    previewView!.contentMode = .scaleAspectFill
+                    callback(previewView!)
+                }
+            }
+        }
+    }
+    
+    func getRemotePreviewView(callback: @escaping (UIView) -> Void) {
+        DispatchQueue.main.async {[weak self] in
+            guard let self = self, let videoManager = self.videoManager  else { return }
+            videoManager.remoteView { previewView in
+                if (previewView != nil) {
+                    previewView!.contentMode = .scaleAspectFill
+                    callback(previewView!)
+                }
+            }
         }
     }
 }

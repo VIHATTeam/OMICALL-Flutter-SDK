@@ -3,21 +3,21 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
-typedef LocalCameraCreatedCallback = void Function(
-    LocalCameraController controller, );
+typedef RemoteCameraCreatedCallback = void Function(
+    RemoteCameraController controller, );
 
-class LocalCameraView extends StatelessWidget {
+class RemoteCameraView extends StatelessWidget {
   // This is used in the platform side to register the view.
-  final String viewType = 'local_camera_view';
-  final LocalCameraCreatedCallback? onCameraCreated;
+  final String viewType = 'remote_camera_view';
+  final RemoteCameraCreatedCallback? onCameraCreated;
 
   // Pass parameters to the platform side.
   final Map<String, dynamic> creationParams = <String, dynamic>{};
   final double width;
   final double height;
-  late final LocalCameraController _controller;
+  late final RemoteCameraController _controller;
 
-  LocalCameraView({
+  RemoteCameraView({
     super.key,
     required this.width,
     required this.height,
@@ -45,7 +45,7 @@ class LocalCameraView extends StatelessWidget {
 
   // Callback method when platform view is created
   void _onPlatformViewCreated(int id) {
-    _controller = LocalCameraController._(id);
+    _controller = RemoteCameraController._(id);
     onCameraCreated?.call(_controller);
   }
 
@@ -59,10 +59,10 @@ class LocalCameraView extends StatelessWidget {
   }
 }
 
-class LocalCameraController {
-  LocalCameraController._(int id)
+class RemoteCameraController {
+  RemoteCameraController._(int id)
       : _channel =
-  MethodChannel('local_camera_controller/$id');
+  MethodChannel('remote_camera_controller/$id');
 
   final MethodChannel _channel;
 

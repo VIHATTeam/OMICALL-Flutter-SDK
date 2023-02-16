@@ -7,6 +7,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:omicall_flutter_plugin/model/action_list.dart';
 
+import '../dialScreen/dial_screen.dart';
+
 class HomeScreen extends StatefulWidget {
   // var phoneNumber = "";
   @override
@@ -15,8 +17,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   TextEditingController phoneNumber = TextEditingController()..text = '3497702';
+
+  //audio
+  // TextEditingController userName = TextEditingController()..text = '100';
+  // TextEditingController password = TextEditingController()..text = 'ConCung100';
+  //video
   TextEditingController userName = TextEditingController()..text = '100';
-  TextEditingController password = TextEditingController()..text = 'ConCung100';
+  TextEditingController password = TextEditingController()..text = 'Kunkun';
   bool _isLoginSuccess = false;
   TextStyle basicStyle = TextStyle(
     color: Colors.white,
@@ -202,10 +209,18 @@ class _HomeScreenState extends State<HomeScreen> {
     if (userName.text.isEmpty || password.text.isEmpty) {
       return;
     }
+    //audio call
+    // final action = OmiAction.initCall(
+    //   userName.text,
+    //   password.text,
+    //   'thaonguyennguyen1197',
+    // );
+    //video call
     final action = OmiAction.initCall(
       userName.text,
       password.text,
-      'thaonguyennguyen1197',
+      'dky',
+      isVideo: true,
     );
     omiChannel.action(action: action);
     Future.delayed(const Duration(seconds: 2), () {
@@ -220,24 +235,29 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> makeCall(
     BuildContext context, {
     String? phone,
+    bool isVideo = true,
   }) async {
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-      return VideoCallScreen();
-    }));
-    // var params = <String, dynamic>{
-    //   'phoneNumber': phone ?? phoneNumber.text,
-    // };
-    // Navigator.of(context).push(
-    //   MaterialPageRoute(
-    //     builder: (_) => DialScreen(
-    //       param: params,
-    //     ),
-    //   ),
-    // );
-    // final action = OmiAction.startCall(
-    //   phone ?? phoneNumber.text,
-    //   true,
-    // );
-    // omiChannel.action(action: action);
+    var params = <String, dynamic>{
+      'phoneNumber': phone ?? phoneNumber.text,
+      'isVideo': isVideo,
+    };
+    if (isVideo) {
+      Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+        return VideoCallScreen();
+      }));
+    } else {
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => DialScreen(
+            param: params,
+          ),
+        ),
+      );
+    }
+    final action = OmiAction.startCall(
+      phone ?? phoneNumber.text,
+      true,
+    );
+    omiChannel.action(action: action);
   }
 }

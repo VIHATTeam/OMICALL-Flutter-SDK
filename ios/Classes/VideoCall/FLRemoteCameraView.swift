@@ -10,7 +10,7 @@ import Flutter
 import WebKit
 import UIKit
 
-class FLLocalCameraFactory: NSObject, FlutterPlatformViewFactory {
+class FLRemoteCameraFactory: NSObject, FlutterPlatformViewFactory {
     private var messenger: FlutterBinaryMessenger
 
     init(messenger: FlutterBinaryMessenger) {
@@ -27,7 +27,7 @@ class FLLocalCameraFactory: NSObject, FlutterPlatformViewFactory {
         viewIdentifier viewId: Int64,
         arguments args: Any?
     ) -> FlutterPlatformView {
-        return FLLocalCameraView(
+        return FLRemoteCameraView(
             frame: frame,
             viewIdentifier: viewId,
             arguments: args,
@@ -36,7 +36,7 @@ class FLLocalCameraFactory: NSObject, FlutterPlatformViewFactory {
     }
 }
 
-class FLLocalCameraView: NSObject, FlutterPlatformView {
+class FLRemoteCameraView: NSObject, FlutterPlatformView {
     private var _view: UIView
     private var _arg : [String : Any]?
     private let methodChannel: FlutterMethodChannel?
@@ -49,7 +49,7 @@ class FLLocalCameraView: NSObject, FlutterPlatformView {
     ) {
         _view = UIView()
         _arg = args as? [String: Any]
-        methodChannel = FlutterMethodChannel(name: "local_camera_controller/\(viewId)", binaryMessenger: messenger!)
+        methodChannel = FlutterMethodChannel(name: "remote_camera_controller/\(viewId)", binaryMessenger: messenger!)
         super.init()
         methodChannel?.setMethodCallHandler(onMethodCall)
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {[weak self] in
@@ -72,7 +72,7 @@ class FLLocalCameraView: NSObject, FlutterPlatformView {
     }
 
     func setupViews() {
-        CallManager.instance?.getLocalPreviewView(callback: {[weak self] previewView in
+        CallManager.instance?.getRemotePreviewView(callback: {[weak self] previewView in
             guard let self = self else { return }
             self._view.addSubview(previewView)
             print(self._view.bounds)

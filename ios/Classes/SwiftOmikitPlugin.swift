@@ -54,11 +54,15 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
 
       switch(action) {
       case INIT_CALL:
-          CallManager.shareInstance().initEndpoint(params: dataOmi as! [String: String])
+          CallManager.shareInstance().initEndpoint(params: dataOmi as! [String: Any])
           break
       case START_CALL:
           let phoneNumber = dataOmi["phoneNumber"] as! String
-          CallManager.shareInstance().startCall(phoneNumber)
+          var isVideo = false
+          if let isVideoCall = dataOmi["isVideo"] as? Bool {
+              isVideo = isVideoCall
+          }
+          CallManager.shareInstance().startCall(phoneNumber, isVideo: isVideo)
           break
       case HANGUP:
           CallManager.shareInstance().endAllCalls()
