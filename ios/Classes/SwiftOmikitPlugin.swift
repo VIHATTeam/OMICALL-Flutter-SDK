@@ -24,8 +24,10 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       }
       instance!.channel = FlutterMethodChannel(name: "omicallsdk", binaryMessenger: registrar.messenger())
       registrar.addMethodCallDelegate(instance, channel: instance!.channel)
-      let factory = FLLocalCameraFactory(messenger: registrar.messenger())
-      registrar.register(factory, withId: "local_camera_view")
+      let localFactory = FLLocalCameraFactory(messenger: registrar.messenger())
+      registrar.register(localFactory, withId: "local_camera_view")
+      let remoteFactory = FLRemoteCameraFactory(messenger: registrar.messenger())
+      registrar.register(remoteFactory, withId: "remote_camera_view")
       
   }
 
@@ -118,8 +120,6 @@ class EventCallbackHandler: FlutterStreamHandler {
         _ = CallKitProviderDelegate.init(callManager: OMISIPLib.sharedInstance().callManager)
         let voipRegistry = PKPushRegistry.init(queue: DispatchQueue.main)
         let result = PushKitManager.init(voipRegistry: voipRegistry)
-        UserDefaults.standard.set("vh.omicrm.com", forKey: "SIPProxy")
-        OmiClient.startOmiService(supportVideoCall)
         requestNotification()
         return result
     }
@@ -133,7 +133,6 @@ class EventCallbackHandler: FlutterStreamHandler {
                 }
             }
         }
-        UIApplication.shared.registerForRemoteNotifications()
     }
 
 }
