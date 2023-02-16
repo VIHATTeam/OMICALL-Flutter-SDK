@@ -3,23 +3,25 @@ import 'action_model.dart';
 
 class OmiAction {
   static ActionModel initCall(
-      String userName,
-      String password,
-      String realm,
-      ) {
+    String userName,
+    String password,
+    String realm, {
+    bool isVideo = false,
+  }) {
     return ActionModel(actionName: OmiActionName.INIT_CALL, data: {
       'userName': userName,
       'password': password,
       'realm': realm,
+      'isVideo': isVideo,
     });
   }
 
   static ActionModel updateToken(
-      String deviceId,
-      String appId, {
-        String? deviceTokenAndroid,
-        String? tokenVoipIos,
-      }) {
+    String deviceId,
+    String appId, {
+    String? deviceTokenAndroid,
+    String? tokenVoipIos,
+  }) {
     return ActionModel(actionName: OmiActionName.UPDATE_TOKEN, data: {
       'deviceTokenAndroid': deviceTokenAndroid,
       'tokenVoipIos': tokenVoipIos,
@@ -29,9 +31,9 @@ class OmiAction {
   }
 
   static ActionModel startCall(
-      String phoneNumber,
-      bool isTransfer,
-      ) {
+    String phoneNumber,
+    bool isTransfer,
+  ) {
     return ActionModel(actionName: OmiActionName.START_CALL, data: {
       'phoneNumber': phoneNumber,
       'isTransfer': isTransfer,
