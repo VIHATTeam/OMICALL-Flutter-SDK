@@ -10,6 +10,7 @@ import AVFoundation
 import MediaPlayer
 import SwiftUI
 import OmiKit
+import AVFoundation
 
 class CallManager {
     
@@ -41,17 +42,17 @@ class CallManager {
         if let isVideoCall = params["isVideo"] as? Bool {
             isSupportVideoCall = isVideoCall
         }
-        omiLib.callManager.audioController.configureAudioSession()
+//        omiLib.callManager.audioController.configureAudioSession()
         OmiClient.startOmiService(isSupportVideoCall)
         if (isSupportVideoCall) {
             OmiClient.registerAccount()
             videoManager = OMIVideoViewManager.init()
         }
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(callStateChanged(_:)),
-                                               name: NSNotification.Name(rawValue: SwiftOmikitPlugin.OMICallStateChangedNotification),
-                                               object: nil
-        )
+//        NotificationCenter.default.addObserver(self,
+//                                               selector: #selector(callStateChanged(_:)),
+//                                               name: NSNotification.Name(rawValue: SwiftOmikitPlugin.OMICallStateChangedNotification),
+//                                               object: nil
+//        )
         
     }
     
@@ -126,6 +127,10 @@ class CallManager {
     func startCall(_ phoneNumber: String, isVideo: Bool) {
         if (isVideo) {
             OmiClient.startVideoCall(phoneNumber)
+            // request camera access
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                
+            }
             return
         }
         OmiClient.startCall(phoneNumber);

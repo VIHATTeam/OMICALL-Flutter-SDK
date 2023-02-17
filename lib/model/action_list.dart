@@ -32,11 +32,11 @@ class OmiAction {
 
   static ActionModel startCall(
     String phoneNumber,
-    bool isTransfer,
+    bool isVideo,
   ) {
     return ActionModel(actionName: OmiActionName.START_CALL, data: {
       'phoneNumber': phoneNumber,
-      'isTransfer': isTransfer,
+      'isVideo': isVideo,
     });
   }
 
