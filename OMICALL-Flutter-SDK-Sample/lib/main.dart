@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:calling/app_router.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -11,7 +13,9 @@ final omiChannel = OmiChannel();
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  if (Platform.isAndroid) {
+    await Firebase.initializeApp();
+  }
   runApp(MyApp());
 }
 

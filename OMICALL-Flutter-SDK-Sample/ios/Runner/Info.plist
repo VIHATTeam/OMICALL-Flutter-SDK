@@ -50,5 +50,23 @@
 	<false/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+    <key>NSAppTransportSecurity</key>
+    <dict>
+      <!--Include to allow all connections (DANGER)-->
+      <key>NSAllowsArbitraryLoads</key>
+          <true/>
+    </dict>
+    <key>NSUserActivityTypes</key>
+    <array>
+        <string>INStartCallIntent</string>
+    </array>
+    <key>UIRequiresPersistentWiFi</key>
+    <true/>
+    <key>NSBonjourServices</key>
+    <array>
+        <string>_dartobservatory._tcp</string>
+    </array>
+    <key>FirebaseAppDelegateProxyEnabled</key>
+    <false/>
 </dict>
 </plist>

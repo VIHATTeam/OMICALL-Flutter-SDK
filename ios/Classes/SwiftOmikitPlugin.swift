@@ -120,7 +120,7 @@ class EventCallbackHandler: FlutterStreamHandler {
         _ = CallKitProviderDelegate.init(callManager: OMISIPLib.sharedInstance().callManager)
         let voipRegistry = PKPushRegistry.init(queue: DispatchQueue.main)
         let result = PushKitManager.init(voipRegistry: voipRegistry)
-        requestNotification()
+//        requestNotification()
         return result
     }
 

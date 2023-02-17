@@ -16,7 +16,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  TextEditingController phoneNumber = TextEditingController()..text = '3497702';
+  TextEditingController phoneNumber = TextEditingController()..text = '100';
 
   //audio
   // TextEditingController userName = TextEditingController()..text = '100';
@@ -45,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> updateToken() async {
+    if (Platform.isIOS) { return; }
     await FirebaseMessaging.instance.requestPermission(
       alert: true,
       badge: true,
@@ -65,7 +66,6 @@ class _HomeScreenState extends State<HomeScreen> {
       id,
       Platform.isAndroid ? "omicall.concung.dev" : "vn.vihat.omikit",
       deviceTokenAndroid: token,
-      tokenVoipIos: (await FirebaseMessaging.instance.getAPNSToken()) ?? "",
     );
 
     omiChannel.action(action: omiAction);
@@ -81,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Icon(Icons.call),
         onPressed: () {
           if (_isLoginSuccess) {
-            makeCall(context, phone: '3497702');
+            makeCall(context, phone: '100');
             FocusScope.of(context).unfocus();
           }
         },
