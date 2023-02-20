@@ -9,8 +9,6 @@ import UserNotifications
 public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
 
     @objc public static var instance: SwiftOmikitPlugin!
-    static let OMICallStateChangedNotification = "OMICallStateChangedNotification";
-
     private var channel: FlutterMethodChannel!
     private var callManager: CallManager? = nil
     private var sharedProvider: CXProvider? = nil
@@ -56,7 +54,7 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
 
       switch(action) {
       case INIT_CALL:
-          CallManager.shareInstance().initEndpoint(params: dataOmi as! [String: Any])
+          CallManager.shareInstance().initEndpoint(params: dataOmi)
           break
       case START_CALL:
           let phoneNumber = dataOmi["phoneNumber"] as! String
@@ -115,22 +113,27 @@ class EventCallbackHandler: FlutterStreamHandler {
 
 
 @objc public extension FlutterAppDelegate {
-    func registerOmicall(enviroment: String, supportVideoCall: Bool = false) -> PushKitManager? {
-        OmiClient.setEnviroment(enviroment)
-        _ = CallKitProviderDelegate.init(callManager: OMISIPLib.sharedInstance().callManager)
-        let voipRegistry = PKPushRegistry.init(queue: DispatchQueue.main)
-        let result = PushKitManager.init(voipRegistry: voipRegistry)
-//        requestNotification()
-        return result
-    }
-
     func requestNotification() {
         let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options:[.badge, .alert, .sound]) { (granted, error) in
-            if (granted) {
+        center.getNotificationSettings { settings in
+            switch settings.authorizationStatus {
+            case .authorized:
                 DispatchQueue.main.async {
                     UIApplication.shared.registerForRemoteNotifications()
                 }
+                break
+            case .denied:
+                break
+            case .notDetermined:
+                center.delegate = self
+                center.requestAuthorization(options:[.badge, .alert, .sound]) { (granted, error) in
+                    if (granted) {
+                        DispatchQueue.main.async {
+                            UIApplication.shared.registerForRemoteNotifications()
+                        }
+                    }
+                }
+            default: break
             }
         }
     }
