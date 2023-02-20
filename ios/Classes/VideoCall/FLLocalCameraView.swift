@@ -9,6 +9,7 @@ import Foundation
 import Flutter
 import WebKit
 import UIKit
+import OmiKit
 
 class FLLocalCameraFactory: NSObject, FlutterPlatformViewFactory {
     private var messenger: FlutterBinaryMessenger
@@ -37,7 +38,7 @@ class FLLocalCameraFactory: NSObject, FlutterPlatformViewFactory {
 }
 
 class FLLocalCameraView: NSObject, FlutterPlatformView {
-    private var _view: UIView
+    private var _view: OMIVideoPreviewView
     private var _arg : [String : Any]?
     private let methodChannel: FlutterMethodChannel?
 
@@ -47,7 +48,7 @@ class FLLocalCameraView: NSObject, FlutterPlatformView {
         arguments args: Any?,
         binaryMessenger messenger: FlutterBinaryMessenger?
     ) {
-        _view = UIView()
+        _view = OMIVideoPreviewView.init()
         _arg = args as? [String: Any]
         methodChannel = FlutterMethodChannel(name: "local_camera_controller/\(viewId)", binaryMessenger: messenger!)
         super.init()
@@ -74,16 +75,7 @@ class FLLocalCameraView: NSObject, FlutterPlatformView {
     func setupViews() {
         CallManager.instance?.getLocalPreviewView(callback: {[weak self] previewView in
             guard let self = self else { return }
-            self._view.addSubview(previewView)
-            print(self._view.bounds)
-            previewView.frame = self._view.bounds
+            self._view.setView(previewView)
         })
-    }
-    
-    @objc func clickText() {
-        if let channel = methodChannel {
-            channel.invokeMethod("click", arguments: nil)
-        }
-    }
-    
+    }    
 }

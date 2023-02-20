@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 typedef RemoteCameraCreatedCallback = void Function(
@@ -71,5 +72,9 @@ class RemoteCameraController {
     _channel.setMethodCallHandler((method) async {
       callback(method.method, method.arguments);
     });
+  }
+
+  void refresh() {
+    _channel.invokeMethod("refresh");
   }
 }

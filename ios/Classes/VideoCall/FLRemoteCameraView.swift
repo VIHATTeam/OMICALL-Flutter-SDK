@@ -9,6 +9,7 @@ import Foundation
 import Flutter
 import WebKit
 import UIKit
+import OmiKit
 
 class FLRemoteCameraFactory: NSObject, FlutterPlatformViewFactory {
     private var messenger: FlutterBinaryMessenger
@@ -37,7 +38,7 @@ class FLRemoteCameraFactory: NSObject, FlutterPlatformViewFactory {
 }
 
 class FLRemoteCameraView: NSObject, FlutterPlatformView {
-    private var _view: UIView
+    private var _view: OMIVideoPreviewView
     private var _arg : [String : Any]?
     private let methodChannel: FlutterMethodChannel?
 
@@ -47,20 +48,17 @@ class FLRemoteCameraView: NSObject, FlutterPlatformView {
         arguments args: Any?,
         binaryMessenger messenger: FlutterBinaryMessenger?
     ) {
-        _view = UIView()
+        _view = OMIVideoPreviewView.init()
         _arg = args as? [String: Any]
         methodChannel = FlutterMethodChannel(name: "remote_camera_controller/\(viewId)", binaryMessenger: messenger!)
         super.init()
         methodChannel?.setMethodCallHandler(onMethodCall)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {[weak self] in
-            guard let self = self else { return }
-            self.setupViews()
-        })
     }
     
     func onMethodCall(call: FlutterMethodCall, result: FlutterResult) {
             switch(call.method){
-            case "":
+            case "refresh":
+                setupViews()
                 break
             default:
                 result(FlutterMethodNotImplemented)
@@ -72,18 +70,15 @@ class FLRemoteCameraView: NSObject, FlutterPlatformView {
     }
 
     func setupViews() {
-        CallManager.instance?.getRemotePreviewView(callback: {[weak self] previewView in
-            guard let self = self else { return }
-            self._view.addSubview(previewView)
-            print(self._view.bounds)
-            previewView.frame = self._view.bounds
+        self._view.layer.cornerRadius = 5
+//        self._view.layer.borderColor = UIColor.gray.cgColor
+//        self._view.layer.borderWidth = 1.0
+        self._view.clipsToBounds = true
+        CallManager.instance?.getRemotePreviewView(callback: { previewView in
+            self._view.setView(previewView)
+            print("\(previewView.frame)")
+            print("\(self._view.frame)")
+            print("AAAA")
         })
     }
-    
-    @objc func clickText() {
-        if let channel = methodChannel {
-            channel.invokeMethod("click", arguments: nil)
-        }
-    }
-    
 }

@@ -30,7 +30,8 @@ class _BodyState extends State<Body> {
   @override
   void initState() {
     super.initState();
-    omiChannel.listerEvent((action) {
+    omiChannel.subscriptionEvent().listen((event) {
+      final action = event.data;
       if (action.actionName == OmiEventList.onCallEstablished) {
         _setDuration();
       }

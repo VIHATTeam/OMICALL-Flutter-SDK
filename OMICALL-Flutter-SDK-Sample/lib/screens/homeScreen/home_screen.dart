@@ -5,6 +5,7 @@ import 'package:calling/screens/videoCallScreen/video_call_screen.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:omicall_flutter_plugin/constant/enums.dart';
 import 'package:omicall_flutter_plugin/model/action_list.dart';
 
 import '../dialScreen/dial_screen.dart';
@@ -16,7 +17,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  TextEditingController phoneNumber = TextEditingController()..text = '100';
+  TextEditingController phoneNumber = TextEditingController()..text = '101';
 
   //audio
   // TextEditingController userName = TextEditingController()..text = '100';
@@ -38,14 +39,25 @@ class _HomeScreenState extends State<HomeScreen> {
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
+  GlobalKey<VideoCallState>? _videoKey;
 
   @override
   void initState() {
     super.initState();
+    omiChannel.subscriptionEvent().listen((event) {
+      final action = event.data;
+      if (action.actionName == OmiEventList.onCallEstablished) {
+        if (_videoKey?.currentState != null) {
+          _videoKey?.currentState?.refreshRemoteCamera();
+        }
+      }
+    });
   }
 
   Future<void> updateToken() async {
-    if (Platform.isIOS) { return; }
+    if (Platform.isIOS) {
+      return;
+    }
     await FirebaseMessaging.instance.requestPermission(
       alert: true,
       badge: true,
@@ -215,6 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
     //   password.text,
     //   'thaonguyennguyen1197',
     // );
+    omiChannel.registerEventListener();
     //video call
     final action = OmiAction.initCall(
       userName.text,
@@ -242,8 +255,11 @@ class _HomeScreenState extends State<HomeScreen> {
       'isVideo': isVideo,
     };
     if (isVideo) {
+      _videoKey = GlobalKey<VideoCallState>();
       Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-        return VideoCallScreen();
+        return VideoCallScreen(
+          key: _videoKey,
+        );
       }));
     } else {
       Navigator.of(context).push(

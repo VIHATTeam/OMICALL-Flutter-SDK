@@ -48,11 +48,11 @@ class CallManager {
             OmiClient.registerAccount()
             videoManager = OMIVideoViewManager.init()
         }
-//        NotificationCenter.default.addObserver(self,
-//                                               selector: #selector(callStateChanged(_:)),
-//                                               name: NSNotification.Name(rawValue: SwiftOmikitPlugin.OMICallStateChangedNotification),
-//                                               object: nil
-//        )
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(callStateChanged(_:)),
+                                               name: NSNotification.Name.OMICallStateChanged,
+                                               object: nil
+        )
         
     }
     
@@ -81,11 +81,19 @@ class CallManager {
             }
             break
         case .confirmed:
-            if (!call.isIncoming) {
+            DispatchQueue.main.async {
+                if (!call.isIncoming) {
+                    NSLog("Outgoing call, in CONFIRMED state, with UUID: \(call.uuid)")
+                    SwiftOmikitPlugin.instance?.sendEvent(onCallEstablished, [:])
+                    SwiftOmikitPlugin.instance?.sendEvent(onMuted, ["isMuted": call.muted])
+                    self.currentConfirmedCall = call
+                    return
+                }
+                //call video
                 NSLog("Outgoing call, in CONFIRMED state, with UUID: \(call.uuid)")
                 SwiftOmikitPlugin.instance?.sendEvent(onCallEstablished, [:])
                 SwiftOmikitPlugin.instance?.sendEvent(onMuted, ["isMuted": call.muted])
-                currentConfirmedCall = call
+                self.currentConfirmedCall = call
             }
             break
         case .disconnected:
@@ -127,10 +135,6 @@ class CallManager {
     func startCall(_ phoneNumber: String, isVideo: Bool) {
         if (isVideo) {
             OmiClient.startVideoCall(phoneNumber)
-            // request camera access
-            AVCaptureDevice.requestAccess(for: .video) { granted in
-                
-            }
             return
         }
         OmiClient.startCall(phoneNumber);
@@ -146,18 +150,7 @@ class CallManager {
                 NSLog("error hanging up call(\(call.uuid.uuidString)): \(error!)")
             }
         }
-        guard let call = omiLib.getCurrentCall() else {
-            endNewestCall()
-            return
-        }
-        
-    }
-    
-    func sendDTMF(character: String) {
-        guard let call = omiLib.getCurrentCall() else {
-            return
-        }
-        try? call.sendDTMF(character)
+        NotificationCenter.default.removeObserver(self)
     }
     
     func endCurrentConfirmCall() {
@@ -170,14 +163,23 @@ class CallManager {
                 NSLog("error hanging up call(\(call.uuid.uuidString)): \(error!)")
             }
         }
+        NotificationCenter.default.removeObserver(self)
     }
     
     
     func endAllCalls() {
         omiLib.callManager.endAllCalls()
         SwiftOmikitPlugin.instance?.sendEvent("onCallEnd", [:])
-
+        NotificationCenter.default.removeObserver(self)
     }
+    
+    func sendDTMF(character: String) {
+        guard let call = omiLib.getCurrentCall() else {
+            return
+        }
+        try? call.sendDTMF(character)
+    }
+    
     
     /// Toogle mtue
     func toggleMute(completion: @escaping () -> Void?) {
@@ -244,9 +246,9 @@ class CallManager {
     }
     
     func getLocalPreviewView(callback: @escaping (UIView) -> Void) {
-        DispatchQueue.main.async {[weak self] in
-            guard let self = self, let videoManager = self.videoManager  else { return }
-            videoManager.localView {previewView in
+        guard let videoManager = videoManager  else { return }
+        videoManager.localView {previewView in
+            DispatchQueue.main.async {
                 if (previewView != nil) {
                     previewView!.contentMode = .scaleAspectFill
                     callback(previewView!)
@@ -256,9 +258,9 @@ class CallManager {
     }
     
     func getRemotePreviewView(callback: @escaping (UIView) -> Void) {
-        DispatchQueue.main.async {[weak self] in
-            guard let self = self, let videoManager = self.videoManager  else { return }
-            videoManager.remoteView { previewView in
+        guard let videoManager = videoManager  else { return }
+        videoManager.remoteView { previewView in
+            DispatchQueue.main.async {
                 if (previewView != nil) {
                     previewView!.contentMode = .scaleAspectFill
                     callback(previewView!)
