@@ -124,4 +124,29 @@ class OmiAction {
       },
     );
   }
+
+  static ActionModel switchCamera() {
+    return ActionModel(
+      actionName: OmiActionName.SWITCH_CAMERA,
+      data: {
+
+      },
+    );
+  }
+
+  static ActionModel cameraStatus() {
+    return ActionModel(
+      actionName: OmiActionName.CAMERA_STATUS,
+      data: {
+      },
+    );
+  }
+
+  static ActionModel toggleVideo() {
+    return ActionModel(
+      actionName: OmiActionName.TOGGLE_VIDEO,
+      data: {
+      },
+    );
+  }
 }

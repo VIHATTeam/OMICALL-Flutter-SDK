@@ -21,6 +21,9 @@ class OmiActionName {
   static const String REGISTER = "REGISTER";
   static const String UPDATE_PUSH_TOKEN = "UPDATE_PUSH_TOKEN";
   static const String SEND_DTMF = "SEND_DTMF";
+  static const String SWITCH_CAMERA = "SWITCH_CAMERA";
+  static const String CAMERA_STATUS = "CAMERA_STATUS";
+  static const String TOGGLE_VIDEO = "TOGGLE_VIDEO";
 }
 
 class OmiEventList {
