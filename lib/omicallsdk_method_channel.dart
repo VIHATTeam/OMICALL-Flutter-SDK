@@ -8,11 +8,23 @@ import 'omicallsdk_platform_interface.dart';
 class MethodChannelOmicallSDK extends OmicallSDKPlatform {
   /// The method channel used to interact with the native platform.
 
-  static const methodChannel = MethodChannel('omicallsdk');
+  final _methodChannel = const MethodChannel('omicallsdk');
+  final _cameraChannel = const EventChannel('event/camera');
+  final _micChannel = const EventChannel('event/mic');
+
+  @override
+  Stream<dynamic> cameraEvent() {
+    return _cameraChannel.receiveBroadcastStream({"name": "camera"});
+  }
+
+  @override
+  Stream micEvent() {
+    return _micChannel.receiveBroadcastStream({"name": "mic"});
+  }
 
   @override
   Future<dynamic> action(ActionModel action) async {
-    final response = await methodChannel.invokeMethod<dynamic>(
+    final response = await _methodChannel.invokeMethod<dynamic>(
       'action',
       action.toJson(),
     );
@@ -21,7 +33,7 @@ class MethodChannelOmicallSDK extends OmicallSDKPlatform {
 
   @override
   void listenerEvent(Function(ActionModel) callback) {
-    methodChannel.setMethodCallHandler(
+    _methodChannel.setMethodCallHandler(
       (call) async {
         switch (call.method) {
           case "CALL_END":

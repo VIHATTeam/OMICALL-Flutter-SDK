@@ -23,4 +23,12 @@ class OmiChannel {
   Stream<OmiEvent> subscriptionEvent() {
     return _eventBus.on<OmiEvent>();
   }
+
+  Stream<dynamic> cameraEvent() {
+    return OmicallSDKPlatform.instance.cameraEvent();
+  }
+
+  Stream<dynamic> micEvent() {
+    return OmicallSDKPlatform.instance.micEvent();
+  }
 }

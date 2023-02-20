@@ -53,7 +53,16 @@ class CallManager {
                                                name: NSNotification.Name.OMICallStateChanged,
                                                object: nil
         )
-        
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(callDealloc),
+                                               name: NSNotification.Name.OMICallDealloc,
+                                               object: nil
+        )
+    }
+    
+    @objc func callDealloc() {
+        SwiftOmikitPlugin.instance?.sendEvent(onCallEnd, [:])
+        currentConfirmedCall = nil
     }
     
     @objc fileprivate func callStateChanged(_ notification: NSNotification) {
@@ -216,27 +225,54 @@ class CallManager {
     
     /// Toogle speaker
     func toogleSpeaker() {
-        do{
+        do {
             if (!isSpeaker) {
                 isSpeaker = true
                 try AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
                 
             } else {
-                isSpeaker = true
+                isSpeaker = false
                 try AVAudioSession.sharedInstance().overrideOutputAudioPort(.none)
             }
-        }catch (let error){
+        } catch (let error){
             NSLog("Error toogleSpeaker current call: \(error)")
 
         }
     }
     
     
+    func inputs() -> [[String: String]] {
+          let inputs = AVAudioSession.sharedInstance().availableInputs ?? []
+          let results = inputs.map { item in
+              return [
+                  "name": item.portName,
+                  "id": item.uid,
+              ]
+          }
+          return results
+    }
+      
+    func outputs() -> [[String: String]] {
+        let outputs = AVAudioSession.sharedInstance().currentRoute.outputs
+          let results = outputs.map { item in
+              return [
+                  "name": item.portName,
+                  "id": item.uid,
+              ]
+          }
+          return results
+    }
+    
     //video call
     func toggleCamera() {
         if let videoManager = videoManager {
             videoManager.toggleCamera()
         }
+    }
+    
+    func getCameraStatus() -> Bool {
+        guard let videoManager = videoManager else { return false }
+        return videoManager.isCameraOn
     }
     
     func switchCamera() {
@@ -269,4 +305,5 @@ class CallManager {
         }
     }
 }
+
 

@@ -61,7 +61,7 @@ class FLLocalCameraView: NSObject, FlutterPlatformView {
     
     func onMethodCall(call: FlutterMethodCall, result: FlutterResult) {
             switch(call.method){
-            case "":
+            case "switch":
                 break
             default:
                 result(FlutterMethodNotImplemented)

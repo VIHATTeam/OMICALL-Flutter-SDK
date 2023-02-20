@@ -1,4 +1,6 @@
+import 'package:calling/main.dart';
 import 'package:flutter/material.dart';
+import 'package:omicall_flutter_plugin/model/action_list.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
 class VideoCallScreen extends StatefulWidget {
@@ -26,6 +28,7 @@ class VideoCallState extends State<VideoCallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
@@ -39,12 +42,15 @@ class VideoCallState extends State<VideoCallScreen> {
             color: Colors.white,
           ),
           onPressed: () {
+            omiChannel.action(action: OmiAction.endCall());
             Navigator.pop(context);
           },
         ),
         actions: [
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              omiChannel.action(action: OmiAction.switchCamera());
+            },
             color: Colors.black,
             icon: Icon(
               Icons.cameraswitch_rounded,
@@ -66,7 +72,7 @@ class VideoCallState extends State<VideoCallScreen> {
                 height: double.infinity,
                 onCameraCreated: (controller) {
                   controller.addListener(
-                        (event, arguments) {
+                    (event, arguments) {
                       debugPrint("aaa");
                     },
                   );
@@ -76,10 +82,10 @@ class VideoCallState extends State<VideoCallScreen> {
             ),
           ),
           Positioned(
-            top: MediaQuery.of(context).padding.top + 16,
+            top: MediaQuery.of(context).padding.top + kToolbarHeight + 12,
             right: 16,
-            width: MediaQuery.of(context).size.width / 3,
-            height: MediaQuery.of(context).size.height / 3,
+            width: width / 3,
+            height: (3 * width) / 5,
             child: RemoteCameraView(
               width: double.infinity,
               height: double.infinity,
@@ -88,7 +94,97 @@ class VideoCallState extends State<VideoCallScreen> {
               },
             ),
           ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: MediaQuery.of(context).padding.bottom + 12,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                StreamBuilder(
+                  initialData: true,
+                  stream: omiChannel.cameraEvent(),
+                  builder: (context, snapshot) {
+                    final cameraStatus = snapshot.data as bool;
+                    return OptionItem(
+                      icon: "video",
+                      showDefaultIcon: cameraStatus,
+                      callback: () {
+                        final toggleVideo = OmiAction.toggleVideo();
+                        omiChannel.action(action: toggleVideo);
+                      },
+                    );
+                  },
+                ),
+                OptionItem(
+                  icon: "hangup",
+                  showDefaultIcon: true,
+                  callback: () {
+                    final endCall = OmiAction.endCall();
+                    omiChannel.action(action: endCall);
+                    Navigator.pop(context);
+                  },
+                ),
+                StreamBuilder(
+                  initialData: true,
+                  stream: omiChannel.micEvent(),
+                  builder: (context, snapshot) {
+                    final micStatus = snapshot.data as bool;
+                    return OptionItem(
+                      icon: "mic",
+                      showDefaultIcon: micStatus,
+                      callback: () {
+                        final toggleMute = OmiAction.toggleMute();
+                        omiChannel.action(action: toggleMute);
+                      },
+                    );
+                  },
+                ),
+                OptionItem(
+                  icon: "more",
+                  showDefaultIcon: true,
+                  callback: () {
+
+                  },
+                ),
+              ],
+            ),
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class OptionItem extends StatelessWidget {
+  final String icon;
+  final bool showDefaultIcon;
+  final VoidCallback callback;
+
+  const OptionItem({
+    required this.icon,
+    this.showDefaultIcon = true,
+    required this.callback,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: callback,
+      child: Container(
+        width: 60,
+        height: 60,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(30),
+          color: Colors.black,
+        ),
+        child: Center(
+          child: Image.asset(
+            "assets/images/${showDefaultIcon ? icon : "${icon}-off"}.png",
+            width: 30,
+            height: 30,
+          ),
+        ),
       ),
     );
   }

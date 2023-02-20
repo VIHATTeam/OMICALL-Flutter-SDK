@@ -37,4 +37,12 @@ abstract class OmicallSDKPlatform extends PlatformInterface {
   void listenerEvent(Function(ActionModel) callback) {
     throw UnimplementedError('action has not been implemented.');
   }
+
+  Stream<dynamic> cameraEvent() {
+    throw UnimplementedError('action has not been implemented.');
+  }
+
+  Stream<dynamic> micEvent() {
+    throw UnimplementedError('action has not been implemented.');
+  }
 }

@@ -14,6 +14,8 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
     private var sharedProvider: CXProvider? = nil
     private var data: Data?
     private var isFromPushKit: Bool = false
+    private var cameraEvent: FlutterEventSink?
+    private var micEvent: FlutterEventSink?
 
 
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -22,16 +24,33 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       }
       instance!.channel = FlutterMethodChannel(name: "omicallsdk", binaryMessenger: registrar.messenger())
       registrar.addMethodCallDelegate(instance, channel: instance!.channel)
+      let cameraEventChannel = FlutterEventChannel(name: "event/camera", binaryMessenger: registrar.messenger())
+      cameraEventChannel.setStreamHandler(instance)
+      let micEventChannel = FlutterEventChannel(name: "event/mic", binaryMessenger: registrar.messenger())
+      micEventChannel.setStreamHandler(instance)
       let localFactory = FLLocalCameraFactory(messenger: registrar.messenger())
       registrar.register(localFactory, withId: "local_camera_view")
       let remoteFactory = FLRemoteCameraFactory(messenger: registrar.messenger())
       registrar.register(remoteFactory, withId: "remote_camera_view")
-      
   }
 
 
   func sendEvent(_ event: String, _ body: [String : Any]) {
       channel.invokeMethod(event, arguments: body)
+  }
+    
+  func sendCameraEvent() {
+      if let cameraEvent = cameraEvent {
+          let cameraStatus = CallManager.instance?.videoManager?.isCameraOn ?? false
+          cameraEvent(cameraStatus)
+      }
+  }
+    
+  func sendMicStatus() {
+      if let micEvent = micEvent {
+          let micStatus = OmiClient.getFirstActiveCall()?.muted ?? true
+          micEvent(micStatus)
+      }
   }
 
 
@@ -39,15 +58,15 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       if(call.method != "action") {
           return
       }
-      print(call.arguments)
+      print("\(call.arguments)")
       guard  let data =  call.arguments as? [String:Any] else  {
           return
       }
-      print(data["data"])
+      print("\(data["data"])")
       guard let dataOmi = data["data"] as? [String:Any] else {
           return
       }
-      print(data["actionName"])
+      print("\(data["actionName"])")
       guard let action = data["actionName"] as? String else {
           return
       }
@@ -63,6 +82,8 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
               isVideo = isVideoCall
           }
           CallManager.shareInstance().startCall(phoneNumber, isVideo: isVideo)
+          sendMicStatus()
+          sendCameraEvent()
           break
       case HANGUP:
           CallManager.shareInstance().endAllCalls()
@@ -71,9 +92,11 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           CallManager.shareInstance().endCurrentConfirmCall()
           break
       case TOGGLE_MUTE:
-          CallManager.shareInstance().toggleMute {
+          CallManager.shareInstance().toggleMute {[weak self] in
+              guard let self = self else { return }
               NSLog("done toggleMute")
           }
+          sendMicStatus()
       case ON_HOLD:
           result(FlutterMethodNotImplemented)
       case TOGGLE_SPEAK:
@@ -81,6 +104,20 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           break
       case SEND_DTMF:
           CallManager.shareInstance().sendDTMF(character: dataOmi["character"] as! String)
+      case SWITCH_CAMERA:
+          CallManager.shareInstance().switchCamera()
+      case CAMERA_STATUS:
+          let status = CallManager.shareInstance().getCameraStatus()
+          result(status)
+      case TOGGLE_VIDEO:
+          let _ = CallManager.shareInstance().toggleCamera()
+          sendCameraEvent()
+      case INPUTS:
+          let inputs = CallManager.shareInstance().inputs()
+          result(inputs)
+      case OUTPUTS:
+          let outputs = CallManager.shareInstance().outputs()
+          result(outputs)
       default:
           break
       }
@@ -88,29 +125,27 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
   }
 }
 
-
-class EventCallbackHandler: FlutterStreamHandler {
-    private var eventSink: FlutterEventSink?
-
-    public func send(_ event: String, _ body: Any) {
-        let data: [String : Any] = [
-            "event": event,
-            "body": body
-        ]
-        eventSink?(data)
-    }
-
-    func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        self.eventSink = events
+extension SwiftOmikitPlugin : FlutterStreamHandler {
+    public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
+        if let arguments = arguments as? [String: Any], let name = arguments["name"] as? String {
+            if (name == "camera") {
+                cameraEvent = events
+            }
+            if (name == "mic") {
+                micEvent = events
+            }
+        }
         return nil
     }
-
-    func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        self.eventSink = nil
+    
+    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
+        self.cameraEvent = nil
+        self.micEvent = nil
         return nil
     }
+    
+    
 }
-
 
 @objc public extension FlutterAppDelegate {
     func requestNotification() {
@@ -139,3 +174,4 @@ class EventCallbackHandler: FlutterStreamHandler {
     }
 
 }
+
