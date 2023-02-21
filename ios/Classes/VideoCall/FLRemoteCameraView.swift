@@ -74,7 +74,7 @@ class FLRemoteCameraView: NSObject, FlutterPlatformView {
 //        self._view.layer.borderColor = UIColor.gray.cgColor
 //        self._view.layer.borderWidth = 1.0
         self._view.clipsToBounds = true
-        CallManager.instance?.getRemotePreviewView(callback: { previewView in
+        CallManager.shareInstance().getRemotePreviewView(callback: { previewView in
             self._view.setView(previewView)
             print("\(previewView.frame)")
             print("\(self._view.frame)")

@@ -14,7 +14,7 @@ import AVFoundation
 
 class CallManager {
     
-    static var instance: CallManager? = nil // Instance
+    static private var instance: CallManager? = nil // Instance
     var account: OMIAccount! // Account
     var call: OMICall? // Call
     var pingTime: Int = 0 // Ping time
@@ -252,15 +252,49 @@ class CallManager {
           return results
     }
       
+    func setInput(id: String) {
+        let inputs = AVAudioSession.sharedInstance().availableInputs ?? []
+        if let newOutput = inputs.first(where: {$0.uid == id}) {
+            try? AVAudioSession.sharedInstance().setPreferredInput(newOutput)
+        }
+    }
+    
     func outputs() -> [[String: String]] {
         let outputs = AVAudioSession.sharedInstance().currentRoute.outputs
-          let results = outputs.map { item in
-              return [
-                  "name": item.portName,
-                  "id": item.uid,
-              ]
-          }
-          return results
+        var results = outputs.map { item in
+           return [
+              "name": item.portName,
+              "id": item.uid,
+           ]
+        }
+        let hasSpeaker = results.contains{ $0["name"] == "Speaker" }
+        if (!hasSpeaker) {
+            results.append([
+                "name": "Speaker",
+                "id": "Speaker",
+            ])
+        } else {
+            results.append([
+                "name": "Off Speaker",
+                "id": "Off Speaker",
+            ])
+        }
+        return results
+    }
+    
+    func setOutput(id: String) {
+        if (id == "Speaker") {
+            try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
+            return
+        }
+        if (id == "Off Speaker") {
+            try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.none)
+            return
+        }
+        let outputs = AVAudioSession.sharedInstance().currentRoute.outputs
+        if let newOutput = outputs.first(where: {$0.uid == id}) {
+            try? AVAudioSession.sharedInstance().setPreferredInput(newOutput)
+        }
     }
     
     //video call

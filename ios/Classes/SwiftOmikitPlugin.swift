@@ -41,7 +41,7 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
     
   func sendCameraEvent() {
       if let cameraEvent = cameraEvent {
-          let cameraStatus = CallManager.instance?.videoManager?.isCameraOn ?? false
+          let cameraStatus = CallManager.shareInstance().videoManager?.isCameraOn ?? false
           cameraEvent(cameraStatus)
       }
   }
@@ -118,6 +118,12 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       case OUTPUTS:
           let outputs = CallManager.shareInstance().outputs()
           result(outputs)
+      case SETOUTPUT:
+          let id = dataOmi["id"] as! String
+          CallManager.shareInstance().setOutput(id: id)
+      case SETINPUT:
+          let id = dataOmi["id"] as! String
+          CallManager.shareInstance().setInput(id: id)
       default:
           break
       }

@@ -149,4 +149,37 @@ class OmiAction {
       },
     );
   }
+
+  static ActionModel outputs() {
+    return ActionModel(
+      actionName: OmiActionName.OUTOUTS,
+      data: {
+      },
+    );
+  }
+
+  static ActionModel setOutput({required String id}) {
+    return ActionModel(
+      actionName: OmiActionName.SET_OUTPUT,
+      data: {
+        "id": id,
+      },
+    );
+  }
+
+  static ActionModel inputs() {
+    return ActionModel(
+      actionName: OmiActionName.INPUTS,
+      data: {
+      },
+    );
+  }
+  static ActionModel setInput({required String id}) {
+    return ActionModel(
+      actionName: OmiActionName.SET_INPUT,
+      data: {
+        "id": id,
+      },
+    );
+  }
 }
