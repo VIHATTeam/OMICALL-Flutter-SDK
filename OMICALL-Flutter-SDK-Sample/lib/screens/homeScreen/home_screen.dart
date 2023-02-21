@@ -49,6 +49,11 @@ class _HomeScreenState extends State<HomeScreen> {
       if (action.actionName == OmiEventList.onCallEstablished) {
         if (_videoKey?.currentState != null) {
           _videoKey?.currentState?.refreshRemoteCamera();
+        } else {
+          pushToVideoScreen();
+          Future.delayed(const Duration(milliseconds: 300), () {
+            _videoKey?.currentState?.refreshRemoteCamera();
+          });
         }
       }
     });
@@ -245,6 +250,16 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  void pushToVideoScreen() {
+    if (_videoKey != null) { return; }
+    _videoKey = GlobalKey<VideoCallState>();
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+      return VideoCallScreen(
+        key: _videoKey,
+      );
+    }));
+  }
+
   Future<void> makeCall(
     BuildContext context, {
     String? phone,
@@ -255,12 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
       'isVideo': isVideo,
     };
     if (isVideo) {
-      _videoKey = GlobalKey<VideoCallState>();
-      Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-        return VideoCallScreen(
-          key: _videoKey,
-        );
-      }));
+      pushToVideoScreen();
     } else {
       Navigator.of(context).push(
         MaterialPageRoute(
