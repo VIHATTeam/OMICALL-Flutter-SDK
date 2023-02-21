@@ -73,7 +73,7 @@ class FLLocalCameraView: NSObject, FlutterPlatformView {
     }
 
     func setupViews() {
-        CallManager.instance?.getLocalPreviewView(callback: {[weak self] previewView in
+        CallManager.shareInstance().getLocalPreviewView(callback: {[weak self] previewView in
             guard let self = self else { return }
             self._view.setView(previewView)
         })

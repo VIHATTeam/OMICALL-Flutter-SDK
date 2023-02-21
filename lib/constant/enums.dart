@@ -24,6 +24,10 @@ class OmiActionName {
   static const String SWITCH_CAMERA = "SWITCH_CAMERA";
   static const String CAMERA_STATUS = "CAMERA_STATUS";
   static const String TOGGLE_VIDEO = "TOGGLE_VIDEO";
+  static const String OUTOUTS = "OUTOUTS";
+  static const String INPUTS = "INPUTS";
+  static const String SET_INPUT = "SET_INPUT";
+  static const String SET_OUTPUT = "SET_OUTPUT";
 }
 
 class OmiEventList {

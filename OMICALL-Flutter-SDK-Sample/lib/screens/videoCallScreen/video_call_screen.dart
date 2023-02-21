@@ -1,4 +1,5 @@
 import 'package:calling/main.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:omicall_flutter_plugin/model/action_list.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
@@ -20,6 +21,84 @@ class VideoCallState extends State<VideoCallScreen> {
   @override
   void initState() {
     super.initState();
+  }
+
+  Future<void> outputOptions(BuildContext context) async {
+    final data = await omiChannel.action(action: OmiAction.outputs()) as List;
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => CupertinoActionSheet(
+        actions: data.map((e) {
+          return CupertinoActionSheetAction(
+            onPressed: () {
+              omiChannel.action(action: OmiAction.setOutput(id: "${e["id"]}"));
+              Navigator.pop(context);
+            },
+            child: Text(e["name"]),
+          );
+        }).toList(),
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Close'),
+        ),
+      ),
+    );
+  }
+
+  Future<void> inputOptions(BuildContext context) async {
+    final data = await omiChannel.action(action: OmiAction.inputs()) as List;
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => CupertinoActionSheet(
+        actions: data.map((e) {
+          return CupertinoActionSheetAction(
+            onPressed: () {
+              omiChannel.action(action: OmiAction.setInput(id: "${e["id"]}"));
+              Navigator.pop(context);
+            },
+            child: Text(e["name"]),
+          );
+        }).toList(),
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Close'),
+        ),
+      ),
+    );
+  }
+
+  Future<void> moreOption(BuildContext context) async {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (_) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              outputOptions(context);
+            },
+            child: Text("Outputs"),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              inputOptions(context);
+            },
+            child: Text("Inputs"),
+          )
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('Close'),
+        ),
+      ),
+    );
   }
 
   void refreshRemoteCamera() {
@@ -144,7 +223,7 @@ class VideoCallState extends State<VideoCallScreen> {
                   icon: "more",
                   showDefaultIcon: true,
                   callback: () {
-
+                    moreOption(context);
                   },
                 ),
               ],
