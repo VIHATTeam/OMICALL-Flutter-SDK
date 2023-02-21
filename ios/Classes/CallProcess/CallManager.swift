@@ -48,21 +48,34 @@ class CallManager {
             OmiClient.registerAccount()
             videoManager = OMIVideoViewManager.init()
         }
+        registerNotificationCenter()
+    }
+    
+    func registerNotificationCenter() {
+        NotificationCenter.default.removeObserver(self)
         NotificationCenter.default.addObserver(self,
-                                               selector: #selector(callStateChanged(_:)),
+                                               selector: #selector(self.callStateChanged(_:)),
                                                name: NSNotification.Name.OMICallStateChanged,
                                                object: nil
         )
         NotificationCenter.default.addObserver(self,
-                                               selector: #selector(callDealloc),
+                                               selector: #selector(self.callDealloc(_:)),
                                                name: NSNotification.Name.OMICallDealloc,
                                                object: nil
         )
     }
     
-    @objc func callDealloc() {
-        SwiftOmikitPlugin.instance?.sendEvent(onCallEnd, [:])
-        currentConfirmedCall = nil
+    @objc func callDealloc(_ notification: NSNotification) {
+        guard let userInfo = notification.userInfo,
+              let call     = userInfo[OMINotificationUserInfoCallKey] as? OMICall else {
+            return;
+        }
+        if (call.callState == .disconnected) {
+            DispatchQueue.main.async {
+                SwiftOmikitPlugin.instance?.sendEvent(onCallEnd, [:])
+                self.currentConfirmedCall = nil
+            }
+        }
     }
     
     @objc fileprivate func callStateChanged(_ notification: NSNotification) {
@@ -142,11 +155,12 @@ class CallManager {
     
     /// Start call
     func startCall(_ phoneNumber: String, isVideo: Bool) {
+        registerNotificationCenter()
         if (isVideo) {
             OmiClient.startVideoCall(phoneNumber)
             return
         }
-        OmiClient.startCall(phoneNumber);
+        OmiClient.startCall(phoneNumber)
     }
     
     /// End call
