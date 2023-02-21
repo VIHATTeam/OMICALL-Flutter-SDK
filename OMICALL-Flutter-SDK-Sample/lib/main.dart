@@ -16,6 +16,7 @@ void main() async{
   if (Platform.isAndroid) {
     await Firebase.initializeApp();
   }
+  omiChannel.registerEventListener();
   runApp(MyApp());
 }
 

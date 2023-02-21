@@ -55,6 +55,14 @@ class _HomeScreenState extends State<HomeScreen> {
             _videoKey?.currentState?.refreshRemoteCamera();
           });
         }
+        return;
+      }
+      if (action.actionName == OmiEventList.onCallEnd) {
+        if (_videoKey?.currentContext != null) {
+          Navigator.of(_videoKey!.currentContext!).pop();
+          _videoKey = null;
+        }
+        return;
       }
     });
   }
@@ -232,7 +240,6 @@ class _HomeScreenState extends State<HomeScreen> {
     //   password.text,
     //   'thaonguyennguyen1197',
     // );
-    omiChannel.registerEventListener();
     //video call
     final action = OmiAction.initCall(
       userName.text,
@@ -257,7 +264,9 @@ class _HomeScreenState extends State<HomeScreen> {
       return VideoCallScreen(
         key: _videoKey,
       );
-    }));
+    })).then((value) {
+      _videoKey = null;
+    });
   }
 
   Future<void> makeCall(

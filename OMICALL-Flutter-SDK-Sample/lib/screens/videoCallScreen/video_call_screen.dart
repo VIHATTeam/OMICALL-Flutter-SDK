@@ -108,129 +108,132 @@ class VideoCallState extends State<VideoCallScreen> {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          color: Colors.black,
-          icon: Icon(
-            Icons.arrow_back_rounded,
-            size: 24,
-            color: Colors.white,
-          ),
-          onPressed: () {
-            omiChannel.action(action: OmiAction.endCall());
-            Navigator.pop(context);
-          },
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              omiChannel.action(action: OmiAction.switchCamera());
-            },
+    return WillPopScope(
+      child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
             color: Colors.black,
             icon: Icon(
-              Icons.cameraswitch_rounded,
+              Icons.arrow_back_rounded,
               size: 24,
               color: Colors.white,
             ),
+            onPressed: () {
+              omiChannel.action(action: OmiAction.endCall());
+              Navigator.pop(context);
+            },
           ),
-          const SizedBox(
-            width: 16,
-          ),
-        ],
-      ),
-      body: Stack(
-        children: [
-          SizedBox.expand(
-            child: Container(
-              child: LocalCameraView(
+          actions: [
+            IconButton(
+              onPressed: () {
+                omiChannel.action(action: OmiAction.switchCamera());
+              },
+              color: Colors.black,
+              icon: Icon(
+                Icons.cameraswitch_rounded,
+                size: 24,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(
+              width: 16,
+            ),
+          ],
+        ),
+        body: Stack(
+          children: [
+            SizedBox.expand(
+              child: Container(
+                child: LocalCameraView(
+                  width: double.infinity,
+                  height: double.infinity,
+                  onCameraCreated: (controller) {
+                    controller.addListener(
+                      (event, arguments) {
+                        debugPrint("aaa");
+                      },
+                    );
+                  },
+                ),
+                color: Colors.grey,
+              ),
+            ),
+            Positioned(
+              top: MediaQuery.of(context).padding.top + kToolbarHeight + 12,
+              right: 16,
+              width: width / 3,
+              height: (3 * width) / 5,
+              child: RemoteCameraView(
                 width: double.infinity,
                 height: double.infinity,
                 onCameraCreated: (controller) {
-                  controller.addListener(
-                    (event, arguments) {
-                      debugPrint("aaa");
-                    },
-                  );
+                  _remoteController = controller;
                 },
               ),
-              color: Colors.grey,
             ),
-          ),
-          Positioned(
-            top: MediaQuery.of(context).padding.top + kToolbarHeight + 12,
-            right: 16,
-            width: width / 3,
-            height: (3 * width) / 5,
-            child: RemoteCameraView(
-              width: double.infinity,
-              height: double.infinity,
-              onCameraCreated: (controller) {
-                _remoteController = controller;
-              },
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: MediaQuery.of(context).padding.bottom + 12,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  StreamBuilder(
+                    initialData: true,
+                    stream: omiChannel.cameraEvent(),
+                    builder: (context, snapshot) {
+                      final cameraStatus = snapshot.data as bool;
+                      return OptionItem(
+                        icon: "video",
+                        showDefaultIcon: cameraStatus,
+                        callback: () {
+                          final toggleVideo = OmiAction.toggleVideo();
+                          omiChannel.action(action: toggleVideo);
+                        },
+                      );
+                    },
+                  ),
+                  OptionItem(
+                    icon: "hangup",
+                    showDefaultIcon: true,
+                    callback: () {
+                      final endCall = OmiAction.endCall();
+                      omiChannel.action(action: endCall);
+                      Navigator.pop(context);
+                    },
+                  ),
+                  StreamBuilder(
+                    initialData: true,
+                    stream: omiChannel.micEvent(),
+                    builder: (context, snapshot) {
+                      final micStatus = snapshot.data as bool;
+                      return OptionItem(
+                        icon: "mic",
+                        showDefaultIcon: micStatus,
+                        callback: () {
+                          final toggleMute = OmiAction.toggleMute();
+                          omiChannel.action(action: toggleMute);
+                        },
+                      );
+                    },
+                  ),
+                  OptionItem(
+                    icon: "more",
+                    showDefaultIcon: true,
+                    callback: () {
+                      moreOption(context);
+                    },
+                  ),
+                ],
+              ),
             ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: MediaQuery.of(context).padding.bottom + 12,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                StreamBuilder(
-                  initialData: true,
-                  stream: omiChannel.cameraEvent(),
-                  builder: (context, snapshot) {
-                    final cameraStatus = snapshot.data as bool;
-                    return OptionItem(
-                      icon: "video",
-                      showDefaultIcon: cameraStatus,
-                      callback: () {
-                        final toggleVideo = OmiAction.toggleVideo();
-                        omiChannel.action(action: toggleVideo);
-                      },
-                    );
-                  },
-                ),
-                OptionItem(
-                  icon: "hangup",
-                  showDefaultIcon: true,
-                  callback: () {
-                    final endCall = OmiAction.endCall();
-                    omiChannel.action(action: endCall);
-                    Navigator.pop(context);
-                  },
-                ),
-                StreamBuilder(
-                  initialData: true,
-                  stream: omiChannel.micEvent(),
-                  builder: (context, snapshot) {
-                    final micStatus = snapshot.data as bool;
-                    return OptionItem(
-                      icon: "mic",
-                      showDefaultIcon: micStatus,
-                      callback: () {
-                        final toggleMute = OmiAction.toggleMute();
-                        omiChannel.action(action: toggleMute);
-                      },
-                    );
-                  },
-                ),
-                OptionItem(
-                  icon: "more",
-                  showDefaultIcon: true,
-                  callback: () {
-                    moreOption(context);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
+      onWillPop: () async => false,
     );
   }
 }
