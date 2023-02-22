@@ -6,8 +6,8 @@ import 'package:omicall_flutter_plugin/omicall.dart';
 
 class VideoCallScreen extends StatefulWidget {
   const VideoCallScreen({
-    super.key,
-  });
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {

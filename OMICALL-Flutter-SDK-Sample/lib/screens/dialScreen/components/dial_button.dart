@@ -39,7 +39,7 @@ class DialButton extends StatelessWidget {
                 color:color ?? Colors.white,
                 fontSize: 13,
               ),
-            )
+            ),
           ],
         ),
       ),

@@ -223,11 +223,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   OutlineInputBorder myFocusBorder() {
     return OutlineInputBorder(
-        borderRadius: BorderRadius.all(Radius.circular(20)),
-        borderSide: BorderSide(
-          color: Colors.greenAccent,
-          width: 3,
-        ));
+      borderRadius: BorderRadius.all(Radius.circular(20)),
+      borderSide: BorderSide(
+        color: Colors.greenAccent,
+        width: 3,
+      ),
+    );
   }
 
   void _login() async {
@@ -258,7 +259,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void pushToVideoScreen() {
-    if (_videoKey != null) { return; }
+    if (_videoKey != null) {
+      return;
+    }
     _videoKey = GlobalKey<VideoCallState>();
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
       return VideoCallScreen(
