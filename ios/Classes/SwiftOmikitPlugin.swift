@@ -149,35 +149,4 @@ extension SwiftOmikitPlugin : FlutterStreamHandler {
         self.micEvent = nil
         return nil
     }
-    
-    
 }
-
-@objc public extension FlutterAppDelegate {
-    func requestNotification() {
-        let center = UNUserNotificationCenter.current()
-        center.getNotificationSettings { settings in
-            switch settings.authorizationStatus {
-            case .authorized:
-                DispatchQueue.main.async {
-                    UIApplication.shared.registerForRemoteNotifications()
-                }
-                break
-            case .denied:
-                break
-            case .notDetermined:
-                center.delegate = self
-                center.requestAuthorization(options:[.badge, .alert, .sound]) { (granted, error) in
-                    if (granted) {
-                        DispatchQueue.main.async {
-                            UIApplication.shared.registerForRemoteNotifications()
-                        }
-                    }
-                }
-            default: break
-            }
-        }
-    }
-
-}
-

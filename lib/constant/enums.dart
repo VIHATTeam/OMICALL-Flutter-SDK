@@ -1,4 +1,6 @@
 
+// ignore_for_file: constant_identifier_names
+
 class OmiActionName {
   static const String INIT_CALL = "INIT_CALL";
   static const String UPDATE_TOKEN = "UPDATE_TOKEN";
