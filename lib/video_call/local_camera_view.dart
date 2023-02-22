@@ -18,11 +18,11 @@ class LocalCameraView extends StatelessWidget {
   late final LocalCameraController _controller;
 
   LocalCameraView({
-    super.key,
+    Key? key,
     required this.width,
     required this.height,
     this.onCameraCreated,
-  });
+  }) : super(key: key);
 
   Widget getPlatformView() {
     if (Platform.isIOS) {

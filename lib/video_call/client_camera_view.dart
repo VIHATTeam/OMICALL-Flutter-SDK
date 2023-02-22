@@ -7,7 +7,7 @@ class ClientCameraView extends StatelessWidget {
   // Pass parameters to the platform side.
   final Map<String, dynamic> creationParams = <String, dynamic>{};
 
-  ClientCameraView({super.key});
+  ClientCameraView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

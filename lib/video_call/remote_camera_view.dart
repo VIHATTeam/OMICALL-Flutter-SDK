@@ -19,11 +19,11 @@ class RemoteCameraView extends StatelessWidget {
   late final RemoteCameraController _controller;
 
   RemoteCameraView({
-    super.key,
+    Key? key,
     required this.width,
     required this.height,
     this.onCameraCreated,
-  });
+  }) : super(key: key);
 
   Widget getPlatformView() {
     if (Platform.isIOS) {
