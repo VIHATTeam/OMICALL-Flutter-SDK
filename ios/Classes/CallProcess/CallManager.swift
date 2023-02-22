@@ -15,12 +15,9 @@ import AVFoundation
 class CallManager {
     
     static private var instance: CallManager? = nil // Instance
-    var account: OMIAccount! // Account
     var call: OMICall? // Call
-    var pingTime: Int = 0 // Ping time
     private var numberRetry: Int = 0
     var isCallError: Bool = false  // check when call error
-    private let omiClient = OmiClient.self
     private let omiLib = OMISIPLib.sharedInstance()
     private var isSpeaker = false
     var currentConfirmedCall : OMICall?
@@ -35,34 +32,44 @@ class CallManager {
         return instance!
     }
     
+    func updateToken(params: [String: Any]) {
+        if let apnsToken = params["apnsToken"] as? String {
+            OmiClient.setUserPushNotificationToken(apnsToken)
+        }
+    }
     
-    public func initEndpoint(params: [String: Any]){
+    func initEndpoint(params: [String: Any]){
         var isSupportVideoCall = false
-        OmiClient.initWithUsername(params["userName"] as! String, password: params["password"] as! String, realm: params["realm"] as! String)
-        if let isVideoCall = params["isVideo"] as? Bool {
-            isSupportVideoCall = isVideoCall
+        if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String {
+            OmiClient.initWithUsername(userName, password: password, realm: realm)
+            if let isVideoCall = params["isVideo"] as? Bool {
+                isSupportVideoCall = isVideoCall
+            }
+    //        omiLib.callManager.audioController.configureAudioSession()
+            OmiClient.startOmiService(isSupportVideoCall)
+            if (isSupportVideoCall) {
+                OmiClient.registerAccount()
+                videoManager = OMIVideoViewManager.init()
+            }
+            registerNotificationCenter()
         }
-//        omiLib.callManager.audioController.configureAudioSession()
-        OmiClient.startOmiService(isSupportVideoCall)
-        if (isSupportVideoCall) {
-            OmiClient.registerAccount()
-            videoManager = OMIVideoViewManager.init()
-        }
-        registerNotificationCenter()
     }
     
     func registerNotificationCenter() {
-        NotificationCenter.default.removeObserver(self)
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(self.callStateChanged(_:)),
-                                               name: NSNotification.Name.OMICallStateChanged,
-                                               object: nil
-        )
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(self.callDealloc(_:)),
-                                               name: NSNotification.Name.OMICallDealloc,
-                                               object: nil
-        )
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            NotificationCenter.default.removeObserver(CallManager.instance!)
+            NotificationCenter.default.addObserver(CallManager.instance!,
+                                                   selector: #selector(self.callStateChanged(_:)),
+                                                   name: NSNotification.Name.OMICallStateChanged,
+                                                   object: nil
+            )
+            NotificationCenter.default.addObserver(CallManager.instance!,
+                                                   selector: #selector(self.callDealloc(_:)),
+                                                   name: NSNotification.Name.OMICallDealloc,
+                                                   object: nil
+            )
+        }
     }
     
     @objc func callDealloc(_ notification: NSNotification) {
