@@ -32,7 +32,7 @@ class DialButton extends StatelessWidget {
               iconSrc,
               height: 36,
             ),
-            VerticalSpacing(of: 5),
+            const VerticalSpacing(of: 5),
             Text(
               text,
               style: TextStyle(

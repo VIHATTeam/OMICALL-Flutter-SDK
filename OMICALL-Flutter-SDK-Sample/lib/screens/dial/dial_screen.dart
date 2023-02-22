@@ -5,12 +5,16 @@ import 'package:flutter/material.dart';
 import 'components/body.dart';
 
 class DialScreen extends StatelessWidget {
-  const DialScreen({required this.param});
+  const DialScreen({
+    Key? key,
+    required this.param,
+  }) : super(key: key);
   final Map param;
+
   @override
   Widget build(BuildContext context) {
     SizeConfig().init(context);
-    return Scaffold(
+    return const Scaffold(
       backgroundColor: kBackgoundColor,
       body: Body(),
     );

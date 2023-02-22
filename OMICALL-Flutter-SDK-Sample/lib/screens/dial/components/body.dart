@@ -13,8 +13,12 @@ import '../../../numeric_keyboard/numeric_keyboard.dart';
 import 'dial_button.dart';
 
 class Body extends StatefulWidget {
+  const Body({Key? key}) : super(key: key);
+
   @override
-  _BodyState createState() => _BodyState();
+  State<StatefulWidget> createState() {
+    return _BodyState();
+  }
 }
 
 class _BodyState extends State<Body> {
@@ -73,7 +77,7 @@ class _BodyState extends State<Body> {
     return Stack(
       alignment: Alignment.bottomCenter,
       children: [
-        SizedBox.expand(),
+        const SizedBox.expand(),
         SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(20.0),
@@ -88,11 +92,15 @@ class _BodyState extends State<Body> {
                 ),
                 Text(
                   _message,
-                  style: TextStyle(color: Colors.white60),
+                  style: const TextStyle(
+                    color: Colors.white60,
+                  ),
                 ),
-                VerticalSpacing(),
-                DialUserPic(image: "assets/images/calling_face.png"),
-                Spacer(),
+                const VerticalSpacing(),
+                const DialUserPic(
+                  image: "assets/images/calling_face.png",
+                ),
+                const Spacer(),
                 Wrap(
                   alignment: WrapAlignment.spaceBetween,
                   children: [
@@ -144,7 +152,7 @@ class _BodyState extends State<Body> {
                     ),
                   ],
                 ),
-                VerticalSpacing(),
+                const VerticalSpacing(),
                 RoundedButton(
                   iconSrc: "assets/icons/call_end.svg",
                   press: () {
@@ -161,6 +169,7 @@ class _BodyState extends State<Body> {
           Container(
             width: double.infinity,
             height: 350,
+            color: Colors.white,
             child: Column(
               children: [
                 const SizedBox(
@@ -174,7 +183,7 @@ class _BodyState extends State<Body> {
                     Expanded(
                       child: Text(
                         message,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 24,
                           color: Colors.red,
                           fontWeight: FontWeight.w700,
@@ -192,7 +201,7 @@ class _BodyState extends State<Body> {
                           message = "";
                         });
                       },
-                      child: Icon(
+                      child: const Icon(
                         Icons.cancel,
                         color: Colors.grey,
                         size: 30,
@@ -215,7 +224,7 @@ class _BodyState extends State<Body> {
                         _isShowKeyboard = !_isShowKeyboard;
                       });
                     },
-                    rightIcon: Text(
+                    rightIcon: const Text(
                       "*",
                       style: TextStyle(
                         color: Colors.red,
@@ -225,7 +234,7 @@ class _BodyState extends State<Body> {
                     leftButtonFn: () {
                       _onKeyboardTap("*");
                     },
-                    leftIcon: Text(
+                    leftIcon: const Text(
                       "#",
                       style: TextStyle(
                         color: Colors.red,
@@ -237,7 +246,6 @@ class _BodyState extends State<Body> {
                 ),
               ],
             ),
-            color: Colors.white,
           )
       ],
     );
@@ -280,7 +288,10 @@ class _BodyState extends State<Body> {
 
   _startWatch() {
     watch.start();
-    timer = new Timer.periodic(new Duration(milliseconds: 100), _updateTime);
+    timer = Timer.periodic(
+      const Duration(milliseconds: 100),
+      _updateTime,
+    );
   }
 
   //

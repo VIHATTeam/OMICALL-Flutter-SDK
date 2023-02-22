@@ -11,6 +11,8 @@ import 'package:omicall_flutter_plugin/model/action_list.dart';
 import '../dial/dial_screen.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
   // var phoneNumber = "";
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -26,7 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController userName = TextEditingController()..text = '100';
   TextEditingController password = TextEditingController()..text = 'Kunkun';
   bool _isLoginSuccess = false;
-  TextStyle basicStyle = TextStyle(
+  TextStyle basicStyle = const TextStyle(
     color: Colors.white,
     fontSize: 16,
   );
@@ -44,6 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    updateToken();
     omiChannel.subscriptionEvent().listen((event) {
       final action = event.data;
       if (action.actionName == OmiEventList.onCallEstablished) {
@@ -68,17 +71,16 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> updateToken() async {
-    if (Platform.isIOS) {
-      return;
-    }
     await FirebaseMessaging.instance.requestPermission(
       alert: true,
       badge: true,
       sound: true,
     );
-
     final token = await FirebaseMessaging.instance.getToken();
-
+    String? apnToken;
+    if (Platform.isIOS) {
+      apnToken = await FirebaseMessaging.instance.getAPNSToken();
+    }
     String id = "";
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
     if (Platform.isAndroid) {
@@ -86,13 +88,12 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       id = (await deviceInfo.iosInfo).identifierForVendor ?? "";
     }
-
     final omiAction = OmiAction.updateToken(
       id,
       Platform.isAndroid ? "omicall.concung.dev" : "vn.vihat.omikit",
       deviceTokenAndroid: token,
+      apnsToken: apnToken,
     );
-
     omiChannel.action(action: omiAction);
   }
 
@@ -103,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text('OmiKit Demo App'),
       ),
       floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.call),
+        child: const Icon(Icons.call),
         onPressed: () {
           if (_isLoginSuccess) {
             makeCall(context, phone: '100');
@@ -113,7 +114,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.0),
           child: Column(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.start,
@@ -126,19 +127,19 @@ class _HomeScreenState extends State<HomeScreen> {
                           controller: userName,
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.person),
+                            prefixIcon: const Icon(Icons.person),
                             labelText: "User Name",
                             enabledBorder: myInputBorder(),
                             focusedBorder: myFocusBorder(),
                           ),
                         ),
-                        SizedBox(
+                        const SizedBox(
                           height: 16,
                         ),
                         TextField(
                           controller: password,
                           decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.password),
+                            prefixIcon: const Icon(Icons.password),
                             labelText: "Password",
                             enabledBorder: myInputBorder(),
                             focusedBorder: myFocusBorder(),
@@ -152,7 +153,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           controller: phoneNumber,
                           keyboardType: TextInputType.number,
                           decoration: InputDecoration(
-                            prefixIcon: Icon(Icons.phone),
+                            prefixIcon: const Icon(Icons.phone),
                             labelText: "Phone Number",
                             enabledBorder: myInputBorder(),
                             focusedBorder: myFocusBorder(),
@@ -170,7 +171,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
                 },
                 child: Container(
-                  margin: EdgeInsets.all(16.0),
+                  margin: const EdgeInsets.all(16.0),
                   width: 300,
                   height: 60,
                   decoration: BoxDecoration(
@@ -183,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       end: Alignment.bottomRight,
                     ),
                     borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
+                    boxShadow: const [
                       BoxShadow(
                         color: Colors.black12,
                         offset: Offset(5, 5),
@@ -194,7 +195,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Center(
                     child: Text(
                       _isLoginSuccess ? 'Make Call' : 'Login',
-                      style: TextStyle(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.w500,
@@ -212,18 +213,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   OutlineInputBorder myInputBorder() {
     //return type is OutlineInputBorder
-    return OutlineInputBorder(
-        //Outline border type for TextFeild
-        borderRadius: BorderRadius.all(Radius.circular(20)),
-        borderSide: BorderSide(
-          color: Colors.redAccent,
-          width: 3,
-        ));
+    return const OutlineInputBorder(
+      //Outline border type for TextFeild
+      borderRadius: BorderRadius.all(Radius.circular(20)),
+      borderSide: BorderSide(
+        color: Colors.redAccent,
+        width: 3,
+      ),
+    );
   }
 
   OutlineInputBorder myFocusBorder() {
-    return OutlineInputBorder(
-      borderRadius: BorderRadius.all(Radius.circular(20)),
+    return const OutlineInputBorder(
+      borderRadius: BorderRadius.all(
+        Radius.circular(20),
+      ),
       borderSide: BorderSide(
         color: Colors.greenAccent,
         width: 3,
@@ -249,10 +253,6 @@ class _HomeScreenState extends State<HomeScreen> {
       isVideo: true,
     );
     omiChannel.action(action: action);
-    Future.delayed(const Duration(seconds: 2), () {
-      updateToken();
-    });
-
     setState(() {
       _isLoginSuccess = true;
     });

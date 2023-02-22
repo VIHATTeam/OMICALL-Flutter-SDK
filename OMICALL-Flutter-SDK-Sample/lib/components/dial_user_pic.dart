@@ -25,7 +25,7 @@ class DialUserPic extends StatelessWidget {
             Colors.white.withOpacity(0.02),
             Colors.white.withOpacity(0.05)
           ],
-          stops: [.5, 1],
+          stops: const [.5, 1],
         ),
       ),
       child: ClipRRect(

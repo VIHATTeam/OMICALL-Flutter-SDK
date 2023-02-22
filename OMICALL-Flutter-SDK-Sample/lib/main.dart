@@ -12,16 +12,18 @@ void main() async{
     await Firebase.initializeApp();
   }
   omiChannel.registerEventListener();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       child: MaterialApp(
         theme: ThemeData.light(),
-        home: HomeScreen(),
+        home: const HomeScreen(),
         debugShowCheckedModeBanner: false,
       ),
       onTap: () {

@@ -25,6 +25,7 @@ class VideoCallState extends State<VideoCallScreen> {
 
   Future<void> outputOptions(BuildContext context) async {
     final data = await omiChannel.action(action: OmiAction.outputs()) as List;
+    if (!mounted) { return; }
     showCupertinoModalPopup(
       context: context,
       builder: (_) => CupertinoActionSheet(
@@ -49,6 +50,7 @@ class VideoCallState extends State<VideoCallScreen> {
 
   Future<void> inputOptions(BuildContext context) async {
     final data = await omiChannel.action(action: OmiAction.inputs()) as List;
+    if (!mounted) { return; }
     showCupertinoModalPopup(
       context: context,
       builder: (_) => CupertinoActionSheet(
@@ -81,14 +83,14 @@ class VideoCallState extends State<VideoCallScreen> {
               Navigator.pop(context);
               outputOptions(context);
             },
-            child: Text("Outputs"),
+            child: const Text("Outputs"),
           ),
           CupertinoActionSheetAction(
             onPressed: () {
               Navigator.pop(context);
               inputOptions(context);
             },
-            child: Text("Inputs"),
+            child: const Text("Inputs"),
           )
         ],
         cancelButton: CupertinoActionSheetAction(
@@ -116,7 +118,7 @@ class VideoCallState extends State<VideoCallScreen> {
           elevation: 0,
           leading: IconButton(
             color: Colors.black,
-            icon: Icon(
+            icon: const Icon(
               Icons.arrow_back_rounded,
               size: 24,
               color: Colors.white,
@@ -132,7 +134,7 @@ class VideoCallState extends State<VideoCallScreen> {
                 omiChannel.action(action: OmiAction.switchCamera());
               },
               color: Colors.black,
-              icon: Icon(
+              icon: const Icon(
                 Icons.cameraswitch_rounded,
                 size: 24,
                 color: Colors.white,
@@ -147,6 +149,7 @@ class VideoCallState extends State<VideoCallScreen> {
           children: [
             SizedBox.expand(
               child: Container(
+                color: Colors.grey,
                 child: LocalCameraView(
                   width: double.infinity,
                   height: double.infinity,
@@ -158,7 +161,6 @@ class VideoCallState extends State<VideoCallScreen> {
                     );
                   },
                 ),
-                color: Colors.grey,
               ),
             ),
             Positioned(
@@ -243,11 +245,11 @@ class OptionItem extends StatelessWidget {
   final bool showDefaultIcon;
   final VoidCallback callback;
 
-  const OptionItem({
+  const OptionItem({Key? key,
     required this.icon,
     this.showDefaultIcon = true,
     required this.callback,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -262,7 +264,7 @@ class OptionItem extends StatelessWidget {
         ),
         child: Center(
           child: Image.asset(
-            "assets/images/${showDefaultIcon ? icon : "${icon}-off"}.png",
+            "assets/images/${showDefaultIcon ? icon : "$icon-off"}.png",
             width: 30,
             height: 30,
           ),

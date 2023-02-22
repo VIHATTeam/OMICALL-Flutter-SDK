@@ -20,11 +20,11 @@ class OmiAction {
     String deviceId,
     String appId, {
     String? deviceTokenAndroid,
-    String? tokenVoipIos,
+    String? apnsToken,
   }) {
     return ActionModel(actionName: OmiActionName.UPDATE_TOKEN, data: {
       'deviceTokenAndroid': deviceTokenAndroid,
-      'tokenVoipIos': tokenVoipIos,
+      'apnsToken': apnsToken,
       'appId': appId,
       'deviceId': deviceId,
     });
