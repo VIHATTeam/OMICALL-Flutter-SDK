@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:calling/screens/homeScreen/home_screen.dart';
+import 'package:calling/screens/home/home_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';

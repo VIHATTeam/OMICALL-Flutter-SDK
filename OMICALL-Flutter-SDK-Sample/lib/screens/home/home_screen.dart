@@ -1,14 +1,14 @@
 import 'dart:io';
 
 import 'package:calling/main.dart';
-import 'package:calling/screens/videoCallScreen/video_call_screen.dart';
+import 'package:calling/screens/video_call/video_call_screen.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:omicall_flutter_plugin/constant/enums.dart';
 import 'package:omicall_flutter_plugin/model/action_list.dart';
 
-import '../dialScreen/dial_screen.dart';
+import '../dial/dial_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   // var phoneNumber = "";
