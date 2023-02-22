@@ -8,9 +8,7 @@ final omiChannel = OmiChannel();
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
-  if (Platform.isAndroid) {
-    await Firebase.initializeApp();
-  }
+  await Firebase.initializeApp();
   omiChannel.registerEventListener();
   runApp(const MyApp());
 }
