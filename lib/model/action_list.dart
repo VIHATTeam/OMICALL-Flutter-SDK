@@ -19,11 +19,11 @@ class OmiAction {
   static ActionModel updateToken(
     String deviceId,
     String appId, {
-    String? deviceTokenAndroid,
+    String? fcmToken,
     String? apnsToken,
   }) {
     return ActionModel(actionName: OmiActionName.UPDATE_TOKEN, data: {
-      'deviceTokenAndroid': deviceTokenAndroid,
+      'fcmToken': fcmToken,
       'apnsToken': apnsToken,
       'appId': appId,
       'deviceId': deviceId,

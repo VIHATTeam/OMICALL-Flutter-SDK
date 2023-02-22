@@ -91,7 +91,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final omiAction = OmiAction.updateToken(
       id,
       Platform.isAndroid ? "omicall.concung.dev" : "vn.vihat.omikit",
-      deviceTokenAndroid: token,
+      fcmToken: token,
       apnsToken: apnToken,
     );
     omiChannel.action(action: omiAction);

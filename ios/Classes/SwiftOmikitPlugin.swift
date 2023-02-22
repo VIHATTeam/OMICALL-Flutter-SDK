@@ -72,6 +72,9 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       }
 
       switch(action) {
+      case UPDATE_TOKEN:
+//          CallManager.shareInstance().updateToken(params: dataOmi)
+          break
       case INIT_CALL:
           CallManager.shareInstance().initEndpoint(params: dataOmi)
           break
@@ -93,10 +96,11 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           break
       case TOGGLE_MUTE:
           CallManager.shareInstance().toggleMute {[weak self] in
-              guard let self = self else { return }
-              NSLog("done toggleMute")
+//              guard let self = self else { return }
+              NSLog("done toggle mute")
           }
           sendMicStatus()
+          break
       case ON_HOLD:
           result(FlutterMethodNotImplemented)
       case TOGGLE_SPEAK:
@@ -104,26 +108,34 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           break
       case SEND_DTMF:
           CallManager.shareInstance().sendDTMF(character: dataOmi["character"] as! String)
+          break
       case SWITCH_CAMERA:
           CallManager.shareInstance().switchCamera()
+          break
       case CAMERA_STATUS:
           let status = CallManager.shareInstance().getCameraStatus()
           result(status)
+          break
       case TOGGLE_VIDEO:
           let _ = CallManager.shareInstance().toggleCamera()
           sendCameraEvent()
+          break
       case INPUTS:
           let inputs = CallManager.shareInstance().inputs()
           result(inputs)
+          break
       case OUTPUTS:
           let outputs = CallManager.shareInstance().outputs()
           result(outputs)
+          break
       case SETOUTPUT:
           let id = dataOmi["id"] as! String
           CallManager.shareInstance().setOutput(id: id)
+          break
       case SETINPUT:
           let id = dataOmi["id"] as! String
           CallManager.shareInstance().setInput(id: id)
+          break
       default:
           break
       }
@@ -150,3 +162,32 @@ extension SwiftOmikitPlugin : FlutterStreamHandler {
         return nil
     }
 }
+
+@objc public extension FlutterAppDelegate {
+    func requestNotification() {
+        let center = UNUserNotificationCenter.current()
+        center.getNotificationSettings { settings in
+            switch settings.authorizationStatus {
+            case .authorized:
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+                break
+            case .denied:
+                break
+            case .notDetermined:
+                center.delegate = self
+                center.requestAuthorization(options:[.badge, .alert, .sound]) { (granted, error) in
+                    if (granted) {
+                        DispatchQueue.main.async {
+                            UIApplication.shared.registerForRemoteNotifications()
+                        }
+                    }
+                }
+            default: break
+            }
+        }
+    }
+
+}
+
