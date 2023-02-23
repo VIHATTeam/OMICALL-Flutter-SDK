@@ -60,7 +60,9 @@ class MethodChannelOmicallSDK extends OmicallSDKPlatform {
             callback.call(
               ActionModel(
                 actionName: OmiEventList.onCallEstablished,
-                data: {},
+                data: {
+                  "isVideo": call.arguments ?? true,
+                },
               ),
             );
 

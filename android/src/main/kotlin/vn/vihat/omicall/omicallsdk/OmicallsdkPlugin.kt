@@ -90,8 +90,10 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
             }
             START_CALL -> {
                 val phoneNumber = dataOmi["phoneNumber"] as String
-                val isTransfer = dataOmi["isTransfer"] as Boolean
-                OmiClient.instance.startCall(phoneNumber, isTransfer)
+                val isVideo = dataOmi["isVideo"] as Boolean
+                if (!isVideo) {
+                    OmiClient.instance.startCall(phoneNumber)
+                }
             }
             END_CALL -> {
                 OmiClient.instance.hangUp()
@@ -171,7 +173,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
 
     override fun onCallEstablished() {
 
-        channel.invokeMethod(onCallEstablished, null)
+        channel.invokeMethod(onCallEstablished, false)
 
         Log.d("omikit", "onCallEstablished: ")
 

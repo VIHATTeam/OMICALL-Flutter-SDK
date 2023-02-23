@@ -51,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
     // updateToken();
     omiChannel.subscriptionEvent().listen((event) {
       final action = event.data;
-      if (action.actionName == OmiEventList.onCallEstablished) {
+      if (action.actionName == OmiEventList.onCallEstablished && action.data["isVideo"] == true) {
         if (_videoKey?.currentState != null) {
           _videoKey?.currentState?.refreshRemoteCamera();
         } else {
