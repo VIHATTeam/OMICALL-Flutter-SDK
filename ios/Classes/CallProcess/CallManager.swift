@@ -155,8 +155,10 @@ class CallManager {
             break
         case .hold:
             SwiftOmikitPlugin.instance?.sendEvent(onHold, ["isHold": call.onHold])
-        @unknown default:
+            break
+        default:
             NSLog("Default call state")
+            break
         }
     }
     

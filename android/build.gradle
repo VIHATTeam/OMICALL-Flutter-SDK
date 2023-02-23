@@ -8,9 +8,10 @@ buildscript {
         mavenCentral()
         jcenter() // Warning: this repository is going to shut down soon
         maven {
-            url("https://vihat.jfrog.io/artifactory/vihat-local-repo")
+            url("https://vihatgroup.jfrog.io/artifactory/omi-voice/")
             credentials {
-                username = "anonymous"
+                username = "downloader"
+                password = "Omi@2022"
             }
         }
     }
@@ -30,9 +31,10 @@ allprojects {
         mavenCentral()
         jcenter() // Warning: this repository is going to shut down soon
         maven {
-            url("https://vihat.jfrog.io/artifactory/vihat-local-repo")
+            url("https://vihatgroup.jfrog.io/artifactory/omi-voice/")
             credentials {
-                username = "anonymous"
+                username = "downloader"
+                password = "Omi@2022"
             }
         }
     }
