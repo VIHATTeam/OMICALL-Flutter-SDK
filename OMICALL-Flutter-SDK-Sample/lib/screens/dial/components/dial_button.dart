@@ -31,6 +31,7 @@ class DialButton extends StatelessWidget {
             SvgPicture.asset(
               iconSrc,
               height: 36,
+              color: Colors.white,
             ),
             const VerticalSpacing(of: 5),
             Text(

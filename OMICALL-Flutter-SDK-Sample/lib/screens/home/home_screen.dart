@@ -7,6 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:omicall_flutter_plugin/constant/enums.dart';
 import 'package:omicall_flutter_plugin/model/action_list.dart';
+import 'package:omicall_flutter_plugin/model/action_model.dart';
 
 import '../dial/dial_screen.dart';
 
@@ -28,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   TextEditingController userName = TextEditingController()..text = '100';
   TextEditingController password = TextEditingController()..text = 'Kunkun';
   bool _isLoginSuccess = false;
+  bool _supportVideoCall = false;
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,
     fontSize: 16,
@@ -46,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    updateToken();
+    // updateToken();
     omiChannel.subscriptionEvent().listen((event) {
       final action = event.data;
       if (action.actionName == OmiEventList.onCallEstablished) {
@@ -103,15 +105,6 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: const Text('OmiKit Demo App'),
       ),
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.call),
-        onPressed: () {
-          if (_isLoginSuccess) {
-            makeCall(context, phone: '100');
-            FocusScope.of(context).unfocus();
-          }
-        },
-      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -161,6 +154,33 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
+              if (!_isLoginSuccess) Container(
+                margin: const EdgeInsets.only(top: 16,),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _supportVideoCall = !_supportVideoCall;
+                    });
+                  },
+                  child: Row(
+                    children: [
+                      Icon(
+                        _supportVideoCall ? Icons.check_circle : Icons.circle_outlined,
+                        size: 24,
+                        color: _supportVideoCall ? Colors.redAccent : Colors.grey,
+                      ),
+                      const SizedBox(width: 8,),
+                      Text(
+                        "Video call",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: _supportVideoCall ? Colors.redAccent : Colors.grey,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+              ),
               GestureDetector(
                 onTap: () {
                   if (_isLoginSuccess) {
@@ -171,8 +191,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   }
                 },
                 child: Container(
-                  margin: const EdgeInsets.all(16.0),
-                  width: 300,
+                  margin: const EdgeInsets.symmetric(
+                    vertical: 16,
+                  ),
                   height: 60,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -240,19 +261,25 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
     //audio call
-    // final action = OmiAction.initCall(
-    //   userName.text,
-    //   password.text,
-    //   'thaonguyennguyen1197',
-    // );
-    //video call
-    final action = OmiAction.initCall(
-      userName.text,
-      password.text,
-      'dky',
-      isVideo: true,
-    );
+    ActionModel action;
+    if (_supportVideoCall) {
+      action = OmiAction.initCall(
+        userName.text,
+        password.text,
+        'dky',
+        isVideo: true,
+      );
+    } else {
+      action = OmiAction.initCall(
+        userName.text,
+        password.text,
+        'thaonguyennguyen1197',
+      );
+    }
     omiChannel.action(action: action);
+    Future.delayed(const Duration(seconds: 2), () {
+      updateToken();
+    });
     setState(() {
       _isLoginSuccess = true;
     });
@@ -275,13 +302,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> makeCall(
     BuildContext context, {
     String? phone,
-    bool isVideo = true,
   }) async {
     var params = <String, dynamic>{
       'phoneNumber': phone ?? phoneNumber.text,
-      'isVideo': isVideo,
+      'isVideo': _supportVideoCall,
     };
-    if (isVideo) {
+    if (_supportVideoCall) {
       pushToVideoScreen();
     } else {
       Navigator.of(context).push(
@@ -294,7 +320,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
     final action = OmiAction.startCall(
       phone ?? phoneNumber.text,
-      true,
+      _supportVideoCall,
     );
     omiChannel.action(action: action);
   }

@@ -72,7 +72,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
 
             }
             UPDATE_TOKEN -> {
-                val deviceTokenAndroid = dataOmi["deviceTokenAndroid"] as String
+                val deviceTokenAndroid = dataOmi["fcmToken"] as String
                 val appId = dataOmi["appId"] as String
                 val deviceId = dataOmi["deviceId"] as String
                 OmiClient.instance.updatePushToken(
