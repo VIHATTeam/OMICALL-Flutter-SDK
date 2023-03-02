@@ -3,12 +3,10 @@ import 'dart:async';
 import 'package:calling/components/dial_user_pic.dart';
 import 'package:calling/components/rounded_button.dart';
 import 'package:calling/constants.dart';
-import 'package:calling/main.dart';
 import 'package:calling/size_config.dart';
 import 'package:flutter/material.dart';
-import 'package:omicall_flutter_plugin/constant/enums.dart';
-import 'package:omicall_flutter_plugin/model/action_list.dart';
 import 'package:omicall_flutter_plugin/model/action_model.dart';
+import 'package:omicall_flutter_plugin/omicall.dart';
 import '../../../numeric_keyboard/numeric_keyboard.dart';
 import 'dial_button.dart';
 
@@ -34,7 +32,7 @@ class _BodyState extends State<Body> {
   @override
   void initState() {
     super.initState();
-    omiChannel.subscriptionEvent().listen((event) {
+    OmicallClient().subscriptionEvent().listen((event) {
       final action = event.data;
       if (action.actionName == OmiEventList.onCallEstablished) {
         _setDuration();
@@ -69,7 +67,7 @@ class _BodyState extends State<Body> {
         "character": value,
       },
     );
-    omiChannel.action(action: action);
+    OmicallClient().action(action: action);
   }
 
   @override
@@ -256,21 +254,18 @@ class _BodyState extends State<Body> {
   }
 
   Future<void> toggleMute(BuildContext context) async {
-    final action = OmiAction.toggleMute();
-    omiChannel.action(action: action);
+    OmicallClient().toggleMute();
   }
 
   Future<void> toggleSpeaker(BuildContext context) async {
     setState(() {
       _isMic = !_isMic;
     });
-    final action = OmiAction.toggleSpeaker(_isMic);
-    omiChannel.action(action: action);
+    OmicallClient().toggleSpeaker(_isMic);
   }
 
   Future<void> endCall(BuildContext context) async {
-    final action = OmiAction.endCall();
-    omiChannel.action(action: action);
+    OmicallClient().endCall();
   }
 
   transformMilliSeconds(int milliseconds) {

@@ -1,13 +1,10 @@
 import 'dart:io';
 
-import 'package:calling/main.dart';
 import 'package:calling/screens/video_call/video_call_screen.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:omicall_flutter_plugin/constant/enums.dart';
-import 'package:omicall_flutter_plugin/model/action_list.dart';
-import 'package:omicall_flutter_plugin/model/action_model.dart';
+import 'package:omicall_flutter_plugin/omicall.dart';
 
 import '../dial/dial_screen.dart';
 
@@ -49,9 +46,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     // updateToken();
-    omiChannel.subscriptionEvent().listen((event) {
+    OmicallClient().subscriptionEvent().listen((event) {
       final action = event.data;
-      if (action.actionName == OmiEventList.onCallEstablished && action.data["isVideo"] == true) {
+      if (action.actionName == OmiEventList.onCallEstablished &&
+          action.data["isVideo"] == true) {
         if (_videoKey?.currentState != null) {
           _videoKey?.currentState?.refreshRemoteCamera();
         } else {
@@ -90,13 +88,12 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       id = (await deviceInfo.iosInfo).identifierForVendor ?? "";
     }
-    final omiAction = OmiAction.updateToken(
+    OmicallClient().updateToken(
       id,
       Platform.isAndroid ? "omicall.concung.dev" : "vn.vihat.omikit",
       fcmToken: token,
       apnsToken: apnToken,
     );
-    omiChannel.action(action: omiAction);
   }
 
   @override
@@ -154,33 +151,44 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ],
                     ),
-              if (!_isLoginSuccess) Container(
-                margin: const EdgeInsets.only(top: 16,),
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _supportVideoCall = !_supportVideoCall;
-                    });
-                  },
-                  child: Row(
-                    children: [
-                      Icon(
-                        _supportVideoCall ? Icons.check_circle : Icons.circle_outlined,
-                        size: 24,
-                        color: _supportVideoCall ? Colors.redAccent : Colors.grey,
-                      ),
-                      const SizedBox(width: 8,),
-                      Text(
-                        "Video call",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: _supportVideoCall ? Colors.redAccent : Colors.grey,
+              if (!_isLoginSuccess)
+                Container(
+                  margin: const EdgeInsets.only(
+                    top: 16,
+                  ),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _supportVideoCall = !_supportVideoCall;
+                      });
+                    },
+                    child: Row(
+                      children: [
+                        Icon(
+                          _supportVideoCall
+                              ? Icons.check_circle
+                              : Icons.circle_outlined,
+                          size: 24,
+                          color: _supportVideoCall
+                              ? Colors.redAccent
+                              : Colors.grey,
                         ),
-                      )
-                    ],
+                        const SizedBox(
+                          width: 8,
+                        ),
+                        Text(
+                          "Video call",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: _supportVideoCall
+                                ? Colors.redAccent
+                                : Colors.grey,
+                          ),
+                        )
+                      ],
+                    ),
                   ),
                 ),
-              ),
               GestureDetector(
                 onTap: () {
                   if (_isLoginSuccess) {
@@ -260,23 +268,20 @@ class _HomeScreenState extends State<HomeScreen> {
     if (userName.text.isEmpty || password.text.isEmpty) {
       return;
     }
-    //audio call
-    ActionModel action;
     if (_supportVideoCall) {
-      action = OmiAction.initCall(
-        userName.text,
-        password.text,
-        'dky',
+      OmicallClient().initCall(
+        userName: userName.text,
+        password: password.text,
+        realm: "dky",
         isVideo: true,
       );
     } else {
-      action = OmiAction.initCall(
-        userName.text,
-        password.text,
-        'thaonguyennguyen1197',
+      OmicallClient().initCall(
+        userName: userName.text,
+        password: password.text,
+        realm: "thaonguyennguyen1197",
       );
     }
-    omiChannel.action(action: action);
     Future.delayed(const Duration(seconds: 2), () {
       updateToken();
     });
@@ -318,10 +323,9 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     }
-    final action = OmiAction.startCall(
+    OmicallClient().startCall(
       phone ?? phoneNumber.text,
       _supportVideoCall,
     );
-    omiChannel.action(action: action);
   }
 }

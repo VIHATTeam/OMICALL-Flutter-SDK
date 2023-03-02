@@ -1,7 +1,5 @@
-import 'package:calling/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:omicall_flutter_plugin/model/action_list.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
 class VideoCallScreen extends StatefulWidget {
@@ -24,7 +22,7 @@ class VideoCallState extends State<VideoCallScreen> {
   }
 
   Future<void> outputOptions(BuildContext context) async {
-    final data = await omiChannel.action(action: OmiAction.outputs()) as List;
+    final data = await OmicallClient().outputs() as List;
     if (!mounted) { return; }
     showCupertinoModalPopup(
       context: context,
@@ -32,7 +30,7 @@ class VideoCallState extends State<VideoCallScreen> {
         actions: data.map((e) {
           return CupertinoActionSheetAction(
             onPressed: () {
-              omiChannel.action(action: OmiAction.setOutput(id: "${e["id"]}"));
+              OmicallClient().setOutput(id: "${e["id"]}");
               Navigator.pop(context);
             },
             child: Text(e["name"]),
@@ -49,7 +47,7 @@ class VideoCallState extends State<VideoCallScreen> {
   }
 
   Future<void> inputOptions(BuildContext context) async {
-    final data = await omiChannel.action(action: OmiAction.inputs()) as List;
+    final data = await OmicallClient().inputs() as List;
     if (!mounted) { return; }
     showCupertinoModalPopup(
       context: context,
@@ -57,7 +55,7 @@ class VideoCallState extends State<VideoCallScreen> {
         actions: data.map((e) {
           return CupertinoActionSheetAction(
             onPressed: () {
-              omiChannel.action(action: OmiAction.setInput(id: "${e["id"]}"));
+              OmicallClient().setInput(id: "${e["id"]}");
               Navigator.pop(context);
             },
             child: Text(e["name"]),
@@ -124,14 +122,14 @@ class VideoCallState extends State<VideoCallScreen> {
               color: Colors.white,
             ),
             onPressed: () {
-              omiChannel.action(action: OmiAction.endCall());
+              OmicallClient().endCall();
               Navigator.pop(context);
             },
           ),
           actions: [
             IconButton(
               onPressed: () {
-                omiChannel.action(action: OmiAction.switchCamera());
+                OmicallClient().switchCamera();
               },
               color: Colors.black,
               icon: const Icon(
@@ -185,15 +183,14 @@ class VideoCallState extends State<VideoCallScreen> {
                 children: [
                   StreamBuilder(
                     initialData: true,
-                    stream: omiChannel.cameraEvent(),
+                    stream: OmicallClient().cameraEvent(),
                     builder: (context, snapshot) {
                       final cameraStatus = snapshot.data as bool;
                       return OptionItem(
                         icon: "video",
                         showDefaultIcon: cameraStatus,
                         callback: () {
-                          final toggleVideo = OmiAction.toggleVideo();
-                          omiChannel.action(action: toggleVideo);
+                          OmicallClient().toggleVideo();
                         },
                       );
                     },
@@ -202,22 +199,20 @@ class VideoCallState extends State<VideoCallScreen> {
                     icon: "hangup",
                     showDefaultIcon: true,
                     callback: () {
-                      final endCall = OmiAction.endCall();
-                      omiChannel.action(action: endCall);
+                      OmicallClient().endCall();
                       Navigator.pop(context);
                     },
                   ),
                   StreamBuilder(
                     initialData: true,
-                    stream: omiChannel.micEvent(),
+                    stream: OmicallClient().micEvent(),
                     builder: (context, snapshot) {
                       final micStatus = snapshot.data as bool;
                       return OptionItem(
                         icon: "mic",
                         showDefaultIcon: micStatus,
                         callback: () {
-                          final toggleMute = OmiAction.toggleMute();
-                          omiChannel.action(action: toggleMute);
+                          OmicallClient().toggleMute();
                         },
                       );
                     },
