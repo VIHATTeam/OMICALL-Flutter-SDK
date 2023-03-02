@@ -1,7 +1,7 @@
-import 'package:omicall_flutter_plugin/model/action_model.dart';
+import '../action/action_model.dart';
 
 class OmiEvent {
-  final ActionModel data;
+  final OmiAction data;
 
   const OmiEvent({
     required this.data,

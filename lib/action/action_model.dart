@@ -1,8 +1,8 @@
-class ActionModel {
+class OmiAction {
   final String actionName;
   final Map<String, dynamic> data;
 
-  ActionModel({
+  OmiAction({
     required this.actionName,
     required this.data,
   });
