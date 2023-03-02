@@ -1,29 +1,25 @@
 import 'package:flutter/services.dart';
 import 'package:omicall_flutter_plugin/constant/enums.dart';
-import 'package:omicall_flutter_plugin/model/action_model.dart';
 
-import 'omicallsdk_platform_interface.dart';
+import 'action/action_model.dart';
 
 /// An implementation of [OmicallsdkPlatform] that uses method channels.
-class MethodChannelOmicallSDK extends OmicallSDKPlatform {
+class OmicallSDKController  {
   /// The method channel used to interact with the native platform.
 
   final _methodChannel = const MethodChannel('omicallsdk');
   final _cameraChannel = const EventChannel('event/camera');
   final _micChannel = const EventChannel('event/mic');
 
-  @override
   Stream<dynamic> cameraEvent() {
     return _cameraChannel.receiveBroadcastStream({"name": "camera"});
   }
 
-  @override
   Stream micEvent() {
     return _micChannel.receiveBroadcastStream({"name": "mic"});
   }
 
-  @override
-  Future<dynamic> action(ActionModel action) async {
+  Future<dynamic> action(OmiAction action) async {
     final response = await _methodChannel.invokeMethod<dynamic>(
       'action',
       action.toJson(),
@@ -31,14 +27,13 @@ class MethodChannelOmicallSDK extends OmicallSDKPlatform {
     return response;
   }
 
-  @override
-  void listenerEvent(Function(ActionModel) callback) {
+  void listenerEvent(Function(OmiAction) callback) {
     _methodChannel.setMethodCallHandler(
       (call) async {
         switch (call.method) {
           case "CALL_END":
             callback.call(
-              ActionModel(
+              OmiAction(
                 actionName: OmiEventList.onCallEnd,
                 data: {},
               ),
@@ -47,7 +42,7 @@ class MethodChannelOmicallSDK extends OmicallSDKPlatform {
           case "INCOMING_RECEIVED":
             final data = call.arguments;
             callback.call(
-              ActionModel(
+              OmiAction(
                 actionName: OmiEventList.incomingReceived,
                 data: {
                   "callerId": data["callerId"] as int,
@@ -58,7 +53,7 @@ class MethodChannelOmicallSDK extends OmicallSDKPlatform {
             break;
           case "CALL_ESTABLISHED":
             callback.call(
-              ActionModel(
+              OmiAction(
                 actionName: OmiEventList.onCallEstablished,
                 data: {
                   "isVideo": call.arguments ?? true,
@@ -79,7 +74,7 @@ class MethodChannelOmicallSDK extends OmicallSDKPlatform {
           case "HOLD":
             final data = call.arguments;
             callback.call(
-              ActionModel(
+              OmiAction(
                 actionName: OmiEventList.onHold,
                 data: {
                   "isHold": data["isHold"] as bool,
@@ -91,7 +86,7 @@ class MethodChannelOmicallSDK extends OmicallSDKPlatform {
           case "MUTED":
             final data = call.arguments;
             callback.call(
-              ActionModel(
+              OmiAction(
                 actionName: OmiEventList.onMuted,
                 data: {
                   "isMuted": data["isMuted"] as bool,
@@ -101,7 +96,7 @@ class MethodChannelOmicallSDK extends OmicallSDKPlatform {
             break;
           case "RINGING":
             callback.call(
-              ActionModel(
+              OmiAction(
                 actionName: OmiEventList.onRinging,
                 data: {},
               ),

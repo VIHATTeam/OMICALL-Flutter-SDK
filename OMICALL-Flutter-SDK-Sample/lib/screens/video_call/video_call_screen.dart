@@ -22,7 +22,7 @@ class VideoCallState extends State<VideoCallScreen> {
   }
 
   Future<void> outputOptions(BuildContext context) async {
-    final data = await OmicallClient().outputs() as List;
+    final data = await OmicallClient().getOutputAudios() as List;
     if (!mounted) { return; }
     showCupertinoModalPopup(
       context: context,
@@ -30,7 +30,7 @@ class VideoCallState extends State<VideoCallScreen> {
         actions: data.map((e) {
           return CupertinoActionSheetAction(
             onPressed: () {
-              OmicallClient().setOutput(id: "${e["id"]}");
+              OmicallClient().setOutputAudio(id: "${e["id"]}");
               Navigator.pop(context);
             },
             child: Text(e["name"]),
@@ -47,7 +47,7 @@ class VideoCallState extends State<VideoCallScreen> {
   }
 
   Future<void> inputOptions(BuildContext context) async {
-    final data = await OmicallClient().inputs() as List;
+    final data = await OmicallClient().getInputAudios() as List;
     if (!mounted) { return; }
     showCupertinoModalPopup(
       context: context,
@@ -55,7 +55,7 @@ class VideoCallState extends State<VideoCallScreen> {
         actions: data.map((e) {
           return CupertinoActionSheetAction(
             onPressed: () {
-              OmicallClient().setInput(id: "${e["id"]}");
+              OmicallClient().setInputAudio(id: "${e["id"]}");
               Navigator.pop(context);
             },
             child: Text(e["name"]),
@@ -212,7 +212,7 @@ class VideoCallState extends State<VideoCallScreen> {
                         icon: "mic",
                         showDefaultIcon: micStatus,
                         callback: () {
-                          OmicallClient().toggleMute();
+                          OmicallClient().toggleMicrophone();
                         },
                       );
                     },

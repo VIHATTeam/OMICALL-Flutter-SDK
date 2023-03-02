@@ -5,7 +5,6 @@ import 'package:calling/components/rounded_button.dart';
 import 'package:calling/constants.dart';
 import 'package:calling/size_config.dart';
 import 'package:flutter/material.dart';
-import 'package:omicall_flutter_plugin/model/action_model.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 import '../../../numeric_keyboard/numeric_keyboard.dart';
 import 'dial_button.dart';
@@ -61,13 +60,7 @@ class _BodyState extends State<Body> {
     setState(() {
       message = "$message$value";
     });
-    final action = ActionModel(
-      actionName: OmiActionName.SEND_DTMF,
-      data: {
-        "character": value,
-      },
-    );
-    OmicallClient().action(action: action);
+    OmicallClient().sendDTMF(value);
   }
 
   @override
@@ -254,7 +247,7 @@ class _BodyState extends State<Body> {
   }
 
   Future<void> toggleMute(BuildContext context) async {
-    OmicallClient().toggleMute();
+    OmicallClient().toggleMicrophone();
   }
 
   Future<void> toggleSpeaker(BuildContext context) async {
