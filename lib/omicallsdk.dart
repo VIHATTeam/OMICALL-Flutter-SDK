@@ -1,28 +1,20 @@
 import 'dart:async';
-
-import 'package:event_bus/event_bus.dart';
 import 'package:omicall_flutter_plugin/omicallsdk_method_channel.dart';
 import 'action/action_model.dart';
 import 'omicall.dart';
 
 class OmicallClient {
-  OmicallClient._() {
-    _instance.listenerEvent((action) {
-      _eventBus.fire(OmiEvent(data: action));
-    });
-  }
+
+  OmicallClient._();
 
   factory OmicallClient() {
     return OmicallClient._();
   }
 
   final OmicallSDKController _instance = OmicallSDKController();
-  final _eventBus = EventBus();
 
-  ///subscribe event
-  Stream<OmiEvent> subscriptionEvent() {
-    return _eventBus.on<OmiEvent>();
-  }
+
+  OmicallSDKController get controller => _instance;
 
   ///streaming camera event
   Stream<dynamic> cameraEvent() {
@@ -35,8 +27,8 @@ class OmicallClient {
   }
 
   ///destroy event
-  void destroy() {
-    _eventBus.destroy();
+  void dispose() {
+    _instance.dispose();
   }
 
   Future<dynamic> action({required OmiAction action}) {

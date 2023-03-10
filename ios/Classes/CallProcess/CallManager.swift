@@ -110,20 +110,10 @@ class CallManager {
             }
             break
         case .confirmed:
-            DispatchQueue.main.async {
-                if (!call.isIncoming) {
-                    NSLog("Outgoing call, in CONFIRMED state, with UUID: \(call.uuid)")
-                    SwiftOmikitPlugin.instance?.sendEvent(onCallEstablished, [:])
-                    SwiftOmikitPlugin.instance?.sendEvent(onMuted, ["isMuted": call.muted])
-                    self.currentConfirmedCall = call
-                    return
-                }
-                //call video
-                NSLog("Outgoing call, in CONFIRMED state, with UUID: \(call.uuid)")
-                SwiftOmikitPlugin.instance?.sendEvent(onCallEstablished, [:])
-                SwiftOmikitPlugin.instance?.sendEvent(onMuted, ["isMuted": call.muted])
-                self.currentConfirmedCall = call
-            }
+            NSLog("Outgoing call, in CONFIRMED state, with UUID: \(call)")
+            SwiftOmikitPlugin.instance?.sendEvent(onCallEstablished, ["isVideo": call.isVideo, "callerNumber": call.callerNumber, "isIncoming": call.isIncoming])
+            SwiftOmikitPlugin.instance.sendMicStatus()
+            self.currentConfirmedCall = call
             break
         case .disconnected:
             if (!call.connected) {
@@ -145,13 +135,10 @@ class CallManager {
             print(omiLib.getNewestCall()?.uuid.uuidString)
             break
         case .incoming:
-            SwiftOmikitPlugin.instance?.sendEvent(incomingReceived, [
-                "callerId": call.callId,
-                "phoneNumber": call.callerNumber
-            ])
+            SwiftOmikitPlugin.instance?.sendEvent(incomingReceived, ["isVideo": call.isVideo, "callerNumber": "0961046493", "isIncoming": call.isIncoming])
             break
         case .muted:
-            SwiftOmikitPlugin.instance?.sendEvent(onMuted, ["isMuted": call.muted])
+            SwiftOmikitPlugin.instance.sendMicStatus()
             break
         case .hold:
             SwiftOmikitPlugin.instance?.sendEvent(onHold, ["isHold": call.onHold])
