@@ -1,24 +1,26 @@
 import 'dart:io';
 
 import 'package:calling/screens/video_call/video_call_screen.dart';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
+import '../../main.dart';
 import '../dial/dial_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({
+    Key? key,
+    this.needRequestNotification = false,
+  }) : super(key: key);
+  final bool needRequestNotification;
 
-  // var phoneNumber = "";
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  TextEditingController phoneNumber = TextEditingController()..text = '101';
+  late final TextEditingController _phoneNumberController =
+      TextEditingController()..text = Platform.isAndroid ? '101' : '100';
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,
     fontSize: 16,
@@ -38,7 +40,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    updateToken();
+    if (widget.needRequestNotification) {
+      updateToken();
+    }
     // OmicallClient().subscriptionEvent().listen((event) {
     //   final action = event.data;
     //   if (action.actionName == OmiEventList.onCallEstablished &&
@@ -63,32 +67,10 @@ class _HomeScreenState extends State<HomeScreen> {
     // });
   }
 
-  Future<void> updateToken() async {
-    await FirebaseMessaging.instance.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-    final token = await FirebaseMessaging.instance.getToken();
-    String? apnToken;
-    if (Platform.isIOS) {
-      apnToken = await FirebaseMessaging.instance.getAPNSToken();
-    }
-    String id = "";
-    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-    if (Platform.isAndroid) {
-      id = (await deviceInfo.androidInfo).id;
-    } else {
-      id = (await deviceInfo.iosInfo).identifierForVendor ?? "";
-    }
-    EasyLoading.show();
-    await OmicallClient().updateToken(
-      id,
-      Platform.isAndroid ? "omicall.concung.dev" : "vn.vihat.omikit",
-      fcmToken: token,
-      apnsToken: apnToken,
-    );
-    EasyLoading.dismiss();
+  @override
+  void dispose() {
+    _phoneNumberController.dispose();
+    super.dispose();
   }
 
   @override
@@ -108,7 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
               TextField(
-                controller: phoneNumber,
+                controller: _phoneNumberController,
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   prefixIcon: const Icon(Icons.phone),
@@ -143,8 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         "Video call",
                         style: TextStyle(
                           fontSize: 16,
-                          color:
-                              _supportVideoCall ? Colors.blue : Colors.grey,
+                          color: _supportVideoCall ? Colors.blue : Colors.grey,
                         ),
                       )
                     ],
@@ -243,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
     String? phone,
   }) async {
     var params = <String, dynamic>{
-      'phoneNumber': phone ?? phoneNumber.text,
+      'phoneNumber': phone ?? _phoneNumberController.text,
       'isVideo': _supportVideoCall,
     };
     if (_supportVideoCall) {
@@ -258,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
     OmicallClient().startCall(
-      phone ?? phoneNumber.text,
+      phone ?? _phoneNumberController.text,
       _supportVideoCall,
     );
   }

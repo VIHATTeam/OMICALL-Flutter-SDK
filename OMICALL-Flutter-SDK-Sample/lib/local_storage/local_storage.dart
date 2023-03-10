@@ -1,16 +1,23 @@
+import 'dart:convert';
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorage {
   LocalStorage._();
   static final instance = LocalStorage._();
-  Future<void> saveLoginStatus() async {
+
+  Future<Map?> loginInfo() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool("login_status", true);
+    final loginInfoString = prefs.getString("login_info");
+    if  (loginInfoString != null) {
+      return json.decode(loginInfoString);
+    }
+    return null;
   }
 
-  Future<bool> getLoginStatus() async {
+  Future<void> setLoginInfo(Map<String, dynamic> loginInfo) async {
     final prefs = await SharedPreferences.getInstance();
-    final result = prefs.getBool("login_status");
-    return result ?? false;
+    final loginInfoString = json.encode(loginInfo);
+    await prefs.setString("login_info", loginInfoString);
   }
 }

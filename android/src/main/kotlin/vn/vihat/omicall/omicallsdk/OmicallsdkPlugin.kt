@@ -69,7 +69,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
                     ),
                     0,
                 )
-
+                result.success(true)
             }
             UPDATE_TOKEN -> {
                 val deviceTokenAndroid = dataOmi["fcmToken"] as String
@@ -81,11 +81,12 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
                     deviceId,
                     appId
                 )
+                result.success(true)
             }
             START_OMI_SERVICE -> {
                 activity?.let {
                     OmiSDKUtils.startOmiService(it)
-
+                    result.success(true)
                 }
             }
             START_CALL -> {
@@ -94,40 +95,47 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
                 if (!isVideo) {
                     OmiClient.instance.startCall(phoneNumber)
                 }
+                result.success(true)
             }
             END_CALL -> {
                 OmiClient.instance.hangUp()
+                result.success(true)
             }
             TOGGLE_MUTE -> {
                 OmiClient.instance.toggleMute()
+                result.success(true)
             }
             TOGGLE_SPEAK -> {
                 val useSpeaker = dataOmi["useSpeaker"] as Boolean
                 OmiClient.instance.toggleSpeaker(useSpeaker)
-
+                result.success(true)
             }
             CHECK_ON_GOING_CALL -> {}
             DECLINE -> {
                 OmiClient.instance.decline()
+                result.success(true)
             }
             FORWARD_CALL_TO -> {}
             HANGUP -> {
                 val callId = dataOmi["callId"] as Int
                 OmiClient.instance.hangUp(callId)
-
+                result.success(true)
             }
             ON_CALL_STARTED -> {
                 val callId = dataOmi["callId"] as Int
                 OmiClient.instance.onCallStarted(callId)
+                result.success(true)
             }
             ON_HOLD -> {
                 val isHold = dataOmi["isHold"] as Boolean
                 OmiClient.instance.onHold(isHold)
+                result.success(true)
             }
             ON_IN_COMING_RECEIVE -> {}
             ON_MUTE -> {
                 val isMute = dataOmi["isMute"] as Boolean
                 OmiClient.instance.onMuted(isMute)
+                result.success(true)
             }
             ON_OUT_GOING -> {}
             REGISTER -> {}
@@ -143,12 +151,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
                 if (characterCode != null) {
                     OmiClient.instance.sendDtmf(characterCode)
                 }
+                result.success(true)
             }
         }
-
-        result.success(true)
-
-
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {

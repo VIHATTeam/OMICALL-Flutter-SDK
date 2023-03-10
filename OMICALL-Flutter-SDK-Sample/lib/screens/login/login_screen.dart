@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/home/home_screen.dart';
 import 'package:flutter/material.dart';
@@ -13,13 +15,15 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // TextEditingController userName = TextEditingController()..text = '100';
-  // TextEditingController password = TextEditingController()..text = 'ConCung100';
+  // NSString * USER_NAME1 = @"100";
+  // NSString * PASS_WORD1 = @"Kunkun";
+  // NSString * USER_NAME2 = @"101";
+  // NSString * PASS_WORD2 = @"Kunkun12345";
   //video
   late final TextEditingController _userNameController = TextEditingController()
-    ..text = '100';
+    ..text = Platform.isAndroid ? '100' : '101';
   late final TextEditingController _passwordController = TextEditingController()
-    ..text = 'Kunkun';
+    ..text = Platform.isAndroid ? 'Kunkun' : 'Kunkun12345';
   late final TextEditingController _serviceUrlController =
       TextEditingController()..text = 'sky';
   bool _supportVideoCall = false;
@@ -214,13 +218,20 @@ class _LoginScreenState extends State<LoginScreen> {
       isVideo: _supportVideoCall,
     );
 
-    await LocalStorage.instance.saveLoginStatus();
+    await LocalStorage.instance.setLoginInfo({
+      "userName": _userNameController.text,
+      "password": _passwordController.text,
+      "realm": _serviceUrlController.text,
+      "isVideo": _supportVideoCall,
+    });
     EasyLoading.dismiss();
     if (!mounted) {
       return;
     }
     Navigator.push(context, MaterialPageRoute(builder: (_) {
-      return const HomeScreen();
+      return const HomeScreen(
+        needRequestNotification: true,
+      );
     }));
   }
 }
