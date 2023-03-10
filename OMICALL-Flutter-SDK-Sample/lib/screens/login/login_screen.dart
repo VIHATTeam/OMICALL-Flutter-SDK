@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   late final TextEditingController _passwordController = TextEditingController()
     ..text = Platform.isAndroid ? 'Kunkun' : 'Kunkun12345';
   late final TextEditingController _serviceUrlController =
-      TextEditingController()..text = 'sky';
+      TextEditingController()..text = 'dky';
   bool _supportVideoCall = false;
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,

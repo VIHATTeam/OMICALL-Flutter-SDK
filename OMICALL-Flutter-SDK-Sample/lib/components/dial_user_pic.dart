@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../size_config.dart';
-
 class DialUserPic extends StatelessWidget {
   const DialUserPic({
     Key? key,
@@ -16,8 +14,8 @@ class DialUserPic extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(30 / 192 * size),
-      height: getProportionateScreenWidth(size),
-      width: getProportionateScreenWidth(size),
+      height: size,
+      width: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(

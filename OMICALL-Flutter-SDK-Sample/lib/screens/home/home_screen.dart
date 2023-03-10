@@ -34,8 +34,9 @@ class _HomeScreenState extends State<HomeScreen> {
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
-  bool _supportVideoCall = false;
+  bool _isVideoCall = false;
   GlobalKey<VideoCallState>? _videoKey;
+  GlobalKey<DialScreenState>? _dialKey;
 
   @override
   void initState() {
@@ -43,28 +44,63 @@ class _HomeScreenState extends State<HomeScreen> {
     if (widget.needRequestNotification) {
       updateToken();
     }
-    // OmicallClient().subscriptionEvent().listen((event) {
-    //   final action = event.data;
-    //   if (action.actionName == OmiEventList.onCallEstablished &&
-    //       action.data["isVideo"] == true) {
-    //     if (_videoKey?.currentState != null) {
-    //       _videoKey?.currentState?.refreshRemoteCamera();
-    //     } else {
-    //       pushToVideoScreen();
-    //       Future.delayed(const Duration(milliseconds: 300), () {
-    //         _videoKey?.currentState?.refreshRemoteCamera();
-    //       });
-    //     }
-    //     return;
-    //   }
-    //   if (action.actionName == OmiEventList.onCallEnd) {
-    //     if (_videoKey?.currentContext != null) {
-    //       Navigator.of(_videoKey!.currentContext!).pop();
-    //       _videoKey = null;
-    //     }
-    //     return;
-    //   }
-    // });
+    OmicallClient().controller.eventTransferStream.listen((omiAction) {
+      if (omiAction.actionName == OmiEventList.incomingReceived) {
+        final data = omiAction.data;
+        final callerNumber = data["callerNumber"];
+        final bool isIncoming = data["isIncoming"];
+        final bool isVideo = data["isVideo"];
+        if (isIncoming && isVideo) {
+          pushToVideoScreen(
+            callerNumber,
+            isInComing: true,
+          );
+          Future.delayed(const Duration(milliseconds: 300), () {
+            _videoKey?.currentState?.refreshRemoteCamera();
+          });
+          return;
+        }
+        if (isIncoming && !isVideo) {
+          pushToDialScreen(
+            callerNumber,
+            isInComing: true,
+          );
+        }
+      }
+      if (omiAction.actionName == OmiEventList.onCallEstablished) {
+        // final data = omiAction.data;
+        // final callerNumber = data["callerNumber"];
+        // final bool isIncoming = data["isIncoming"];
+        // final bool isVideo = data["isVideo"];
+        // if (isIncoming && isVideo) {
+        //   pushToVideoScreen(
+        //     callerNumber,
+        //     isInComing: true,
+        //   );
+        //   Future.delayed(const Duration(milliseconds: 300), () {
+        //     _videoKey?.currentState?.refreshRemoteCamera();
+        //   });
+        //   return;
+        // }
+        // if (isIncoming && !isVideo) {
+        //   pushToDialScreen(
+        //     callerNumber,
+        //     isInComing: true,
+        //   );
+        // }
+      }
+      if (omiAction.actionName == OmiEventList.onCallEnd) {
+        if (_videoKey?.currentContext != null) {
+          Navigator.of(_videoKey!.currentContext!).pop();
+          _videoKey = null;
+        }
+        if (_dialKey?.currentContext != null) {
+          Navigator.of(_dialKey!.currentContext!).pop();
+          _dialKey = null;
+        }
+        return;
+      }
+    });
   }
 
   @override
@@ -106,17 +142,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: GestureDetector(
                   onTap: () {
                     setState(() {
-                      _supportVideoCall = !_supportVideoCall;
+                      _isVideoCall = !_isVideoCall;
                     });
                   },
                   child: Row(
                     children: [
                       Icon(
-                        _supportVideoCall
+                        _isVideoCall
                             ? Icons.check_circle
                             : Icons.circle_outlined,
                         size: 24,
-                        color: _supportVideoCall ? Colors.blue : Colors.grey,
+                        color: _isVideoCall ? Colors.blue : Colors.grey,
                       ),
                       const SizedBox(
                         width: 8,
@@ -125,7 +161,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         "Video call",
                         style: TextStyle(
                           fontSize: 16,
-                          color: _supportVideoCall ? Colors.blue : Colors.grey,
+                          color: _isVideoCall ? Colors.blue : Colors.grey,
                         ),
                       )
                     ],
@@ -205,7 +241,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void pushToVideoScreen() {
+  void pushToVideoScreen(
+    String phoneNumber, {
+    bool isInComing = true,
+  }) {
     if (_videoKey != null) {
       return;
     }
@@ -219,28 +258,41 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> makeCall(
-    BuildContext context, {
-    String? phone,
-  }) async {
-    var params = <String, dynamic>{
-      'phoneNumber': phone ?? _phoneNumberController.text,
-      'isVideo': _supportVideoCall,
-    };
-    if (_supportVideoCall) {
-      pushToVideoScreen();
+  void pushToDialScreen(
+    String phoneNumber, {
+    bool isInComing = true,
+  }) {
+    if (_dialKey != null) {
+      return;
+    }
+    _dialKey = GlobalKey<DialScreenState>();
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+      return DialScreen(
+        key: _dialKey,
+        phoneNumber: phoneNumber,
+        isInComing: false,
+      );
+    })).then((value) {
+      _dialKey = null;
+    });
+  }
+
+  Future<void> makeCall(BuildContext context) async {
+    final phone = _phoneNumberController.text;
+    if (phone.isEmpty) {
+      return;
+    }
+    if (_isVideoCall) {
+      pushToVideoScreen(phone);
     } else {
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) => DialScreen(
-            param: params,
-          ),
-        ),
+      pushToDialScreen(
+        phone,
+        isInComing: false,
       );
     }
     OmicallClient().startCall(
-      phone ?? _phoneNumberController.text,
-      _supportVideoCall,
+      phone,
+      _isVideoCall,
     );
   }
 }

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../size_config.dart';
-
 class RoundedButton extends StatelessWidget {
   const RoundedButton({
     Key? key,
@@ -21,8 +19,8 @@ class RoundedButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: getProportionateScreenWidth(size),
-      width: getProportionateScreenWidth(size),
+      height: size,
+      width: size,
       child: TextButton(
         style: TextButton.styleFrom(
           padding: EdgeInsets.all(15 / 64 * size),

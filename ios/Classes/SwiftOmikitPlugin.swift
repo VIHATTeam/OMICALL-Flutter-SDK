@@ -36,7 +36,10 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
 
 
   func sendEvent(_ event: String, _ body: [String : Any]) {
-      channel.invokeMethod(event, arguments: body)
+      DispatchQueue.main.async {[weak self] in
+          guard let self = self else { return }
+          self.channel.invokeMethod(event, arguments: body)
+      }
   }
     
   func sendCameraEvent() {

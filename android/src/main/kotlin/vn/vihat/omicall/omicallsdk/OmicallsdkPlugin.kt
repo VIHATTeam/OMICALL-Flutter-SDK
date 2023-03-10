@@ -56,7 +56,13 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
                 val userName = dataOmi["userName"] as String
                 val password = dataOmi["password"] as String
                 val realm = dataOmi["realm"] as String
-                OmiClient.register(applicationContext!!, userName, password, realm)
+                OmiClient.register(
+                    applicationContext!!,
+                    userName,
+                    password,
+                    realm,
+                    customUI = true,
+                )
                 OmiClient.instance.setListener(this)
                 ActivityCompat.requestPermissions(
                     activity!!,
@@ -177,8 +183,12 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
     }
 
     override fun onCallEstablished() {
-
-        channel.invokeMethod(onCallEstablished, false)
+        val sipNumber = OmiClient.instance.sipNumber
+        channel.invokeMethod(onCallEstablished, mapOf(
+            "isIncoming" to true,
+            "callerNumber" to sipNumber,
+            "isVideo" to false,
+        ))
 
         Log.d("omikit", "onCallEstablished: ")
 
@@ -196,7 +206,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
             )
         )
         Log.d("omikit", "incomingReceived: ")
-
     }
 
     override fun onRinging() {
