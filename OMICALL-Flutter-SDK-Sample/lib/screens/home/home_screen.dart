@@ -4,6 +4,7 @@ import 'package:calling/screens/video_call/video_call_screen.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
 import '../dial/dial_screen.dart';
@@ -18,15 +19,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   TextEditingController phoneNumber = TextEditingController()..text = '101';
-
-  //audio
-  // TextEditingController userName = TextEditingController()..text = '100';
-  // TextEditingController password = TextEditingController()..text = 'ConCung100';
-  //video
-  TextEditingController userName = TextEditingController()..text = '100';
-  TextEditingController password = TextEditingController()..text = 'Kunkun';
-  bool _isLoginSuccess = false;
-  bool _supportVideoCall = false;
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,
     fontSize: 16,
@@ -40,34 +32,35 @@ class _HomeScreenState extends State<HomeScreen> {
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
+  bool _supportVideoCall = false;
   GlobalKey<VideoCallState>? _videoKey;
 
   @override
   void initState() {
     super.initState();
-    // updateToken();
-    OmicallClient().subscriptionEvent().listen((event) {
-      final action = event.data;
-      if (action.actionName == OmiEventList.onCallEstablished &&
-          action.data["isVideo"] == true) {
-        if (_videoKey?.currentState != null) {
-          _videoKey?.currentState?.refreshRemoteCamera();
-        } else {
-          pushToVideoScreen();
-          Future.delayed(const Duration(milliseconds: 300), () {
-            _videoKey?.currentState?.refreshRemoteCamera();
-          });
-        }
-        return;
-      }
-      if (action.actionName == OmiEventList.onCallEnd) {
-        if (_videoKey?.currentContext != null) {
-          Navigator.of(_videoKey!.currentContext!).pop();
-          _videoKey = null;
-        }
-        return;
-      }
-    });
+    updateToken();
+    // OmicallClient().subscriptionEvent().listen((event) {
+    //   final action = event.data;
+    //   if (action.actionName == OmiEventList.onCallEstablished &&
+    //       action.data["isVideo"] == true) {
+    //     if (_videoKey?.currentState != null) {
+    //       _videoKey?.currentState?.refreshRemoteCamera();
+    //     } else {
+    //       pushToVideoScreen();
+    //       Future.delayed(const Duration(milliseconds: 300), () {
+    //         _videoKey?.currentState?.refreshRemoteCamera();
+    //       });
+    //     }
+    //     return;
+    //   }
+    //   if (action.actionName == OmiEventList.onCallEnd) {
+    //     if (_videoKey?.currentContext != null) {
+    //       Navigator.of(_videoKey!.currentContext!).pop();
+    //       _videoKey = null;
+    //     }
+    //     return;
+    //   }
+    // });
   }
 
   Future<void> updateToken() async {
@@ -88,120 +81,84 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       id = (await deviceInfo.iosInfo).identifierForVendor ?? "";
     }
-    OmicallClient().updateToken(
+    EasyLoading.show();
+    await OmicallClient().updateToken(
       id,
       Platform.isAndroid ? "omicall.concung.dev" : "vn.vihat.omikit",
       fcmToken: token,
       apnsToken: apnToken,
     );
+    EasyLoading.dismiss();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('OmiKit Demo App'),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
+    return WillPopScope(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Home'),
+          leading: const SizedBox(),
+          leadingWidth: 0,
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
           child: Column(
             mainAxisSize: MainAxisSize.max,
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              !_isLoginSuccess
-                  ? Column(
-                      children: [
-                        TextField(
-                          controller: userName,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.person),
-                            labelText: "User Name",
-                            enabledBorder: myInputBorder(),
-                            focusedBorder: myFocusBorder(),
-                          ),
+              TextField(
+                controller: phoneNumber,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  prefixIcon: const Icon(Icons.phone),
+                  labelText: "Phone Number",
+                  enabledBorder: myInputBorder(),
+                  focusedBorder: myFocusBorder(),
+                ),
+              ),
+              Container(
+                margin: const EdgeInsets.only(
+                  top: 16,
+                ),
+                child: GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _supportVideoCall = !_supportVideoCall;
+                    });
+                  },
+                  child: Row(
+                    children: [
+                      Icon(
+                        _supportVideoCall
+                            ? Icons.check_circle
+                            : Icons.circle_outlined,
+                        size: 24,
+                        color: _supportVideoCall ? Colors.blue : Colors.grey,
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      Text(
+                        "Video call",
+                        style: TextStyle(
+                          fontSize: 16,
+                          color:
+                              _supportVideoCall ? Colors.blue : Colors.grey,
                         ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        TextField(
-                          controller: password,
-                          decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.password),
-                            labelText: "Password",
-                            enabledBorder: myInputBorder(),
-                            focusedBorder: myFocusBorder(),
-                          ),
-                        ),
-                      ],
-                    )
-                  : Column(
-                      children: [
-                        TextField(
-                          controller: phoneNumber,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                            prefixIcon: const Icon(Icons.phone),
-                            labelText: "Phone Number",
-                            enabledBorder: myInputBorder(),
-                            focusedBorder: myFocusBorder(),
-                          ),
-                        ),
-                      ],
-                    ),
-              if (!_isLoginSuccess)
-                Container(
-                  margin: const EdgeInsets.only(
-                    top: 16,
-                  ),
-                  child: GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _supportVideoCall = !_supportVideoCall;
-                      });
-                    },
-                    child: Row(
-                      children: [
-                        Icon(
-                          _supportVideoCall
-                              ? Icons.check_circle
-                              : Icons.circle_outlined,
-                          size: 24,
-                          color: _supportVideoCall
-                              ? Colors.redAccent
-                              : Colors.grey,
-                        ),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        Text(
-                          "Video call",
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: _supportVideoCall
-                                ? Colors.redAccent
-                                : Colors.grey,
-                          ),
-                        )
-                      ],
-                    ),
+                      )
+                    ],
                   ),
                 ),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
               GestureDetector(
                 onTap: () {
-                  if (_isLoginSuccess) {
-                    FocusScope.of(context).unfocus();
-                    makeCall(context);
-                  } else {
-                    _login();
-                  }
+                  makeCall(context);
                 },
                 child: Container(
-                  margin: const EdgeInsets.symmetric(
-                    vertical: 16,
-                  ),
                   height: 60,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -221,10 +178,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       )
                     ],
                   ),
-                  child: Center(
+                  child: const Center(
                     child: Text(
-                      _isLoginSuccess ? 'Make Call' : 'Login',
-                      style: const TextStyle(
+                      'Call',
+                      style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
                         fontWeight: FontWeight.w500,
@@ -237,6 +194,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+      onWillPop: () async {
+        return false;
+      },
     );
   }
 
@@ -262,32 +222,6 @@ class _HomeScreenState extends State<HomeScreen> {
         width: 3,
       ),
     );
-  }
-
-  void _login() async {
-    if (userName.text.isEmpty || password.text.isEmpty) {
-      return;
-    }
-    if (_supportVideoCall) {
-      OmicallClient().initCall(
-        userName: userName.text,
-        password: password.text,
-        realm: "dky",
-        isVideo: true,
-      );
-    } else {
-      OmicallClient().initCall(
-        userName: userName.text,
-        password: password.text,
-        realm: "thaonguyennguyen1197",
-      );
-    }
-    Future.delayed(const Duration(seconds: 2), () {
-      updateToken();
-    });
-    setState(() {
-      _isLoginSuccess = true;
-    });
   }
 
   void pushToVideoScreen() {
