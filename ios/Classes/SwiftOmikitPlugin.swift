@@ -74,9 +74,11 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       switch(action) {
       case UPDATE_TOKEN:
           CallManager.shareInstance().updateToken(params: dataOmi)
+          result(true)
           break
       case INIT_CALL:
           CallManager.shareInstance().initEndpoint(params: dataOmi)
+          result(true)
           break
       case START_CALL:
           let phoneNumber = dataOmi["phoneNumber"] as! String
@@ -87,12 +89,15 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           CallManager.shareInstance().startCall(phoneNumber, isVideo: isVideo)
           sendMicStatus()
           sendCameraEvent()
+          result(true)
           break
       case HANGUP:
           CallManager.shareInstance().endAllCalls()
+          result(true)
           break
       case END_CALL:
           CallManager.shareInstance().endCurrentConfirmCall()
+          result(true)
           break
       case TOGGLE_MUTE:
           CallManager.shareInstance().toggleMute {[weak self] in
@@ -100,17 +105,21 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
               NSLog("done toggle mute")
           }
           sendMicStatus()
+          result(true)
           break
       case ON_HOLD:
           result(FlutterMethodNotImplemented)
       case TOGGLE_SPEAK:
           CallManager.shareInstance().toogleSpeaker()
+          result(true)
           break
       case SEND_DTMF:
           CallManager.shareInstance().sendDTMF(character: dataOmi["character"] as! String)
+          result(true)
           break
       case SWITCH_CAMERA:
           CallManager.shareInstance().switchCamera()
+          result(true)
           break
       case CAMERA_STATUS:
           let status = CallManager.shareInstance().getCameraStatus()
@@ -119,10 +128,12 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       case TOGGLE_VIDEO:
           let _ = CallManager.shareInstance().toggleCamera()
           sendCameraEvent()
+          result(true)
           break
       case INPUTS:
           let inputs = CallManager.shareInstance().inputs()
           result(inputs)
+          result(true)
           break
       case OUTPUTS:
           let outputs = CallManager.shareInstance().outputs()
@@ -131,10 +142,12 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       case SETOUTPUT:
           let id = dataOmi["id"] as! String
           CallManager.shareInstance().setOutput(id: id)
+          result(true)
           break
       case SETINPUT:
           let id = dataOmi["id"] as! String
           CallManager.shareInstance().setInput(id: id)
+          result(true)
           break
       default:
           break
