@@ -111,7 +111,7 @@ class CallManager {
             break
         case .confirmed:
             NSLog("Outgoing call, in CONFIRMED state, with UUID: \(call)")
-            SwiftOmikitPlugin.instance?.sendEvent(onCallEstablished, ["isVideo": false, "callerNumber": call.callerNumber, "isIncoming": call.isIncoming])
+            SwiftOmikitPlugin.instance?.sendEvent(onCallEstablished, ["isVideo": call.isVideo != 0, "callerNumber": call.callerNumber, "isIncoming": call.isIncoming])
             SwiftOmikitPlugin.instance.sendMicStatus()
             self.currentConfirmedCall = call
             break
@@ -135,7 +135,7 @@ class CallManager {
             print(omiLib.getNewestCall()?.uuid.uuidString)
             break
         case .incoming:
-            SwiftOmikitPlugin.instance?.sendEvent(incomingReceived, ["isVideo": false, "callerNumber": "0961046493", "isIncoming": call.isIncoming])
+            SwiftOmikitPlugin.instance?.sendEvent(incomingReceived, ["isVideo": call.isVideo != 0, "callerNumber": "0961046493", "isIncoming": call.isIncoming])
             break
         case .muted:
             SwiftOmikitPlugin.instance.sendMicStatus()
