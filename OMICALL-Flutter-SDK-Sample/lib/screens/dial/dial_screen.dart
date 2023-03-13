@@ -30,6 +30,7 @@ class DialScreenState extends State<DialScreen> {
   String _callingStatus = '';
   bool _isShowKeyboard = false;
   String message = "";
+  late StreamSubscription _subscription;
 
   Stopwatch watch = Stopwatch();
   Timer? timer;
@@ -42,6 +43,15 @@ class DialScreenState extends State<DialScreen> {
       _callingStatus = widget.status.value;
     }
     super.initState();
+    _subscription = OmicallClient().controller.eventTransferStream.listen((omiAction) {
+      if (omiAction.actionName == OmiEventList.onCallEstablished) {
+        updateDialScreen(null, CallStatus.established);
+      }
+      if (omiAction.actionName == OmiEventList.onCallEnd) {
+        Navigator.of(context).pop();
+        return;
+      }
+    });
   }
 
   void updateDialScreen(Map<String, dynamic>? callInfo, CallStatus? status) {
@@ -258,7 +268,7 @@ class DialScreenState extends State<DialScreen> {
 
   Future<void> endCall(BuildContext context) async {
     OmicallClient().endCall();
-    Navigator.pop(context, true);
+    // Navigator.pop(context, true);
   }
 
   transformMilliSeconds(int milliseconds) {
@@ -300,6 +310,7 @@ class DialScreenState extends State<DialScreen> {
   @override
   void dispose() {
     super.dispose();
+    _subscription.cancel();
     watch.stop();
     timer?.cancel();
     timer = null;

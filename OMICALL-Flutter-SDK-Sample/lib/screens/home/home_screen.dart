@@ -37,8 +37,6 @@ class _HomeScreenState extends State<HomeScreen> {
     end: Alignment.centerRight,
   );
   bool _isVideoCall = false;
-  GlobalKey<VideoCallState>? _videoKey;
-  GlobalKey<DialScreenState>? _dialKey;
   late StreamSubscription _subscription;
 
   @override
@@ -47,7 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (widget.needRequestNotification) {
       updateToken();
     }
-    _subscription = OmicallClient().controller.eventTransferStream.listen((omiAction) {
+    _subscription =
+        OmicallClient().controller.eventTransferStream.listen((omiAction) {
       if (omiAction.actionName == OmiEventList.incomingReceived) {
         //having a incoming call
         final data = omiAction.data;
@@ -59,9 +58,9 @@ class _HomeScreenState extends State<HomeScreen> {
             callerNumber,
             isInComing: true,
           );
-          Future.delayed(const Duration(milliseconds: 300), () {
-            _videoKey?.currentState?.refreshRemoteCamera();
-          });
+          // Future.delayed(const Duration(milliseconds: 300), () {
+          //   _videoKey?.currentState?.refreshRemoteCamera();
+          // });
           return;
         }
         if (isIncoming && !isVideo) {
@@ -70,22 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
             status: CallStatus.ringing,
           );
         }
-      }
-      if (omiAction.actionName == OmiEventList.onCallEstablished) {
-        if (_dialKey?.currentState != null) {
-          _dialKey?.currentState?.updateDialScreen(null, CallStatus.established);
-        }
-      }
-      if (omiAction.actionName == OmiEventList.onCallEnd) {
-        if (_videoKey?.currentContext != null) {
-          Navigator.of(_videoKey!.currentContext!).pop();
-          _videoKey = null;
-        }
-        if (_dialKey?.currentContext != null) {
-          Navigator.of(_dialKey!.currentContext!).pop();
-          _dialKey = null;
-        }
-        return;
       }
     });
   }
@@ -233,36 +216,21 @@ class _HomeScreenState extends State<HomeScreen> {
     String phoneNumber, {
     bool isInComing = true,
   }) {
-    if (_videoKey != null) {
-      return;
-    }
-    _videoKey = GlobalKey<VideoCallState>();
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-      return VideoCallScreen(
-        key: _videoKey,
-      );
-    })).then((value) {
-      _videoKey = null;
-    });
+      return const VideoCallScreen();
+    }));
   }
 
   void pushToDialScreen(
     String phoneNumber, {
     required CallStatus status,
   }) {
-    if (_dialKey != null) {
-      return;
-    }
-    _dialKey = GlobalKey<DialScreenState>();
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
       return DialScreen(
-        key: _dialKey,
         phoneNumber: phoneNumber,
         status: status,
       );
-    })).then((value) {
-      _dialKey = null;
-    });
+    }));
   }
 
   Future<void> makeCall(BuildContext context) async {

@@ -159,37 +159,25 @@ class CallManager {
         OmiClient.startCall(phoneNumber)
     }
     
-    /// End call
-    func endNewestCall() {
-        guard let call = omiLib.getNewestCall() else {
-            return
-        }
-        omiLib.callManager.end(call) { error in
-            if error != nil {
-                NSLog("error hanging up call(\(call.uuid.uuidString)): \(error!)")
-            }
-        }
-        NotificationCenter.default.removeObserver(self)
-    }
-    
     func endCurrentConfirmCall() {
-        guard let call = omiLib.getCurrentCall() else {
-            endNewestCall()
+        var currentCall = omiLib.getCurrentCall()
+        if (currentCall == nil) {
+            currentCall = omiLib.getNewestCall()
+        }
+        if (currentCall == nil) {
+            SwiftOmikitPlugin.instance?.sendEvent(onCallEnd, [:])
             return
         }
-        omiLib.callManager.end(call) { error in
-            if error != nil {
-                NSLog("error hanging up call(\(call.uuid.uuidString)): \(error!)")
-            }
-        }
-        NotificationCenter.default.removeObserver(self)
+        omiLib.callManager.end(currentCall!)
+//        SwiftOmikitPlugin.instance?.sendEvent(onCallEnd, [:])
+//        NotificationCenter.default.removeObserver(self)
     }
     
     
     func endAllCalls() {
         omiLib.callManager.endAllCalls()
-        SwiftOmikitPlugin.instance?.sendEvent("onCallEnd", [:])
-        NotificationCenter.default.removeObserver(self)
+//        SwiftOmikitPlugin.instance?.sendEvent(onCallEnd, [:])
+//        NotificationCenter.default.removeObserver(self)
     }
     
     func sendDTMF(character: String) {
