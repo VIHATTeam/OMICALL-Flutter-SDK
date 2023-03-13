@@ -183,10 +183,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
     }
 
     override fun onCallEstablished() {
-        val sipNumber = OmiClient.instance.sipNumber
+//        val sipNumber = OmiClient.instance.currentCallerId
         channel.invokeMethod(onCallEstablished, mapOf(
-            "isIncoming" to true,
-            "callerNumber" to sipNumber,
+            "callerNumber" to "100",
             "isVideo" to false,
         ))
 
@@ -201,8 +200,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
     override fun incomingReceived(callerId: Int, phoneNumber: String?) {
         channel.invokeMethod(
             incomingReceived, mapOf(
-                "callerId" to callerId,
+                "isVideo" to false,
                 "phoneNumber" to phoneNumber,
+                "isIncoming" to true,
             )
         )
         Log.d("omikit", "incomingReceived: ")

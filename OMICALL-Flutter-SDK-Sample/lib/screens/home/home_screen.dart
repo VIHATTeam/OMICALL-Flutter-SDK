@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:calling/components/call_status.dart';
 import 'package:calling/screens/video_call/video_call_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
@@ -37,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isVideoCall = false;
   GlobalKey<VideoCallState>? _videoKey;
   GlobalKey<DialScreenState>? _dialKey;
+  late StreamSubscription _subscription;
 
   @override
   void initState() {
@@ -44,8 +47,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (widget.needRequestNotification) {
       updateToken();
     }
-    OmicallClient().controller.eventTransferStream.listen((omiAction) {
+    _subscription = OmicallClient().controller.eventTransferStream.listen((omiAction) {
       if (omiAction.actionName == OmiEventList.incomingReceived) {
+        //having a incoming call
         final data = omiAction.data;
         final callerNumber = data["callerNumber"];
         final bool isIncoming = data["isIncoming"];
@@ -62,32 +66,15 @@ class _HomeScreenState extends State<HomeScreen> {
         }
         if (isIncoming && !isVideo) {
           pushToDialScreen(
-            callerNumber,
-            isInComing: true,
+            callerNumber ?? "",
+            status: CallStatus.ringing,
           );
         }
       }
       if (omiAction.actionName == OmiEventList.onCallEstablished) {
-        // final data = omiAction.data;
-        // final callerNumber = data["callerNumber"];
-        // final bool isIncoming = data["isIncoming"];
-        // final bool isVideo = data["isVideo"];
-        // if (isIncoming && isVideo) {
-        //   pushToVideoScreen(
-        //     callerNumber,
-        //     isInComing: true,
-        //   );
-        //   Future.delayed(const Duration(milliseconds: 300), () {
-        //     _videoKey?.currentState?.refreshRemoteCamera();
-        //   });
-        //   return;
-        // }
-        // if (isIncoming && !isVideo) {
-        //   pushToDialScreen(
-        //     callerNumber,
-        //     isInComing: true,
-        //   );
-        // }
+        if (_dialKey?.currentState != null) {
+          _dialKey?.currentState?.updateDialScreen(null, CallStatus.established);
+        }
       }
       if (omiAction.actionName == OmiEventList.onCallEnd) {
         if (_videoKey?.currentContext != null) {
@@ -105,6 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _subscription.cancel();
     _phoneNumberController.dispose();
     super.dispose();
   }
@@ -260,7 +248,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void pushToDialScreen(
     String phoneNumber, {
-    bool isInComing = true,
+    required CallStatus status,
   }) {
     if (_dialKey != null) {
       return;
@@ -270,7 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return DialScreen(
         key: _dialKey,
         phoneNumber: phoneNumber,
-        isInComing: false,
+        status: status,
       );
     })).then((value) {
       _dialKey = null;
@@ -287,7 +275,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       pushToDialScreen(
         phone,
-        isInComing: false,
+        status: CallStatus.ringing,
       );
     }
     OmicallClient().startCall(

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:calling/components/call_status.dart';
 import 'package:calling/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
@@ -13,18 +14,17 @@ class DialScreen extends StatefulWidget {
   const DialScreen({
     Key? key,
     this.phoneNumber,
-    this.isInComing = false,
+    required this.status,
   }) : super(key: key);
 
   final String? phoneNumber;
-  final bool? isInComing;
+  final CallStatus status;
 
   @override
   State<DialScreen> createState() => DialScreenState();
 }
 
 class DialScreenState extends State<DialScreen> {
-
   bool _isMuted = false;
   bool _isMic = false;
   String _callingStatus = '';
@@ -36,197 +36,212 @@ class DialScreenState extends State<DialScreen> {
 
   @override
   void initState() {
-    if (widget.isInComing == true) {
+    if (widget.status == CallStatus.established) {
       _startWatch();
     } else {
-      _callingStatus = 'Ringing';
+      _callingStatus = widget.status.value;
     }
     super.initState();
   }
 
-  void updateDialScreen(Map<String, dynamic> callInfo) {
-
+  void updateDialScreen(Map<String, dynamic>? callInfo, CallStatus? status) {
+    if (status == CallStatus.established) {
+      _startWatch();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: kBackgoundColor,
-      body: SafeArea(
-        child: Stack(
-          alignment: Alignment.bottomCenter,
-          children: [
-            const SizedBox.expand(),
-            Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                children: [
-                  Text(
-                    "#${widget.phoneNumber ?? ""}",
-                    style: Theme.of(context)
-                        .textTheme
-                        .headline4!
-                        .copyWith(color: Colors.white),
-                  ),
-                  Text(
-                    _callingStatus,
-                    style: const TextStyle(
-                      color: Colors.white60,
-                    ),
-                  ),
-                  const SizedBox(height: 16,),
-                  const DialUserPic(
-                    image: "assets/images/calling_face.png",
-                  ),
-                  const Spacer(),
-                  Wrap(
-                    alignment: WrapAlignment.spaceBetween,
-                    children: [
-                      DialButton(
-                        iconSrc: _isMic
-                            ? 'assets/icons/ic_microphone.svg'
-                            : 'assets/icons/ic_block_microphone.svg',
-                        text: "Microphone",
-                        press: () {
-                          toggleSpeaker(context);
-                        },
-                      ),
-                      DialButton(
-                        iconSrc: !_isMuted
-                            ? 'assets/icons/ic_audio.svg'
-                            : 'assets/icons/ic_no_audio.svg',
-                        text: "Audio",
-                        press: () {
-                          toggleMute(context);
-                        },
-                      ),
-                      DialButton(
-                        iconSrc: "assets/icons/Icon Video.svg",
-                        text: "Video",
-                        press: () {},
-                        color: Colors.grey,
-                      ),
-                      DialButton(
-                        iconSrc: "assets/icons/Icon Message.svg",
-                        text: "Message",
-                        press: () {
-                          setState(() {
-                            _isShowKeyboard = !_isShowKeyboard;
-                          });
-                        },
-                        color: Colors.white,
-                      ),
-                      DialButton(
-                        iconSrc: "assets/icons/Icon User.svg",
-                        text: "Add contact",
-                        press: () {},
-                        color: Colors.grey,
-                      ),
-                      DialButton(
-                        iconSrc: "assets/icons/Icon Voicemail.svg",
-                        text: "Voice mail",
-                        press: () {},
-                        color: Colors.grey,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16,),
-                  RoundedButton(
-                    iconSrc: "assets/icons/call_end.svg",
-                    press: () {
-                      endCall(context);
-                    },
-                    color: kRedColor,
-                    iconColor: Colors.white,
-                  )
-                ],
-              ),
-            ),
-            if (_isShowKeyboard)
-              Container(
-                width: double.infinity,
-                height: 350,
-                color: Colors.white,
+    return WillPopScope(
+      child: Scaffold(
+        backgroundColor: kBackgoundColor,
+        body: SafeArea(
+          child: Stack(
+            alignment: Alignment.bottomCenter,
+            children: [
+              const SizedBox.expand(),
+              Padding(
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   children: [
-                    const SizedBox(
-                      height: 10,
+                    Text(
+                      "#${widget.phoneNumber ?? ""}",
+                      style: Theme.of(context)
+                          .textTheme
+                          .headline4!
+                          .copyWith(color: Colors.white),
                     ),
+                    Text(
+                      _callingStatus,
+                      style: const TextStyle(
+                        color: Colors.white60,
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    const DialUserPic(
+                      image: "assets/images/calling_face.png",
+                    ),
+                    const Spacer(),
                     Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const SizedBox(
-                          width: 54,
-                        ),
-                        Expanded(
-                          child: Text(
-                            message,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              color: Colors.red,
-                              fontWeight: FontWeight.w700,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        const SizedBox(
-                          width: 12,
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _isShowKeyboard = !_isShowKeyboard;
-                              message = "";
-                            });
+                        DialButton(
+                          iconSrc: _isMic
+                              ? 'assets/icons/ic_microphone.svg'
+                              : 'assets/icons/ic_block_microphone.svg',
+                          text: "Microphone",
+                          press: () {
+                            toggleSpeaker(context);
                           },
-                          child: const Icon(
-                            Icons.cancel,
-                            color: Colors.grey,
-                            size: 30,
-                          ),
                         ),
-                        const SizedBox(
-                          width: 24,
+                        DialButton(
+                          iconSrc: !_isMuted
+                              ? 'assets/icons/ic_audio.svg'
+                              : 'assets/icons/ic_no_audio.svg',
+                          text: "Audio",
+                          press: () {
+                            toggleMute(context);
+                          },
+                        ),
+                        DialButton(
+                          iconSrc: "assets/icons/Icon Video.svg",
+                          text: "Video",
+                          press: () {},
+                          color: Colors.grey,
                         ),
                       ],
                     ),
                     const SizedBox(
-                      height: 10,
+                      height: 16,
                     ),
-                    Expanded(
-                      child: NumericKeyboard(
-                        onKeyboardTap: _onKeyboardTap,
-                        textColor: Colors.red,
-                        rightButtonFn: () {
-                          setState(() {
-                            _isShowKeyboard = !_isShowKeyboard;
-                          });
-                        },
-                        rightIcon: const Text(
-                          "*",
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontSize: 24,
-                          ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        DialButton(
+                          iconSrc: "assets/icons/Icon Message.svg",
+                          text: "Message",
+                          press: () {
+                            setState(() {
+                              _isShowKeyboard = !_isShowKeyboard;
+                            });
+                          },
+                          color: Colors.white,
                         ),
-                        leftButtonFn: () {
-                          _onKeyboardTap("*");
-                        },
-                        leftIcon: const Text(
-                          "#",
-                          style: TextStyle(
-                            color: Colors.red,
-                            fontSize: 24,
-                          ),
+                        DialButton(
+                          iconSrc: "assets/icons/Icon User.svg",
+                          text: "Add contact",
+                          press: () {},
+                          color: Colors.grey,
                         ),
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      ),
+                        DialButton(
+                          iconSrc: "assets/icons/Icon Voicemail.svg",
+                          text: "Voice mail",
+                          press: () {},
+                          color: Colors.grey,
+                        ),
+                      ],
                     ),
+                    const Spacer(),
+                    RoundedButton(
+                      iconSrc: "assets/icons/call_end.svg",
+                      press: () {
+                        endCall(context);
+                      },
+                      color: kRedColor,
+                      iconColor: Colors.white,
+                    )
                   ],
                 ),
-              )
-          ],
+              ),
+              if (_isShowKeyboard)
+                Container(
+                  width: double.infinity,
+                  height: 350,
+                  color: Colors.white,
+                  child: Column(
+                    children: [
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        children: [
+                          const SizedBox(
+                            width: 54,
+                          ),
+                          Expanded(
+                            child: Text(
+                              message,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                color: Colors.red,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 12,
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _isShowKeyboard = !_isShowKeyboard;
+                                message = "";
+                              });
+                            },
+                            child: const Icon(
+                              Icons.cancel,
+                              color: Colors.grey,
+                              size: 30,
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 24,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Expanded(
+                        child: NumericKeyboard(
+                          onKeyboardTap: _onKeyboardTap,
+                          textColor: Colors.red,
+                          rightButtonFn: () {
+                            setState(() {
+                              _isShowKeyboard = !_isShowKeyboard;
+                            });
+                          },
+                          rightIcon: const Text(
+                            "*",
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 24,
+                            ),
+                          ),
+                          leftButtonFn: () {
+                            _onKeyboardTap("*");
+                          },
+                          leftIcon: const Text(
+                            "#",
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 24,
+                            ),
+                          ),
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+            ],
+          ),
         ),
       ),
+      onWillPop: () async => false,
     );
   }
 
@@ -243,6 +258,7 @@ class DialScreenState extends State<DialScreen> {
 
   Future<void> endCall(BuildContext context) async {
     OmicallClient().endCall();
+    Navigator.pop(context, true);
   }
 
   transformMilliSeconds(int milliseconds) {

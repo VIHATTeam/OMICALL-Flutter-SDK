@@ -17,7 +17,7 @@ class DialButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 120,
+      width: 80,
       child: TextButton(
         style: TextButton.styleFrom(
           padding: const EdgeInsets.symmetric(

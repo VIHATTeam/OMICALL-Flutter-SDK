@@ -104,7 +104,7 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           break
       case TOGGLE_MUTE:
           CallManager.shareInstance().toggleMute {[weak self] in
-//              guard let self = self else { return }
+              guard let self = self else { return }
               NSLog("done toggle mute")
           }
           sendMicStatus()
