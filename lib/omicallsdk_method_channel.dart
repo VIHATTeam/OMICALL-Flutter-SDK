@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:omicall_flutter_plugin/constant/enums.dart';
 
@@ -13,8 +14,7 @@ class OmicallSDKController {
   final _cameraChannel = const EventChannel('event/camera');
   final _micChannel = const EventChannel('event/mic');
   final StreamController<OmiAction> _eventTransfer =
-      StreamController.broadcast();
-  late final _eventSink = _eventTransfer.sink;
+      StreamController<OmiAction>.broadcast();
 
   OmicallSDKController() {
     _methodChannel.setMethodCallHandler(_omicallSDKMethodCall);
@@ -46,37 +46,40 @@ class OmicallSDKController {
     final args = call.arguments;
     switch (call.method) {
       case "CALL_END":
-        _eventSink.add(
+        _eventTransfer.sink.add(
           OmiAction(
             actionName: OmiEventList.onCallEnd,
             data: {},
           ),
         );
+        debugPrint("SEND CALLEND Success");
         break;
       case "INCOMING_RECEIVED":
-        _eventSink.add(
+        final Map<String, dynamic> data = {
+          "isVideo": args["isVideo"],
+          "callerNumber": args["callerNumber"] as String?,
+          "isIncoming": args["isIncoming"] as bool
+        };
+        _eventTransfer.sink.add(
           OmiAction(
             actionName: OmiEventList.incomingReceived,
-            data: {
-              "isVideo": args["isVideo"] == 0 ? false : true,
-              "callerNumber": args["callerNumber"] as String,
-              "isIncoming": args["isIncoming"] as bool
-            },
+            data: data,
           ),
         );
+        debugPrint("SEND INCOMING_RECEIVED Success");
         break;
       case "CALL_ESTABLISHED":
-        _eventSink.add(
+        final Map<String, dynamic> data = {
+          "isVideo": args["isVideo"],
+          "callerNumber": args["callerNumber"] as String?,
+        };
+        _eventTransfer.sink.add(
           OmiAction(
             actionName: OmiEventList.onCallEstablished,
-            data: {
-              "isVideo": args["isVideo"] == 0 ? false : true,
-              "callerNumber": args["callerNumber"] as String,
-              "isIncoming": args["isIncoming"] as bool
-            },
+            data: data,
           ),
         );
-
+        debugPrint("SEND CALL_ESTABLISHED Success");
         break;
       case "CONNECTION_TIMEOUT":
         // callback.call(
@@ -89,7 +92,7 @@ class OmicallSDKController {
         break;
       case "HOLD":
         final data = call.arguments;
-        _eventSink.add(
+        _eventTransfer.sink.add(
           OmiAction(
             actionName: OmiEventList.onHold,
             data: {
@@ -101,7 +104,7 @@ class OmicallSDKController {
         break;
       case "MUTED":
         final data = call.arguments;
-        _eventSink.add(
+        _eventTransfer.sink.add(
           OmiAction(
             actionName: OmiEventList.onMuted,
             data: {
@@ -111,7 +114,7 @@ class OmicallSDKController {
         );
         break;
       case "RINGING":
-        _eventSink.add(
+        _eventTransfer.sink.add(
           OmiAction(
             actionName: OmiEventList.onRinging,
             data: {},
