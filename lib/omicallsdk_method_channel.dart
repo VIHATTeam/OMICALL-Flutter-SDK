@@ -10,7 +10,8 @@ class OmicallSDKController {
 
   final _methodChannel = const MethodChannel('omicallsdk');
   final _cameraChannel = const EventChannel('event/camera');
-  final _micChannel = const EventChannel('event/mic');
+  final _onMuteChannel = const EventChannel('event/on_mute');
+  final _onMicChannel = const EventChannel('event/on_mic');
   final StreamController<OmiAction> _eventTransfer =
       StreamController<OmiAction>.broadcast();
 
@@ -28,8 +29,12 @@ class OmicallSDKController {
     return _cameraChannel.receiveBroadcastStream({"name": "camera"});
   }
 
-  Stream micEvent() {
-    return _micChannel.receiveBroadcastStream({"name": "mic"});
+  Stream<dynamic> onMuteEvent() {
+    return _onMuteChannel.receiveBroadcastStream({"name": "on_mute"});
+  }
+
+  Stream<dynamic> onMicEvent() {
+    return _onMicChannel.receiveBroadcastStream({"name": "on_mic"});
   }
 
   Future<dynamic> action(OmiAction action) async {

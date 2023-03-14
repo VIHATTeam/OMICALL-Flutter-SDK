@@ -19,7 +19,7 @@ class CallManager {
     private var numberRetry: Int = 0
     var isCallError: Bool = false  // check when call error
     private let omiLib = OMISIPLib.sharedInstance()
-    private var isSpeaker = false
+    var isSpeaker = false
     var currentConfirmedCall : OMICall?
     var videoManager: OMIVideoViewManager?
     
@@ -112,7 +112,7 @@ class CallManager {
         case .confirmed:
             NSLog("Outgoing call, in CONFIRMED state, with UUID: \(call)")
             SwiftOmikitPlugin.instance?.sendEvent(onCallEstablished, ["isVideo": false, "callerNumber": call.callerNumber])
-            SwiftOmikitPlugin.instance.sendMicStatus()
+            SwiftOmikitPlugin.instance.sendOnMuteStatus()
             self.currentConfirmedCall = call
             break
         case .disconnected:
@@ -136,9 +136,6 @@ class CallManager {
             break
         case .incoming:
             SwiftOmikitPlugin.instance?.sendEvent(incomingReceived, ["isVideo": false, "callerNumber": call.callerNumber ?? ""])
-            break
-        case .muted:
-            SwiftOmikitPlugin.instance.sendMicStatus()
             break
         case .hold:
             SwiftOmikitPlugin.instance?.sendEvent(onHold, ["isHold": call.onHold])
