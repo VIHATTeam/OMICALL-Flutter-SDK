@@ -6,7 +6,6 @@ import android.util.Log
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import io.flutter.embedding.android.FlutterActivity
-
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -18,7 +17,7 @@ import vn.vihat.omicall.omicallsdk.constants.*
 import vn.vihat.omicall.omicallsdk.video_call.FLLocalCameraFactory
 import vn.vihat.omicall.omisdk.OmiClient
 import vn.vihat.omicall.omisdk.OmiListener
-import vn.vihat.omicall.omisdk.OmiSDKUtils
+import vn.vihat.omicall.omisdk.utils.OmiSDKUtils
 import java.util.*
 
 /** OmicallsdkPlugin */
@@ -35,12 +34,13 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
         flutterPluginBinding
             .platformViewRegistry
             .registerViewFactory("local_camera_view", FLLocalCameraFactory())
+        OmiClient(applicationContext!!)
     }
 
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         if (call.method == "action") {
-            handleAction(call, result);
+            handleAction(call, result)
         } else {
             result.notImplemented()
         }
@@ -60,8 +60,10 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
                     applicationContext!!,
                     userName,
                     password,
+                    false,
                     realm,
                     customUI = true,
+                    isTcp = true
                 )
                 OmiClient.instance.setListener(this)
                 ActivityCompat.requestPermissions(
@@ -79,21 +81,15 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
             }
             UPDATE_TOKEN -> {
                 val deviceTokenAndroid = dataOmi["fcmToken"] as String
-                val appId = dataOmi["appId"] as String
                 val deviceId = dataOmi["deviceId"] as String
+                val appId = dataOmi["appId"] as String
                 OmiClient.instance.updatePushToken(
                     "",
                     deviceTokenAndroid,
                     deviceId,
-                    appId
+                    appId,
                 )
                 result.success(true)
-            }
-            START_OMI_SERVICE -> {
-                activity?.let {
-                    OmiSDKUtils.startOmiService(it)
-                    result.success(true)
-                }
             }
             START_CALL -> {
                 val phoneNumber = dataOmi["phoneNumber"] as String
@@ -116,34 +112,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
                 OmiClient.instance.toggleSpeaker(useSpeaker)
                 result.success(true)
             }
-            CHECK_ON_GOING_CALL -> {}
-            DECLINE -> {
-                OmiClient.instance.decline()
-                result.success(true)
-            }
-            FORWARD_CALL_TO -> {}
-            HANGUP -> {
-                val callId = dataOmi["callId"] as Int
-                OmiClient.instance.hangUp(callId)
-                result.success(true)
-            }
-            ON_CALL_STARTED -> {
-                val callId = dataOmi["callId"] as Int
-                OmiClient.instance.onCallStarted(callId)
-                result.success(true)
-            }
-            ON_HOLD -> {
-                val isHold = dataOmi["isHold"] as Boolean
-                OmiClient.instance.onHold(isHold)
-                result.success(true)
-            }
-            ON_IN_COMING_RECEIVE -> {}
-            ON_MUTE -> {
-                val isMute = dataOmi["isMute"] as Boolean
-                OmiClient.instance.onMuted(isMute)
-                result.success(true)
-            }
-            ON_OUT_GOING -> {}
             REGISTER -> {}
             SEND_DTMF -> {
                 val character = dataOmi["character"] as String
@@ -183,9 +151,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
     }
 
     override fun onCallEstablished() {
-//        val sipNumber = OmiClient.instance.currentCallerId
+        val sipNumber = OmiClient.instance.callUUID
         channel.invokeMethod(onCallEstablished, mapOf(
-            "callerNumber" to "100",
+            "callerNumber" to sipNumber,
             "isVideo" to false,
         ))
 
@@ -201,16 +169,16 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
         channel.invokeMethod(
             incomingReceived, mapOf(
                 "isVideo" to false,
-                "phoneNumber" to phoneNumber,
-                "isIncoming" to true,
+                "callerNumber" to phoneNumber,
             )
         )
         Log.d("omikit", "incomingReceived: ")
     }
 
     override fun onRinging() {
-        channel.invokeMethod(onRinging, null)
-        Log.d("omikit", "onRinging: ")
+    }
+
+    override fun onVideoSize(width: Int, height: Int) {
 
     }
 
@@ -237,6 +205,10 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
             )
         )
         Log.d("omikit", "onMuted: $isMuted")
+    }
+
+    override fun onOutgoingStarted(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
+
     }
 
     companion object {

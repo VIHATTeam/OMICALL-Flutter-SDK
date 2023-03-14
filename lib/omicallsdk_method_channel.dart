@@ -1,8 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:omicall_flutter_plugin/constant/enums.dart';
 
 import 'action/action_model.dart';
 
@@ -43,86 +41,11 @@ class OmicallSDKController {
   }
 
   Future<dynamic> _omicallSDKMethodCall(MethodCall call) async {
-    final args = call.arguments;
-    switch (call.method) {
-      case "CALL_END":
-        _eventTransfer.sink.add(
-          OmiAction(
-            actionName: OmiEventList.onCallEnd,
-            data: {},
-          ),
-        );
-        debugPrint("SEND CALLEND Success");
-        break;
-      case "INCOMING_RECEIVED":
-        final Map<String, dynamic> data = {
-          "isVideo": args["isVideo"],
-          "callerNumber": args["callerNumber"] as String?,
-          "isIncoming": args["isIncoming"] as bool
-        };
-        _eventTransfer.sink.add(
-          OmiAction(
-            actionName: OmiEventList.incomingReceived,
-            data: data,
-          ),
-        );
-        debugPrint("SEND INCOMING_RECEIVED Success");
-        break;
-      case "CALL_ESTABLISHED":
-        final Map<String, dynamic> data = {
-          "isVideo": args["isVideo"],
-          "callerNumber": args["callerNumber"] as String?,
-        };
-        _eventTransfer.sink.add(
-          OmiAction(
-            actionName: OmiEventList.onCallEstablished,
-            data: data,
-          ),
-        );
-        debugPrint("SEND CALL_ESTABLISHED Success");
-        break;
-      case "CONNECTION_TIMEOUT":
-        // callback.call(
-        //   ActionModel(
-        //     actionName: OmiEventList.onConnectionTimeout,
-        //     data: {},
-        //   ),
-        // );
-
-        break;
-      case "HOLD":
-        final data = call.arguments;
-        _eventTransfer.sink.add(
-          OmiAction(
-            actionName: OmiEventList.onHold,
-            data: {
-              "isHold": data["isHold"] as bool,
-            },
-          ),
-        );
-
-        break;
-      case "MUTED":
-        final data = call.arguments;
-        _eventTransfer.sink.add(
-          OmiAction(
-            actionName: OmiEventList.onMuted,
-            data: {
-              "isMuted": data["isMuted"] as bool,
-            },
-          ),
-        );
-        break;
-      case "RINGING":
-        _eventTransfer.sink.add(
-          OmiAction(
-            actionName: OmiEventList.onRinging,
-            data: {},
-          ),
-        );
-        break;
-      default:
-        break;
-    }
+    _eventTransfer.sink.add(
+      OmiAction(
+        actionName: call.method,
+        data: call.arguments,
+      ),
+    );
   }
 }

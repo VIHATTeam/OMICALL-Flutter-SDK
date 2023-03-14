@@ -1,14 +1,13 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+
 import 'package:omicall_flutter_plugin/omicallsdk_method_channel.dart';
+
 import 'action/action_model.dart';
-import 'omicall.dart';
+import 'constant/names.dart';
 
 class OmicallClient {
 
-  OmicallClient._() {
-    debugPrint("initttttt");
-  }
+  OmicallClient._();
   
   static final _instance = OmicallClient._();
 
@@ -87,14 +86,6 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
-  Future<void> startOmiService() async {
-    final action = OmiAction(
-      actionName: OmiActionName.START_OMI_SERVICE,
-      data: {},
-    );
-    return await _controller.action(action);
-  }
-
   Future<void> toggleMicrophone() async {
     final action = OmiAction(
       actionName: OmiActionName.TOGGLE_MUTE,
@@ -153,7 +144,7 @@ class OmicallClient {
 
   Future<dynamic> getOutputAudios() async {
     final action = OmiAction(
-      actionName: OmiActionName.OUTOUTS,
+      actionName: OmiActionName.OUTPUTS,
       data: {
       },
     );
