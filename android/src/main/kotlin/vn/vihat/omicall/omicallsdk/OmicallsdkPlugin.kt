@@ -21,11 +21,74 @@ import vn.vihat.omicall.omisdk.utils.OmiSDKUtils
 import java.util.*
 
 /** OmicallsdkPlugin */
-class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiListener {
+class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private lateinit var channel: MethodChannel
     private var activity: FlutterActivity? = null
     private var applicationContext: Context? = null
+
+    private val callListener = object : OmiListener {
+        override fun onCallEstablished() {
+            val sipNumber = OmiClient.instance.callUUID
+            channel.invokeMethod(onCallEstablished, mapOf(
+                "callerNumber" to sipNumber,
+                "isVideo" to false,
+            ))
+
+            Log.d("omikit", "onCallEstablished: ")
+
+        }
+
+        override fun onCallEnd() {
+            channel.invokeMethod(onCallEnd, null)
+        }
+
+        override fun incomingReceived(callerId: Int, phoneNumber: String?) {
+            channel.invokeMethod(
+                incomingReceived, mapOf(
+                    "isVideo" to false,
+                    "callerNumber" to phoneNumber,
+                )
+            )
+            Log.d("omikit", "incomingReceived: ")
+        }
+
+        override fun onRinging() {
+        }
+
+        override fun onVideoSize(width: Int, height: Int) {
+
+        }
+
+        override fun onConnectionTimeout() {
+            channel.invokeMethod(onConnectionTimeout, null)
+            Log.d("omikit", "onConnectionTimeout: ")
+
+        }
+
+        override fun onHold(isHold: Boolean) {
+            channel.invokeMethod(
+                onHold, mapOf(
+                    "isHold" to isHold,
+                )
+            )
+            Log.d("omikit", "onHold: $isHold")
+
+        }
+
+        override fun onMuted(isMuted: Boolean) {
+            channel.invokeMethod(
+                onMuted, mapOf(
+                    "isMuted" to isMuted,
+                )
+            )
+            Log.d("omikit", "onMuted: $isMuted")
+        }
+
+        override fun onOutgoingStarted(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
+            Log.d("aa", "aa")
+        }
+    }
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         applicationContext = flutterPluginBinding.applicationContext
@@ -35,6 +98,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
             .platformViewRegistry
             .registerViewFactory("local_camera_view", FLLocalCameraFactory())
         OmiClient(applicationContext!!)
+        OmiClient.instance.setListener(callListener)
     }
 
 
@@ -65,7 +129,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
                     customUI = true,
                     isTcp = true
                 )
-                OmiClient.instance.setListener(this)
                 ActivityCompat.requestPermissions(
                     activity!!,
                     arrayOf(
@@ -148,67 +211,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
 
     override fun onDetachedFromActivity() {
 
-    }
-
-    override fun onCallEstablished() {
-        val sipNumber = OmiClient.instance.callUUID
-        channel.invokeMethod(onCallEstablished, mapOf(
-            "callerNumber" to sipNumber,
-            "isVideo" to false,
-        ))
-
-        Log.d("omikit", "onCallEstablished: ")
-
-    }
-
-    override fun onCallEnd() {
-        channel.invokeMethod(onCallEnd, null)
-    }
-
-    override fun incomingReceived(callerId: Int, phoneNumber: String?) {
-        channel.invokeMethod(
-            incomingReceived, mapOf(
-                "isVideo" to false,
-                "callerNumber" to phoneNumber,
-            )
-        )
-        Log.d("omikit", "incomingReceived: ")
-    }
-
-    override fun onRinging() {
-    }
-
-    override fun onVideoSize(width: Int, height: Int) {
-
-    }
-
-    override fun onConnectionTimeout() {
-        channel.invokeMethod(onConnectionTimeout, null)
-        Log.d("omikit", "onConnectionTimeout: ")
-
-    }
-
-    override fun onHold(isHold: Boolean) {
-        channel.invokeMethod(
-            onHold, mapOf(
-                "isHold" to isHold,
-            )
-        )
-        Log.d("omikit", "onHold: $isHold")
-
-    }
-
-    override fun onMuted(isMuted: Boolean) {
-        channel.invokeMethod(
-            onMuted, mapOf(
-                "isMuted" to isMuted,
-            )
-        )
-        Log.d("omikit", "onMuted: $isMuted")
-    }
-
-    override fun onOutgoingStarted(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
-        Log.d("aa", "aa")
     }
 
     companion object {
