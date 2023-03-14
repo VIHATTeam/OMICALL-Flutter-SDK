@@ -13,9 +13,11 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
     private var callManager: CallManager? = nil
     private var sharedProvider: CXProvider? = nil
     private var data: Data?
+    private var onSpeakerStatus = false
     private var isFromPushKit: Bool = false
     private var cameraEvent: FlutterEventSink?
-    private var micEvent: FlutterEventSink?
+    private var onMuteEvent: FlutterEventSink?
+    private var onMicEvent: FlutterEventSink?
 
 
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -26,8 +28,10 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       registrar.addMethodCallDelegate(instance, channel: instance!.channel)
       let cameraEventChannel = FlutterEventChannel(name: "event/camera", binaryMessenger: registrar.messenger())
       cameraEventChannel.setStreamHandler(instance)
-      let micEventChannel = FlutterEventChannel(name: "event/mic", binaryMessenger: registrar.messenger())
-      micEventChannel.setStreamHandler(instance)
+      let onMuteEventChannel = FlutterEventChannel(name: "event/on_mute", binaryMessenger: registrar.messenger())
+      onMuteEventChannel.setStreamHandler(instance)
+      let onMicEventChannel = FlutterEventChannel(name: "event/on_mic", binaryMessenger: registrar.messenger())
+      onMicEventChannel.setStreamHandler(instance)
       let localFactory = FLLocalCameraFactory(messenger: registrar.messenger())
       registrar.register(localFactory, withId: "local_camera_view")
       let remoteFactory = FLRemoteCameraFactory(messenger: registrar.messenger())
@@ -49,11 +53,18 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       }
   }
     
-  func sendMicStatus() {
-      if let micEvent = micEvent {
-          let micStatus = OmiClient.getFirstActiveCall()?.muted ?? true
-          micEvent(micStatus)
+  func sendOnMuteStatus() {
+      if let onMuteEvent = onMuteEvent {
+          let isMuted = OmiClient.getFirstActiveCall()?.muted ?? false
+          print("mute status \(isMuted)")
+          onMuteEvent(isMuted)
       }
+  }
+    
+  func sendOnSpeakerStatus() {
+      if let onMicEvent = onMicEvent {
+        onMicEvent(CallManager.shareInstance().isSpeaker)
+     }
   }
 
 
@@ -90,8 +101,7 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
               isVideo = isVideoCall
           }
           CallManager.shareInstance().startCall(phoneNumber, isVideo: isVideo)
-          sendMicStatus()
-          sendCameraEvent()
+          sendOnMuteStatus()
           result(true)
           break
       case END_CALL:
@@ -103,12 +113,13 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
               guard let self = self else { return }
               NSLog("done toggle mute")
           }
-          sendMicStatus()
+          sendOnMuteStatus()
           result(true)
           break
       case TOGGLE_SPEAK:
           CallManager.shareInstance().toogleSpeaker()
           result(true)
+          sendOnSpeakerStatus()
           break
       case SEND_DTMF:
           CallManager.shareInstance().sendDTMF(character: dataOmi["character"] as! String)
@@ -130,7 +141,6 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       case INPUTS:
           let inputs = CallManager.shareInstance().inputs()
           result(inputs)
-          result(true)
           break
       case OUTPUTS:
           let outputs = CallManager.shareInstance().outputs()
@@ -159,16 +169,20 @@ extension SwiftOmikitPlugin : FlutterStreamHandler {
             if (name == "camera") {
                 cameraEvent = events
             }
-            if (name == "mic") {
-                micEvent = events
+            if (name == "on_mute") {
+                onMuteEvent = events
+            }
+            if (name == "on_mic") {
+                onMicEvent = events
             }
         }
         return nil
     }
     
     public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-        self.cameraEvent = nil
-        self.micEvent = nil
+//        self.cameraEvent = nil
+//        self.onMuteEvent = nil
+//        self.onMicEvent = nil
         return nil
     }
 }

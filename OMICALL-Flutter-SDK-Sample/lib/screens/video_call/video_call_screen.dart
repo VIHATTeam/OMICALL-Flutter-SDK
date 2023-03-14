@@ -205,14 +205,14 @@ class VideoCallState extends State<VideoCallScreen> {
                   ),
                   StreamBuilder(
                     initialData: true,
-                    stream: OmicallClient().micEvent(),
+                    stream: OmicallClient().onMicEvent(),
                     builder: (context, snapshot) {
                       final micStatus = snapshot.data as bool;
                       return OptionItem(
                         icon: "mic",
                         showDefaultIcon: micStatus,
                         callback: () {
-                          OmicallClient().toggleMicrophone();
+                          OmicallClient().toggleAudio();
                         },
                       );
                     },

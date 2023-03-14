@@ -25,8 +25,6 @@ class DialScreen extends StatefulWidget {
 }
 
 class DialScreenState extends State<DialScreen> {
-  bool _isMuted = false;
-  bool _isMic = false;
   String _callingStatus = '';
   bool _isShowKeyboard = false;
   String _keyboardMessage = "";
@@ -102,22 +100,36 @@ class DialScreenState extends State<DialScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        DialButton(
-                          iconSrc: _isMic
-                              ? 'assets/icons/ic_microphone.svg'
-                              : 'assets/icons/ic_block_microphone.svg',
-                          text: "Microphone",
-                          press: () {
-                            toggleSpeaker(context);
+                        StreamBuilder(
+                          initialData: false,
+                          stream: OmicallClient().onMuteEvent(),
+                          builder: (context, snapshot) {
+                            final isMute = snapshot.data as bool;
+                            return DialButton(
+                              iconSrc: !isMute
+                                  ? 'assets/icons/ic_microphone.svg'
+                                  : 'assets/icons/ic_block_microphone.svg',
+                              text: "Microphone",
+                              press: () {
+                                toggleMute(context);
+                              },
+                            );
                           },
                         ),
-                        DialButton(
-                          iconSrc: !_isMuted
-                              ? 'assets/icons/ic_audio.svg'
-                              : 'assets/icons/ic_no_audio.svg',
-                          text: "Audio",
-                          press: () {
-                            toggleMute(context);
+                        StreamBuilder(
+                          initialData: false,
+                          stream: OmicallClient().onMicEvent(),
+                          builder: (context, snapshot) {
+                            final isSpeaker = snapshot.data as bool;
+                            return DialButton(
+                              iconSrc: !isSpeaker
+                                  ? 'assets/icons/ic_no_audio.svg'
+                                  : 'assets/icons/ic_audio.svg',
+                              text: "Audio",
+                              press: () {
+                                toggleSpeaker(context);
+                              },
+                            );
                           },
                         ),
                         DialButton(
@@ -264,14 +276,11 @@ class DialScreenState extends State<DialScreen> {
   }
 
   Future<void> toggleMute(BuildContext context) async {
-    OmicallClient().toggleMicrophone();
+    OmicallClient().toggleAudio();
   }
 
   Future<void> toggleSpeaker(BuildContext context) async {
-    setState(() {
-      _isMic = !_isMic;
-    });
-    OmicallClient().toggleSpeaker(_isMic);
+    OmicallClient().toggleSpeaker();
   }
 
   Future<void> endCall(
@@ -311,7 +320,7 @@ class DialScreenState extends State<DialScreen> {
   _startWatch() {
     watch.start();
     timer = Timer.periodic(
-      const Duration(milliseconds: 100),
+      const Duration(seconds: 1),
       _updateTime,
     );
   }

@@ -24,8 +24,13 @@ class OmicallClient {
   }
 
   ///streaming mic event
-  Stream<dynamic> micEvent() {
-    return _controller.micEvent();
+  Stream<dynamic> onMicEvent() {
+    return _controller.onMicEvent();
+  }
+
+  ///streaming mic event
+  Stream<dynamic> onMuteEvent() {
+    return _controller.onMuteEvent();
   }
 
   ///destroy event
@@ -86,7 +91,7 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
-  Future<void> toggleMicrophone() async {
+  Future<void> toggleAudio() async {
     final action = OmiAction(
       actionName: OmiActionName.TOGGLE_MUTE,
       data: {},
@@ -94,12 +99,10 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
-  Future<void> toggleSpeaker(bool useSpeaker) async {
+  Future<void> toggleSpeaker() async {
     final action = OmiAction(
       actionName: OmiActionName.TOGGLE_SPEAK,
-      data: {
-        'useSpeaker': useSpeaker,
-      },
+      data: {},
     );
     return await _controller.action(action);
   }
