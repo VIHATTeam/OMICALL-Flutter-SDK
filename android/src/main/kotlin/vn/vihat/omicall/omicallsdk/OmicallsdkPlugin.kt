@@ -114,7 +114,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
         onMuteEventChannel.setStreamHandler(this)
         flutterPluginBinding
             .platformViewRegistry
-            .registerViewFactory("local_camera_view", FLLocalCameraFactory())
+            .registerViewFactory("local_camera_view", FLLocalCameraFactory(flutterPluginBinding.binaryMessenger))
         OmiClient(applicationContext!!)
         OmiClient.instance.setListener(callListener)
     }
@@ -172,9 +172,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
             START_CALL -> {
                 val phoneNumber = dataOmi["phoneNumber"] as String
                 val isVideo = dataOmi["isVideo"] as Boolean
-                if (!isVideo) {
-                    OmiClient.instance.startCall(phoneNumber)
-                }
+                OmiClient.instance.startCall(phoneNumber, isVideo)
                 result.success(true)
             }
             END_CALL -> {

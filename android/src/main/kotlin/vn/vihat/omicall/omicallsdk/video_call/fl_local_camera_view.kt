@@ -1,18 +1,19 @@
 package vn.vihat.omicall.omicallsdk.video_call
 
-import android.app.ActionBar.LayoutParams
 import android.content.Context
-import android.graphics.Color
+import android.view.Surface
+import android.view.TextureView
 import android.view.View
-import android.widget.LinearLayout
-import android.widget.TextView
-import androidx.core.view.marginLeft
-
+import io.flutter.plugin.common.BinaryMessenger
+import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.platform.PlatformView
+import vn.vihat.omicall.omisdk.OmiClient
+import io.flutter.plugin.common.MethodChannel
 
-internal class FLLocalCameraView(context: Context, id: Int, creationParams: Map<String?, Any?>?) :
-    PlatformView {
-    private val view: View
+internal class FLLocalCameraView(context: Context, id: Int, creationParams: Map<String?, Any?>?,  messenger: BinaryMessenger) :
+    PlatformView, MethodChannel.MethodCallHandler {
+    private val view: TextureView
+    private var methodChannel : MethodChannel
 
     override fun getView(): View {
         return view
@@ -21,27 +22,17 @@ internal class FLLocalCameraView(context: Context, id: Int, creationParams: Map<
     override fun dispose() {}
 
     init {
-        view = LinearLayout(context)
-        view.orientation = LinearLayout.VERTICAL
-        val view1 = LinearLayout(context)
-        view1.orientation = LinearLayout.HORIZONTAL
-        val view1Param = LinearLayout.LayoutParams(
-            LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
-            1.0f,
-        )
-        view1.setBackgroundColor(Color.rgb(255, 0, 0))
-        val text1Param = LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,LayoutParams.WRAP_CONTENT);
-        text1Param.setMargins(10, 0,0,0)
-        val tex1 = TextView(context)
-        tex1.text = creationParams?.get("title") as? String
-        view1.addView(tex1, text1Param)
-        view.addView(view1, view1Param)
-        val view2 = View(context)
-        val view2Param = LinearLayout.LayoutParams(
-            LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT,
-            1.0f,
-        )
-        view2.setBackgroundColor(Color.rgb(255, 113, 0))
-        view.addView(view2, view2Param)
+        methodChannel = MethodChannel(messenger, "local_camera_controller/$id")
+        methodChannel.setMethodCallHandler(this)
+        view = TextureView(context)
+    }
+
+    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
+        if (call.method == "refresh") {
+            view.surfaceTexture?.let {
+                OmiClient.instance.setupLocalVideoFeed(Surface(it))
+                view.scaleX = 1.5F
+            }
+        }
     }
 }

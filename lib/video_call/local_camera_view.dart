@@ -72,4 +72,8 @@ class LocalCameraController {
       callback(method.method, method.arguments);
     });
   }
+
+  void refresh() {
+    _channel.invokeMethod("refresh");
+  }
 }
