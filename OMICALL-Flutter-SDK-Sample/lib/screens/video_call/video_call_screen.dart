@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
@@ -15,10 +17,23 @@ class VideoCallScreen extends StatefulWidget {
 
 class VideoCallState extends State<VideoCallScreen> {
   RemoteCameraController? _remoteController;
+  LocalCameraController? _localController;
+  late StreamSubscription _subscription;
 
   @override
   void initState() {
     super.initState();
+    _subscription =
+        OmicallClient().controller.eventTransferStream.listen((omiAction) {
+          if (omiAction.actionName == OmiEventList.onCallEstablished) {
+            refreshRemoteCamera();
+            localRemoteCamera();
+          }
+          if (omiAction.actionName == OmiEventList.onCallEnd) {
+            // endCall(context);
+            return;
+          }
+        });
   }
 
   Future<void> outputOptions(BuildContext context) async {
@@ -105,6 +120,15 @@ class VideoCallState extends State<VideoCallScreen> {
     _remoteController?.refresh();
   }
 
+  void localRemoteCamera() {
+    _localController?.refresh();
+  }
+
+  endCall(BuildContext context) {
+    OmicallClient().endCall();
+    Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -122,8 +146,7 @@ class VideoCallState extends State<VideoCallScreen> {
               color: Colors.white,
             ),
             onPressed: () {
-              OmicallClient().endCall();
-              Navigator.pop(context);
+              endCall(context);
             },
           ),
           actions: [
@@ -152,6 +175,7 @@ class VideoCallState extends State<VideoCallScreen> {
                   width: double.infinity,
                   height: double.infinity,
                   onCameraCreated: (controller) {
+                    _localController = controller;
                     controller.addListener(
                       (event, arguments) {
                         debugPrint("aaa");
@@ -161,19 +185,19 @@ class VideoCallState extends State<VideoCallScreen> {
                 ),
               ),
             ),
-            Positioned(
-              top: MediaQuery.of(context).padding.top + kToolbarHeight + 12,
-              right: 16,
-              width: width / 3,
-              height: (3 * width) / 5,
-              child: RemoteCameraView(
-                width: double.infinity,
-                height: double.infinity,
-                onCameraCreated: (controller) {
-                  _remoteController = controller;
-                },
-              ),
-            ),
+            // Positioned(
+            //   top: MediaQuery.of(context).padding.top + kToolbarHeight + 12,
+            //   right: 16,
+            //   width: width / 3,
+            //   height: (3 * width) / 5,
+            //   child: RemoteCameraView(
+            //     width: double.infinity,
+            //     height: double.infinity,
+            //     onCameraCreated: (controller) {
+            //       _remoteController = controller;
+            //     },
+            //   ),
+            // ),
             Positioned(
               left: 0,
               right: 0,
@@ -199,8 +223,7 @@ class VideoCallState extends State<VideoCallScreen> {
                     icon: "hangup",
                     showDefaultIcon: true,
                     callback: () {
-                      OmicallClient().endCall();
-                      Navigator.pop(context);
+                      endCall(context);
                     },
                   ),
                   StreamBuilder(
