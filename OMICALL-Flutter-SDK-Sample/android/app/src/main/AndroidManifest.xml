@@ -46,6 +46,14 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <service
+            android:name="vn.vihat.omicall.omisdk.service.OmiService"
+            android:enabled="true"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.omicall.app.OMI_SERVICE" />
+            </intent-filter>
+        </service>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

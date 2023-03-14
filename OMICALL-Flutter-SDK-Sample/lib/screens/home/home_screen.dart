@@ -51,9 +51,8 @@ class _HomeScreenState extends State<HomeScreen> {
         //having a incoming call
         final data = omiAction.data;
         final callerNumber = data["callerNumber"];
-        final bool isIncoming = data["isIncoming"];
         final bool isVideo = data["isVideo"];
-        if (isIncoming && isVideo) {
+        if (isVideo) {
           pushToVideoScreen(
             callerNumber,
             isInComing: true,
@@ -63,12 +62,10 @@ class _HomeScreenState extends State<HomeScreen> {
           // });
           return;
         }
-        if (isIncoming && !isVideo) {
-          pushToDialScreen(
-            callerNumber ?? "",
-            status: CallStatus.ringing,
-          );
-        }
+        pushToDialScreen(
+          callerNumber ?? "",
+          status: CallStatus.ringing,
+        );
       }
     });
   }

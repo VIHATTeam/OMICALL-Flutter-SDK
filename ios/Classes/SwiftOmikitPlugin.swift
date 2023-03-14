@@ -94,10 +94,6 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           sendCameraEvent()
           result(true)
           break
-      case HANGUP:
-          CallManager.shareInstance().endAllCalls()
-          result(true)
-          break
       case END_CALL:
           CallManager.shareInstance().endCurrentConfirmCall()
           result(true)
@@ -110,8 +106,6 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           sendMicStatus()
           result(true)
           break
-      case ON_HOLD:
-          result(FlutterMethodNotImplemented)
       case TOGGLE_SPEAK:
           CallManager.shareInstance().toogleSpeaker()
           result(true)

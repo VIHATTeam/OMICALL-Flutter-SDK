@@ -1,6 +1,5 @@
-library OmicallClient;
+library omicall_client;
 
 export 'omicallsdk.dart';
-export 'constant/enums.dart';
-export 'event/events.dart';
+export 'constant/events.dart';
 export 'video_call/video_call.dart';
