@@ -208,7 +208,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, OmiLis
     }
 
     override fun onOutgoingStarted(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
-
+        Log.d("aa", "aa")
     }
 
     companion object {

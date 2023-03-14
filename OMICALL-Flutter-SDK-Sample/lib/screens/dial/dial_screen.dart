@@ -29,7 +29,7 @@ class DialScreenState extends State<DialScreen> {
   bool _isMic = false;
   String _callingStatus = '';
   bool _isShowKeyboard = false;
-  String message = "";
+  String _keyboardMessage = "";
   late StreamSubscription _subscription;
 
   Stopwatch watch = Stopwatch();
@@ -43,12 +43,17 @@ class DialScreenState extends State<DialScreen> {
       _callingStatus = widget.status.value;
     }
     super.initState();
-    _subscription = OmicallClient().controller.eventTransferStream.listen((omiAction) {
+    _subscription =
+        OmicallClient().controller.eventTransferStream.listen((omiAction) {
       if (omiAction.actionName == OmiEventList.onCallEstablished) {
         updateDialScreen(null, CallStatus.established);
       }
       if (omiAction.actionName == OmiEventList.onCallEnd) {
-        Navigator.of(context).pop();
+        endCall(
+          context,
+          needShowStatus: true,
+          needRequest: false,
+        );
         return;
       }
     });
@@ -157,7 +162,10 @@ class DialScreenState extends State<DialScreen> {
                     RoundedButton(
                       iconSrc: "assets/icons/call_end.svg",
                       press: () {
-                        endCall(context);
+                        endCall(
+                          context,
+                          needShowStatus: false,
+                        );
                       },
                       color: kRedColor,
                       iconColor: Colors.white,
@@ -182,7 +190,7 @@ class DialScreenState extends State<DialScreen> {
                           ),
                           Expanded(
                             child: Text(
-                              message,
+                              _keyboardMessage,
                               style: const TextStyle(
                                 fontSize: 24,
                                 color: Colors.red,
@@ -198,7 +206,7 @@ class DialScreenState extends State<DialScreen> {
                             onTap: () {
                               setState(() {
                                 _isShowKeyboard = !_isShowKeyboard;
-                                message = "";
+                                _keyboardMessage = "";
                               });
                             },
                             child: const Icon(
@@ -266,9 +274,25 @@ class DialScreenState extends State<DialScreen> {
     OmicallClient().toggleSpeaker(_isMic);
   }
 
-  Future<void> endCall(BuildContext context) async {
-    OmicallClient().endCall();
-    // Navigator.pop(context, true);
+  Future<void> endCall(
+    BuildContext context, {
+    bool needRequest = true,
+    bool needShowStatus = true,
+  }) async {
+    if (needRequest) {
+      OmicallClient().endCall();
+    }
+    if (needShowStatus) {
+      _stopWatch();
+      setState(() {
+        _callingStatus = "Ended call";
+      });
+      await Future.delayed(const Duration(milliseconds: 400));
+    }
+    if (!mounted) {
+      return;
+    }
+    Navigator.pop(context);
   }
 
   transformMilliSeconds(int milliseconds) {
@@ -300,19 +324,23 @@ class DialScreenState extends State<DialScreen> {
     }
   }
 
+  _stopWatch() {
+    watch.stop();
+    timer?.cancel();
+    timer = null;
+  }
+
   _onKeyboardTap(String value) {
     setState(() {
-      message = "$message$value";
+      _keyboardMessage = "$_keyboardMessage$value";
     });
     OmicallClient().sendDTMF(value);
   }
 
   @override
   void dispose() {
-    super.dispose();
     _subscription.cancel();
-    watch.stop();
-    timer?.cancel();
-    timer = null;
+    _stopWatch();
+    super.dispose();
   }
 }

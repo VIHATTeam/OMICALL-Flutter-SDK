@@ -41,10 +41,11 @@ class OmicallSDKController {
   }
 
   Future<dynamic> _omicallSDKMethodCall(MethodCall call) async {
+    final Map? args = call.arguments;
     _eventTransfer.sink.add(
       OmiAction(
         actionName: call.method,
-        data: call.arguments,
+        data: args ?? <dynamic, dynamic>{},
       ),
     );
   }

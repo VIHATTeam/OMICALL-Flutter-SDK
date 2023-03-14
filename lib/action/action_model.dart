@@ -1,6 +1,6 @@
 class OmiAction {
   final String actionName;
-  final Map<String, dynamic> data;
+  final Map<dynamic, dynamic> data;
 
   OmiAction({
     required this.actionName,
