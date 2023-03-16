@@ -54,8 +54,7 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
   }
     
   func sendOnMuteStatus() {
-      if let onMuteEvent = onMuteEvent {
-          let isMuted = OmiClient.getFirstActiveCall()?.muted ?? false
+      if let onMuteEvent = onMuteEvent, let call = CallManager.shareInstance().currentConfirmedCall, let isMuted = call.muted as? Bool {
           print("mute status \(isMuted)")
           onMuteEvent(isMuted)
       }
