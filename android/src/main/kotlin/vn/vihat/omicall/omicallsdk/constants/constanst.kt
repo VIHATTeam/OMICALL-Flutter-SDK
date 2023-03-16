@@ -11,10 +11,10 @@ const val REGISTER = "REGISTER";
 const val SEND_DTMF = "SEND_DTMF";
 
 //LISTENER
-const val onCallEstablished = "CALL_ESTABLISHED"
-const val onCallEnd = "CALL_END"
-const val incomingReceived = "INCOMING_RECEIVED"
-const val onConnectionTimeout = "CONNECTION_TIMEOUT"
-const val onHold = "HOLD"
-const val onMuted = "MUTED"
+const val CALL_ESTABLISHED = "CALL_ESTABLISHED"
+const val CALL_END = "CALL_END"
+const val INCOMING_RECEIVED = "INCOMING_RECEIVED"
+//const val CONNECTION_TIMEOUT = "CONNECTION_TIMEOUT"
+const val HOLD = "HOLD"
+const val MUTED = "MUTED"
 

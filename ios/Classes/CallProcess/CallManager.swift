@@ -23,7 +23,6 @@ class CallManager {
     var currentConfirmedCall : OMICall?
     var videoManager: OMIVideoViewManager?
     
-    
     /// Get instance
     static func shareInstance() -> CallManager {
         if (instance == nil) {
@@ -45,7 +44,6 @@ class CallManager {
             if let isVideoCall = params["isVideo"] as? Bool {
                 isSupportVideoCall = isVideoCall
             }
-    //        omiLib.callManager.audioController.configureAudioSession()
             OmiClient.startOmiService(isSupportVideoCall)
             if (isSupportVideoCall) {
                 OmiClient.registerAccount()
@@ -79,7 +77,7 @@ class CallManager {
         }
         if (call.callState == .disconnected) {
             DispatchQueue.main.async {
-                SwiftOmikitPlugin.instance?.sendEvent(onCallEnd, [:])
+                SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
                 self.currentConfirmedCall = nil
             }
         }
@@ -111,7 +109,7 @@ class CallManager {
             break
         case .confirmed:
             NSLog("Outgoing call, in CONFIRMED state, with UUID: \(call)")
-            SwiftOmikitPlugin.instance?.sendEvent(onCallEstablished, ["isVideo": false, "callerNumber": call.callerNumber])
+            SwiftOmikitPlugin.instance?.sendEvent(CALL_ESTABLISHED, ["isVideo": false, "callerNumber": call.callerNumber])
             SwiftOmikitPlugin.instance.sendOnMuteStatus()
             self.currentConfirmedCall = call
             break
@@ -124,21 +122,21 @@ class CallManager {
             print(omiLib.getCurrentCall()?.uuid.uuidString)
             print(call.uuid.uuidString)
             if let currentActiveCall = currentConfirmedCall, currentActiveCall.uuid.uuidString == call.uuid.uuidString {
-                SwiftOmikitPlugin.instance?.sendEvent(onCallEnd, [:])
+                SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
                 currentConfirmedCall = nil
                 break
             }
             if currentConfirmedCall == nil {
-                SwiftOmikitPlugin.instance?.sendEvent(onCallEnd, [:])
+                SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
                 break
             }
             print(omiLib.getNewestCall()?.uuid.uuidString)
             break
         case .incoming:
-            SwiftOmikitPlugin.instance?.sendEvent(incomingReceived, ["isVideo": false, "callerNumber": call.callerNumber ?? ""])
+            SwiftOmikitPlugin.instance?.sendEvent(INCOMING_RECEIVED, ["isVideo": false, "callerNumber": call.callerNumber ?? ""])
             break
         case .hold:
-            SwiftOmikitPlugin.instance?.sendEvent(onHold, ["isHold": call.onHold])
+//            SwiftOmikitPlugin.instance?.sendEvent(onHold, ["isHold": call.onHold])
             break
         default:
             NSLog("Default call state")
@@ -162,7 +160,7 @@ class CallManager {
             currentCall = omiLib.getNewestCall()
         }
         if (currentCall == nil) {
-            SwiftOmikitPlugin.instance?.sendEvent(onCallEnd, [:])
+            SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
             return
         }
         omiLib.callManager.end(currentCall!)
