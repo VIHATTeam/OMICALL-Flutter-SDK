@@ -1,6 +1,7 @@
 package vn.vihat.omicall.omicallsdk
 
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import androidx.annotation.NonNull
@@ -51,18 +52,19 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
             Log.d("omikit", "incomingReceived: ")
         }
 
+        @SuppressLint("LongLogTag")
         override fun onCallEstablished() {
             val sipNumber = OmiClient.instance.callUUID
             channel.invokeMethod(CALL_ESTABLISHED, mapOf(
                 "callerNumber" to sipNumber,
                 "isVideo" to false,
             ))
-
-            Log.d("omikit", "onCallEstablished: ")
-
+            Log.d("omikit", "onCallEnd: ")
         }
 
         override fun onCallEnd() {
+            Log.d("omikit-endCall", "onCallEnd: ")
+            print("omikit-endCall");
             channel.invokeMethod(CALL_END, null)
         }
 

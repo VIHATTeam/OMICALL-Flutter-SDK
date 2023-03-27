@@ -12,6 +12,8 @@
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
     <application
         android:name="${applicationName}"
         android:label="OmiCall Example"
@@ -45,13 +47,16 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <intent-filter>
+                <action android:name="com.omicall.sdk.CallingActivity"/>
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
         </activity>
         <service
-            android:name="vn.vihat.omicall.omisdk.service.OmiService"
-            android:enabled="true"
-            android:exported="false" >
+            android:name="vn.vihat.omicall.omisdk.service.FMService"
+            android:exported="false">
             <intent-filter>
-                <action android:name="com.omicall.app.OMI_SERVICE" />
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
         <!-- Don't delete the meta-data below.

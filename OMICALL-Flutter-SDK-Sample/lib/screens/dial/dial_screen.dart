@@ -60,6 +60,9 @@ class DialScreenState extends State<DialScreen> {
   void updateDialScreen(Map<String, dynamic>? callInfo, CallStatus? status) {
     if (status == CallStatus.established) {
       _startWatch();
+      setState(() {
+        _callingStatus = status!.value;
+      });
     }
   }
 
@@ -97,90 +100,104 @@ class DialScreenState extends State<DialScreen> {
                       image: "assets/images/calling_face.png",
                     ),
                     const Spacer(),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        StreamBuilder(
-                          initialData: false,
-                          stream: OmicallClient().onMuteEvent(),
-                          builder: (context, snapshot) {
-                            final isMute = snapshot.data as bool;
-                            return DialButton(
-                              iconSrc: !isMute
-                                  ? 'assets/icons/ic_microphone.svg'
-                                  : 'assets/icons/ic_block_microphone.svg',
-                              text: "Microphone",
-                              press: () {
-                                toggleMute(context);
-                              },
-                            );
-                          },
-                        ),
-                        StreamBuilder(
-                          initialData: false,
-                          stream: OmicallClient().onMicEvent(),
-                          builder: (context, snapshot) {
-                            final isSpeaker = snapshot.data as bool;
-                            return DialButton(
-                              iconSrc: !isSpeaker
-                                  ? 'assets/icons/ic_no_audio.svg'
-                                  : 'assets/icons/ic_audio.svg',
-                              text: "Audio",
-                              press: () {
-                                toggleSpeaker(context);
-                              },
-                            );
-                          },
-                        ),
-                        DialButton(
-                          iconSrc: "assets/icons/Icon Video.svg",
-                          text: "Video",
-                          press: () {},
-                          color: Colors.grey,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        DialButton(
-                          iconSrc: "assets/icons/Icon Message.svg",
-                          text: "Message",
-                          press: () {
-                            setState(() {
-                              _isShowKeyboard = !_isShowKeyboard;
-                            });
-                          },
-                          color: Colors.white,
-                        ),
-                        DialButton(
-                          iconSrc: "assets/icons/Icon User.svg",
-                          text: "Add contact",
-                          press: () {},
-                          color: Colors.grey,
-                        ),
-                        DialButton(
-                          iconSrc: "assets/icons/Icon Voicemail.svg",
-                          text: "Voice mail",
-                          press: () {},
-                          color: Colors.grey,
-                        ),
-                      ],
-                    ),
+                    if (_callingStatus != "Ringing") ...[
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          StreamBuilder(
+                            initialData: false,
+                            stream: OmicallClient().onMuteEvent(),
+                            builder: (context, snapshot) {
+                              final isMute = snapshot.data as bool;
+                              return DialButton(
+                                iconSrc: !isMute
+                                    ? 'assets/icons/ic_microphone.svg'
+                                    : 'assets/icons/ic_block_microphone.svg',
+                                text: "Microphone",
+                                press: () {
+                                  toggleMute(context);
+                                },
+                              );
+                            },
+                          ),
+                          StreamBuilder(
+                            initialData: false,
+                            stream: OmicallClient().onMicEvent(),
+                            builder: (context, snapshot) {
+                              final isSpeaker = snapshot.data as bool;
+                              return DialButton(
+                                iconSrc: !isSpeaker
+                                    ? 'assets/icons/ic_no_audio.svg'
+                                    : 'assets/icons/ic_audio.svg',
+                                text: "Audio",
+                                press: () {
+                                  toggleSpeaker(context);
+                                },
+                              );
+                            },
+                          ),
+                          DialButton(
+                            iconSrc: "assets/icons/Icon Video.svg",
+                            text: "Video",
+                            press: () {},
+                            color: Colors.grey,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 16,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          DialButton(
+                            iconSrc: "assets/icons/Icon Message.svg",
+                            text: "Message",
+                            press: () {
+                              setState(() {
+                                _isShowKeyboard = !_isShowKeyboard;
+                              });
+                            },
+                            color: Colors.white,
+                          ),
+                          DialButton(
+                            iconSrc: "assets/icons/Icon User.svg",
+                            text: "Add contact",
+                            press: () {},
+                            color: Colors.grey,
+                          ),
+                          DialButton(
+                            iconSrc: "assets/icons/Icon Voicemail.svg",
+                            text: "Voice mail",
+                            press: () {},
+                            color: Colors.grey,
+                          ),
+                        ],
+                      ),
+                    ],
                     const Spacer(),
-                    RoundedButton(
-                      iconSrc: "assets/icons/call_end.svg",
-                      press: () {
-                        endCall(
-                          context,
-                          needShowStatus: false,
-                        );
-                      },
-                      color: kRedColor,
-                      iconColor: Colors.white,
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        if (_callingStatus == "Ringing")
+                          RoundedCircleButton(
+                            iconSrc: "assets/icons/call_end.svg",
+                            press: () {},
+                            color: kGreenColor,
+                            iconColor: Colors.white,
+                          ),
+                        RoundedCircleButton(
+                          iconSrc: "assets/icons/call_end.svg",
+                          press: () {
+                            endCall(
+                              context,
+                              needShowStatus: false,
+                            );
+                          },
+                          color: kRedColor,
+                          iconColor: Colors.white,
+                        ),
+                      ],
                     )
                   ],
                 ),

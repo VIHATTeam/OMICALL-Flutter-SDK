@@ -38,3 +38,42 @@ class RoundedButton extends StatelessWidget {
     );
   }
 }
+
+
+class RoundedCircleButton extends StatelessWidget {
+  const RoundedCircleButton({
+    Key? key,
+    this.size = 64,
+    required this.iconSrc,
+    this.color = Colors.white,
+    this.iconColor = Colors.black,
+    required this.press,
+  }) : super(key: key);
+
+  final double size;
+  final String iconSrc;
+  final Color color, iconColor;
+  final VoidCallback press;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: press,
+      child: Container(
+        height: size,
+        width: size,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(size/2),
+          color: color,
+        ),
+        child: Center(
+          child: SvgPicture.asset(
+            iconSrc,
+            width: 40,
+            height: 40,
+          ),
+        ),
+      ),
+    );
+  }
+}
