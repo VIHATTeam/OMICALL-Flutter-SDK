@@ -6,6 +6,7 @@ class OmiActionName {
   static const String UPDATE_TOKEN = "UPDATE_TOKEN";
   static const String START_CALL = "START_CALL";
   static const String END_CALL = "END_CALL";
+  static const String JOIN_CALL = "JOIN_CALL";
   static const String TOGGLE_MUTE = "TOGGLE_MUTE";
   static const String TOGGLE_SPEAK = "TOGGLE_SPEAK";
   static const String REGISTER = "REGISTER";

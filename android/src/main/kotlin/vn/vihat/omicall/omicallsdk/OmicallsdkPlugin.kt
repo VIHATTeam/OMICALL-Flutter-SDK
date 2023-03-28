@@ -42,30 +42,34 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
 
     private val callListener = object : OmiListener {
 
-        override fun incomingReceived(callerId: Int, phoneNumber: String?) {
+        override fun incomingReceived(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
             channel.invokeMethod(
                 INCOMING_RECEIVED, mapOf(
-                    "isVideo" to false,
+                    "isVideo" to isVideo,
                     "callerNumber" to phoneNumber,
                 )
             )
             Log.d("omikit", "incomingReceived: ")
         }
 
-        @SuppressLint("LongLogTag")
-        override fun onCallEstablished() {
-            val sipNumber = OmiClient.instance.callUUID
-            channel.invokeMethod(CALL_ESTABLISHED, mapOf(
-                "callerNumber" to sipNumber,
-                "isVideo" to false,
-            ))
-            Log.d("omikit", "onCallEnd: ")
-        }
-
         override fun onCallEnd() {
             Log.d("omikit-endCall", "onCallEnd: ")
             print("omikit-endCall");
             channel.invokeMethod(CALL_END, null)
+        }
+
+        override fun onCallEstablished(
+            callerId: Int,
+            phoneNumber: String?,
+            isVideo: Boolean?,
+            startTime: Long,
+        ) {
+            val sipNumber = OmiClient.instance.callUUID
+            channel.invokeMethod(CALL_ESTABLISHED, mapOf(
+                "callerNumber" to sipNumber,
+                "isVideo" to isVideo,
+            ))
+            Log.d("omikit", "onCallEstablished: ")
         }
 
         override fun onHold(isHold: Boolean) {
@@ -134,18 +138,20 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
 
         when (data["actionName"]) {
             INIT_CALL -> {
-                val userName = dataOmi["userName"] as String
-                val password = dataOmi["password"] as String
-                val realm = dataOmi["realm"] as String
-                OmiClient.register(
-                    applicationContext!!,
-                    userName,
-                    password,
-                    false,
-                    realm,
-                    customUI = true,
-                    isTcp = true
-                )
+                val userName = dataOmi["userName"] as? String
+                val password = dataOmi["password"] as? String
+                val realm = dataOmi["realm"] as? String
+                if (userName != null && password != null && realm != null) {
+                    OmiClient.register(
+                        applicationContext!!,
+                        userName,
+                        password,
+                        false,
+                        realm,
+                        customUI = true,
+                        isTcp = true
+                    )
+                }
                 ActivityCompat.requestPermissions(
                     activity!!,
                     arrayOf(
@@ -207,6 +213,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
                     OmiClient.instance.sendDtmf(characterCode)
                 }
                 result.success(true)
+            }
+            JOIN_CALL -> {
+                OmiClient.instance.pickUp(false)
             }
         }
     }

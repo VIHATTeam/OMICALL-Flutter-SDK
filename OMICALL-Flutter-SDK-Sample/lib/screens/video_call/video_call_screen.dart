@@ -24,7 +24,7 @@ class VideoCallState extends State<VideoCallScreen> {
   void initState() {
     super.initState();
     _subscription =
-        OmicallClient().controller.eventTransferStream.listen((omiAction) {
+        OmicallClient.instance.controller.eventTransferStream.listen((omiAction) {
           if (omiAction.actionName == OmiEventList.onCallEstablished) {
             refreshRemoteCamera();
             localRemoteCamera();
@@ -37,7 +37,7 @@ class VideoCallState extends State<VideoCallScreen> {
   }
 
   Future<void> outputOptions(BuildContext context) async {
-    final data = await OmicallClient().getOutputAudios() as List;
+    final data = await OmicallClient.instance.getOutputAudios() as List;
     if (!mounted) { return; }
     showCupertinoModalPopup(
       context: context,
@@ -45,7 +45,7 @@ class VideoCallState extends State<VideoCallScreen> {
         actions: data.map((e) {
           return CupertinoActionSheetAction(
             onPressed: () {
-              OmicallClient().setOutputAudio(id: "${e["id"]}");
+              OmicallClient.instance.setOutputAudio(id: "${e["id"]}");
               Navigator.pop(context);
             },
             child: Text(e["name"]),
@@ -62,7 +62,7 @@ class VideoCallState extends State<VideoCallScreen> {
   }
 
   Future<void> inputOptions(BuildContext context) async {
-    final data = await OmicallClient().getInputAudios() as List;
+    final data = await OmicallClient.instance.getInputAudios() as List;
     if (!mounted) { return; }
     showCupertinoModalPopup(
       context: context,
@@ -70,7 +70,7 @@ class VideoCallState extends State<VideoCallScreen> {
         actions: data.map((e) {
           return CupertinoActionSheetAction(
             onPressed: () {
-              OmicallClient().setInputAudio(id: "${e["id"]}");
+              OmicallClient.instance.setInputAudio(id: "${e["id"]}");
               Navigator.pop(context);
             },
             child: Text(e["name"]),
@@ -125,7 +125,7 @@ class VideoCallState extends State<VideoCallScreen> {
   }
 
   endCall(BuildContext context) {
-    OmicallClient().endCall();
+    OmicallClient.instance.endCall();
     Navigator.pop(context);
   }
 
@@ -152,7 +152,7 @@ class VideoCallState extends State<VideoCallScreen> {
           actions: [
             IconButton(
               onPressed: () {
-                OmicallClient().switchCamera();
+                OmicallClient.instance.switchCamera();
               },
               color: Colors.black,
               icon: const Icon(
@@ -207,14 +207,14 @@ class VideoCallState extends State<VideoCallScreen> {
                 children: [
                   StreamBuilder(
                     initialData: true,
-                    stream: OmicallClient().cameraEvent(),
+                    stream: OmicallClient.instance.cameraEvent(),
                     builder: (context, snapshot) {
                       final cameraStatus = snapshot.data as bool;
                       return OptionItem(
                         icon: "video",
                         showDefaultIcon: cameraStatus,
                         callback: () {
-                          OmicallClient().toggleVideo();
+                          OmicallClient.instance.toggleVideo();
                         },
                       );
                     },
@@ -228,14 +228,14 @@ class VideoCallState extends State<VideoCallScreen> {
                   ),
                   StreamBuilder(
                     initialData: true,
-                    stream: OmicallClient().onMicEvent(),
+                    stream: OmicallClient.instance.onMicEvent(),
                     builder: (context, snapshot) {
                       final micStatus = snapshot.data as bool;
                       return OptionItem(
                         icon: "mic",
                         showDefaultIcon: micStatus,
                         callback: () {
-                          OmicallClient().toggleAudio();
+                          OmicallClient.instance.toggleAudio();
                         },
                       );
                     },

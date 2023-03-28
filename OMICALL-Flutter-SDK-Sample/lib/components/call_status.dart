@@ -1,5 +1,5 @@
 enum CallStatus {
-  ringing, established, end
+  calling, ringing, established, end
 }
 
 extension CallStatusExtension on CallStatus {
@@ -10,6 +10,6 @@ extension CallStatusExtension on CallStatus {
     if (this == CallStatus.end) {
       return "End";
     }
-    return "";
+    return "Established";
   }
 }

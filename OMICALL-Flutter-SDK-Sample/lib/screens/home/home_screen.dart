@@ -22,7 +22,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final TextEditingController _phoneNumberController =
-      TextEditingController()..text = Platform.isAndroid ? '101' : '100';
+      TextEditingController()..text = Platform.isAndroid ? '111' : '112';
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,
     fontSize: 16,
@@ -46,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
       updateToken();
     }
     _subscription =
-        OmicallClient().controller.eventTransferStream.listen((omiAction) {
+        OmicallClient.instance.controller.eventTransferStream.listen((omiAction) {
       if (omiAction.actionName == OmiEventList.incomingReceived) {
         //having a incoming call
         final data = omiAction.data;
@@ -240,10 +240,10 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       pushToDialScreen(
         phone,
-        status: CallStatus.ringing,
+        status: CallStatus.calling,
       );
     }
-    OmicallClient().startCall(
+    OmicallClient.instance.startCall(
       phone,
       _isVideoCall,
     );

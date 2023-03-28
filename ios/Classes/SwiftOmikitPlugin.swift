@@ -54,9 +54,11 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
   }
     
   func sendOnMuteStatus() {
-      if let onMuteEvent = onMuteEvent, let call = CallManager.shareInstance().currentConfirmedCall, let isMuted = call.muted as? Bool {
-          print("mute status \(isMuted)")
-          onMuteEvent(isMuted)
+      if let call = CallManager.shareInstance().getAvailableCall() {
+          if let isMuted = call.muted as? Bool, let onMuteEvent = onMuteEvent {
+              print("muteeeeed \(isMuted)")
+              onMuteEvent(isMuted)
+          }
       }
   }
     
@@ -104,14 +106,11 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           result(true)
           break
       case END_CALL:
-          CallManager.shareInstance().endCurrentConfirmCall()
+          CallManager.shareInstance().endAvailableCall()
           result(true)
           break
       case TOGGLE_MUTE:
-          CallManager.shareInstance().toggleMute {[weak self] in
-              guard let self = self else { return }
-              NSLog("done toggle mute")
-          }
+          CallManager.shareInstance().toggleMute()
           sendOnMuteStatus()
           result(true)
           break
@@ -145,16 +144,19 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           let outputs = CallManager.shareInstance().outputs()
           result(outputs)
           break
-      case SETOUTPUT:
+      case SET_OUTPUT:
           let id = dataOmi["id"] as! String
           CallManager.shareInstance().setOutput(id: id)
           result(true)
           break
-      case SETINPUT:
+      case SET_INPUT:
           let id = dataOmi["id"] as! String
           CallManager.shareInstance().setInput(id: id)
           result(true)
           break
+      case JOIN_CALL:
+          CallManager.shareInstance().joinCall()
+          result(true)
       default:
           break
       }

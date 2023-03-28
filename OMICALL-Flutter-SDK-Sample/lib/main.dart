@@ -24,11 +24,12 @@ Future<void> initService(Map<dynamic, dynamic>? loginInfo) async {
   if (loginInfo == null) {
     return;
   }
-  await OmicallClient().initCall(
-    userName: loginInfo["userName"],
-    password: loginInfo["password"],
-    realm: loginInfo["realm"],
-    isVideo: loginInfo["isVideo"],
+  //auto login
+  await OmicallClient.instance.initCall(
+    userName: null,
+    password: null,
+    realm: null,
+    isVideo: false,
   );
   await updateToken(
     showLoading: false,
@@ -96,9 +97,9 @@ Future<void> updateToken({
   if (showLoading) {
     EasyLoading.show();
   }
-  await OmicallClient().updateToken(
+  await OmicallClient.instance.updateToken(
     id,
-    Platform.isAndroid ? "omicall.concung.dev" : "vn.vihat.omikit",
+    Platform.isAndroid ? "vn.vihat.omicall.sdk_example" : "vn.vihat.omikit",
     fcmToken: token,
     apnsToken: apnToken,
   );

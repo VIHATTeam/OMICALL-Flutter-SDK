@@ -26,6 +26,7 @@ class DialScreen extends StatefulWidget {
 
 class DialScreenState extends State<DialScreen> {
   String _callingStatus = '';
+  String? _callTime;
   bool _isShowKeyboard = false;
   String _keyboardMessage = "";
   late StreamSubscription _subscription;
@@ -42,7 +43,7 @@ class DialScreenState extends State<DialScreen> {
     }
     super.initState();
     _subscription =
-        OmicallClient().controller.eventTransferStream.listen((omiAction) {
+        OmicallClient.instance.controller.eventTransferStream.listen((omiAction) {
       if (omiAction.actionName == OmiEventList.onCallEstablished) {
         updateDialScreen(null, CallStatus.established);
       }
@@ -88,7 +89,7 @@ class DialScreenState extends State<DialScreen> {
                           .copyWith(color: Colors.white),
                     ),
                     Text(
-                      _callingStatus,
+                      _callTime ?? _callingStatus,
                       style: const TextStyle(
                         color: Colors.white60,
                       ),
@@ -100,13 +101,13 @@ class DialScreenState extends State<DialScreen> {
                       image: "assets/images/calling_face.png",
                     ),
                     const Spacer(),
-                    if (_callingStatus != "Ringing") ...[
+                    if (_callingStatus == "Established") ...[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           StreamBuilder(
                             initialData: false,
-                            stream: OmicallClient().onMuteEvent(),
+                            stream: OmicallClient.instance.onMuteEvent(),
                             builder: (context, snapshot) {
                               final isMute = snapshot.data as bool;
                               return DialButton(
@@ -122,7 +123,7 @@ class DialScreenState extends State<DialScreen> {
                           ),
                           StreamBuilder(
                             initialData: false,
-                            stream: OmicallClient().onMicEvent(),
+                            stream: OmicallClient.instance.onMicEvent(),
                             builder: (context, snapshot) {
                               final isSpeaker = snapshot.data as bool;
                               return DialButton(
@@ -137,7 +138,7 @@ class DialScreenState extends State<DialScreen> {
                             },
                           ),
                           DialButton(
-                            iconSrc: "assets/icons/Icon Video.svg",
+                            iconSrc: "assets/icons/ic_video.svg",
                             text: "Video",
                             press: () {},
                             color: Colors.grey,
@@ -151,7 +152,7 @@ class DialScreenState extends State<DialScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           DialButton(
-                            iconSrc: "assets/icons/Icon Message.svg",
+                            iconSrc: "assets/icons/ic_message.svg",
                             text: "Message",
                             press: () {
                               setState(() {
@@ -161,13 +162,13 @@ class DialScreenState extends State<DialScreen> {
                             color: Colors.white,
                           ),
                           DialButton(
-                            iconSrc: "assets/icons/Icon User.svg",
+                            iconSrc: "assets/icons/ic_user.svg",
                             text: "Add contact",
                             press: () {},
                             color: Colors.grey,
                           ),
                           DialButton(
-                            iconSrc: "assets/icons/Icon Voicemail.svg",
+                            iconSrc: "assets/icons/ic_voicemail.svg",
                             text: "Voice mail",
                             press: () {},
                             color: Colors.grey,
@@ -182,7 +183,9 @@ class DialScreenState extends State<DialScreen> {
                         if (_callingStatus == "Ringing")
                           RoundedCircleButton(
                             iconSrc: "assets/icons/call_end.svg",
-                            press: () {},
+                            press: () {
+                              OmicallClient.instance.joinCall();
+                            },
                             color: kGreenColor,
                             iconColor: Colors.white,
                           ),
@@ -293,11 +296,11 @@ class DialScreenState extends State<DialScreen> {
   }
 
   Future<void> toggleMute(BuildContext context) async {
-    OmicallClient().toggleAudio();
+    OmicallClient.instance.toggleAudio();
   }
 
   Future<void> toggleSpeaker(BuildContext context) async {
-    OmicallClient().toggleSpeaker();
+    OmicallClient.instance.toggleSpeaker();
   }
 
   Future<void> endCall(
@@ -306,12 +309,12 @@ class DialScreenState extends State<DialScreen> {
     bool needShowStatus = true,
   }) async {
     if (needRequest) {
-      OmicallClient().endCall();
+      OmicallClient.instance.endCall();
     }
     if (needShowStatus) {
       _stopWatch();
       setState(() {
-        _callingStatus = "Ended call";
+        _callingStatus = CallStatus.end.value;
       });
       await Future.delayed(const Duration(milliseconds: 400));
     }
@@ -345,7 +348,7 @@ class DialScreenState extends State<DialScreen> {
   _updateTime(Timer timer) {
     if (watch.isRunning) {
       setState(() {
-        _callingStatus = transformMilliSeconds(watch.elapsedMilliseconds);
+        _callTime = transformMilliSeconds(watch.elapsedMilliseconds);
       });
     }
   }
@@ -360,7 +363,7 @@ class DialScreenState extends State<DialScreen> {
     setState(() {
       _keyboardMessage = "$_keyboardMessage$value";
     });
-    OmicallClient().sendDTMF(value);
+    OmicallClient.instance.sendDTMF(value);
   }
 
   @override

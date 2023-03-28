@@ -211,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     EasyLoading.show();
-    await OmicallClient().initCall(
+    await OmicallClient.instance.initCall(
       userName: _userNameController.text,
       password: _passwordController.text,
       realm: _serviceUrlController.text,
