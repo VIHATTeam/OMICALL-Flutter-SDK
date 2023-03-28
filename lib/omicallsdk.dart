@@ -9,9 +9,7 @@ class OmicallClient {
 
   OmicallClient._();
   
-  static final _instance = OmicallClient._();
-
-  factory OmicallClient() => _instance;
+  static final instance = OmicallClient._();
 
   final OmicallSDKController _controller = OmicallSDKController();
 
@@ -43,9 +41,9 @@ class OmicallClient {
   }
 
   Future<void> initCall({
-    required String userName,
-    required String password,
-    required String realm,
+    String? userName,
+    String? password,
+    String? realm,
     bool isVideo = false,
   }) async {
     final action = OmiAction(actionName: OmiActionName.INIT_CALL, data: {
@@ -80,6 +78,15 @@ class OmicallClient {
       'phoneNumber': phoneNumber,
       'isVideo': isVideo,
     });
+    return await _controller.action(action);
+  }
+
+
+  Future<void> joinCall() async {
+    final action = OmiAction(
+      actionName: OmiActionName.JOIN_CALL,
+      data: {},
+    );
     return await _controller.action(action);
   }
 
