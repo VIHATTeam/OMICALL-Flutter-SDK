@@ -23,22 +23,45 @@ class VideoCallState extends State<VideoCallScreen> {
   @override
   void initState() {
     super.initState();
-    _subscription =
-        OmicallClient.instance.controller.eventTransferStream.listen((omiAction) {
-          if (omiAction.actionName == OmiEventList.onCallEstablished) {
-            refreshRemoteCamera();
-            localRemoteCamera();
-          }
-          if (omiAction.actionName == OmiEventList.onCallEnd) {
-            // endCall(context);
-            return;
-          }
-        });
+    _subscription = OmicallClient.instance.controller.eventTransferStream
+        .listen((omiAction) {
+      if (omiAction.actionName == OmiEventList.onCallEstablished) {
+        refreshRemoteCamera();
+        localRemoteCamera();
+      }
+      if (omiAction.actionName == OmiEventList.onCallEnd) {
+        endCall(
+          context,
+          needShowStatus: true,
+          needRequest: false,
+        );
+        return;
+      }
+    });
+  }
+
+  Future<void> endCall(
+    BuildContext context, {
+    bool needRequest = true,
+    bool needShowStatus = true,
+  }) async {
+    if (needRequest) {
+      OmicallClient.instance.endCall();
+    }
+    if (needShowStatus) {
+      await Future.delayed(const Duration(milliseconds: 400));
+    }
+    if (!mounted) {
+      return;
+    }
+    Navigator.pop(context);
   }
 
   Future<void> outputOptions(BuildContext context) async {
     final data = await OmicallClient.instance.getOutputAudios() as List;
-    if (!mounted) { return; }
+    if (!mounted) {
+      return;
+    }
     showCupertinoModalPopup(
       context: context,
       builder: (_) => CupertinoActionSheet(
@@ -63,7 +86,9 @@ class VideoCallState extends State<VideoCallScreen> {
 
   Future<void> inputOptions(BuildContext context) async {
     final data = await OmicallClient.instance.getInputAudios() as List;
-    if (!mounted) { return; }
+    if (!mounted) {
+      return;
+    }
     showCupertinoModalPopup(
       context: context,
       builder: (_) => CupertinoActionSheet(
@@ -124,11 +149,6 @@ class VideoCallState extends State<VideoCallScreen> {
     _localController?.refresh();
   }
 
-  endCall(BuildContext context) {
-    OmicallClient.instance.endCall();
-    Navigator.pop(context);
-  }
-
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -146,7 +166,7 @@ class VideoCallState extends State<VideoCallScreen> {
               color: Colors.white,
             ),
             onPressed: () {
-              endCall(context);
+              endCall(context, needShowStatus: false,);
             },
           ),
           actions: [
@@ -185,19 +205,19 @@ class VideoCallState extends State<VideoCallScreen> {
                 ),
               ),
             ),
-            // Positioned(
-            //   top: MediaQuery.of(context).padding.top + kToolbarHeight + 12,
-            //   right: 16,
-            //   width: width / 3,
-            //   height: (3 * width) / 5,
-            //   child: RemoteCameraView(
-            //     width: double.infinity,
-            //     height: double.infinity,
-            //     onCameraCreated: (controller) {
-            //       _remoteController = controller;
-            //     },
-            //   ),
-            // ),
+            Positioned(
+              top: MediaQuery.of(context).padding.top + kToolbarHeight + 12,
+              right: 16,
+              width: width / 3,
+              height: (3 * width) / 5,
+              child: RemoteCameraView(
+                width: double.infinity,
+                height: double.infinity,
+                onCameraCreated: (controller) {
+                  _remoteController = controller;
+                },
+              ),
+            ),
             Positioned(
               left: 0,
               right: 0,
@@ -212,7 +232,7 @@ class VideoCallState extends State<VideoCallScreen> {
                       final cameraStatus = snapshot.data as bool;
                       return OptionItem(
                         icon: "video",
-                        showDefaultIcon: cameraStatus,
+                        showDefaultIcon: true,
                         callback: () {
                           OmicallClient.instance.toggleVideo();
                         },
@@ -223,7 +243,7 @@ class VideoCallState extends State<VideoCallScreen> {
                     icon: "hangup",
                     showDefaultIcon: true,
                     callback: () {
-                      endCall(context);
+                      endCall(context, needShowStatus: false,);
                     },
                   ),
                   StreamBuilder(
@@ -263,7 +283,8 @@ class OptionItem extends StatelessWidget {
   final bool showDefaultIcon;
   final VoidCallback callback;
 
-  const OptionItem({Key? key,
+  const OptionItem({
+    Key? key,
     required this.icon,
     this.showDefaultIcon = true,
     required this.callback,

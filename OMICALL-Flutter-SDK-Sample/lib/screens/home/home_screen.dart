@@ -39,6 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isVideoCall = false;
   late StreamSubscription _subscription;
   GlobalKey<DialScreenState>? _dialScreenKey;
+  GlobalKey<VideoCallState>? _videoScreenKey;
 
   @override
   void initState() {
@@ -56,11 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (isVideo) {
           pushToVideoScreen(
             callerNumber,
-            isInComing: true,
           );
-          // Future.delayed(const Duration(milliseconds: 300), () {
-          //   _videoKey?.currentState?.refreshRemoteCamera();
-          // });
           return;
         }
         pushToDialScreen(
@@ -69,18 +66,15 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
       if (omiAction.actionName == OmiEventList.onCallEstablished) {
-        if (_dialScreenKey != null && _dialScreenKey?.currentState != null) { return; }
+        if (_dialScreenKey != null || _dialScreenKey?.currentState != null) { return; }
+        if (_videoScreenKey != null || _videoScreenKey?.currentState != null) { return; }
         final data = omiAction.data;
         final callerNumber = data["callerNumber"];
         final bool isVideo = data["isVideo"];
-        if (isVideo) {
+        if (isVideo && _videoScreenKey?.currentState == null) {
           pushToVideoScreen(
             callerNumber,
-            isInComing: true,
           );
-          // Future.delayed(const Duration(milliseconds: 300), () {
-          //   _videoKey?.currentState?.refreshRemoteCamera();
-          // });
           return;
         }
         pushToDialScreen(
@@ -231,11 +225,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void pushToVideoScreen(
-    String phoneNumber, {
-    bool isInComing = true,
-  }) {
+    String phoneNumber) {
+    _videoScreenKey = GlobalKey();
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-      return const VideoCallScreen();
+      return VideoCallScreen(
+        key: _videoScreenKey,
+      );
     }));
   }
 
