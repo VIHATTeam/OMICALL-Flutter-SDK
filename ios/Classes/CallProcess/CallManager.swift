@@ -108,7 +108,7 @@ class CallManager {
             break
         case .confirmed:
             NSLog("Outgoing call, in CONFIRMED state, with UUID: \(call)")
-            SwiftOmikitPlugin.instance?.sendEvent(CALL_ESTABLISHED, ["isVideo": false, "callerNumber": call.callerNumber])
+            SwiftOmikitPlugin.instance?.sendEvent(CALL_ESTABLISHED, ["isVideo": call.isVideo, "callerNumber": call.callerNumber])
             SwiftOmikitPlugin.instance.sendOnMuteStatus()
             break
         case .disconnected:
@@ -121,7 +121,7 @@ class CallManager {
             SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
             break
         case .incoming:
-            SwiftOmikitPlugin.instance?.sendEvent(INCOMING_RECEIVED, ["isVideo": false, "callerNumber": call.callerNumber ?? ""])
+            SwiftOmikitPlugin.instance?.sendEvent(INCOMING_RECEIVED, ["isVideo": call.isVideo, "callerNumber": call.callerNumber ?? ""])
             break
         case .muted:
             print("muteddddddd")
@@ -137,7 +137,7 @@ class CallManager {
     
     /// Start call
     func startCall(_ phoneNumber: String, isVideo: Bool) {
-        registerNotificationCenter()
+//        registerNotificationCenter()
         if (isVideo) {
             OmiClient.startVideoCall(phoneNumber)
             return
