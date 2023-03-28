@@ -101,7 +101,7 @@ class DialScreenState extends State<DialScreen> {
                       image: "assets/images/calling_face.png",
                     ),
                     const Spacer(),
-                    if (_callingStatus == "Established") ...[
+                    if (_callingStatus == CallStatus.established.value) ...[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
