@@ -64,9 +64,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
             isVideo: Boolean?,
             startTime: Long,
         ) {
-            val sipNumber = OmiClient.instance.callUUID
             channel.invokeMethod(CALL_ESTABLISHED, mapOf(
-                "callerNumber" to sipNumber,
+                "callerNumber" to phoneNumber,
                 "isVideo" to isVideo,
             ))
             Log.d("omikit", "onCallEstablished: ")

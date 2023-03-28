@@ -38,6 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   );
   bool _isVideoCall = false;
   late StreamSubscription _subscription;
+  GlobalKey<DialScreenState>? _dialScreenKey;
 
   @override
   void initState() {
@@ -65,6 +66,26 @@ class _HomeScreenState extends State<HomeScreen> {
         pushToDialScreen(
           callerNumber ?? "",
           status: CallStatus.ringing,
+        );
+      }
+      if (omiAction.actionName == OmiEventList.onCallEstablished) {
+        if (_dialScreenKey != null && _dialScreenKey?.currentState != null) { return; }
+        final data = omiAction.data;
+        final callerNumber = data["callerNumber"];
+        final bool isVideo = data["isVideo"];
+        if (isVideo) {
+          pushToVideoScreen(
+            callerNumber,
+            isInComing: true,
+          );
+          // Future.delayed(const Duration(milliseconds: 300), () {
+          //   _videoKey?.currentState?.refreshRemoteCamera();
+          // });
+          return;
+        }
+        pushToDialScreen(
+          callerNumber ?? "",
+          status: CallStatus.established,
         );
       }
     });
@@ -222,8 +243,10 @@ class _HomeScreenState extends State<HomeScreen> {
     String phoneNumber, {
     required CallStatus status,
   }) {
+    _dialScreenKey = GlobalKey();
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
       return DialScreen(
+        key: _dialScreenKey,
         phoneNumber: phoneNumber,
         status: status,
       );

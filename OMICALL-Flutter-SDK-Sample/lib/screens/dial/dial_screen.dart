@@ -36,10 +36,9 @@ class DialScreenState extends State<DialScreen> {
 
   @override
   void initState() {
+    _callingStatus = widget.status.value;
     if (widget.status == CallStatus.established) {
       _startWatch();
-    } else {
-      _callingStatus = widget.status.value;
     }
     super.initState();
     _subscription =
