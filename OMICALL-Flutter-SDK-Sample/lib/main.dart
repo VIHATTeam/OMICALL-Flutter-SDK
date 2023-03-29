@@ -29,7 +29,7 @@ Future<void> initService(Map<dynamic, dynamic>? loginInfo) async {
     userName: null,
     password: null,
     realm: null,
-    isVideo: false,
+    isVideo: true,
   );
   await updateToken(
     showLoading: false,

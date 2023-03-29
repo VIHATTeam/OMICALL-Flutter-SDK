@@ -7,6 +7,9 @@ extension CallStatusExtension on CallStatus {
     if (this == CallStatus.ringing) {
       return "Ringing";
     }
+    if (this == CallStatus.calling) {
+      return "Calling";
+    }
     if (this == CallStatus.end) {
       return "End";
     }

@@ -47,8 +47,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (widget.needRequestNotification) {
       updateToken();
     }
-    _subscription =
-        OmicallClient.instance.controller.eventTransferStream.listen((omiAction) {
+    _subscription = OmicallClient.instance.controller.eventTransferStream
+        .listen((omiAction) {
       if (omiAction.actionName == OmiEventList.incomingReceived) {
         //having a incoming call
         final data = omiAction.data;
@@ -57,6 +57,7 @@ class _HomeScreenState extends State<HomeScreen> {
         if (isVideo) {
           pushToVideoScreen(
             callerNumber,
+            status: CallStatus.ringing,
           );
           return;
         }
@@ -66,14 +67,19 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
       if (omiAction.actionName == OmiEventList.onCallEstablished) {
-        if (_dialScreenKey != null || _dialScreenKey?.currentState != null) { return; }
-        if (_videoScreenKey != null || _videoScreenKey?.currentState != null) { return; }
+        if (_dialScreenKey != null || _dialScreenKey?.currentState != null) {
+          return;
+        }
+        if (_videoScreenKey != null || _videoScreenKey?.currentState != null) {
+          return;
+        }
         final data = omiAction.data;
         final callerNumber = data["callerNumber"];
         final bool isVideo = data["isVideo"];
         if (isVideo && _videoScreenKey?.currentState == null) {
           pushToVideoScreen(
             callerNumber,
+            status: CallStatus.established,
           );
           return;
         }
@@ -225,11 +231,14 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void pushToVideoScreen(
-    String phoneNumber) {
+    String phoneNumber, {
+    required CallStatus status,
+  }) {
     _videoScreenKey = GlobalKey();
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
       return VideoCallScreen(
         key: _videoScreenKey,
+        status: status,
       );
     }));
   }
@@ -254,7 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
     if (_isVideoCall) {
-      pushToVideoScreen(phone);
+      pushToVideoScreen(phone, status: CallStatus.calling);
     } else {
       pushToDialScreen(
         phone,

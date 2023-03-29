@@ -9,8 +9,8 @@ import Foundation
 import AVFoundation
 import MediaPlayer
 import SwiftUI
-import OmiKit
 import AVFoundation
+import OmiKit
 
 class CallManager {
     
@@ -45,7 +45,11 @@ class CallManager {
         if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String {
             OmiClient.initWithUsername(userName, password: password, realm: realm)
         }
+        if (Thread.isMainThread) {
+            print("main thread")
+        }
         if let isVideoCall = params["isVideo"] as? Bool, isVideoCall == true {
+            OmiClient.startOmiService(true)
             OmiClient.registerAccount()
             videoManager = OMIVideoViewManager.init()
         }
@@ -61,26 +65,25 @@ class CallManager {
                                                    name: NSNotification.Name.OMICallStateChanged,
                                                    object: nil
             )
-//            NotificationCenter.default.addObserver(CallManager.instance!,
-//                                                   selector: #selector(self.callDealloc(_:)),
-//                                                   name: NSNotification.Name.OMICallDealloc,
-//                                                   object: nil
-//            )
+            NotificationCenter.default.addObserver(CallManager.instance!,
+                                                   selector: #selector(self.callDealloc(_:)),
+                                                   name: NSNotification.Name.OMICallDealloc,
+                                                   object: nil
+            )
         }
     }
     
-//    @objc func callDealloc(_ notification: NSNotification) {
-//        guard let userInfo = notification.userInfo,
-//              let call     = userInfo[OMINotificationUserInfoCallKey] as? OMICall else {
-//            return;
-//        }
-//        if (call.callState == .disconnected) {
-//            DispatchQueue.main.async {
-//                SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
-//                self.currentConfirmedCall = nil
-//            }
-//        }
-//    }
+    @objc func callDealloc(_ notification: NSNotification) {
+        guard let userInfo = notification.userInfo,
+              let call     = userInfo[OMINotificationUserInfoCallKey] as? OMICall else {
+            return;
+        }
+        if (call.callState == .disconnected) {
+            DispatchQueue.main.async {
+                SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
+            }
+        }
+    }
     
     @objc fileprivate func callStateChanged(_ notification: NSNotification) {
         guard let userInfo = notification.userInfo,

@@ -44,7 +44,7 @@ class OmicallClient {
     String? userName,
     String? password,
     String? realm,
-    bool isVideo = false,
+    bool isVideo = true,
   }) async {
     final action = OmiAction(actionName: OmiActionName.INIT_CALL, data: {
       'userName': userName,
@@ -161,7 +161,7 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
-  Future<void> setOutputAudio({required String id}) async {
+  Future<void> setOutputAudio({required dynamic id}) async {
     final action = OmiAction(
       actionName: OmiActionName.SET_OUTPUT,
       data: {
@@ -179,7 +179,7 @@ class OmicallClient {
     );
     return await _controller.action(action);
   }
-  Future<void> setInputAudio({required String id}) async {
+  Future<void> setInputAudio({required dynamic id}) async {
     final action = OmiAction(
       actionName: OmiActionName.SET_INPUT,
       data: {

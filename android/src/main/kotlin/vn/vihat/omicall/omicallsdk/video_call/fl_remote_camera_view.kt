@@ -12,29 +12,29 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
 import vn.vihat.omicall.omisdk.OmiClient
 
-internal class FLLocalCameraView(context: Context, id: Int, creationParams: Map<String?, Any?>?,  messenger: BinaryMessenger) :
+internal class FLRemoteCameraView(context: Context, id: Int, creationParams: Map<String?, Any?>?,  messenger: BinaryMessenger) :
     PlatformView, MethodChannel.MethodCallHandler, TextureView.SurfaceTextureListener {
-    private val localView : TextureView
+    private val remoteView : TextureView
     private var methodChannel : MethodChannel
 
     override fun getView(): View {
-        return localView
+        return remoteView
     }
 
     override fun dispose() {}
 
     init {
-        methodChannel = MethodChannel(messenger, "local_camera_controller/$id")
+        methodChannel = MethodChannel(messenger, "remote_camera_controller/$id")
         methodChannel.setMethodCallHandler(this)
-        localView = TextureView(context)
-        localView.surfaceTextureListener = this
+        remoteView = TextureView(context)
+        remoteView.surfaceTextureListener = this
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         if (call.method == "refresh") {
-            localView.surfaceTexture?.let {
-                OmiClient.instance.setupLocalVideoFeed(Surface(it))
-                localView.scaleX = 1.5F
+            remoteView.surfaceTexture?.let {
+                OmiClient.instance.setupIncomingVideoFeed(Surface(it))
+                remoteView.scaleX = 1.5F
             }
         }
     }
