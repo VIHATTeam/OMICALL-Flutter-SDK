@@ -2,9 +2,9 @@ import Flutter
 import UIKit
 import CallKit
 import AVFoundation
-import OmiKit
 import PushKit
 import UserNotifications
+import OmiKit
 
 public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
 
@@ -36,6 +36,8 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       registrar.register(localFactory, withId: "local_camera_view")
       let remoteFactory = FLRemoteCameraFactory(messenger: registrar.messenger())
       registrar.register(remoteFactory, withId: "remote_camera_view")
+      AVCaptureDevice.requestAccess(for: .video) { result in
+      }
   }
 
 
