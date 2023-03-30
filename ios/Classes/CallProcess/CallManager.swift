@@ -50,7 +50,6 @@ class CallManager {
         }
         if let isVideoCall = params["isVideo"] as? Bool, isVideoCall == true {
             OmiClient.startOmiService(true)
-            OmiClient.registerAccount()
             videoManager = OMIVideoViewManager.init()
         }
         registerNotificationCenter()
@@ -165,11 +164,7 @@ class CallManager {
         guard let call = getAvailableCall() else {
             return
         }
-        omiLib.callManager.answer(call) { error in
-            if (error != nil) {
-                print(error)
-            }
-        }
+        OmiClient.answerIncommingCall(call.uuid)
     }
     
     func sendDTMF(character: String) {

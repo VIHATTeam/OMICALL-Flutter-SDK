@@ -1,11 +1,16 @@
 package vn.vihat.omicall.omicallsdk
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Context
+import android.content.pm.PackageManager
+import android.hardware.camera2.CameraManager
+import android.os.Build
+import android.preference.PreferenceManager
 import android.util.Log
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
+import androidx.core.app.ActivityCompat.requestPermissions
+import androidx.core.content.ContextCompat.getSystemService
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -25,7 +30,6 @@ import vn.vihat.omicall.omisdk.OmiClient
 import vn.vihat.omicall.omisdk.OmiListener
 import vn.vihat.omicall.omisdk.utils.OmiSDKUtils
 import java.util.*
-import kotlin.collections.HashMap
 
 /** OmicallsdkPlugin */
 class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, StreamHandler,
@@ -128,6 +132,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
             .registerViewFactory("remote_camera_view", FLRemoteCameraFactory(flutterPluginBinding.binaryMessenger))
         OmiClient(applicationContext!!)
         OmiClient.instance.setListener(callListener)
+//        setupSIP()
 //        OmiClient.instance.addAccountListener(this)
     }
 
@@ -147,28 +152,46 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
                 val userName = dataOmi["userName"] as? String
                 val password = dataOmi["password"] as? String
                 val realm = dataOmi["realm"] as? String
+                val isVideo = dataOmi["isVideo"] as? Boolean
                 if (userName != null && password != null && realm != null) {
                     OmiClient.register(
                         applicationContext!!,
                         userName,
                         password,
-                        true,
+                        isVideo ?: true,
                         realm,
-                        customUI = true,
-                        isTcp = true
                     )
                 }
-                ActivityCompat.requestPermissions(
-                    activity!!,
-                    arrayOf(
-                        Manifest.permission.USE_SIP,
-                        Manifest.permission.CALL_PHONE,
-                        Manifest.permission.CAMERA,
-                        Manifest.permission.MODIFY_AUDIO_SETTINGS,
-                        Manifest.permission.RECORD_AUDIO,
-                    ),
-                    0,
-                )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    requestPermissions(
+                        activity!!,
+                        arrayOf(
+                            Manifest.permission.USE_SIP,
+                            Manifest.permission.CALL_PHONE,
+                            Manifest.permission.CAMERA,
+                            Manifest.permission.MODIFY_AUDIO_SETTINGS,
+                            Manifest.permission.RECORD_AUDIO,
+                            Manifest.permission.POST_NOTIFICATIONS,
+                        ),
+                        0,
+                    )
+                } else {
+                    requestPermissions(
+                        activity!!,
+                        arrayOf(
+                            Manifest.permission.USE_SIP,
+                            Manifest.permission.CALL_PHONE,
+                            Manifest.permission.CAMERA,
+                            Manifest.permission.MODIFY_AUDIO_SETTINGS,
+                            Manifest.permission.RECORD_AUDIO,
+                        ),
+                        0,
+                    )
+                }
+                if (isVideo == true) {
+                    val cm = this.applicationContext!!.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+                    OmiClient.instance.setCameraManager(cm)
+                }
                 result.success(true)
             }
             UPDATE_TOKEN -> {
