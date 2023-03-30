@@ -6,6 +6,12 @@ All notable changes to this project will be documented in this file.
 
 ## [1.0.0](https://github.com/VIHATTeam/OMICALL-Flutter-SDK.git) (13/12/2022)
 
+
+## 2.0.0
+* Support App - to - App
+* Support Video Call
+* Improve performance and logic
+
 ## 1.0.12
 
 * Support iOS 11,12
