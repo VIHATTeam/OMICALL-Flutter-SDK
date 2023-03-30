@@ -130,11 +130,12 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
         flutterPluginBinding
             .platformViewRegistry
             .registerViewFactory("remote_camera_view", FLRemoteCameraFactory(flutterPluginBinding.binaryMessenger))
-        OmiClient(applicationContext!!)
-        OmiClient.instance.setListener(callListener)
 //        setupSIP()
 //        OmiClient.instance.addAccountListener(this)
     }
+
+
+
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         if (call.method == "action") {
@@ -149,17 +150,23 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
 
         when (data["actionName"]) {
             INIT_CALL -> {
+                OmiClient(applicationContext!!)
+                OmiClient.instance.setListener(callListener)
                 val userName = dataOmi["userName"] as? String
                 val password = dataOmi["password"] as? String
                 val realm = dataOmi["realm"] as? String
+                val host = dataOmi["host"] as? String
                 val isVideo = dataOmi["isVideo"] as? Boolean
-                if (userName != null && password != null && realm != null) {
+                if (userName != null && password != null && realm != null && host != null) {
                     OmiClient.register(
                         applicationContext!!,
                         userName,
                         password,
                         isVideo ?: true,
                         realm,
+                        host = host,
+                        isTcp = true,
+                        customUI = true,
                     )
                 }
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {

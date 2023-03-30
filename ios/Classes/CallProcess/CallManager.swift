@@ -42,7 +42,7 @@ class CallManager {
     }
     
     func initEndpoint(params: [String: Any]){
-        if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String {
+        if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String, let host = params["host"] as? String {
             OmiClient.initWithUsername(userName, password: password, realm: realm)
         }
         if (Thread.isMainThread) {

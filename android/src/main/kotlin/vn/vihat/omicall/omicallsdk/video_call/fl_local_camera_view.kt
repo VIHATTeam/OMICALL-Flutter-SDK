@@ -34,7 +34,7 @@ internal class FLLocalCameraView(context: Context, id: Int, creationParams: Map<
         if (call.method == "refresh") {
             localView.surfaceTexture?.let {
                 OmiClient.instance.setupLocalVideoFeed(Surface(it))
-                localView.scaleX = 1.5F
+                localView.scaleX = 2F
             }
         }
     }
