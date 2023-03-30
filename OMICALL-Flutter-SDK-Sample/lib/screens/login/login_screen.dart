@@ -26,6 +26,8 @@ class _LoginScreenState extends State<LoginScreen> {
     ..text = Platform.isAndroid ? 'kjO8XbGZZG' : 'P5JgMhMWhm';
   late final TextEditingController _serviceUrlController =
       TextEditingController()..text = 'dky';
+  late final TextEditingController _hostUrlController =
+  TextEditingController()..text = '171.244.138.14';
   bool _supportVideoCall = true;
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,
@@ -97,6 +99,18 @@ class _LoginScreenState extends State<LoginScreen> {
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.cleaning_services),
                 labelText: "Service",
+                enabledBorder: myInputBorder(),
+                focusedBorder: myFocusBorder(),
+              ),
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            TextField(
+              controller: _hostUrlController,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.cleaning_services),
+                labelText: "Host",
                 enabledBorder: myInputBorder(),
                 focusedBorder: myFocusBorder(),
               ),
@@ -207,7 +221,7 @@ class _LoginScreenState extends State<LoginScreen> {
   void _login() async {
     if (_userNameController.text.isEmpty ||
         _passwordController.text.isEmpty ||
-        _serviceUrlController.text.isEmpty) {
+        _serviceUrlController.text.isEmpty || _hostUrlController.text.isEmpty) {
       return;
     }
     EasyLoading.show();
@@ -216,6 +230,7 @@ class _LoginScreenState extends State<LoginScreen> {
       password: _passwordController.text,
       realm: _serviceUrlController.text,
       isVideo: _supportVideoCall,
+      host: _hostUrlController.text,
     );
 
     await LocalStorage.instance.setLoginInfo({
@@ -223,6 +238,7 @@ class _LoginScreenState extends State<LoginScreen> {
       "password": _passwordController.text,
       "realm": _serviceUrlController.text,
       "isVideo": _supportVideoCall,
+      "host": _hostUrlController.text,
     });
     EasyLoading.dismiss();
     if (!mounted) {

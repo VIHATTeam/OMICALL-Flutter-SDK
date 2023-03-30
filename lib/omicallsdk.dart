@@ -44,6 +44,7 @@ class OmicallClient {
     String? userName,
     String? password,
     String? realm,
+    String? host,
     bool isVideo = true,
   }) async {
     final action = OmiAction(actionName: OmiActionName.INIT_CALL, data: {
@@ -51,6 +52,7 @@ class OmicallClient {
       'password': password,
       'realm': realm,
       'isVideo': isVideo,
+      'host': host,
     });
     return await _controller.action(action);
   }

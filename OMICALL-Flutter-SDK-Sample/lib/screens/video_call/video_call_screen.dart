@@ -218,20 +218,16 @@ class VideoCallState extends State<VideoCallScreen> {
           ],
         ),
         body: Stack(
+          alignment: Alignment.center,
           children: [
             SizedBox.expand(
               child: Container(
                 color: Colors.grey,
-                child: LocalCameraView(
+                child: RemoteCameraView(
                   width: double.infinity,
                   height: double.infinity,
                   onCameraCreated: (controller) {
-                    _localController = controller;
-                    controller.addListener(
-                      (event, arguments) {
-                        debugPrint("aaa");
-                      },
-                    );
+                    _remoteController = controller;
                   },
                 ),
               ),
@@ -241,11 +237,16 @@ class VideoCallState extends State<VideoCallScreen> {
               right: 16,
               width: width / 3,
               height: (3 * width) / 5,
-              child: RemoteCameraView(
+              child: LocalCameraView(
                 width: double.infinity,
                 height: double.infinity,
                 onCameraCreated: (controller) {
-                  _remoteController = controller;
+                  _localController = controller;
+                  controller.addListener(
+                    (event, arguments) {
+                      debugPrint("aaa");
+                    },
+                  );
                 },
               ),
             ),
@@ -306,10 +307,19 @@ class VideoCallState extends State<VideoCallScreen> {
                 ),
               ),
             if (_callingStatus == CallStatus.ringing.value || _callingStatus == CallStatus.calling.value)
+              Text(
+                _callingStatus,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                ),
+              ),
+            if (_callingStatus == CallStatus.ringing.value ||
+                _callingStatus == CallStatus.calling.value)
               Positioned(
                 left: 0,
                 right: 0,
-                bottom: MediaQuery.of(context).padding.bottom + 12,
+                bottom: MediaQuery.of(context).padding.bottom + 32,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
