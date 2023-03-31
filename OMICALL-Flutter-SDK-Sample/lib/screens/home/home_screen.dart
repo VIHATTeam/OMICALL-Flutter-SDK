@@ -67,10 +67,10 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
       if (omiAction.actionName == OmiEventList.onCallEstablished) {
-        if (_dialScreenKey != null || _dialScreenKey?.currentState != null) {
+        if (_dialScreenKey?.currentState != null) {
           return;
         }
-        if (_videoScreenKey != null || _videoScreenKey?.currentState != null) {
+        if (_videoScreenKey?.currentState != null) {
           return;
         }
         final data = omiAction.data;

@@ -242,11 +242,6 @@ class VideoCallState extends State<VideoCallScreen> {
                 height: double.infinity,
                 onCameraCreated: (controller) {
                   _localController = controller;
-                  controller.addListener(
-                    (event, arguments) {
-                      debugPrint("aaa");
-                    },
-                  );
                 },
               ),
             ),
