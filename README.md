@@ -9,14 +9,14 @@ The most important part of the framework is :
 - Full inteface to interactive with core function like sound/ringtone/codec.
 
 ## Status
-Currently active maintained
+Currently active maintainance and improve performance
 
 
 ## Running
 Install via pubspec.yaml:
 
 ```
-omicall_flutter_plugin: ^1.0.9
+omicall_flutter_plugin: ^latest_version
 ```
 
 ### Configuration
@@ -26,18 +26,40 @@ omicall_flutter_plugin: ^1.0.9
 - Add this setting in `build.gradle`:
 
 ```
-jcenter() // Warning: this repository is going to shut down soon
+jcenter() 
 maven {
-    url("https://vihat.jfrog.io/artifactory/vihat-local-repo")
+    url("https://vihatgroup.jfrog.io/artifactory/omi-voice/")
     credentials {
-        username = "anonymous"
+        username = "downloader"
+        password = "Omi@2022"
     }
 }
 ```
 
 ```
-classpath 'com.google.gms:google-services:4.3.13' //in dependencies
+//in dependencies
+classpath 'com.google.gms:google-services:4.3.13'
 ```
+
+```
+//under buildscript
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        jcenter() // Warning: this repository is going to shut down soon
+        maven {
+            url("https://vihatgroup.jfrog.io/artifactory/omi-voice/")
+            credentials {
+                username = "downloader"
+                password = "Omi@2022"
+            }
+        }
+    }
+}
+```
+
+You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/main/OMICALL-Flutter-SDK-Sample/android/build.gradle">android/build.gradle</a> to know more informations.
 
 - Add this setting In `app/build.gradle`:
 
@@ -47,28 +69,101 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.google.gms.google-services'
 ```
 
-Push Notification:
+You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/main/OMICALL-Flutter-SDK-Sample/android/app/build.gradle">android/app/build.gradle</a> to know more informations.
 
-- Add `google-service.json` in `android/app` (For more information, you can refer <a href="https://firebase.flutter.dev/docs/manual-installation/android">Firebase core</a>)
+- Update AndroidManifest.xml:
 
-- For more setting information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/android-sdk/cau-hinh-push-notification">Omicall Config Push for Android</a>
+```
+//need request this permission
+<uses-permission android:name="android.permission.INTERNET" />
+//add this lines inside <activity>
+<intent-filter>
+    <action android:name="com.omicall.sdk.CallingActivity"/>
+    <category android:name="android.intent.category.DEFAULT" />
+</intent-filter>
+//add this lines outside <activity>
+<service
+    android:name="vn.vihat.omicall.omisdk.service.FMService"
+    android:enabled="true"
+    android:exported="false">
+    <intent-filter>
+        <action android:name="com.google.firebase.MESSAGING_EVENT" />
+    </intent-filter>
+</service>
+```
+You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/main/OMICALL-Flutter-SDK-Sample/android/app/src/main/AndroidManifest.xml">AndroidManifest</a> to know more informations.
+
+
+- We registered permissions into my plugin:
+```
+<uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"
+    tools:ignore="ProtectedPermissions" />
+<uses-permission android:name="android.permission.INTERNET" />
+<uses-permission android:name="android.permission.USE_SIP" />
+<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+<uses-permission android:name="android.permission.WAKE_LOCK" />
+<uses-permission android:name="android.permission.CAMERA" />
+<uses-permission android:name="android.permission.RECORD_AUDIO" />
+<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+<uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+<uses-permission android:name="android.permission.WAKE_LOCK"/>
+<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+```
+
+- Setup push notification: We only support Firebase for push notification.
+  - Add `google-service.json` in `android/app` (For more information, you can refer <a href="https://pub.dev/packages/firebase_core">firebase_core</a>)
+  - Add Fire Messaging to receive `fcm_token` (You can refer <a href="https://pub.dev/packages/firebase_messaging">firebase_messaging</a> to setup notification for Flutter)
+
+  - For more setting information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/android-sdk/cau-hinh-push-notification">Config Push for Android</a>
 
 
 #### iOS:
+----
 
-- Set up environment and library:
+We support both Object-C and Swift. But we only support documents for Object-C. We will write for Swift language later. Thank you.
+
+---
+
+- Add variables in Appdelegate.h:
 
 ```
+#import <UIKit/UIKit.h>
+#import <UserNotifications/UserNotifications.h>
+#import <OmiKit/OmiKit-umbrella.h>
+#import <OmiKit/Constants.h>
+#import <UserNotifications/UserNotifications.h>
+
+PushKitManager *pushkitManager;
+CallKitProviderDelegate * provider;
+PKPushRegistry * voipRegistry;
+```
+
+- Edit AppDelegate.m:
+
+```
+#import <OmiKit/OmiKit.h>
 #import <omicall_flutter_plugin/omicall_flutter_plugin-Swift.h>
 
-[self registerOmicallWithEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX supportVideoCall:supportForVideo];
-We have 2 environment variables:
-- KEY_OMI_APP_ENVIROMENT_SANDBOX //Support for testing
-- KEY_OMI_APP_ENVIROMENT_PRODUCTION //Supprt for production
-//supportForVideo is TRUE, if you need to support video call or else.
+[OmiClient setEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX];
+provider = [[CallKitProviderDelegate alloc] initWithCallManager: [OMISIPLib sharedInstance].callManager];
+voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
+pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
 ```
 
-- Save token for `OmiClient`:
+-  Add this lines into `Info.plist`:
+
+```
+<key>NSCameraUsageDescription</key>
+<string>Need camera access for video call functions</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>Need microphone access for make Call</string>
+```
+
+- Save token for `OmiClient`: You use `firebase_messaging` into your project so you don't need add this lines.
 
 ```
 - (void)application:(UIApplication*)app didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)devToken
@@ -87,65 +182,155 @@ We have 2 environment variables:
 }
 
 ```
-Push Notification:
-Omicall need 2 certificate: VOIP Push Certificate & User Push Notification Certificate
 
-- For more information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/ios-sdk/cau-hinh-push-notification">Omicall Push Notification for iOS</a>
+*** Only under use under lines when add `firebase_messaging` plugin ***
+- Setup push notification: We only support Firebase for push notification.
+  - Add `google-service.json` in `android/app` (For more information, you can refer <a href="https://pub.dev/packages/firebase_core">firebase_core</a>)
+  - Add Fire Messaging to receive `fcm_token` (You can refer <a href="https://pub.dev/packages/firebase_messaging">firebase_messaging</a> to setup notification for Flutter)
+
+  - For more setting information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/ios-sdk/cau-hinh-push-notification">Config Push for iOS</a>
+
 
 ## Implement
 - Set up for Firebase:
 
 ```
 await Firebase.initializeApp();
-//if you use only on Android. Add this line `if (Platform.isAndroid)`
-//because we use APNS to push notification on iOS so you don't need add Firebase for iOS.
+// If you only use Firebase on Android. Add this line `if (Platform.isAndroid)`
+// Because we use APNS to push notification on iOS so you don't need add Firebase for iOS.
 ```
-- Init OmiChannel:
-
-```
-final omiChannel = OmiChannel();
-//You need init OmiChannel with a global variable
-```
-
-- Call actions: We definded `OmiAction` to call functions. For more information, you can search `omicall.dart`, all actions are in there.
-
-```
-final action = OmiAction.initCall(
-  userName.text,
-  password.text,
-  'thaonguyennguyen1197',
+- Important function.
+  - Create OmiKit: OmiKit need userName, password, realm to init enviroment. ViHAT Group will provide informations for you. Please contact for my sale:
+ ```
+await OmicallClient.instance.initCall(
+    userName: "", 
+    password: "",
+    realm: "",
+    isVideo: true/false,
 );
-omiChannel.action(action: action);
 ```
-* Action list:
-  * `OmiAction.initCall` : register and init OmiCall
-  * `OmiAction.updateToken` : update token for Android
-  * `OmiAction.startCall` : start Call
-  * `OmiAction.endCall` : end Call
-  * `OmiAction.toggleMute` : toggle the microphone status
-  * `OmiAction.toggleSpeaker` : toggle the voice status
-  * `OmiAction.sendDTMF` : send DTMF for call server
+- Upload token: OmiKit need FCM for Android and APNS to push notification on user devices. We use more packages: <a href="https://pub.dev/packages/firebase_messaging">firebase_messaging</a> and <a href="https://pub.dev/packages/device_info_plus">device_info_plus</a>
+  ```
+  await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+  );
+  final token = await FirebaseMessaging.instance.getToken();
+  String? apnToken;
+  if (Platform.isIOS) {
+      apnToken = await FirebaseMessaging.instance.getAPNSToken();
+  }
+  String id = "";
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  if (Platform.isAndroid) {
+      id = (await deviceInfo.androidInfo).id;
+  } else {
+      id = (await deviceInfo.iosInfo).identifierForVendor ?? "";
+  }
+  String appId = 'Bundle id on iOS/ App id on Android'
+  await OmicallClient.instance.updateToken(
+      id,
+      appId,
+      fcmToken: token,
+      apnsToken: apnToken,
+  );
+  ```
 
-* You can init action with another way.
-```
-final action = ActionModel(
-    actionName: ActionName.SEND_DTMF,
-    data: {"character": value},
-);
-omiChannel.action(action: action);
-```
+
+- Other functions:
+-  Call with phone number (mobile phone or internal number):
+ ```
+ OmicallClient.instance.startCall(
+        phone, //phone number
+        _isVideoCall, //call video or audio. If true is video call. 
+ );
+ ```
+- Accept a call:
+ ```
+ OmicallClient.instance.joinCall();
+ ```
+- End a call: We will push a event `endCall` for you.
+ ```
+ OmicallClient.instance.endCall();
+ ```
+- Toggle the audio: On/off audio a call
+ ```
+ OmicallClient.instance.toggleAudio();
+ ```
+- Toggle the speaker: On/off the phone speaker
+ ```
+ OmicallClient.instance.toggleSpeaker();
+ ```
+- Send character: We only support `1 to 9` and `* #`.
+ ```
+ OmicallClient.instance.sendDTMF(value);
+ ```
+- Video Call functions: Support only video call, We need enable video in `init functions` and `start call` to implements under functions.
+  - Switch front/back camera: We use the front camera for first time.
+  ```
+  OmicallClient.instance.switchCamera();
+  ```
+  - Toggle a video in video call: On/off video in video call
+  ```
+  OmicallClient.instance.toggleVideo();
+  ```
+  - Local Camera Widget: Your camera view in a call
+  ```
+  LocalCameraView(
+    width: double.infinity,
+    height: double.infinity,
+    onCameraCreated: (controller) {
+      _localController = controller;
+      //we will return the controller to call some functions.
+    },
+  )
+  ```
+  - Remote Camera Widget: Remote camera view in a call
+  ```
+    RemoteCameraView(
+      width: double.infinity,
+      height: double.infinity,
+      onCameraCreated: (controller) {
+        _remoteController = controller;
+      },
+    )
+  ```
+  - More function: Refresh camera
+  ```
+  //camera controller receive when you create camera widget.
+  RemoteCameraController? _remoteController;
+  LocalCameraController? _localController;
+  //refresh remote camera
+  void refreshRemoteCamera() {
+    _remoteController?.refresh();
+  }
+  //refresh local camera
+  void localRemoteCamera() {
+    _localController?.refresh();
+  }
+  ```
 
 * Event listener:
-
-```
-omiChannel.listerEvent((action) {
-  
-});
-```
-
-* Event List: `We support 5 events`
-  * `OmiEventList.onCallEnd`: Trigger when end the call.
-  * `OmiEventList.onCallEstablished`: Trigger when we created the call.
-  * `OmiEventList.onRinging`: Trigger when the phone is ringing.
-  * `OmiEventList.onHold`: Trigger when user hold the call. From parameters, you can reviceved correct status from server through `isHold`
-  * `OmiEventList.onMuted`: Trigger when user muted the call. From parameters, you can reviceved correct status from server through `isMuted`
+- Important event `eventTransferStream`: We provide it to listen call state change.
+ ```
+ OmicallClient.instance.controller.eventTransferStream..listen((omiAction) {
+ }
+ //OmiAction have 2 variables: actionName and data
+ ```
+    - Action Name value: 
+        - `incomingReceived`: Have a incoming call. On Android this event work only foreground
+        - `onCallEstablished`: Connected a call.
+        - `onCallEnd`: End a call.
+        - `onHold`: `Comming soon....`
+        - `onMuted`: `Comming soon...`
+    - Data value: We return `callerNumber`, `isVideo: true/false` information
+- Other events:
+  - Mic event: Listen on/off mic in a call
+  ```
+  OmicallClient.instance.onMicEvent() //StreamSubscription
+  ```
+  - Mute event: Listen on/off muted in a call
+  ```
+  OmicallClient.instance.onMuteEvent() //StreamSubscription
+  ```

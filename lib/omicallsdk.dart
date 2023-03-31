@@ -13,7 +13,6 @@ class OmicallClient {
 
   final OmicallSDKController _controller = OmicallSDKController();
 
-
   OmicallSDKController get controller => _controller;
 
   ///streaming camera event
@@ -34,10 +33,6 @@ class OmicallClient {
   ///destroy event
   void dispose() {
     _controller.dispose();
-  }
-
-  Future<dynamic> action({required OmiAction action}) {
-    return _controller.action(action);
   }
 
   Future<void> initCall({
