@@ -307,7 +307,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
 
     companion object {
         fun onDestroy() {
-            OmiClient.instance.disconnect()
+//            OmiClient.instance.disconnect()
         }
 
         fun onRequestPermissionsResult(
