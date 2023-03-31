@@ -266,7 +266,7 @@ await OmicallClient.instance.initCall(
  ```
  OmicallClient.instance.sendDTMF(value);
  ```
-- Video Call functions: Support only video call, you need enable video in `init functions` and `start call` to implements under functions.
+- Video Call functions: Support only video call, We need enable video in `init functions` and `start call` to implements under functions.
   - Switch front/back camera: We use the front camera for first time.
   ```
   OmicallClient.instance.switchCamera();
@@ -305,14 +305,14 @@ await OmicallClient.instance.initCall(
   void refreshRemoteCamera() {
     _remoteController?.refresh();
   }
-  //refresh local camera
+  //refresh remote camera
   void localRemoteCamera() {
     _localController?.refresh();
   }
   ```
 
-* Event listener:
- - Important event `eventTransferStream`: We provide it to listen call state change.
+####  Event listener:
+- Important event `eventTransferStream`: We provide it to listen call state change.
  ```
  OmicallClient.instance.controller.eventTransferStream..listen((omiAction) {
  }
