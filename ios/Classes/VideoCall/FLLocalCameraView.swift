@@ -53,15 +53,12 @@ class FLLocalCameraView: NSObject, FlutterPlatformView {
         methodChannel = FlutterMethodChannel(name: "local_camera_controller/\(viewId)", binaryMessenger: messenger!)
         super.init()
         methodChannel?.setMethodCallHandler(onMethodCall)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {[weak self] in
-            guard let self = self else { return }
-            self.setupViews()
-        })
     }
     
     func onMethodCall(call: FlutterMethodCall, result: FlutterResult) {
             switch(call.method){
-            case "switch":
+            case "refresh":
+                setupViews()
                 break
             default:
                 result(FlutterMethodNotImplemented)
