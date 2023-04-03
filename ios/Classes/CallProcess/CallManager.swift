@@ -139,7 +139,6 @@ class CallManager {
     
     /// Start call
     func startCall(_ phoneNumber: String, isVideo: Bool) {
-//        registerNotificationCenter()
         if (isVideo) {
             OmiClient.startVideoCall(phoneNumber)
             return
