@@ -208,7 +208,7 @@ await Firebase.initializeApp();
       host: "",
       isVideo: true/false,
     );
-```
+    ```
 - Upload token: OmiKit need FCM for Android and APNS to push notification on user devices. We use more packages: <a href="https://pub.dev/packages/firebase_messaging">firebase_messaging</a> and <a href="https://pub.dev/packages/device_info_plus">device_info_plus</a>
   ```
   await FirebaseMessaging.instance.requestPermission(
