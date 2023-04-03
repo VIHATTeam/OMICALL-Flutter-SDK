@@ -201,13 +201,13 @@ await Firebase.initializeApp();
 - Important function.
   - Create OmiKit: OmiKit need userName, password, realm, host to init enviroment. ViHAT Group will provide informations for you. Please contact for my sale:
 ```
-    await OmicallClient.instance.initCall(
-        userName: "", 
-        password: "",
-        realm: "",
-        host: "",
-        isVideo: true/false,
-    );
+await OmicallClient.instance.initCall(
+    userName: "", 
+    password: "",
+    realm: "",
+    host: "",
+    isVideo: true/false,
+);
 ```
 - Upload token: OmiKit need FCM for Android and APNS to push notification on user devices. We use more packages: <a href="https://pub.dev/packages/firebase_messaging">firebase_messaging</a> and <a href="https://pub.dev/packages/device_info_plus">device_info_plus</a>
   ```
@@ -240,32 +240,32 @@ await Firebase.initializeApp();
 
 - Other functions:
   -  Call with phone number (mobile phone or internal number):
- ```
- OmicallClient.instance.startCall(
-        phone, //phone number
-        _isVideoCall, //call video or audio. If true is video call. 
- );
- ```
-    - Accept a call:
- ```
- OmicallClient.instance.joinCall();
- ```
-    - End a call: We will push a event `endCall` for you.
- ```
- OmicallClient.instance.endCall();
- ```
-    - Toggle the audio: On/off audio a call
- ```
- OmicallClient.instance.toggleAudio();
- ```
-    - Toggle the speaker: On/off the phone speaker
- ```
- OmicallClient.instance.toggleSpeaker();
- ```
-    - Send character: We only support `1 to 9` and `* #`.
- ```
- OmicallClient.instance.sendDTMF(value);
- ```
+    ```
+    OmicallClient.instance.startCall(
+    phone, //phone number
+    _isVideoCall, //call video or audio. If true is video call. 
+    );
+    ```
+  - Accept a call:
+    ```
+    OmicallClient.instance.joinCall();
+    ```
+  - End a call: We will push a event `endCall` for you.
+    ```
+    OmicallClient.instance.endCall();
+    ```
+  - Toggle the audio: On/off audio a call
+    ```
+    OmicallClient.instance.toggleAudio();
+    ```
+  - Toggle the speaker: On/off the phone speaker
+    ```
+    OmicallClient.instance.toggleSpeaker();
+    ```
+  - Send character: We only support `1 to 9` and `* #`.
+    ```
+    OmicallClient.instance.sendDTMF(value);
+    ```
 - Video Call functions: Support only video call, We need enable video in `init functions` and `start call` to implements under functions.
   - Switch front/back camera: We use the front camera for first time.
   ```
@@ -303,11 +303,11 @@ await Firebase.initializeApp();
   LocalCameraController? _localController;
   //refresh remote camera
   void refreshRemoteCamera() {
-       _remoteController?.refresh();
+    _remoteController?.refresh();
   }
   //refresh remote camera
   void localRemoteCamera() {
-       _localController?.refresh();
+    _localController?.refresh();
   }
   ```
 
