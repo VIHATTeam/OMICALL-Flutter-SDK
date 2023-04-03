@@ -44,7 +44,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-
+/OMICALL-Flutter-SDK-Sample/android/app/google-services.json
 #fastlane
 /fastlane/report.xml
 .fvm/
