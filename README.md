@@ -120,7 +120,6 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
 
   - For more setting information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/android-sdk/cau-hinh-push-notification">Config Push for Android</a>
 
-
 #### iOS:
 ----
 
@@ -183,10 +182,10 @@ pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
 
 ```
 
-*** Only under use under lines when add `firebase_messaging` plugin ***
+*** Only use under lines when add `firebase_messaging` plugin ***
 - Setup push notification: We only support Firebase for push notification.
   - Add `google-service.json` in `android/app` (For more information, you can refer <a href="https://pub.dev/packages/firebase_core">firebase_core</a>)
-  - Add Fire Messaging to receive `fcm_token` (You can refer <a href="https://pub.dev/packages/firebase_messaging">firebase_messaging</a> to setup notification for Flutter)
+  - Add Firebase Messaging to receive `fcm_token` (You can refer <a href="https://pub.dev/packages/firebase_messaging">firebase_messaging</a> to setup notification for Flutter)
 
   - For more setting information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/ios-sdk/cau-hinh-push-notification">Config Push for iOS</a>
 
@@ -200,14 +199,15 @@ await Firebase.initializeApp();
 // Because we use APNS to push notification on iOS so you don't need add Firebase for iOS.
 ```
 - Important function.
-  - Create OmiKit: OmiKit need userName, password, realm to init enviroment. ViHAT Group will provide informations for you. Please contact for my sale:
- ```
-await OmicallClient.instance.initCall(
-    userName: "", 
-    password: "",
-    realm: "",
-    isVideo: true/false,
-);
+  - Create OmiKit: OmiKit need userName, password, realm, host to init enviroment. ViHAT Group will provide informations for you. Please contact for my sale:
+```
+    await OmicallClient.instance.initCall(
+        userName: "", 
+        password: "",
+        realm: "",
+        host: "",
+        isVideo: true/false,
+    );
 ```
 - Upload token: OmiKit need FCM for Android and APNS to push notification on user devices. We use more packages: <a href="https://pub.dev/packages/firebase_messaging">firebase_messaging</a> and <a href="https://pub.dev/packages/device_info_plus">device_info_plus</a>
   ```
@@ -239,30 +239,30 @@ await OmicallClient.instance.initCall(
 
 
 - Other functions:
--  Call with phone number (mobile phone or internal number):
+  -  Call with phone number (mobile phone or internal number):
  ```
  OmicallClient.instance.startCall(
         phone, //phone number
         _isVideoCall, //call video or audio. If true is video call. 
  );
  ```
-- Accept a call:
+    - Accept a call:
  ```
  OmicallClient.instance.joinCall();
  ```
-- End a call: We will push a event `endCall` for you.
+    - End a call: We will push a event `endCall` for you.
  ```
  OmicallClient.instance.endCall();
  ```
-- Toggle the audio: On/off audio a call
+    - Toggle the audio: On/off audio a call
  ```
  OmicallClient.instance.toggleAudio();
  ```
-- Toggle the speaker: On/off the phone speaker
+    - Toggle the speaker: On/off the phone speaker
  ```
  OmicallClient.instance.toggleSpeaker();
  ```
-- Send character: We only support `1 to 9` and `* #`.
+    - Send character: We only support `1 to 9` and `* #`.
  ```
  OmicallClient.instance.sendDTMF(value);
  ```
@@ -277,14 +277,14 @@ await OmicallClient.instance.initCall(
   ```
   - Local Camera Widget: Your camera view in a call
   ```
-  LocalCameraView(
-    width: double.infinity,
-    height: double.infinity,
-    onCameraCreated: (controller) {
-      _localController = controller;
-      //we will return the controller to call some functions.
-    },
-  )
+    LocalCameraView(
+      width: double.infinity,
+      height: double.infinity,
+      onCameraCreated: (controller) {
+        _localController = controller;
+        //we will return the controller to call some functions.
+      },
+    )
   ```
   - Remote Camera Widget: Remote camera view in a call
   ```
@@ -303,16 +303,16 @@ await OmicallClient.instance.initCall(
   LocalCameraController? _localController;
   //refresh remote camera
   void refreshRemoteCamera() {
-    _remoteController?.refresh();
+       _remoteController?.refresh();
   }
   //refresh remote camera
   void localRemoteCamera() {
-    _localController?.refresh();
+       _localController?.refresh();
   }
   ```
 
-####  Event listener:
-- Important event `eventTransferStream`: We provide it to listen call state change.
+- Event listener:
+  - Important event `eventTransferStream`: We provide it to listen call state change.
  ```
  OmicallClient.instance.controller.eventTransferStream..listen((omiAction) {
  }
