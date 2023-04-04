@@ -39,6 +39,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
     private var onMuteEventSink: EventSink? = null
     private var activity: FlutterActivity? = null
     private var applicationContext: Context? = null
+    private var initResult : MethodChannel.Result? = null
     private var icSpeaker = false
     private var isMute = false
 
@@ -114,6 +115,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
     private val accountListener = object : OmiAccountListener {
         override fun onAccountStatus(online: Boolean) {
             Log.d("aaa", "Account status $online")
+            initResult?.success(online)
         }
     }
 
@@ -157,6 +159,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
 
         when (data["actionName"]) {
             INIT_CALL -> {
+                initResult = result
                 OmiClient(applicationContext!!)
                 OmiClient.instance.setListener(callListener)
                 OmiClient.instance.addAccountListener(accountListener)
@@ -165,7 +168,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
                 val apiKey = dataOmi["apiKey"] as? String
                 val isVideo = dataOmi["isVideo"] as? Boolean
                 if (usrName != null && usrUuid != null && apiKey != null) {
-                    OmiClient.register(
+                    OmiClient.registerWithApiKey(
                         apiKey = apiKey,
                         userName = usrName,
                         uuid = usrUuid,
@@ -203,7 +206,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
                         this.applicationContext!!.getSystemService(Context.CAMERA_SERVICE) as CameraManager
                     OmiClient.instance.setCameraManager(cm)
                 }
-                result.success(true)
             }
             UPDATE_TOKEN -> {
                 val deviceTokenAndroid = dataOmi["fcmToken"] as String

@@ -41,15 +41,17 @@ class CallManager {
         }
     }
     
-    func initEndpoint(params: [String: Any]){
+    func initEndpoint(params: [String: Any]) -> Bool {
+        var result = true
         if let usrUuid = params["usrUuid"] as? String, let fullName = params["fullName"] as? String, let apiKey = params["apiKey"] as? String {
-            OmiClient.initWithUUID(usrUuid, fullName: fullName, apiKey: apiKey)
+            result = OmiClient.initWithUUID(usrUuid, fullName: fullName, apiKey: apiKey)
         }
         if let isVideoCall = params["isVideo"] as? Bool, isVideoCall == true {
             OmiClient.startOmiService(true)
             videoManager = OMIVideoViewManager.init()
         }
         registerNotificationCenter()
+        return result
     }
     
     func registerNotificationCenter() {
