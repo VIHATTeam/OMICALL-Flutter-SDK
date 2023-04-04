@@ -158,7 +158,58 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
         val dataOmi = data["data"] as HashMap<String, Any>
 
         when (data["actionName"]) {
-            INIT_CALL -> {
+            INIT_CALL_API_KEY -> {
+                initResult = result
+                OmiClient(applicationContext!!)
+                OmiClient.instance.setListener(callListener)
+                OmiClient.instance.addAccountListener(accountListener)
+                val userName = dataOmi["userName"] as? String
+                val password = dataOmi["password"] as? String
+                val realm = dataOmi["realm"] as? String
+                val host = dataOmi["host"] as? String
+                val isVideo = dataOmi["isVideo"] as? Boolean
+                if (userName != null && password != null && realm != null && host != null) {
+                    OmiClient.register(
+                        userName,
+                        password,
+                        isVideo ?: true,
+                        realm,
+                        host,
+                    )
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    requestPermissions(
+                        activity!!,
+                        arrayOf(
+                            Manifest.permission.USE_SIP,
+                            Manifest.permission.CALL_PHONE,
+                            Manifest.permission.CAMERA,
+                            Manifest.permission.MODIFY_AUDIO_SETTINGS,
+                            Manifest.permission.RECORD_AUDIO,
+                            Manifest.permission.POST_NOTIFICATIONS,
+                        ),
+                        0,
+                    )
+                } else {
+                    requestPermissions(
+                        activity!!,
+                        arrayOf(
+                            Manifest.permission.USE_SIP,
+                            Manifest.permission.CALL_PHONE,
+                            Manifest.permission.CAMERA,
+                            Manifest.permission.MODIFY_AUDIO_SETTINGS,
+                            Manifest.permission.RECORD_AUDIO,
+                        ),
+                        0,
+                    )
+                }
+                if (isVideo == true) {
+                    val cm =
+                        this.applicationContext!!.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+                    OmiClient.instance.setCameraManager(cm)
+                }
+            }
+            INIT_CALL_USER_PASSWORD -> {
                 initResult = result
                 OmiClient(applicationContext!!)
                 OmiClient.instance.setListener(callListener)

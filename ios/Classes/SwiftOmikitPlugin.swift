@@ -91,8 +91,12 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           CallManager.shareInstance().updateToken(params: dataOmi)
           result(true)
           break
-      case INIT_CALL:
-          let value = CallManager.shareInstance().initEndpoint(params: dataOmi)
+      case INIT_CALL_API_KEY:
+          let value = CallManager.shareInstance().initWithApiKeyEndpoint(params: dataOmi)
+          result(value)
+          break
+      case INIT_CALL_USER_PASSWORD:
+          let value = CallManager.shareInstance().initWithUserPasswordEndpoint(params: dataOmi)
           result(value)
           break
       case START_CALL:
@@ -101,9 +105,9 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           if let isVideoCall = dataOmi["isVideo"] as? Bool {
               isVideo = isVideoCall
           }
-          let startCallResult = CallManager.shareInstance().startCall(phoneNumber, isVideo: isVideo)
+          CallManager.shareInstance().startCall(phoneNumber, isVideo: isVideo)
           sendOnMuteStatus()
-          result(startCallResult)
+          result(true)
           break
       case END_CALL:
           CallManager.shareInstance().endAvailableCall()
