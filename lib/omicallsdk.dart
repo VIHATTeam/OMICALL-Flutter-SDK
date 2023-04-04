@@ -35,17 +35,34 @@ class OmicallClient {
     _controller.dispose();
   }
 
-  Future<void> initCall({
+  Future<void> initCallWithApiKey({
     String? usrName,
     String? usrUuid,
     String? apiKey,
     bool isVideo = true,
   }) async {
-    final action = OmiAction(actionName: OmiActionName.INIT_CALL, data: {
+    final action = OmiAction(actionName: OmiActionName.INIT_CALL_API_KEY, data: {
       'fullName': usrName,
       'usrUuid': usrUuid,
       'apiKey': apiKey,
       'isVideo': isVideo,
+    });
+    return await _controller.action(action);
+  }
+
+  Future<void> initCallWithUserPassword({
+    String? userName,
+    String? password,
+    String? realm,
+    String? host,
+    bool isVideo = true,
+  }) async {
+    final action = OmiAction(actionName: OmiActionName.INIT_CALL_USER_PASSWORD, data: {
+      'userName': userName,
+      'password': password,
+      'realm': realm,
+      'isVideo': isVideo,
+      'host': host,
     });
     return await _controller.action(action);
   }

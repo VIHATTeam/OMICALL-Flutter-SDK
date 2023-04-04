@@ -6,15 +6,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class LoginApiKeyScreen extends StatefulWidget {
+  const LoginApiKeyScreen({Key? key}) : super(key: key);
 
   // var phoneNumber = "";
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<LoginApiKeyScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginApiKeyScreen> {
   // NSString * USER_NAME1 = @"100";
   // NSString * PASS_WORD1 = @"Kunkun";
   // NSString * USER_NAME2 = @"101";
@@ -212,7 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     EasyLoading.show();
-    await OmicallClient.instance.initCall(
+    await OmicallClient.instance.initCallWithApiKey(
       usrName: _userNameController.text,
       usrUuid: _usrUuidController.text,
       isVideo: _supportVideoCall,

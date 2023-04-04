@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/home/home_screen.dart';
-import 'package:calling/screens/login/login_screen.dart';
+import 'package:calling/screens/login/login_apikey_screen.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -25,12 +25,18 @@ Future<void> initService(Map<dynamic, dynamic>? loginInfo) async {
     return;
   }
   //auto login
-  await OmicallClient.instance.initCall(
+  await OmicallClient.instance.initCallWithApiKey(
     usrName: null,
     apiKey: null,
     usrUuid: null,
     isVideo: true,
   );
+  // await OmicallClient.instance.initCallWithUserPassword(
+  //   userName: null,
+  //   password: null,
+  //   realm: null,
+  //   isVideo: true,
+  // );
   await updateToken(
     showLoading: false,
   );
@@ -61,7 +67,7 @@ class _MyAppState extends State<MyApp> {
     return GestureDetector(
       child: MaterialApp(
         theme: ThemeData.light(),
-        home: loginInfo != null ? const HomeScreen() : const LoginScreen(),
+        home: loginInfo != null ? const HomeScreen() : const LoginApiKeyScreen(),
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
       ),
