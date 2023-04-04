@@ -21,13 +21,13 @@ class _LoginScreenState extends State<LoginScreen> {
   // NSString * PASS_WORD2 = @"Kunkun12345";
   //video
   late final TextEditingController _userNameController = TextEditingController()
-    ..text = Platform.isAndroid ? '112' : '111';
-  late final TextEditingController _passwordController = TextEditingController()
-    ..text = Platform.isAndroid ? 'kjO8XbGZZG' : 'P5JgMhMWhm';
-  late final TextEditingController _serviceUrlController =
-      TextEditingController()..text = 'dky';
-  late final TextEditingController _hostUrlController =
-  TextEditingController()..text = '171.244.138.14';
+    ..text = Platform.isAndroid ? 'tienvt12' : 'tienvt11';
+  late final TextEditingController _usrUuidController = TextEditingController()
+    ..text = Platform.isAndroid
+        ? '67f06b0a-4905-46ee-93f4'
+        : '67f06b0a-4905-46ee-93f4-dff81e8d349x';
+  late final TextEditingController _apiKeyController = TextEditingController()
+    ..text = '2deb1550-9855-4b53-8a18-bd0418104dd9-070d6b10';
   bool _supportVideoCall = true;
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,
@@ -51,8 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void dispose() {
     _userNameController.dispose();
-    _passwordController.dispose();
-    _serviceUrlController.dispose();
+    _usrUuidController.dispose();
     super.dispose();
   }
 
@@ -83,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 16,
             ),
             TextField(
-              controller: _passwordController,
+              controller: _usrUuidController,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.password),
                 labelText: "Password",
@@ -95,19 +94,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 16,
             ),
             TextField(
-              controller: _serviceUrlController,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.cleaning_services),
-                labelText: "Service",
-                enabledBorder: myInputBorder(),
-                focusedBorder: myFocusBorder(),
-              ),
-            ),
-            const SizedBox(
-              height: 16,
-            ),
-            TextField(
-              controller: _hostUrlController,
+              controller: _apiKeyController,
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.cleaning_services),
                 labelText: "Host",
@@ -220,25 +207,23 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _login() async {
     if (_userNameController.text.isEmpty ||
-        _passwordController.text.isEmpty ||
-        _serviceUrlController.text.isEmpty || _hostUrlController.text.isEmpty) {
+        _usrUuidController.text.isEmpty ||
+        _apiKeyController.text.isEmpty) {
       return;
     }
     EasyLoading.show();
     await OmicallClient.instance.initCall(
-      userName: _userNameController.text,
-      password: _passwordController.text,
-      realm: _serviceUrlController.text,
+      usrName: _userNameController.text,
+      usrUuid: _usrUuidController.text,
       isVideo: _supportVideoCall,
-      host: _hostUrlController.text,
+      apiKey: _apiKeyController.text,
     );
 
     await LocalStorage.instance.setLoginInfo({
-      "userName": _userNameController.text,
-      "password": _passwordController.text,
-      "realm": _serviceUrlController.text,
+      "usrName": _userNameController.text,
+      "usrUuid": _usrUuidController.text,
       "isVideo": _supportVideoCall,
-      "host": _hostUrlController.text,
+      "apiKey": _apiKeyController.text,
     });
     EasyLoading.dismiss();
     if (!mounted) {

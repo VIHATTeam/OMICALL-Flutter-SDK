@@ -24,7 +24,7 @@ internal class FLRemoteCameraView(context: Context, id: Int, creationParams: Map
     override fun dispose() {}
 
     init {
-        methodChannel = MethodChannel(messenger, "remote_camera_controller/$id")
+        methodChannel = MethodChannel(messenger, "omicallsdk/remote_camera_controller/$id")
         methodChannel.setMethodCallHandler(this)
         remoteView = TextureView(context)
         remoteView.surfaceTextureListener = this

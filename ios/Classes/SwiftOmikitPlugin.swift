@@ -26,16 +26,16 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       }
       instance!.channel = FlutterMethodChannel(name: "omicallsdk", binaryMessenger: registrar.messenger())
       registrar.addMethodCallDelegate(instance, channel: instance!.channel)
-      let cameraEventChannel = FlutterEventChannel(name: "event/camera", binaryMessenger: registrar.messenger())
+      let cameraEventChannel = FlutterEventChannel(name: "omicallsdk/event/camera", binaryMessenger: registrar.messenger())
       cameraEventChannel.setStreamHandler(instance)
-      let onMuteEventChannel = FlutterEventChannel(name: "event/on_mute", binaryMessenger: registrar.messenger())
+      let onMuteEventChannel = FlutterEventChannel(name: "omicallsdk/event/on_mute", binaryMessenger: registrar.messenger())
       onMuteEventChannel.setStreamHandler(instance)
-      let onMicEventChannel = FlutterEventChannel(name: "event/on_mic", binaryMessenger: registrar.messenger())
+      let onMicEventChannel = FlutterEventChannel(name: "omicallsdk/event/on_mic", binaryMessenger: registrar.messenger())
       onMicEventChannel.setStreamHandler(instance)
       let localFactory = FLLocalCameraFactory(messenger: registrar.messenger())
-      registrar.register(localFactory, withId: "local_camera_view")
+      registrar.register(localFactory, withId: "omicallsdk/local_camera_view")
       let remoteFactory = FLRemoteCameraFactory(messenger: registrar.messenger())
-      registrar.register(remoteFactory, withId: "remote_camera_view")
+      registrar.register(remoteFactory, withId: "omicallsdk/remote_camera_view")
       AVCaptureDevice.requestAccess(for: .video) { result in
       }
   }

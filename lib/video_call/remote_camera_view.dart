@@ -9,7 +9,7 @@ typedef RemoteCameraCreatedCallback = void Function(
 
 class RemoteCameraView extends StatelessWidget {
   // This is used in the platform side to register the view.
-  final String viewType = 'remote_camera_view';
+  final String viewType = 'omicallsdk/remote_camera_view';
   final RemoteCameraCreatedCallback? onCameraCreated;
 
   // Pass parameters to the platform side.
@@ -63,7 +63,7 @@ class RemoteCameraView extends StatelessWidget {
 class RemoteCameraController {
   RemoteCameraController._(int id)
       : _channel =
-  MethodChannel('remote_camera_controller/$id');
+  MethodChannel('omicallsdk/remote_camera_controller/$id');
 
   final MethodChannel _channel;
 

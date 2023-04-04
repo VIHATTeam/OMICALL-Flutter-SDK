@@ -26,9 +26,9 @@ Future<void> initService(Map<dynamic, dynamic>? loginInfo) async {
   }
   //auto login
   await OmicallClient.instance.initCall(
-    userName: null,
-    password: null,
-    realm: null,
+    usrName: null,
+    apiKey: null,
+    usrUuid: null,
     isVideo: true,
   );
   await updateToken(

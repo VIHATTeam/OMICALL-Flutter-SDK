@@ -9,9 +9,9 @@ class OmicallSDKController {
   /// The method channel used to interact with the native platform.
 
   final _methodChannel = const MethodChannel('omicallsdk');
-  final _cameraChannel = const EventChannel('event/camera');
-  final _onMuteChannel = const EventChannel('event/on_mute');
-  final _onMicChannel = const EventChannel('event/on_mic');
+  final _cameraChannel = const EventChannel('omicallsdk/event/camera');
+  final _onMuteChannel = const EventChannel('omicallsdk/event/on_mute');
+  final _onMicChannel = const EventChannel('omicallsdk/event/on_mic');
   final StreamController<OmiAction> _eventTransfer =
       StreamController<OmiAction>.broadcast();
 
