@@ -24,7 +24,7 @@ internal class FLLocalCameraView(context: Context, id: Int, creationParams: Map<
     override fun dispose() {}
 
     init {
-        methodChannel = MethodChannel(messenger, "local_camera_controller/$id")
+        methodChannel = MethodChannel(messenger, "omicallsdk/local_camera_controller/$id")
         methodChannel.setMethodCallHandler(this)
         localView = TextureView(context)
         localView.surfaceTextureListener = this

@@ -36,18 +36,16 @@ class OmicallClient {
   }
 
   Future<void> initCall({
-    String? userName,
-    String? password,
-    String? realm,
-    String? host,
+    String? usrName,
+    String? usrUuid,
+    String? apiKey,
     bool isVideo = true,
   }) async {
     final action = OmiAction(actionName: OmiActionName.INIT_CALL, data: {
-      'userName': userName,
-      'password': password,
-      'realm': realm,
+      'fullName': usrName,
+      'usrUuid': usrUuid,
+      'apiKey': apiKey,
       'isVideo': isVideo,
-      'host': host,
     });
     return await _controller.action(action);
   }

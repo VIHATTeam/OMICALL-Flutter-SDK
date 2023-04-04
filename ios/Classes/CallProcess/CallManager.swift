@@ -42,11 +42,8 @@ class CallManager {
     }
     
     func initEndpoint(params: [String: Any]){
-        if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String, let host = params["host"] as? String {
-            OmiClient.initWithUsername(userName, password: password, realm: realm)
-        }
-        if (Thread.isMainThread) {
-            print("main thread")
+        if let usrUuid = params["usrUuid"] as? String, let fullName = params["fullName"] as? String, let apiKey = params["apiKey"] as? String {
+            OmiClient.initWithUUID(usrUuid, fullName: fullName, apiKey: apiKey)
         }
         if let isVideoCall = params["isVideo"] as? Bool, isVideoCall == true {
             OmiClient.startOmiService(true)
