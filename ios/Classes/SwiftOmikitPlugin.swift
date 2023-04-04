@@ -36,8 +36,6 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       registrar.register(localFactory, withId: "omicallsdk/local_camera_view")
       let remoteFactory = FLRemoteCameraFactory(messenger: registrar.messenger())
       registrar.register(remoteFactory, withId: "omicallsdk/remote_camera_view")
-      AVCaptureDevice.requestAccess(for: .video) { result in
-      }
   }
 
 
@@ -94,8 +92,8 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           result(true)
           break
       case INIT_CALL:
-          CallManager.shareInstance().initEndpoint(params: dataOmi)
-          result(true)
+          let value = CallManager.shareInstance().initEndpoint(params: dataOmi)
+          result(value)
           break
       case START_CALL:
           let phoneNumber = dataOmi["phoneNumber"] as! String
@@ -103,9 +101,9 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           if let isVideoCall = dataOmi["isVideo"] as? Bool {
               isVideo = isVideoCall
           }
-          CallManager.shareInstance().startCall(phoneNumber, isVideo: isVideo)
+          let startCallResult = CallManager.shareInstance().startCall(phoneNumber, isVideo: isVideo)
           sendOnMuteStatus()
-          result(true)
+          result(startCallResult)
           break
       case END_CALL:
           CallManager.shareInstance().endAvailableCall()
@@ -114,7 +112,9 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       case TOGGLE_MUTE:
           CallManager.shareInstance().toggleMute()
           sendOnMuteStatus()
-          result(true)
+          if let call = CallManager.init().getAvailableCall() {
+              result(call.muted)
+          }
           break
       case TOGGLE_SPEAK:
           CallManager.shareInstance().toogleSpeaker()
