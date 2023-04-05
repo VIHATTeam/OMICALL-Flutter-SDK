@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/home/home_screen.dart';
 import 'package:calling/screens/login/login_apikey_screen.dart';
-import 'package:calling/screens/login/login_user_password_screen.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -13,34 +12,13 @@ import 'package:omicall_flutter_plugin/omicall.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global = MyHttpOverrides();
   await Firebase.initializeApp();
   final loginInfo = await LocalStorage.instance.loginInfo();
-  await initService(loginInfo);
+  OmicallClient.instance.startServices();
   runApp(MyApp(
     loginInfo: loginInfo,
   ));
-}
-
-Future<void> initService(Map<dynamic, dynamic>? loginInfo) async {
-  if (loginInfo == null) {
-    return;
-  }
-  //auto login
-  await OmicallClient.instance.initCallWithApiKey(
-    usrName: null,
-    apiKey: null,
-    usrUuid: null,
-    isVideo: true,
-  );
-  // await OmicallClient.instance.initCallWithUserPassword(
-  //   userName: null,
-  //   password: null,
-  //   realm: null,
-  //   isVideo: true,
-  // );
-  await updateToken(
-    showLoading: false,
-  );
 }
 
 class MyApp extends StatefulWidget {
@@ -112,5 +90,19 @@ Future<void> updateToken({
   );
   if (showLoading) {
     EasyLoading.dismiss();
+  }
+}
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (
+          X509Certificate cert,
+          String host,
+          int port,
+          ) {
+        return true;
+      };
   }
 }

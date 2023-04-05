@@ -44,9 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.needRequestNotification) {
-      updateToken();
-    }
+    updateToken();
     _subscription = OmicallClient.instance.controller.eventTransferStream
         .listen((omiAction) {
       if (omiAction.actionName == OmiEventList.incomingReceived) {

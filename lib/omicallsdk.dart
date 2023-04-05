@@ -6,9 +6,8 @@ import 'action/action_model.dart';
 import 'constant/names.dart';
 
 class OmicallClient {
-
   OmicallClient._();
-  
+
   static final instance = OmicallClient._();
 
   final OmicallSDKController _controller = OmicallSDKController();
@@ -35,13 +34,22 @@ class OmicallClient {
     _controller.dispose();
   }
 
+  Future<void> startServices() async {
+    final action = OmiAction(
+      actionName: OmiActionName.START_SERVICES,
+      data: {},
+    );
+    return await _controller.action(action);
+  }
+
   Future<void> initCallWithApiKey({
     String? usrName,
     String? usrUuid,
     String? apiKey,
     bool isVideo = true,
   }) async {
-    final action = OmiAction(actionName: OmiActionName.INIT_CALL_API_KEY, data: {
+    final action =
+        OmiAction(actionName: OmiActionName.INIT_CALL_API_KEY, data: {
       'fullName': usrName,
       'usrUuid': usrUuid,
       'apiKey': apiKey,
@@ -57,7 +65,8 @@ class OmicallClient {
     String? host,
     bool isVideo = true,
   }) async {
-    final action = OmiAction(actionName: OmiActionName.INIT_CALL_USER_PASSWORD, data: {
+    final action =
+        OmiAction(actionName: OmiActionName.INIT_CALL_USER_PASSWORD, data: {
       'userName': userName,
       'password': password,
       'realm': realm,
@@ -83,16 +92,15 @@ class OmicallClient {
   }
 
   Future<void> startCall(
-      String phoneNumber,
-      bool isVideo,
-      ) async {
+    String phoneNumber,
+    bool isVideo,
+  ) async {
     final action = OmiAction(actionName: OmiActionName.START_CALL, data: {
       'phoneNumber': phoneNumber,
       'isVideo': isVideo,
     });
     return await _controller.action(action);
   }
-
 
   Future<void> joinCall() async {
     final action = OmiAction(
@@ -139,9 +147,7 @@ class OmicallClient {
   Future<void> switchCamera() async {
     final action = OmiAction(
       actionName: OmiActionName.SWITCH_CAMERA,
-      data: {
-
-      },
+      data: {},
     );
     return await _controller.action(action);
   }
@@ -149,8 +155,7 @@ class OmicallClient {
   Future<void> getCameraStatus() async {
     final action = OmiAction(
       actionName: OmiActionName.CAMERA_STATUS,
-      data: {
-      },
+      data: {},
     );
     return await _controller.action(action);
   }
@@ -158,8 +163,7 @@ class OmicallClient {
   Future<void> toggleVideo() async {
     final action = OmiAction(
       actionName: OmiActionName.TOGGLE_VIDEO,
-      data: {
-      },
+      data: {},
     );
     return await _controller.action(action);
   }
@@ -167,8 +171,7 @@ class OmicallClient {
   Future<dynamic> getOutputAudios() async {
     final action = OmiAction(
       actionName: OmiActionName.OUTPUTS,
-      data: {
-      },
+      data: {},
     );
     return await _controller.action(action);
   }
@@ -186,11 +189,11 @@ class OmicallClient {
   Future<dynamic> getInputAudios() async {
     final action = OmiAction(
       actionName: OmiActionName.INPUTS,
-      data: {
-      },
+      data: {},
     );
     return await _controller.action(action);
   }
+
   Future<void> setInputAudio({required dynamic id}) async {
     final action = OmiAction(
       actionName: OmiActionName.SET_INPUT,

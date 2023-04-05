@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+##2.0.2
+* Fix crash on release mode: login and update notification for Android
+* Increase core version
+* Add "startServices" function
 
 ##2.0.1
 * Support API for SDK
