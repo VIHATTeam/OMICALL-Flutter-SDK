@@ -46,10 +46,10 @@ class CallManager {
         if let usrUuid = params["usrUuid"] as? String, let fullName = params["fullName"] as? String, let apiKey = params["apiKey"] as? String {
             result = OmiClient.initWithUUID(usrUuid, fullName: fullName, apiKey: apiKey)
         }
-        if let isVideoCall = params["isVideo"] as? Bool, isVideoCall == true {
-            OmiClient.startOmiService(true)
-            videoManager = OMIVideoViewManager.init()
-        }
+//        if let isVideoCall = params["isVideo"] as? Bool, isVideoCall == true {
+//            OmiClient.startOmiService(true)
+//            videoManager = OMIVideoViewManager.init()
+//        }
         registerNotificationCenter()
         return result
     }
@@ -58,10 +58,10 @@ class CallManager {
         if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String, let host = params["host"] as? String {
             OmiClient.initWithUsername(userName, password: password, realm: realm)
         }
-        if let isVideoCall = params["isVideo"] as? Bool, isVideoCall == true {
-            OmiClient.startOmiService(true)
-            videoManager = OMIVideoViewManager.init()
-        }
+//        if let isVideoCall = params["isVideo"] as? Bool, isVideoCall == true {
+//            OmiClient.startOmiService(true)
+//            videoManager = OMIVideoViewManager.init()
+//        }
         registerNotificationCenter()
         return true
     }
@@ -152,12 +152,14 @@ class CallManager {
     func startCall(_ phoneNumber: String, isVideo: Bool) {
         if (isVideo) {
             OmiClient.startVideoCall(phoneNumber)
+            videoManager = OMIVideoViewManager.init()
             return
         }
         OmiClient.startCall(phoneNumber)
     }
     
     func endAvailableCall() {
+        videoManager = nil
         guard let call = getAvailableCall() else {
             SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
             return
@@ -168,6 +170,7 @@ class CallManager {
     
     func endAllCalls() {
         omiLib.callManager.endAllCalls()
+        videoManager = nil
     }
     
     func joinCall() {

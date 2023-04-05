@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/home/home_screen.dart';
 import 'package:calling/screens/login/login_apikey_screen.dart';
+import 'package:calling/screens/login/login_user_password_screen.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -103,12 +104,14 @@ Future<void> updateToken({
   if (showLoading) {
     EasyLoading.show();
   }
-  await OmicallClient.instance.updateToken(
-    id,
-    Platform.isAndroid ? "vn.vihat.omicall.sdk_example" : "vn.vihat.omikit",
-    fcmToken: token,
-    apnsToken: apnToken,
-  );
+  if (Platform.isAndroid) {
+    await OmicallClient.instance.updateToken(
+      id,
+      Platform.isAndroid ? "omicall.concung.dev" : "vn.vihat.omikit",
+      fcmToken: token,
+      apnsToken: apnToken,
+    );
+  }
   if (showLoading) {
     EasyLoading.dismiss();
   }
