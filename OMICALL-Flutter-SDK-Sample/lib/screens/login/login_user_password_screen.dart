@@ -21,11 +21,14 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
   // NSString * PASS_WORD2 = @"Kunkun12345";
   //video
   late final TextEditingController _userNameController = TextEditingController()
-    ..text = Platform.isAndroid ? '112' : '111';
+    ..text = Platform.isAndroid ? '112' : '100';
   late final TextEditingController _passwordController = TextEditingController()
-    ..text = Platform.isAndroid ? 'kjO8XbGZZG' : 'P5JgMhMWhm';
+    ..text = Platform.isAndroid ? 'kjO8XbGZZG' : 'ConCung100';
   late final TextEditingController _serviceUrlController =
-  TextEditingController()..text = 'dky';
+      TextEditingController()..text = 'thaonguyennguyen1197';
+  late final TextEditingController _hostUrlController = TextEditingController()
+    ..text = '171.244.138.14';
+
   bool _supportVideoCall = true;
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,
@@ -97,6 +100,18 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
               decoration: InputDecoration(
                 prefixIcon: const Icon(Icons.cleaning_services),
                 labelText: "Service",
+                enabledBorder: myInputBorder(),
+                focusedBorder: myFocusBorder(),
+              ),
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            TextField(
+              controller: _hostUrlController,
+              decoration: InputDecoration(
+                prefixIcon: const Icon(Icons.cleaning_services),
+                labelText: "Host",
                 enabledBorder: myInputBorder(),
                 focusedBorder: myFocusBorder(),
               ),
@@ -207,7 +222,9 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
   void _login() async {
     if (_userNameController.text.isEmpty ||
         _passwordController.text.isEmpty ||
-        _serviceUrlController.text.isEmpty) {
+        _serviceUrlController.text.isEmpty ||
+        _serviceUrlController.text.isEmpty ||
+        _hostUrlController.text.isEmpty) {
       return;
     }
     EasyLoading.show();
@@ -215,6 +232,7 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
       userName: _userNameController.text,
       password: _passwordController.text,
       realm: _serviceUrlController.text,
+      host: _hostUrlController.text,
       isVideo: _supportVideoCall,
     );
 

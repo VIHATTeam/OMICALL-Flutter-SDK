@@ -18,21 +18,7 @@
   provider = [[CallKitProviderDelegate alloc] initWithCallManager: [OMISIPLib sharedInstance].callManager];
   voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
   pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
-  [self requestNotification];
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
-
-- (void)application:(UIApplication*)app didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)devToken
-{
-    // parse token bytes to string
-    const char *data = [devToken bytes];
-    NSMutableString *token = [NSMutableString string];
-    for (NSUInteger i = 0; i < [devToken length]; i++)
-    {
-        [token appendFormat:@"%02.2hhX", data[i]];
-    }
-    [OmiClient setUserPushNotificationToken:[token copy]];
-}
-
 
 @end

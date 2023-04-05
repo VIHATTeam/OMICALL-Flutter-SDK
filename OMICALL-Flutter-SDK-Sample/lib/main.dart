@@ -104,14 +104,12 @@ Future<void> updateToken({
   if (showLoading) {
     EasyLoading.show();
   }
-  if (Platform.isAndroid) {
-    await OmicallClient.instance.updateToken(
-      id,
-      Platform.isAndroid ? "omicall.concung.dev" : "vn.vihat.omikit",
-      fcmToken: token,
-      apnsToken: apnToken,
-    );
-  }
+  await OmicallClient.instance.updateToken(
+    id,
+    Platform.isAndroid ? "omicall.concung.dev" : "vn.vihat.omikit",
+    fcmToken: token,
+    apnsToken: apnToken,
+  );
   if (showLoading) {
     EasyLoading.dismiss();
   }
