@@ -87,6 +87,9 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       }
 
       switch(action) {
+      case START_SERVICES:
+          result(true)
+          break
       case UPDATE_TOKEN:
           CallManager.shareInstance().updateToken(params: dataOmi)
           result(true)

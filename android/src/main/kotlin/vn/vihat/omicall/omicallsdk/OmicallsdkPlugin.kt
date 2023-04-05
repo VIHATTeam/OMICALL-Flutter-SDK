@@ -5,6 +5,7 @@ import android.content.Context
 import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat.requestPermissions
@@ -19,7 +20,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import vn.vihat.omicall.omicallsdk.constants.*
 import vn.vihat.omicall.omicallsdk.video_call.FLLocalCameraFactory
 import vn.vihat.omicall.omicallsdk.video_call.FLRemoteCameraFactory
@@ -41,9 +42,10 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
     private var onMuteEventSink: EventSink? = null
     private var activity: FlutterActivity? = null
     private var applicationContext: Context? = null
-    private var initResult : MethodChannel.Result? = null
+//    private var initResult: MethodChannel.Result? = null
     private var icSpeaker = false
     private var isMute = false
+    private val mainScope = CoroutineScope(Dispatchers.Main)
 
     private val callListener = object : OmiListener {
 
@@ -119,8 +121,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
     private val accountListener = object : OmiAccountListener {
         override fun onAccountStatus(online: Boolean) {
             Log.d("aaa", "Account status $online")
-            initResult?.success(online)
-            initResult = null
+//            initResult?.success(online)
+//            initResult = null
         }
     }
 
@@ -129,11 +131,14 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
         applicationContext = flutterPluginBinding.applicationContext
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "omicallsdk")
         channel.setMethodCallHandler(this)
-        cameraEventChannel = EventChannel(flutterPluginBinding.binaryMessenger, "omicallsdk/event/camera")
+        cameraEventChannel =
+            EventChannel(flutterPluginBinding.binaryMessenger, "omicallsdk/event/camera")
         cameraEventChannel.setStreamHandler(this)
-        onMicEventChannel = EventChannel(flutterPluginBinding.binaryMessenger, "omicallsdk/event/on_mic")
+        onMicEventChannel =
+            EventChannel(flutterPluginBinding.binaryMessenger, "omicallsdk/event/on_mic")
         onMicEventChannel.setStreamHandler(this)
-        onMuteEventChannel = EventChannel(flutterPluginBinding.binaryMessenger, "omicallsdk/event/on_mute")
+        onMuteEventChannel =
+            EventChannel(flutterPluginBinding.binaryMessenger, "omicallsdk/event/on_mute")
         onMuteEventChannel.setStreamHandler(this)
         flutterPluginBinding
             .platformViewRegistry
@@ -161,11 +166,26 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
     private fun handleAction(call: MethodCall, result: Result) {
         val data = call.arguments as HashMap<String, Any>
         val dataOmi = data["data"] as HashMap<String, Any>
-
         when (data["actionName"]) {
+            START_SERVICES -> {
+                OmiClient(applicationContext!!)
+                OmiClient.instance.setListener(callListener)
+                OmiClient.instance.addAccountListener(accountListener)
+                OmiClient.instance.configPushNotification(
+                    prefix = "Cuộc gọi tới từ: ",
+                    declineTitle = "Từ chối",
+                    acceptTitle = "Chấp nhận",
+                    acceptBackgroundColor = "#FF3700B3",
+                    declineBackgroundColor = "#FF000000",
+                    incomingBackgroundColor = "#FFFFFFFF",
+                    incomingAcceptButtonImage = "join_call",
+                    incomingDeclineButtonImage = "hangup",
+                    backImage = "ic_back",
+                    userImage = "calling_face",
+                )
+                result.success(true)
+            }
             INIT_CALL_USER_PASSWORD -> {
-                initResult = result
-                initOmi()
                 val userName = dataOmi["userName"] as? String
                 val password = dataOmi["password"] as? String
                 val realm = dataOmi["realm"] as? String
@@ -180,38 +200,58 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
                         host,
                     )
                 }
-                requestPermission()
-                setCamera()
+                requestPermission(isVideo ?: true)
+                if (isVideo == true) {
+                    setCamera()
+                }
             }
             INIT_CALL_API_KEY -> {
-                initResult = result
-                initOmi()
-                val usrName = dataOmi["fullName"] as? String
-                val usrUuid = dataOmi["usrUuid"] as? String
-                val apiKey = dataOmi["apiKey"] as? String
-                val isVideo = dataOmi["isVideo"] as? Boolean
-                if (usrName != null && usrUuid != null && apiKey != null) {
-                    OmiClient.registerWithApiKey(
-                        apiKey = apiKey,
-                        userName = usrName,
-                        uuid = usrUuid,
-                        isVideo ?: true,
-                    )
+                mainScope.launch {
+                    var loginResult = false
+                    val usrName = dataOmi["fullName"] as? String
+                    val usrUuid = dataOmi["usrUuid"] as? String
+                    val apiKey = dataOmi["apiKey"] as? String
+                    val isVideo = dataOmi["isVideo"] as? Boolean
+                    withContext(Dispatchers.Default) {
+                       try {
+                           if (usrName != null && usrUuid != null && apiKey != null) {
+                               loginResult = OmiClient.registerWithApiKey(
+                                   apiKey = apiKey,
+                                   userName = usrName,
+                                   uuid = usrUuid,
+                                   isVideo ?: true,
+                               )
+                           }
+                       } catch (_ : Throwable) {
+
+                       }
+                    }
+                    requestPermission(isVideo ?: true)
+                    if (isVideo == true) {
+                        setCamera()
+                    }
+                    result.success(loginResult)
                 }
-                requestPermission()
-                setCamera()
             }
             UPDATE_TOKEN -> {
-                val deviceTokenAndroid = dataOmi["fcmToken"] as String
-                val deviceId = dataOmi["deviceId"] as String
-                val appId = dataOmi["appId"] as String
-                OmiClient.instance.updatePushToken(
-                    "",
-                    deviceTokenAndroid,
-                    deviceId,
-                    appId,
-                )
-                result.success(true)
+                mainScope.launch {
+                    val deviceTokenAndroid = dataOmi["fcmToken"] as String
+                    val deviceId = dataOmi["deviceId"] as String
+                    val appId = dataOmi["appId"] as String
+                    withContext(Dispatchers.Default) {
+                       try {
+                           OmiClient.instance.updatePushToken(
+                               "",
+                               deviceTokenAndroid,
+                               deviceId,
+                               appId,
+                           )
+                       } catch (_ : Throwable) {
+
+                       }
+                    }
+                    result.success(true)
+                }
             }
             START_CALL -> {
                 val phoneNumber = dataOmi["phoneNumber"] as String
@@ -324,50 +364,23 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
         }
     }
 
-    private fun requestPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            requestPermissions(
-                activity!!,
-                arrayOf(
-                    Manifest.permission.USE_SIP,
-                    Manifest.permission.CALL_PHONE,
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.MODIFY_AUDIO_SETTINGS,
-                    Manifest.permission.RECORD_AUDIO,
-                    Manifest.permission.POST_NOTIFICATIONS,
-                ),
-                0,
-            )
-        } else {
-            requestPermissions(
-                activity!!,
-                arrayOf(
-                    Manifest.permission.USE_SIP,
-                    Manifest.permission.CALL_PHONE,
-                    Manifest.permission.CAMERA,
-                    Manifest.permission.MODIFY_AUDIO_SETTINGS,
-                    Manifest.permission.RECORD_AUDIO,
-                ),
-                0,
-            )
+    private fun requestPermission(isVideo : Boolean) {
+        var permissions = arrayOf(
+            Manifest.permission.USE_SIP,
+            Manifest.permission.CALL_PHONE,
+            Manifest.permission.MODIFY_AUDIO_SETTINGS,
+            Manifest.permission.RECORD_AUDIO,
+        )
+        if (isVideo) {
+            permissions = permissions.plus(Manifest.permission.CAMERA)
         }
-    }
-
-    private fun initOmi() {
-        OmiClient(applicationContext!!)
-        OmiClient.instance.setListener(callListener)
-        OmiClient.instance.addAccountListener(accountListener)
-        OmiClient.instance.configPushNotification(
-            prefix = "Cuộc gọi tới từ: ",
-            declineTitle = "Từ chối",
-            acceptTitle = "Chấp nhận",
-            acceptBackgroundColor = "#FF3700B3",
-            declineBackgroundColor = "#FF000000",
-            incomingBackgroundColor = "#FFFFFFFF",
-            incomingAcceptButtonImage = "join_call",
-            incomingDeclineButtonImage = "hangup",
-            backImage = "ic_back",
-            userImage = "calling_face",
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions = permissions.plus(Manifest.permission.POST_NOTIFICATIONS)
+        }
+        requestPermissions(
+            activity!!,
+            permissions,
+            0,
         )
     }
 
@@ -376,6 +389,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
             applicationContext!!.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         OmiClient.instance.setCameraManager(cm)
     }
+
     override fun onListen(arguments: Any?, events: EventSink?) {
         val args = arguments as HashMap<*, *>
         val name = args["name"] as String
