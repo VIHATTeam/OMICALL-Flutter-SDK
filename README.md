@@ -84,7 +84,6 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
 //add this lines outside <activity>
 <service
     android:name="vn.vihat.omicall.omisdk.service.FMService"
-    android:enabled="true"
     android:exported="false">
     <intent-filter>
         <action android:name="com.google.firebase.MESSAGING_EVENT" />
@@ -207,6 +206,15 @@ await Firebase.initializeApp();
       realm: "",
       host: "",
       isVideo: true/false,
+    );
+    ```
+  - Create OmiKit With ApiKey: OmiKit need apikey, username, user id to init enviroment. ViHAT Group will provide api key for you. Please contact for my sale:
+    ```
+     await OmicallClient.instance.initCallWithApiKey(
+      usrName: "",
+      usrUuid: "",
+      isVideo: true/false,
+      apiKey: "",
     );
     ```
 - Upload token: OmiKit need FCM for Android and APNS to push notification on user devices. We use more packages: <a href="https://pub.dev/packages/firebase_messaging">firebase_messaging</a> and <a href="https://pub.dev/packages/device_info_plus">device_info_plus</a>

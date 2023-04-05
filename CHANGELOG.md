@@ -3,9 +3,10 @@
 All notable changes to this project will be documented in this file.
 
 
-
-## [1.0.0](https://github.com/VIHATTeam/OMICALL-Flutter-SDK.git) (13/12/2022)
-
+##2.0.1
+* Support API for SDK
+* Increase core version
+* Update documents
 
 ## 2.0.0
 * Support App - to - App
