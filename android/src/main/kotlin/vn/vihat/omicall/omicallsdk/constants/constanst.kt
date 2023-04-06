@@ -2,6 +2,7 @@ package vn.vihat.omicall.omicallsdk.constants
 
 //EVENT
 const val START_SERVICES = "START_SERVICES"
+const val CONFIG_NOTIFICATION = "CONFIG_NOTIFICATION"
 const val INIT_CALL_API_KEY = "INIT_CALL_API_KEY"
 const val INIT_CALL_USER_PASSWORD = "INIT_CALL_USER_PASSWORD"
 const val UPDATE_TOKEN = "UPDATE_TOKEN"
