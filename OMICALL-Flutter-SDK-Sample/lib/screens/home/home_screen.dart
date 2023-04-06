@@ -45,8 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     updateToken();
-    _subscription = OmicallClient.instance.controller.eventTransferStream
-        .listen((omiAction) {
+    _subscription =
+        OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
       if (omiAction.actionName == OmiEventList.incomingReceived) {
         //having a incoming call
         final data = omiAction.data;

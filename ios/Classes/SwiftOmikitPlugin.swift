@@ -15,9 +15,6 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
     private var data: Data?
     private var onSpeakerStatus = false
     private var isFromPushKit: Bool = false
-    private var cameraEvent: FlutterEventSink?
-    private var onMuteEvent: FlutterEventSink?
-    private var onMicEvent: FlutterEventSink?
 
 
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -26,12 +23,6 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       }
       instance!.channel = FlutterMethodChannel(name: "omicallsdk", binaryMessenger: registrar.messenger())
       registrar.addMethodCallDelegate(instance, channel: instance!.channel)
-      let cameraEventChannel = FlutterEventChannel(name: "omicallsdk/event/camera", binaryMessenger: registrar.messenger())
-      cameraEventChannel.setStreamHandler(instance)
-      let onMuteEventChannel = FlutterEventChannel(name: "omicallsdk/event/on_mute", binaryMessenger: registrar.messenger())
-      onMuteEventChannel.setStreamHandler(instance)
-      let onMicEventChannel = FlutterEventChannel(name: "omicallsdk/event/on_mic", binaryMessenger: registrar.messenger())
-      onMicEventChannel.setStreamHandler(instance)
       let localFactory = FLLocalCameraFactory(messenger: registrar.messenger())
       registrar.register(localFactory, withId: "omicallsdk/local_camera_view")
       let remoteFactory = FLRemoteCameraFactory(messenger: registrar.messenger())
@@ -47,25 +38,20 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
   }
     
   func sendCameraEvent() {
-      if let cameraEvent = cameraEvent {
-          let cameraStatus = CallManager.shareInstance().videoManager?.isCameraOn ?? false
-          cameraEvent(cameraStatus)
-      }
+      let cameraStatus = CallManager.shareInstance().videoManager?.isCameraOn ?? false
+      channel.invokeMethod(VIDEO, arguments: cameraStatus)
   }
     
   func sendOnMuteStatus() {
       if let call = CallManager.shareInstance().getAvailableCall() {
-          if let isMuted = call.muted as? Bool, let onMuteEvent = onMuteEvent {
-              print("muteeeeed \(isMuted)")
-              onMuteEvent(isMuted)
+          if let isMuted = call.muted as? Bool {
+              channel.invokeMethod(MUTED, arguments: isMuted)
           }
       }
   }
     
   func sendOnSpeakerStatus() {
-      if let onMicEvent = onMicEvent {
-        onMicEvent(CallManager.shareInstance().isSpeaker)
-     }
+      channel.invokeMethod(SPEAKER, arguments: CallManager.shareInstance().isSpeaker)
   }
 
 
@@ -175,30 +161,6 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       }
 
   }
-}
-
-extension SwiftOmikitPlugin : FlutterStreamHandler {
-    public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        if let arguments = arguments as? [String: Any], let name = arguments["name"] as? String {
-            if (name == "camera") {
-                cameraEvent = events
-            }
-            if (name == "on_mute") {
-                onMuteEvent = events
-            }
-            if (name == "on_mic") {
-                onMicEvent = events
-            }
-        }
-        return nil
-    }
-    
-    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-//        self.cameraEvent = nil
-//        self.onMuteEvent = nil
-//        self.onMicEvent = nil
-        return nil
-    }
 }
 
 @objc public extension FlutterAppDelegate {

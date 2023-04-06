@@ -30,15 +30,12 @@ import vn.vihat.omicall.omisdk.utils.OmiSDKUtils
 import java.util.*
 
 /** OmicallsdkPlugin */
-class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, StreamHandler {
+class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private lateinit var channel: MethodChannel
     private lateinit var cameraEventChannel: EventChannel
     private lateinit var onMicEventChannel: EventChannel
     private lateinit var onMuteEventChannel: EventChannel
-    private var cameraEventSink: EventSink? = null
-    private var onMicEventSink: EventSink? = null
-    private var onMuteEventSink: EventSink? = null
     private var activity: FlutterActivity? = null
     private var applicationContext: Context? = null
     private val mainScope = CoroutineScope(Dispatchers.Main)
@@ -79,13 +76,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
         }
 
         override fun onHold(isHold: Boolean) {
-            channel.invokeMethod(
-                HOLD, mapOf(
-                    "isHold" to isHold,
-                )
-            )
-            Log.d("omikit", "onHold: $isHold")
-
         }
 
         override fun onMuted(isMuted: Boolean) {
@@ -127,15 +117,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
         applicationContext = flutterPluginBinding.applicationContext
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "omicallsdk")
         channel.setMethodCallHandler(this)
-        cameraEventChannel =
-            EventChannel(flutterPluginBinding.binaryMessenger, "omicallsdk/event/camera")
-        cameraEventChannel.setStreamHandler(this)
-        onMicEventChannel =
-            EventChannel(flutterPluginBinding.binaryMessenger, "omicallsdk/event/on_mic")
-        onMicEventChannel.setStreamHandler(this)
-        onMuteEventChannel =
-            EventChannel(flutterPluginBinding.binaryMessenger, "omicallsdk/event/on_mute")
-        onMuteEventChannel.setStreamHandler(this)
         flutterPluginBinding
             .platformViewRegistry
             .registerViewFactory(
@@ -284,13 +265,13 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
                         }
                     }
                     result.success(newStatus)
-                    onMuteEventSink?.success(newStatus)
+                    channel.invokeMethod(MUTED, newStatus)
                 }
             }
             TOGGLE_SPEAK -> {
                 val newStatus = OmiClient.instance.toggleSpeaker()
                 result.success(newStatus)
-                onMicEventSink?.success(newStatus)
+                channel.invokeMethod(SPEAKER, newStatus)
             }
             REGISTER -> {}
             SEND_DTMF -> {
@@ -312,6 +293,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
             }
             SWITCH_CAMERA -> {
                 OmiClient.instance.switchCamera()
+                channel.invokeMethod(CAMERA_STATUS, true)
             }
             TOGGLE_VIDEO -> {
                 OmiClient.instance.toggleCamera()
@@ -405,25 +387,5 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
         val cm =
             applicationContext!!.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         OmiClient.instance.setCameraManager(cm)
-    }
-
-    override fun onListen(arguments: Any?, events: EventSink?) {
-        val args = arguments as HashMap<*, *>
-        val name = args["name"] as String
-        if (name == "camera") {
-            cameraEventSink = events
-        }
-        if (name == "on_mute") {
-            onMuteEventSink = events
-        }
-        if (name == "on_mic") {
-            onMicEventSink = events
-        }
-    }
-
-    override fun onCancel(arguments: Any?) {
-//        cameraEventSink = null
-//        onMicEventSink = null
-//        onMuteEventSink = null
     }
 }

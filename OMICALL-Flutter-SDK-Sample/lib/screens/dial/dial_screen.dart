@@ -42,7 +42,7 @@ class DialScreenState extends State<DialScreen> {
     }
     super.initState();
     _subscription =
-        OmicallClient.instance.controller.eventTransferStream.listen((omiAction) {
+        OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
       if (omiAction.actionName == OmiEventList.onCallEstablished) {
         updateDialScreen(null, CallStatus.established);
       }
@@ -106,7 +106,7 @@ class DialScreenState extends State<DialScreen> {
                         children: [
                           StreamBuilder(
                             initialData: false,
-                            stream: OmicallClient.instance.onMuteEvent(),
+                            stream: OmicallClient.instance.mutedEvent,
                             builder: (context, snapshot) {
                               final isMute = snapshot.data as bool;
                               return DialButton(
@@ -122,7 +122,7 @@ class DialScreenState extends State<DialScreen> {
                           ),
                           StreamBuilder(
                             initialData: false,
-                            stream: OmicallClient.instance.onMicEvent(),
+                            stream: OmicallClient.instance.micEvent,
                             builder: (context, snapshot) {
                               final isSpeaker = snapshot.data as bool;
                               return DialButton(
