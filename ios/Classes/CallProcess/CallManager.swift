@@ -41,16 +41,27 @@ class CallManager {
         }
     }
     
-    func initWithApiKeyEndpoint(params: [String: Any]) -> Bool {
-        var result = true
-        if let usrUuid = params["usrUuid"] as? String, let fullName = params["fullName"] as? String, let apiKey = params["apiKey"] as? String {
-            result = OmiClient.initWithUUID(usrUuid, fullName: fullName, apiKey: apiKey)
+    private func requestPermission(isVideo: Bool) {
+        AVCaptureDevice.requestAccess(for: .audio) { _ in
+            print("request audio")
         }
-//        if let isVideoCall = params["isVideo"] as? Bool, isVideoCall == true {
-//            OmiClient.startOmiService(true)
-//            videoManager = OMIVideoViewManager.init()
-//        }
-//        registerNotificationCenter()
+        if isVideo {
+            AVCaptureDevice.requestAccess(for: .video) { _ in
+                print("request video")
+            }
+        }
+    }
+    
+    func initWithApiKeyEndpoint(params: [String: Any]) -> Bool {
+        //request permission
+        var result = true
+        if let usrUuid = params["usrUuid"] as? String, let fullName = params["fullName"] as? String, let apiKey = params["apiKey"] as? String, let isVideo = params["isVideo"] as? Bool {
+            result = OmiClient.initWithUUID(usrUuid, fullName: fullName, apiKey: apiKey)
+            requestPermission(isVideo: isVideo)
+        }
+        if let isVideo = params["isVideo"] as? Bool {
+            requestPermission(isVideo: isVideo)
+        }
         return result
     }
     
@@ -58,11 +69,9 @@ class CallManager {
         if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String, let host = params["host"] as? String {
             OmiClient.initWithUsername(userName, password: password, realm: realm)
         }
-//        if let isVideoCall = params["isVideo"] as? Bool, isVideoCall == true {
-//            OmiClient.startOmiService(true)
-//            videoManager = OMIVideoViewManager.init()
-//        }
-//        registerNotificationCenter()
+        if let isVideo = params["isVideo"] as? Bool {
+            requestPermission(isVideo: isVideo)
+        }
         return true
     }
     
