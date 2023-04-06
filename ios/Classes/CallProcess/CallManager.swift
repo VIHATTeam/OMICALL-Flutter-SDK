@@ -89,9 +89,10 @@ class CallManager {
             return;
         }
         if (call.callState == .disconnected) {
-            DispatchQueue.main.async {
-                if (videoManager != nil) {
-                    videoManager = nil
+            DispatchQueue.main.async {[weak self] in
+                guard let self = self else { return }
+                if (self.videoManager != nil) {
+                    self.videoManager = nil
                 }
                 SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
             }
