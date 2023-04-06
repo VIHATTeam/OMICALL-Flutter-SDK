@@ -41,9 +41,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
     private var onMuteEventSink: EventSink? = null
     private var activity: FlutterActivity? = null
     private var applicationContext: Context? = null
-//    private var initResult: MethodChannel.Result? = null
-    private var icSpeaker = false
-    private var isMute = false
     private val mainScope = CoroutineScope(Dispatchers.Main)
 
     private val callListener = object : OmiListener {
@@ -277,16 +274,23 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
                 result.success(true)
             }
             TOGGLE_MUTE -> {
-                OmiClient.instance.toggleMute()
-                result.success(true)
-                isMute = !isMute
-                onMuteEventSink?.success(isMute)
+                mainScope.launch {
+                    var newStatus : Boolean? = null
+                    withContext(Dispatchers.Default) {
+                        try {
+                            newStatus = OmiClient.instance.toggleMute()
+                        } catch (_ : Throwable) {
+
+                        }
+                    }
+                    result.success(newStatus)
+                    onMuteEventSink?.success(newStatus)
+                }
             }
             TOGGLE_SPEAK -> {
-                icSpeaker = !icSpeaker
-                OmiClient.instance.toggleSpeaker(icSpeaker)
-                result.success(true)
-                onMicEventSink?.success(icSpeaker)
+                val newStatus = OmiClient.instance.toggleSpeaker()
+                result.success(newStatus)
+                onMicEventSink?.success(newStatus)
             }
             REGISTER -> {}
             SEND_DTMF -> {
