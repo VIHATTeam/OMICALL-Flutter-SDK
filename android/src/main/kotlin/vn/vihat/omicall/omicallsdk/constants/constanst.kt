@@ -26,6 +26,7 @@ const val CALL_ESTABLISHED = "CALL_ESTABLISHED"
 const val CALL_END = "CALL_END"
 const val INCOMING_RECEIVED = "INCOMING_RECEIVED"
 //const val CONNECTION_TIMEOUT = "CONNECTION_TIMEOUT"
-const val HOLD = "HOLD"
+const val SPEAKER = "SPEAKER"
+const val VIDEO = "VIDEO"
 const val MUTED = "MUTED"
 

@@ -12,22 +12,14 @@ class OmicallClient {
 
   final OmicallSDKController _controller = OmicallSDKController();
 
-  OmicallSDKController get controller => _controller;
-
   ///streaming camera event
-  Stream<dynamic> cameraEvent() {
-    return _controller.cameraEvent();
-  }
-
+  Stream<OmiAction> get callStateChangeEvent => _controller.callStateChangeEvent;
+  ///streaming camera event
+  Stream<bool> get cameraEvent => _controller.cameraEvent;
   ///streaming mic event
-  Stream<dynamic> onMicEvent() {
-    return _controller.onMicEvent();
-  }
-
+  Stream<bool> get micEvent => _controller.micEvent;
   ///streaming mic event
-  Stream<dynamic> onMuteEvent() {
-    return _controller.onMuteEvent();
-  }
+  Stream<bool> get mutedEvent => _controller.mutedEvent;
 
   ///destroy event
   void dispose() {
