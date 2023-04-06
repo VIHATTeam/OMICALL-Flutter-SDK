@@ -90,6 +90,9 @@ class CallManager {
         }
         if (call.callState == .disconnected) {
             DispatchQueue.main.async {
+                if (videoManager != nil) {
+                    videoManager = nil
+                }
                 SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
             }
         }
@@ -134,6 +137,9 @@ class CallManager {
                 NSLog("Call remotly ended, in DISCONNECTED state, with UUID: \(call.uuid)")
             }
             print(call.uuid.uuidString)
+            if (videoManager != nil) {
+                videoManager = nil
+            }
             SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
             break
         case .incoming:
@@ -161,7 +167,6 @@ class CallManager {
     }
     
     func endAvailableCall() {
-        videoManager = nil
         guard let call = getAvailableCall() else {
             SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
             return
@@ -172,7 +177,6 @@ class CallManager {
     
     func endAllCalls() {
         omiLib.callManager.endAllCalls()
-        videoManager = nil
     }
     
     func joinCall() {
