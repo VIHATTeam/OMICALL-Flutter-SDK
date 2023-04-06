@@ -88,6 +88,7 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
 
       switch(action) {
       case START_SERVICES:
+          CallManager.shareInstance().registerNotificationCenter()
           result(true)
           break
       case UPDATE_TOKEN:

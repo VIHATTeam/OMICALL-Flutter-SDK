@@ -5,7 +5,6 @@ import android.content.Context
 import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat.requestPermissions
@@ -204,6 +203,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
                 if (isVideo == true) {
                     setCamera()
                 }
+                result.success(true)
             }
             INIT_CALL_API_KEY -> {
                 mainScope.launch {
@@ -291,7 +291,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
                 result.success(true)
             }
             JOIN_CALL -> {
-                OmiClient.instance.pickUp(true)
+                OmiClient.instance.pickUp()
             }
             SWITCH_CAMERA -> {
                 OmiClient.instance.switchCamera()
