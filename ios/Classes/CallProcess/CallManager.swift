@@ -50,7 +50,7 @@ class CallManager {
 //            OmiClient.startOmiService(true)
 //            videoManager = OMIVideoViewManager.init()
 //        }
-        registerNotificationCenter()
+//        registerNotificationCenter()
         return result
     }
     
@@ -62,7 +62,7 @@ class CallManager {
 //            OmiClient.startOmiService(true)
 //            videoManager = OMIVideoViewManager.init()
 //        }
-        registerNotificationCenter()
+//        registerNotificationCenter()
         return true
     }
     
@@ -121,6 +121,9 @@ class CallManager {
             break
         case .confirmed:
             NSLog("Outgoing call, in CONFIRMED state, with UUID: \(call)")
+            if (videoManager == nil) {
+                videoManager = OMIVideoViewManager.init()
+            }
             SwiftOmikitPlugin.instance?.sendEvent(CALL_ESTABLISHED, ["isVideo": call.isVideo, "callerNumber": call.callerNumber])
             SwiftOmikitPlugin.instance.sendOnMuteStatus()
             break
@@ -152,7 +155,6 @@ class CallManager {
     func startCall(_ phoneNumber: String, isVideo: Bool) {
         if (isVideo) {
             OmiClient.startVideoCall(phoneNumber)
-            videoManager = OMIVideoViewManager.init()
             return
         }
         OmiClient.startCall(phoneNumber)

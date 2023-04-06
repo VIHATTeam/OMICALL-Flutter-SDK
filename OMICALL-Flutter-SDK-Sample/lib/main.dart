@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/home/home_screen.dart';
 import 'package:calling/screens/login/login_apikey_screen.dart';
+import 'package:calling/screens/login/login_user_password_screen.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -15,7 +16,6 @@ void main() async {
   HttpOverrides.global = MyHttpOverrides();
   await Firebase.initializeApp();
   final loginInfo = await LocalStorage.instance.loginInfo();
-  OmicallClient.instance.startServices();
   runApp(MyApp(
     loginInfo: loginInfo,
   ));
@@ -39,6 +39,7 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     EasyLoading.instance.userInteractions = false;
+    OmicallClient.instance.startServices();
   }
 
   @override
@@ -46,7 +47,7 @@ class _MyAppState extends State<MyApp> {
     return GestureDetector(
       child: MaterialApp(
         theme: ThemeData.light(),
-        home: loginInfo != null ? const HomeScreen() : const LoginApiKeyScreen(),
+        home: loginInfo != null ? const HomeScreen() : const LoginUserPasswordScreen(),
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
       ),
