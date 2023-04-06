@@ -170,17 +170,30 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
                 OmiClient(applicationContext!!)
                 OmiClient.instance.setListener(callListener)
                 OmiClient.instance.addAccountListener(accountListener)
+                result.success(true)
+            }
+            CONFIG_NOTIFICATION -> {
+                val prefix = dataOmi["prefix"] as? String
+                val declineTitle = dataOmi["declineTitle"] as? String
+                val acceptTitle = dataOmi["acceptTitle"] as? String
+                val acceptBackgroundColor = dataOmi["acceptBackgroundColor"] as? String
+                val declineBackgroundColor = dataOmi["declineBackgroundColor"] as? String
+                val incomingBackgroundColor = dataOmi["incomingBackgroundColor"] as? String
+                val incomingAcceptButtonImage = dataOmi["incomingAcceptButtonImage"] as? String
+                val incomingDeclineButtonImage = dataOmi["incomingDeclineButtonImage"] as? String
+                val backImage = dataOmi["backImage"] as? String
+                val userImage = dataOmi["userImage"] as? String
                 OmiClient.instance.configPushNotification(
-                    prefix = "Cuộc gọi tới từ: ",
-                    declineTitle = "Từ chối",
-                    acceptTitle = "Chấp nhận",
-                    acceptBackgroundColor = "#FF3700B3",
-                    declineBackgroundColor = "#FF000000",
-                    incomingBackgroundColor = "#FFFFFFFF",
-                    incomingAcceptButtonImage = "join_call",
-                    incomingDeclineButtonImage = "hangup",
-                    backImage = "ic_back",
-                    userImage = "calling_face",
+                    prefix = prefix ?: "Cuộc gọi tới từ: ",
+                    declineTitle = declineTitle ?: "Từ chối",
+                    acceptTitle = acceptTitle ?: "Chấp nhận",
+                    acceptBackgroundColor = acceptBackgroundColor ?: "#FF3700B3",
+                    declineBackgroundColor = declineBackgroundColor ?: "#FF000000",
+                    incomingBackgroundColor = incomingBackgroundColor ?: "#FFFFFFFF",
+                    incomingAcceptButtonImage = incomingAcceptButtonImage ?: "join_call",
+                    incomingDeclineButtonImage = incomingDeclineButtonImage ?: "hangup",
+                    backImage = backImage ?: "ic_back",
+                    userImage = userImage ?: "calling_face",
                 )
                 result.success(true)
             }

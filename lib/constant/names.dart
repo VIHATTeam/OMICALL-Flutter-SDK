@@ -4,6 +4,7 @@
 class OmiActionName {
   static const String START_SERVICES = "START_SERVICES";
   static const String INIT_CALL_API_KEY = "INIT_CALL_API_KEY";
+  static const String CONFIG_NOTIFICATION = "CONFIG_NOTIFICATION";
   static const String INIT_CALL_USER_PASSWORD = "INIT_CALL_USER_PASSWORD";
   static const String UPDATE_TOKEN = "UPDATE_TOKEN";
   static const String START_CALL = "START_CALL";

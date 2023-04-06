@@ -58,6 +58,36 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
+  Future<void> configPushNotification({
+    String? prefix,
+    String? declineTitle,
+    String? acceptTitle,
+    String? acceptBackgroundColor,
+    String? declineBackgroundColor,
+    String? incomingBackgroundColor,
+    String? incomingAcceptButtonImage,
+    String? incomingDeclineButtonImage,
+    String? backImage,
+    String? userImage,
+  }) async {
+    final action = OmiAction(
+      actionName: OmiActionName.CONFIG_NOTIFICATION,
+      data: {
+        'prefix': prefix,
+        'declineTitle': declineTitle,
+        'acceptTitle': acceptTitle,
+        'acceptBackgroundColor': acceptBackgroundColor,
+        'declineBackgroundColor': declineBackgroundColor,
+        'incomingBackgroundColor': incomingBackgroundColor,
+        'incomingAcceptButtonImage': incomingAcceptButtonImage,
+        'incomingDeclineButtonImage': incomingDeclineButtonImage,
+        'backImage': backImage,
+        'userImage': userImage,
+      },
+    );
+    return await _controller.action(action);
+  }
+
   Future<void> initCallWithUserPassword({
     String? userName,
     String? password,

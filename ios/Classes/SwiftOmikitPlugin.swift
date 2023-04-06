@@ -91,6 +91,9 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           CallManager.shareInstance().registerNotificationCenter()
           result(true)
           break
+      case CONFIG_NOTIFICATION:
+          result(true)
+          break
       case UPDATE_TOKEN:
           CallManager.shareInstance().updateToken(params: dataOmi)
           result(true)
