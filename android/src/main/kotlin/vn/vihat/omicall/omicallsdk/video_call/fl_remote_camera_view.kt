@@ -11,6 +11,8 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
 import vn.vihat.omicall.omisdk.OmiClient
+import vn.vihat.omicall.omisdk.videoutils.ScaleManager
+import vn.vihat.omicall.omisdk.videoutils.Size
 
 internal class FLRemoteCameraView(context: Context, id: Int, creationParams: Map<String?, Any?>?,  messenger: BinaryMessenger) :
     PlatformView, MethodChannel.MethodCallHandler, TextureView.SurfaceTextureListener {
@@ -34,7 +36,10 @@ internal class FLRemoteCameraView(context: Context, id: Int, creationParams: Map
         if (call.method == "refresh") {
             remoteView.surfaceTexture?.let {
                 OmiClient.instance.setupIncomingVideoFeed(Surface(it))
-                remoteView.scaleX = 1.5F
+                ScaleManager.adjustAspectRatio(remoteView,
+                    Size(remoteView.width, remoteView.height),
+                    Size(1280,720)
+                )
             }
         }
     }

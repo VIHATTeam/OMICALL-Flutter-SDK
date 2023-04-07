@@ -12,9 +12,6 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
-import io.flutter.plugin.common.EventChannel
-import io.flutter.plugin.common.EventChannel.EventSink
-import io.flutter.plugin.common.EventChannel.StreamHandler
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -33,9 +30,6 @@ import java.util.*
 class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private lateinit var channel: MethodChannel
-    private lateinit var cameraEventChannel: EventChannel
-    private lateinit var onMicEventChannel: EventChannel
-    private lateinit var onMuteEventChannel: EventChannel
     private var activity: FlutterActivity? = null
     private var applicationContext: Context? = null
     private val mainScope = CoroutineScope(Dispatchers.Main)
@@ -324,6 +318,24 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
             SET_OUTPUT -> {
 
+            }
+            START_CALL_WITH_UUID -> {
+                mainScope.launch {
+                    var callResult = false
+                    withContext(Dispatchers.Default) {
+                        try {
+                            val uuid = dataOmi["usrUuid"] as String
+                            val isVideo = dataOmi["isVideo"] as Boolean
+                            callResult = OmiClient.instance.startCallWithUuid(uuid = uuid, isVideo = isVideo)
+                        } catch (_ : Throwable) {
+
+                        }
+                    }
+                    result.success(callResult)
+                }
+            }
+            LOG_OUT -> {
+                ///implement later
             }
         }
     }

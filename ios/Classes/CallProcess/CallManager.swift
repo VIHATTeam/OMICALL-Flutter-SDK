@@ -168,12 +168,23 @@ class CallManager {
     }
     
     /// Start call
-    func startCall(_ phoneNumber: String, isVideo: Bool) {
+    func startCall(_ phoneNumber: String, isVideo: Bool) -> Bool {
         if (isVideo) {
-            OmiClient.startVideoCall(phoneNumber)
-            return
+            return OmiClient.startVideoCall(phoneNumber)
         }
-        OmiClient.startCall(phoneNumber)
+        return OmiClient.startCall(phoneNumber)
+    }
+    
+    /// Start call
+    func startCallWithUuid(_ uuid: String, isVideo: Bool) -> Bool {
+        let phoneNumber = OmiClient.getPhone(uuid)
+        if let phone = phoneNumber {
+            if (isVideo) {
+                return OmiClient.startVideoCall(phone)
+            }
+            return OmiClient.startCall(phone)
+        }
+        return false
     }
     
     func endAvailableCall() {

@@ -20,6 +20,8 @@ const val INPUTS = "INPUTS"
 const val OUTPUTS = "OUTOUTS"
 const val SET_INPUT = "SET_INPUT"
 const val SET_OUTPUT = "SET_OUTPUT"
+const val START_CALL_WITH_UUID = "START_CALL_WITH_UUID"
+const val LOG_OUT = "LOG_OUT"
 
 //LISTENER
 const val CALL_ESTABLISHED = "CALL_ESTABLISHED"
