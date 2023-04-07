@@ -84,11 +84,14 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
 //add this lines outside <activity>
 <service
     android:name="vn.vihat.omicall.omisdk.service.FMService"
-    android:enabled="true"
     android:exported="false">
     <intent-filter>
         <action android:name="com.google.firebase.MESSAGING_EVENT" />
     </intent-filter>
+</service>
+<service
+    android:name="vn.vihat.omicall.omisdk.service.NotificationService"
+    android:exported="false">
 </service>
 ```
 You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/main/OMICALL-Flutter-SDK-Sample/android/app/src/main/AndroidManifest.xml">AndroidManifest</a> to know more informations.
@@ -199,7 +202,12 @@ await Firebase.initializeApp();
 // Because we use APNS to push notification on iOS so you don't need add Firebase for iOS.
 ```
 - Important function.
-    - Create OmiKit: OmiKit need userName, password, realm, host to init enviroment. ViHAT Group will provide informations for you. Please contact for my sale:
+  - Start Serivce: OmiKit need start services and register some events.
+    ```
+    //Call in the root widget
+    OmicallClient.instance.startServices();
+    ```
+  - Create OmiKit: OmiKit need userName, password, realm, host to init enviroment. ViHAT Group will provide informations for you. Please contact for my sale:
     ```
     await OmicallClient.instance.initCall(
       userName: "", 
@@ -208,6 +216,31 @@ await Firebase.initializeApp();
       host: "",
       isVideo: true/false,
     );
+    ```
+  - Create OmiKit With ApiKey: OmiKit need apikey, username, user id to init enviroment. ViHAT Group will provide api key for you. Please contact for my sale:
+    ```
+     await OmicallClient.instance.initCallWithApiKey(
+      usrName: "",
+      usrUuid: "",
+      isVideo: true/false,
+      apiKey: "",
+    );
+    ```
+    - Config push notification for Android:
+    ```
+    OmicallClient.instance.configPushNotification(
+      prefix : "Cuộc gọi tới từ: ",
+      declineTitle : "Từ chối",
+      acceptTitle : "Chấp nhận",
+      acceptBackgroundColor : "#FF3700B3",
+      declineBackgroundColor : "#FF000000",
+      incomingBackgroundColor : "#FFFFFFFF",
+      incomingAcceptButtonImage : "join_call", //image name
+      incomingDeclineButtonImage : "hangup", //image name
+      backImage : "ic_back", //image name: icon of back button
+      userImage : "calling_face", //image name: icon of user default
+    );
+    //incomingAcceptButtonImage, incomingDeclineButtonImage, backImage, userImage: Add these into `android/app/src/main/res/drawble`
     ```
 - Upload token: OmiKit need FCM for Android and APNS to push notification on user devices. We use more packages: <a href="https://pub.dev/packages/firebase_messaging">firebase_messaging</a> and <a href="https://pub.dev/packages/device_info_plus">device_info_plus</a>
   ```
@@ -243,6 +276,13 @@ await Firebase.initializeApp();
     ```
     OmicallClient.instance.startCall(
         phone, //phone number
+        _isVideoCall, //call video or audio. If true is video call. 
+    );
+    ```
+  -  Call with UUID (only support with Api key):
+    ```
+    OmicallClient.instance.startCallWithUUID(
+        uuid, //your user id
         _isVideoCall, //call video or audio. If true is video call. 
     );
     ```

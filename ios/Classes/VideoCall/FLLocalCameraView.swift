@@ -50,7 +50,7 @@ class FLLocalCameraView: NSObject, FlutterPlatformView {
     ) {
         _view = OMIVideoPreviewView.init()
         _arg = args as? [String: Any]
-        methodChannel = FlutterMethodChannel(name: "local_camera_controller/\(viewId)", binaryMessenger: messenger!)
+        methodChannel = FlutterMethodChannel(name: "omicallsdk/local_camera_controller/\(viewId)", binaryMessenger: messenger!)
         super.init()
         methodChannel?.setMethodCallHandler(onMethodCall)
     }

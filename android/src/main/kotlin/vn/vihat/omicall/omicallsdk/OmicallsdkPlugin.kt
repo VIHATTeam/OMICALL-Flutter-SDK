@@ -2,26 +2,21 @@ package vn.vihat.omicall.omicallsdk
 
 import android.Manifest
 import android.content.Context
-import android.content.pm.PackageManager
 import android.hardware.camera2.CameraManager
 import android.os.Build
-import android.preference.PreferenceManager
+import android.os.Handler
 import android.util.Log
 import androidx.annotation.NonNull
-import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.requestPermissions
-import androidx.core.content.ContextCompat.getSystemService
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
-import io.flutter.plugin.common.EventChannel
-import io.flutter.plugin.common.EventChannel.EventSink
-import io.flutter.plugin.common.EventChannel.StreamHandler
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import kotlinx.coroutines.*
 import vn.vihat.omicall.omicallsdk.constants.*
 import vn.vihat.omicall.omicallsdk.video_call.FLLocalCameraFactory
 import vn.vihat.omicall.omicallsdk.video_call.FLRemoteCameraFactory
@@ -32,20 +27,12 @@ import vn.vihat.omicall.omisdk.utils.OmiSDKUtils
 import java.util.*
 
 /** OmicallsdkPlugin */
-class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, StreamHandler,
-    OmiAccountListener {
+class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private lateinit var channel: MethodChannel
-    private lateinit var cameraEventChannel: EventChannel
-    private lateinit var onMicEventChannel: EventChannel
-    private lateinit var onMuteEventChannel: EventChannel
-    private var cameraEventSink: EventSink? = null
-    private var onMicEventSink: EventSink? = null
-    private var onMuteEventSink: EventSink? = null
     private var activity: FlutterActivity? = null
     private var applicationContext: Context? = null
-    private var icSpeaker = false
-    private var isMute = false
+    private val mainScope = CoroutineScope(Dispatchers.Main)
 
     private val callListener = object : OmiListener {
 
@@ -71,21 +58,18 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
             isVideo: Boolean?,
             startTime: Long,
         ) {
-            channel.invokeMethod(CALL_ESTABLISHED, mapOf(
-                "callerNumber" to phoneNumber,
-                "isVideo" to isVideo,
-            ))
+            Handler().postDelayed({
+                channel.invokeMethod(
+                    CALL_ESTABLISHED, mapOf(
+                        "callerNumber" to phoneNumber,
+                        "isVideo" to isVideo,
+                    )
+                )
+            }, 500)
             Log.d("omikit", "onCallEstablished: ")
         }
 
         override fun onHold(isHold: Boolean) {
-            channel.invokeMethod(
-                HOLD, mapOf(
-                    "isHold" to isHold,
-                )
-            )
-            Log.d("omikit", "onHold: $isHold")
-
         }
 
         override fun onMuted(isMuted: Boolean) {
@@ -114,27 +98,33 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
         }
     }
 
+    private val accountListener = object : OmiAccountListener {
+        override fun onAccountStatus(online: Boolean) {
+            Log.d("aaa", "Account status $online")
+//            initResult?.success(online)
+//            initResult = null
+        }
+    }
+
+
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
         applicationContext = flutterPluginBinding.applicationContext
         channel = MethodChannel(flutterPluginBinding.binaryMessenger, "omicallsdk")
         channel.setMethodCallHandler(this)
-        cameraEventChannel = EventChannel(flutterPluginBinding.binaryMessenger, "event/camera")
-        cameraEventChannel.setStreamHandler(this)
-        onMicEventChannel = EventChannel(flutterPluginBinding.binaryMessenger, "event/on_mic")
-        onMicEventChannel.setStreamHandler(this)
-        onMuteEventChannel = EventChannel(flutterPluginBinding.binaryMessenger, "event/on_mute")
-        onMuteEventChannel.setStreamHandler(this)
         flutterPluginBinding
             .platformViewRegistry
-            .registerViewFactory("local_camera_view", FLLocalCameraFactory(flutterPluginBinding.binaryMessenger))
+            .registerViewFactory(
+                "omicallsdk/local_camera_view",
+                FLLocalCameraFactory(flutterPluginBinding.binaryMessenger)
+            )
         flutterPluginBinding
             .platformViewRegistry
-            .registerViewFactory("remote_camera_view", FLRemoteCameraFactory(flutterPluginBinding.binaryMessenger))
+            .registerViewFactory(
+                "omicallsdk/remote_camera_view",
+                FLRemoteCameraFactory(flutterPluginBinding.binaryMessenger)
+            )
 //        setupSIP()
-//        OmiClient.instance.addAccountListener(this)
     }
-
-
 
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
@@ -147,11 +137,39 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
     private fun handleAction(call: MethodCall, result: Result) {
         val data = call.arguments as HashMap<String, Any>
         val dataOmi = data["data"] as HashMap<String, Any>
-
         when (data["actionName"]) {
-            INIT_CALL -> {
+            START_SERVICES -> {
                 OmiClient(applicationContext!!)
                 OmiClient.instance.setListener(callListener)
+                OmiClient.instance.addAccountListener(accountListener)
+                result.success(true)
+            }
+            CONFIG_NOTIFICATION -> {
+                val prefix = dataOmi["prefix"] as? String
+                val declineTitle = dataOmi["declineTitle"] as? String
+                val acceptTitle = dataOmi["acceptTitle"] as? String
+                val acceptBackgroundColor = dataOmi["acceptBackgroundColor"] as? String
+                val declineBackgroundColor = dataOmi["declineBackgroundColor"] as? String
+                val incomingBackgroundColor = dataOmi["incomingBackgroundColor"] as? String
+                val incomingAcceptButtonImage = dataOmi["incomingAcceptButtonImage"] as? String
+                val incomingDeclineButtonImage = dataOmi["incomingDeclineButtonImage"] as? String
+                val backImage = dataOmi["backImage"] as? String
+                val userImage = dataOmi["userImage"] as? String
+                OmiClient.instance.configPushNotification(
+                    prefix = prefix ?: "Cuộc gọi tới từ: ",
+                    declineTitle = declineTitle ?: "Từ chối",
+                    acceptTitle = acceptTitle ?: "Chấp nhận",
+                    acceptBackgroundColor = acceptBackgroundColor ?: "#FF3700B3",
+                    declineBackgroundColor = declineBackgroundColor ?: "#FF000000",
+                    incomingBackgroundColor = incomingBackgroundColor ?: "#FFFFFFFF",
+                    incomingAcceptButtonImage = incomingAcceptButtonImage ?: "join_call",
+                    incomingDeclineButtonImage = incomingDeclineButtonImage ?: "hangup",
+                    backImage = backImage ?: "ic_back",
+                    userImage = userImage ?: "calling_face",
+                )
+                result.success(true)
+            }
+            INIT_CALL_USER_PASSWORD -> {
                 val userName = dataOmi["userName"] as? String
                 val password = dataOmi["password"] as? String
                 val realm = dataOmi["realm"] as? String
@@ -159,59 +177,66 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
                 val isVideo = dataOmi["isVideo"] as? Boolean
                 if (userName != null && password != null && realm != null && host != null) {
                     OmiClient.register(
-                        applicationContext!!,
                         userName,
                         password,
                         isVideo ?: true,
                         realm,
-                        host = host,
-                        isTcp = true,
-                        customUI = true,
+                        host,
                     )
                 }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    requestPermissions(
-                        activity!!,
-                        arrayOf(
-                            Manifest.permission.USE_SIP,
-                            Manifest.permission.CALL_PHONE,
-                            Manifest.permission.CAMERA,
-                            Manifest.permission.MODIFY_AUDIO_SETTINGS,
-                            Manifest.permission.RECORD_AUDIO,
-                            Manifest.permission.POST_NOTIFICATIONS,
-                        ),
-                        0,
-                    )
-                } else {
-                    requestPermissions(
-                        activity!!,
-                        arrayOf(
-                            Manifest.permission.USE_SIP,
-                            Manifest.permission.CALL_PHONE,
-                            Manifest.permission.CAMERA,
-                            Manifest.permission.MODIFY_AUDIO_SETTINGS,
-                            Manifest.permission.RECORD_AUDIO,
-                        ),
-                        0,
-                    )
-                }
+                requestPermission(isVideo ?: true)
                 if (isVideo == true) {
-                    val cm = this.applicationContext!!.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-                    OmiClient.instance.setCameraManager(cm)
+                    setCamera()
                 }
                 result.success(true)
             }
+            INIT_CALL_API_KEY -> {
+                mainScope.launch {
+                    var loginResult = false
+                    val usrName = dataOmi["fullName"] as? String
+                    val usrUuid = dataOmi["usrUuid"] as? String
+                    val apiKey = dataOmi["apiKey"] as? String
+                    val isVideo = dataOmi["isVideo"] as? Boolean
+                    withContext(Dispatchers.Default) {
+                       try {
+                           if (usrName != null && usrUuid != null && apiKey != null) {
+                               loginResult = OmiClient.registerWithApiKey(
+                                   apiKey = apiKey,
+                                   userName = usrName,
+                                   uuid = usrUuid,
+                                   isVideo ?: true,
+                               )
+                           }
+                       } catch (_ : Throwable) {
+
+                       }
+                    }
+                    requestPermission(isVideo ?: true)
+                    if (isVideo == true) {
+                        setCamera()
+                    }
+                    result.success(loginResult)
+                }
+            }
             UPDATE_TOKEN -> {
-                val deviceTokenAndroid = dataOmi["fcmToken"] as String
-                val deviceId = dataOmi["deviceId"] as String
-                val appId = dataOmi["appId"] as String
-                OmiClient.instance.updatePushToken(
-                    "",
-                    deviceTokenAndroid,
-                    deviceId,
-                    appId,
-                )
-                result.success(true)
+                mainScope.launch {
+                    val deviceTokenAndroid = dataOmi["fcmToken"] as String
+                    val deviceId = dataOmi["deviceId"] as String
+                    val appId = dataOmi["appId"] as String
+                    withContext(Dispatchers.Default) {
+                       try {
+                           OmiClient.instance.updatePushToken(
+                               "",
+                               deviceTokenAndroid,
+                               deviceId,
+                               appId,
+                           )
+                       } catch (_ : Throwable) {
+
+                       }
+                    }
+                    result.success(true)
+                }
             }
             START_CALL -> {
                 val phoneNumber = dataOmi["phoneNumber"] as String
@@ -224,16 +249,23 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
                 result.success(true)
             }
             TOGGLE_MUTE -> {
-                OmiClient.instance.toggleMute()
-                result.success(true)
-                isMute = !isMute
-                onMuteEventSink?.success(isMute)
+                mainScope.launch {
+                    var newStatus : Boolean? = null
+                    withContext(Dispatchers.Default) {
+                        try {
+                            newStatus = OmiClient.instance.toggleMute()
+                        } catch (_ : Throwable) {
+
+                        }
+                    }
+                    result.success(newStatus)
+                    channel.invokeMethod(MUTED, newStatus)
+                }
             }
             TOGGLE_SPEAK -> {
-                icSpeaker = !icSpeaker
-                OmiClient.instance.toggleSpeaker(icSpeaker)
-                result.success(true)
-                onMicEventSink?.success(icSpeaker)
+                val newStatus = OmiClient.instance.toggleSpeaker()
+                result.success(newStatus)
+                channel.invokeMethod(SPEAKER, newStatus)
             }
             REGISTER -> {}
             SEND_DTMF -> {
@@ -251,28 +283,33 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
                 result.success(true)
             }
             JOIN_CALL -> {
-                OmiClient.instance.pickUp(true)
+                OmiClient.instance.pickUp()
             }
             SWITCH_CAMERA -> {
                 OmiClient.instance.switchCamera()
+                channel.invokeMethod(CAMERA_STATUS, true)
             }
             TOGGLE_VIDEO -> {
                 OmiClient.instance.toggleCamera()
             }
             INPUTS -> {
                 val inputs = OmiClient.instance.getAudioInputs()
-                val allAudios = inputs.map { mapOf(
-                    "name" to it.first,
-                    "id" to it.second,
-                ) }.toTypedArray()
+                val allAudios = inputs.map {
+                    mapOf(
+                        "name" to it.first,
+                        "id" to it.second,
+                    )
+                }.toTypedArray()
                 result.success(allAudios)
             }
             OUTPUTS -> {
                 val inputs = OmiClient.instance.getAudioOutputs()
-                val allAudios = inputs.map { mapOf(
-                    "name" to it.first,
-                    "id" to it.second,
-                ) }.toTypedArray()
+                val allAudios = inputs.map {
+                    mapOf(
+                        "name" to it.first,
+                        "id" to it.second,
+                    )
+                }.toTypedArray()
                 result.success(allAudios)
             }
             SET_INPUT -> {
@@ -281,6 +318,24 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
 
             SET_OUTPUT -> {
 
+            }
+            START_CALL_WITH_UUID -> {
+                mainScope.launch {
+                    var callResult = false
+                    withContext(Dispatchers.Default) {
+                        try {
+                            val uuid = dataOmi["usrUuid"] as String
+                            val isVideo = dataOmi["isVideo"] as Boolean
+                            callResult = OmiClient.instance.startCallWithUuid(uuid = uuid, isVideo = isVideo)
+                        } catch (_ : Throwable) {
+
+                        }
+                    }
+                    result.success(callResult)
+                }
+            }
+            LOG_OUT -> {
+                ///implement later
             }
         }
     }
@@ -320,27 +375,29 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware, Stream
         }
     }
 
-    override fun onListen(arguments: Any?, events: EventSink?) {
-        val args = arguments as HashMap<*, *>
-        val name = args["name"] as String
-        if (name == "camera") {
-            cameraEventSink = events
+    private fun requestPermission(isVideo : Boolean) {
+        var permissions = arrayOf(
+            Manifest.permission.USE_SIP,
+            Manifest.permission.CALL_PHONE,
+            Manifest.permission.MODIFY_AUDIO_SETTINGS,
+            Manifest.permission.RECORD_AUDIO,
+        )
+        if (isVideo) {
+            permissions = permissions.plus(Manifest.permission.CAMERA)
         }
-        if (name == "on_mute") {
-            onMuteEventSink = events
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissions = permissions.plus(Manifest.permission.POST_NOTIFICATIONS)
         }
-        if (name == "on_mic") {
-            onMicEventSink = events
-        }
+        requestPermissions(
+            activity!!,
+            permissions,
+            0,
+        )
     }
 
-    override fun onCancel(arguments: Any?) {
-//        cameraEventSink = null
-//        onMicEventSink = null
-//        onMuteEventSink = null
-    }
-
-    override fun onAccountStatus(online: Boolean) {
-
+    private fun setCamera() {
+        val cm =
+            applicationContext!!.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        OmiClient.instance.setCameraManager(cm)
     }
 }

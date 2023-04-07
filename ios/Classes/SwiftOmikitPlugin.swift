@@ -15,9 +15,6 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
     private var data: Data?
     private var onSpeakerStatus = false
     private var isFromPushKit: Bool = false
-    private var cameraEvent: FlutterEventSink?
-    private var onMuteEvent: FlutterEventSink?
-    private var onMicEvent: FlutterEventSink?
 
 
   public static func register(with registrar: FlutterPluginRegistrar) {
@@ -26,18 +23,10 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       }
       instance!.channel = FlutterMethodChannel(name: "omicallsdk", binaryMessenger: registrar.messenger())
       registrar.addMethodCallDelegate(instance, channel: instance!.channel)
-      let cameraEventChannel = FlutterEventChannel(name: "event/camera", binaryMessenger: registrar.messenger())
-      cameraEventChannel.setStreamHandler(instance)
-      let onMuteEventChannel = FlutterEventChannel(name: "event/on_mute", binaryMessenger: registrar.messenger())
-      onMuteEventChannel.setStreamHandler(instance)
-      let onMicEventChannel = FlutterEventChannel(name: "event/on_mic", binaryMessenger: registrar.messenger())
-      onMicEventChannel.setStreamHandler(instance)
       let localFactory = FLLocalCameraFactory(messenger: registrar.messenger())
-      registrar.register(localFactory, withId: "local_camera_view")
+      registrar.register(localFactory, withId: "omicallsdk/local_camera_view")
       let remoteFactory = FLRemoteCameraFactory(messenger: registrar.messenger())
-      registrar.register(remoteFactory, withId: "remote_camera_view")
-      AVCaptureDevice.requestAccess(for: .video) { result in
-      }
+      registrar.register(remoteFactory, withId: "omicallsdk/remote_camera_view")
   }
 
 
@@ -49,25 +38,20 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
   }
     
   func sendCameraEvent() {
-      if let cameraEvent = cameraEvent {
-          let cameraStatus = CallManager.shareInstance().videoManager?.isCameraOn ?? false
-          cameraEvent(cameraStatus)
-      }
+      let cameraStatus = CallManager.shareInstance().videoManager?.isCameraOn ?? false
+      channel.invokeMethod(VIDEO, arguments: cameraStatus)
   }
     
   func sendOnMuteStatus() {
       if let call = CallManager.shareInstance().getAvailableCall() {
-          if let isMuted = call.muted as? Bool, let onMuteEvent = onMuteEvent {
-              print("muteeeeed \(isMuted)")
-              onMuteEvent(isMuted)
+          if let isMuted = call.muted as? Bool {
+              channel.invokeMethod(MUTED, arguments: isMuted)
           }
       }
   }
     
   func sendOnSpeakerStatus() {
-      if let onMicEvent = onMicEvent {
-        onMicEvent(CallManager.shareInstance().isSpeaker)
-     }
+      channel.invokeMethod(SPEAKER, arguments: CallManager.shareInstance().isSpeaker)
   }
 
 
@@ -89,13 +73,24 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       }
 
       switch(action) {
+      case START_SERVICES:
+          CallManager.shareInstance().registerNotificationCenter()
+          result(true)
+          break
+      case CONFIG_NOTIFICATION:
+          result(true)
+          break
       case UPDATE_TOKEN:
           CallManager.shareInstance().updateToken(params: dataOmi)
           result(true)
           break
-      case INIT_CALL:
-          CallManager.shareInstance().initEndpoint(params: dataOmi)
-          result(true)
+      case INIT_CALL_API_KEY:
+          let value = CallManager.shareInstance().initWithApiKeyEndpoint(params: dataOmi)
+          result(value)
+          break
+      case INIT_CALL_USER_PASSWORD:
+          let value = CallManager.shareInstance().initWithUserPasswordEndpoint(params: dataOmi)
+          result(value)
           break
       case START_CALL:
           let phoneNumber = dataOmi["phoneNumber"] as! String
@@ -103,9 +98,9 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           if let isVideoCall = dataOmi["isVideo"] as? Bool {
               isVideo = isVideoCall
           }
-          CallManager.shareInstance().startCall(phoneNumber, isVideo: isVideo)
+          let callResult = CallManager.shareInstance().startCall(phoneNumber, isVideo: isVideo)
           sendOnMuteStatus()
-          result(true)
+          result(callResult)
           break
       case END_CALL:
           CallManager.shareInstance().endAvailableCall()
@@ -114,7 +109,9 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       case TOGGLE_MUTE:
           CallManager.shareInstance().toggleMute()
           sendOnMuteStatus()
-          result(true)
+          if let call = CallManager.init().getAvailableCall() {
+              result(call.muted)
+          }
           break
       case TOGGLE_SPEAK:
           CallManager.shareInstance().toogleSpeaker()
@@ -159,35 +156,24 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       case JOIN_CALL:
           CallManager.shareInstance().joinCall()
           result(true)
+      case START_CALL_WITH_UUID:
+          let uuid = dataOmi["usrUuid"] as! String
+          var isVideo = false
+          if let isVideoCall = dataOmi["isVideo"] as? Bool {
+              isVideo = isVideoCall
+          }
+          let callResult = CallManager.shareInstance().startCallWithUuid(uuid, isVideo: isVideo)
+          sendOnMuteStatus()
+          result(callResult)
+          break
+      case LOG_OUT:
+          ///implement later
+          break
       default:
           break
       }
 
   }
-}
-
-extension SwiftOmikitPlugin : FlutterStreamHandler {
-    public func onListen(withArguments arguments: Any?, eventSink events: @escaping FlutterEventSink) -> FlutterError? {
-        if let arguments = arguments as? [String: Any], let name = arguments["name"] as? String {
-            if (name == "camera") {
-                cameraEvent = events
-            }
-            if (name == "on_mute") {
-                onMuteEvent = events
-            }
-            if (name == "on_mic") {
-                onMicEvent = events
-            }
-        }
-        return nil
-    }
-    
-    public func onCancel(withArguments arguments: Any?) -> FlutterError? {
-//        self.cameraEvent = nil
-//        self.onMuteEvent = nil
-//        self.onMicEvent = nil
-        return nil
-    }
 }
 
 @objc public extension FlutterAppDelegate {
