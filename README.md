@@ -279,6 +279,13 @@ await Firebase.initializeApp();
         _isVideoCall, //call video or audio. If true is video call. 
     );
     ```
+  -  Call with UUID (only support with Api key):
+    ```
+    OmicallClient.instance.startCallWithUUID(
+        uuid, //your user id
+        _isVideoCall, //call video or audio. If true is video call. 
+    );
+    ```
   - Accept a call:
     ```
     OmicallClient.instance.joinCall();
