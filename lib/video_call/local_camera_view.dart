@@ -8,7 +8,7 @@ typedef LocalCameraCreatedCallback = void Function(
 
 class LocalCameraView extends StatelessWidget {
   // This is used in the platform side to register the view.
-  final String viewType = 'local_camera_view';
+  final String viewType = 'omicallsdk/local_camera_view';
   final LocalCameraCreatedCallback? onCameraCreated;
 
   // Pass parameters to the platform side.
@@ -62,7 +62,7 @@ class LocalCameraView extends StatelessWidget {
 class LocalCameraController {
   LocalCameraController._(int id)
       : _channel =
-  MethodChannel('local_camera_controller/$id');
+  MethodChannel('omicallsdk/local_camera_controller/$id');
 
   final MethodChannel _channel;
 

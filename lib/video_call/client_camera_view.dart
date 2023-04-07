@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 
 class ClientCameraView extends StatelessWidget {
   // This is used in the platform side to register the view.
-  final String viewType = 'client_camera_view';
+  final String viewType = 'omicallsdk/client_camera_view';
   // Pass parameters to the platform side.
   final Map<String, dynamic> creationParams = <String, dynamic>{};
 

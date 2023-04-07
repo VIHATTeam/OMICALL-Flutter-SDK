@@ -6,28 +6,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class LoginUserPasswordScreen extends StatefulWidget {
+  const LoginUserPasswordScreen({Key? key}) : super(key: key);
 
   // var phoneNumber = "";
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
+  State<LoginUserPasswordScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _LoginScreenState extends State<LoginUserPasswordScreen> {
   // NSString * USER_NAME1 = @"100";
   // NSString * PASS_WORD1 = @"Kunkun";
   // NSString * USER_NAME2 = @"101";
   // NSString * PASS_WORD2 = @"Kunkun12345";
   //video
   late final TextEditingController _userNameController = TextEditingController()
-    ..text = Platform.isAndroid ? '112' : '111';
+    ..text = Platform.isIOS ? '115' : '116';
   late final TextEditingController _passwordController = TextEditingController()
-    ..text = Platform.isAndroid ? 'kjO8XbGZZG' : 'P5JgMhMWhm';
+    ..text = Platform.isIOS ? 'VlAkzpm2Fn' : 'vWmFFBZwss';
   late final TextEditingController _serviceUrlController =
-      TextEditingController()..text = 'dky';
-  late final TextEditingController _hostUrlController =
-  TextEditingController()..text = '171.244.138.14';
+      TextEditingController()..text = 'thaonguyennguyen1197';
+  late final TextEditingController _hostUrlController = TextEditingController()
+    ..text = '171.244.138.14';
+
   bool _supportVideoCall = true;
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,
@@ -221,16 +222,18 @@ class _LoginScreenState extends State<LoginScreen> {
   void _login() async {
     if (_userNameController.text.isEmpty ||
         _passwordController.text.isEmpty ||
-        _serviceUrlController.text.isEmpty || _hostUrlController.text.isEmpty) {
+        _serviceUrlController.text.isEmpty ||
+        _serviceUrlController.text.isEmpty ||
+        _hostUrlController.text.isEmpty) {
       return;
     }
     EasyLoading.show();
-    await OmicallClient.instance.initCall(
+    await OmicallClient.instance.initCallWithUserPassword(
       userName: _userNameController.text,
       password: _passwordController.text,
       realm: _serviceUrlController.text,
-      isVideo: _supportVideoCall,
       host: _hostUrlController.text,
+      isVideo: _supportVideoCall,
     );
 
     await LocalStorage.instance.setLoginInfo({
@@ -238,7 +241,6 @@ class _LoginScreenState extends State<LoginScreen> {
       "password": _passwordController.text,
       "realm": _serviceUrlController.text,
       "isVideo": _supportVideoCall,
-      "host": _hostUrlController.text,
     });
     EasyLoading.dismiss();
     if (!mounted) {

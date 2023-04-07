@@ -41,18 +41,38 @@ class CallManager {
         }
     }
     
-    func initEndpoint(params: [String: Any]){
+    private func requestPermission(isVideo: Bool) {
+        AVCaptureDevice.requestAccess(for: .audio) { _ in
+            print("request audio")
+        }
+        if isVideo {
+            AVCaptureDevice.requestAccess(for: .video) { _ in
+                print("request video")
+            }
+        }
+    }
+    
+    func initWithApiKeyEndpoint(params: [String: Any]) -> Bool {
+        //request permission
+        var result = true
+        if let usrUuid = params["usrUuid"] as? String, let fullName = params["fullName"] as? String, let apiKey = params["apiKey"] as? String, let isVideo = params["isVideo"] as? Bool {
+            result = OmiClient.initWithUUID(usrUuid, fullName: fullName, apiKey: apiKey)
+            requestPermission(isVideo: isVideo)
+        }
+        if let isVideo = params["isVideo"] as? Bool {
+            requestPermission(isVideo: isVideo)
+        }
+        return result
+    }
+    
+    func initWithUserPasswordEndpoint(params: [String: Any]) -> Bool {
         if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String, let host = params["host"] as? String {
             OmiClient.initWithUsername(userName, password: password, realm: realm)
         }
-        if (Thread.isMainThread) {
-            print("main thread")
+        if let isVideo = params["isVideo"] as? Bool {
+            requestPermission(isVideo: isVideo)
         }
-        if let isVideoCall = params["isVideo"] as? Bool, isVideoCall == true {
-            OmiClient.startOmiService(true)
-            videoManager = OMIVideoViewManager.init()
-        }
-        registerNotificationCenter()
+        return true
     }
     
     func registerNotificationCenter() {
@@ -78,7 +98,11 @@ class CallManager {
             return;
         }
         if (call.callState == .disconnected) {
-            DispatchQueue.main.async {
+            DispatchQueue.main.async {[weak self] in
+                guard let self = self else { return }
+                if (self.videoManager != nil) {
+                    self.videoManager = nil
+                }
                 SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
             }
         }
@@ -110,6 +134,9 @@ class CallManager {
             break
         case .confirmed:
             NSLog("Outgoing call, in CONFIRMED state, with UUID: \(call)")
+            if (videoManager == nil) {
+                videoManager = OMIVideoViewManager.init()
+            }
             SwiftOmikitPlugin.instance?.sendEvent(CALL_ESTABLISHED, ["isVideo": call.isVideo, "callerNumber": call.callerNumber])
             SwiftOmikitPlugin.instance.sendOnMuteStatus()
             break
@@ -120,6 +147,9 @@ class CallManager {
                 NSLog("Call remotly ended, in DISCONNECTED state, with UUID: \(call.uuid)")
             }
             print(call.uuid.uuidString)
+            if (videoManager != nil) {
+                videoManager = nil
+            }
             SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
             break
         case .incoming:
@@ -138,12 +168,23 @@ class CallManager {
     }
     
     /// Start call
-    func startCall(_ phoneNumber: String, isVideo: Bool) {
+    func startCall(_ phoneNumber: String, isVideo: Bool) -> Bool {
         if (isVideo) {
-            OmiClient.startVideoCall(phoneNumber)
-            return
+            return OmiClient.startVideoCall(phoneNumber)
         }
-        OmiClient.startCall(phoneNumber)
+        return OmiClient.startCall(phoneNumber)
+    }
+    
+    /// Start call
+    func startCallWithUuid(_ uuid: String, isVideo: Bool) -> Bool {
+        let phoneNumber = OmiClient.getPhone(uuid)
+        if let phone = phoneNumber {
+            if (isVideo) {
+                return OmiClient.startVideoCall(phone)
+            }
+            return OmiClient.startCall(phone)
+        }
+        return false
     }
     
     func endAvailableCall() {

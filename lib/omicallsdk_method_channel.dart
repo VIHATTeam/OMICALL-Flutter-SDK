@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/services.dart';
+import 'package:omicall_flutter_plugin/omicall.dart';
 
 import 'action/action_model.dart';
 
@@ -9,33 +10,52 @@ class OmicallSDKController {
   /// The method channel used to interact with the native platform.
 
   final _methodChannel = const MethodChannel('omicallsdk');
-  final _cameraChannel = const EventChannel('event/camera');
-  final _onMuteChannel = const EventChannel('event/on_mute');
-  final _onMicChannel = const EventChannel('event/on_mic');
-  final StreamController<OmiAction> _eventTransfer =
+  final _videoController = StreamController<bool>.broadcast();
+  final _mutedController = StreamController<bool>.broadcast();
+  final _speakerController = StreamController<bool>.broadcast();
+  final StreamController<OmiAction> _callStateChangeController =
       StreamController<OmiAction>.broadcast();
 
   OmicallSDKController() {
-    _methodChannel.setMethodCallHandler(_omicallSDKMethodCall);
+    _methodChannel.setMethodCallHandler((call) async {
+      final method = call.method;
+      final data = call.arguments;
+      if (method == OmiEventList.onMuted) {
+        _mutedController.sink.add(data);
+        return;
+      }
+      if (method == OmiEventList.onSpeaker) {
+        _speakerController.sink.add(data);
+        return;
+      }
+      if (method == OmiEventList.onVideo) {
+        _videoController.sink.add(data);
+        return;
+      }
+      _callStateChangeController.sink.add(
+        OmiAction(
+          actionName: call.method,
+          data: data ?? <dynamic, dynamic>{},
+        ),
+      );
+    });
   }
 
   dispose() {
-    _eventTransfer.close();
+    _videoController.close();
+    _mutedController.close();
+    _speakerController.close();
+    _callStateChangeController.close();
   }
 
-  Stream<OmiAction> get eventTransferStream => _eventTransfer.stream;
+  Stream<OmiAction> get callStateChangeEvent =>
+      _callStateChangeController.stream;
 
-  Stream<dynamic> cameraEvent() {
-    return _cameraChannel.receiveBroadcastStream({"name": "camera"});
-  }
+  Stream<bool> get cameraEvent => _videoController.stream;
 
-  Stream<dynamic> onMuteEvent() {
-    return _onMuteChannel.receiveBroadcastStream({"name": "on_mute"});
-  }
+  Stream<bool> get mutedEvent => _mutedController.stream;
 
-  Stream<dynamic> onMicEvent() {
-    return _onMicChannel.receiveBroadcastStream({"name": "on_mic"});
-  }
+  Stream<bool> get micEvent => _speakerController.stream;
 
   Future<dynamic> action(OmiAction action) async {
     final response = await _methodChannel.invokeMethod<dynamic>(
@@ -43,15 +63,5 @@ class OmicallSDKController {
       action.toJson(),
     );
     return response;
-  }
-
-  Future<dynamic> _omicallSDKMethodCall(MethodCall call) async {
-    final Map? args = call.arguments;
-    _eventTransfer.sink.add(
-      OmiAction(
-        actionName: call.method,
-        data: args ?? <dynamic, dynamic>{},
-      ),
-    );
   }
 }

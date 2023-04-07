@@ -11,6 +11,8 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.platform.PlatformView
 import vn.vihat.omicall.omisdk.OmiClient
+import vn.vihat.omicall.omisdk.videoutils.ScaleManager
+import vn.vihat.omicall.omisdk.videoutils.Size
 
 internal class FLLocalCameraView(context: Context, id: Int, creationParams: Map<String?, Any?>?,  messenger: BinaryMessenger) :
     PlatformView, MethodChannel.MethodCallHandler, TextureView.SurfaceTextureListener {
@@ -24,7 +26,7 @@ internal class FLLocalCameraView(context: Context, id: Int, creationParams: Map<
     override fun dispose() {}
 
     init {
-        methodChannel = MethodChannel(messenger, "local_camera_controller/$id")
+        methodChannel = MethodChannel(messenger, "omicallsdk/local_camera_controller/$id")
         methodChannel.setMethodCallHandler(this)
         localView = TextureView(context)
         localView.surfaceTextureListener = this
@@ -34,7 +36,10 @@ internal class FLLocalCameraView(context: Context, id: Int, creationParams: Map<
         if (call.method == "refresh") {
             localView.surfaceTexture?.let {
                 OmiClient.instance.setupLocalVideoFeed(Surface(it))
-                localView.scaleX = 2F
+                ScaleManager.adjustAspectRatio(localView,
+                    Size(localView.width, localView.height),
+                    Size(1280,720)
+                )
             }
         }
     }

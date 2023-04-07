@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/home/home_screen.dart';
-import 'package:calling/screens/login/login_screen.dart';
+import 'package:calling/screens/login/login_apikey_screen.dart';
+import 'package:calling/screens/login/login_user_password_screen.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -12,28 +13,12 @@ import 'package:omicall_flutter_plugin/omicall.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  HttpOverrides.global = MyHttpOverrides();
   await Firebase.initializeApp();
   final loginInfo = await LocalStorage.instance.loginInfo();
-  await initService(loginInfo);
   runApp(MyApp(
     loginInfo: loginInfo,
   ));
-}
-
-Future<void> initService(Map<dynamic, dynamic>? loginInfo) async {
-  if (loginInfo == null) {
-    return;
-  }
-  //auto login
-  await OmicallClient.instance.initCall(
-    userName: null,
-    password: null,
-    realm: null,
-    isVideo: true,
-  );
-  await updateToken(
-    showLoading: false,
-  );
 }
 
 class MyApp extends StatefulWidget {
@@ -54,6 +39,19 @@ class _MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     EasyLoading.instance.userInteractions = false;
+    OmicallClient.instance.startServices();
+    OmicallClient.instance.configPushNotification(
+      prefix : "Cuộc gọi tới từ: ",
+      declineTitle : "Từ chối",
+      acceptTitle : "Chấp nhận",
+      acceptBackgroundColor : "#FF3700B3",
+      declineBackgroundColor : "#FF000000",
+      incomingBackgroundColor : "#FFFFFFFF",
+      incomingAcceptButtonImage : "join_call",
+      incomingDeclineButtonImage : "hangup",
+      backImage : "ic_back",
+      userImage : "calling_face",
+    );
   }
 
   @override
@@ -61,7 +59,7 @@ class _MyAppState extends State<MyApp> {
     return GestureDetector(
       child: MaterialApp(
         theme: ThemeData.light(),
-        home: loginInfo != null ? const HomeScreen() : const LoginScreen(),
+        home: loginInfo != null ? const HomeScreen() : const LoginApiKeyScreen(),
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
       ),
@@ -99,11 +97,25 @@ Future<void> updateToken({
   }
   await OmicallClient.instance.updateToken(
     id,
-    Platform.isAndroid ? "vn.vihat.omicall.sdk_example" : "vn.vihat.omikit",
+    Platform.isAndroid ? "omicall.concung.dev" : "vn.vihat.omikit",
     fcmToken: token,
     apnsToken: apnToken,
   );
   if (showLoading) {
     EasyLoading.dismiss();
+  }
+}
+
+class MyHttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..badCertificateCallback = (
+          X509Certificate cert,
+          String host,
+          int port,
+          ) {
+        return true;
+      };
   }
 }

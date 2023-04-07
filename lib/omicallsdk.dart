@@ -6,43 +6,89 @@ import 'action/action_model.dart';
 import 'constant/names.dart';
 
 class OmicallClient {
-
   OmicallClient._();
-  
+
   static final instance = OmicallClient._();
 
   final OmicallSDKController _controller = OmicallSDKController();
 
-  OmicallSDKController get controller => _controller;
-
   ///streaming camera event
-  Stream<dynamic> cameraEvent() {
-    return _controller.cameraEvent();
-  }
-
+  Stream<OmiAction> get callStateChangeEvent => _controller.callStateChangeEvent;
+  ///streaming camera event
+  Stream<bool> get cameraEvent => _controller.cameraEvent;
   ///streaming mic event
-  Stream<dynamic> onMicEvent() {
-    return _controller.onMicEvent();
-  }
-
+  Stream<bool> get micEvent => _controller.micEvent;
   ///streaming mic event
-  Stream<dynamic> onMuteEvent() {
-    return _controller.onMuteEvent();
-  }
+  Stream<bool> get mutedEvent => _controller.mutedEvent;
 
   ///destroy event
   void dispose() {
     _controller.dispose();
   }
 
-  Future<void> initCall({
+  Future<void> startServices() async {
+    final action = OmiAction(
+      actionName: OmiActionName.START_SERVICES,
+      data: {},
+    );
+    return await _controller.action(action);
+  }
+
+  Future<void> initCallWithApiKey({
+    String? usrName,
+    String? usrUuid,
+    String? apiKey,
+    bool isVideo = true,
+  }) async {
+    final action =
+        OmiAction(actionName: OmiActionName.INIT_CALL_API_KEY, data: {
+      'fullName': usrName,
+      'usrUuid': usrUuid,
+      'apiKey': apiKey,
+      'isVideo': isVideo,
+    });
+    return await _controller.action(action);
+  }
+
+  Future<void> configPushNotification({
+    String? prefix,
+    String? declineTitle,
+    String? acceptTitle,
+    String? acceptBackgroundColor,
+    String? declineBackgroundColor,
+    String? incomingBackgroundColor,
+    String? incomingAcceptButtonImage,
+    String? incomingDeclineButtonImage,
+    String? backImage,
+    String? userImage,
+  }) async {
+    final action = OmiAction(
+      actionName: OmiActionName.CONFIG_NOTIFICATION,
+      data: {
+        'prefix': prefix,
+        'declineTitle': declineTitle,
+        'acceptTitle': acceptTitle,
+        'acceptBackgroundColor': acceptBackgroundColor,
+        'declineBackgroundColor': declineBackgroundColor,
+        'incomingBackgroundColor': incomingBackgroundColor,
+        'incomingAcceptButtonImage': incomingAcceptButtonImage,
+        'incomingDeclineButtonImage': incomingDeclineButtonImage,
+        'backImage': backImage,
+        'userImage': userImage,
+      },
+    );
+    return await _controller.action(action);
+  }
+
+  Future<void> initCallWithUserPassword({
     String? userName,
     String? password,
     String? realm,
     String? host,
     bool isVideo = true,
   }) async {
-    final action = OmiAction(actionName: OmiActionName.INIT_CALL, data: {
+    final action =
+        OmiAction(actionName: OmiActionName.INIT_CALL_USER_PASSWORD, data: {
       'userName': userName,
       'password': password,
       'realm': realm,
@@ -67,10 +113,10 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
-  Future<void> startCall(
-      String phoneNumber,
-      bool isVideo,
-      ) async {
+  Future<bool> startCall(
+    String phoneNumber,
+    bool isVideo,
+  ) async {
     final action = OmiAction(actionName: OmiActionName.START_CALL, data: {
       'phoneNumber': phoneNumber,
       'isVideo': isVideo,
@@ -78,6 +124,16 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
+  Future<bool> startCallWithUUID(
+      String uuid,
+      bool isVideo,
+      ) async {
+    final action = OmiAction(actionName: OmiActionName.START_CALL_WITH_UUID, data: {
+      'usrUuid': uuid,
+      'isVideo': isVideo,
+    });
+    return await _controller.action(action);
+  }
 
   Future<void> joinCall() async {
     final action = OmiAction(
@@ -124,9 +180,7 @@ class OmicallClient {
   Future<void> switchCamera() async {
     final action = OmiAction(
       actionName: OmiActionName.SWITCH_CAMERA,
-      data: {
-
-      },
+      data: {},
     );
     return await _controller.action(action);
   }
@@ -134,8 +188,7 @@ class OmicallClient {
   Future<void> getCameraStatus() async {
     final action = OmiAction(
       actionName: OmiActionName.CAMERA_STATUS,
-      data: {
-      },
+      data: {},
     );
     return await _controller.action(action);
   }
@@ -143,8 +196,7 @@ class OmicallClient {
   Future<void> toggleVideo() async {
     final action = OmiAction(
       actionName: OmiActionName.TOGGLE_VIDEO,
-      data: {
-      },
+      data: {},
     );
     return await _controller.action(action);
   }
@@ -152,8 +204,7 @@ class OmicallClient {
   Future<dynamic> getOutputAudios() async {
     final action = OmiAction(
       actionName: OmiActionName.OUTPUTS,
-      data: {
-      },
+      data: {},
     );
     return await _controller.action(action);
   }
@@ -171,17 +222,25 @@ class OmicallClient {
   Future<dynamic> getInputAudios() async {
     final action = OmiAction(
       actionName: OmiActionName.INPUTS,
-      data: {
-      },
+      data: {},
     );
     return await _controller.action(action);
   }
+
   Future<void> setInputAudio({required dynamic id}) async {
     final action = OmiAction(
       actionName: OmiActionName.SET_INPUT,
       data: {
         "id": id,
       },
+    );
+    return await _controller.action(action);
+  }
+  ///Implement later
+  Future<dynamic> logout() async {
+    final action = OmiAction(
+      actionName: OmiActionName.LOG_OUT,
+      data: {},
     );
     return await _controller.action(action);
   }

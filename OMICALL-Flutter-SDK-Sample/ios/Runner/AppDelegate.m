@@ -18,7 +18,6 @@
   provider = [[CallKitProviderDelegate alloc] initWithCallManager: [OMISIPLib sharedInstance].callManager];
   voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
   pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
-//  [self requestNotification];
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 

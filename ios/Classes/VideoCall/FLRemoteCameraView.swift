@@ -50,7 +50,7 @@ class FLRemoteCameraView: NSObject, FlutterPlatformView {
     ) {
         _view = OMIVideoPreviewView.init()
         _arg = args as? [String: Any]
-        methodChannel = FlutterMethodChannel(name: "remote_camera_controller/\(viewId)", binaryMessenger: messenger!)
+        methodChannel = FlutterMethodChannel(name: "omicallsdk/remote_camera_controller/\(viewId)", binaryMessenger: messenger!)
         super.init()
         methodChannel?.setMethodCallHandler(onMethodCall)
     }
