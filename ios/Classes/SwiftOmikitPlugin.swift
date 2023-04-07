@@ -98,9 +98,9 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           if let isVideoCall = dataOmi["isVideo"] as? Bool {
               isVideo = isVideoCall
           }
-          CallManager.shareInstance().startCall(phoneNumber, isVideo: isVideo)
+          let callResult = CallManager.shareInstance().startCall(phoneNumber, isVideo: isVideo)
           sendOnMuteStatus()
-          result(true)
+          result(callResult)
           break
       case END_CALL:
           CallManager.shareInstance().endAvailableCall()
@@ -156,6 +156,19 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       case JOIN_CALL:
           CallManager.shareInstance().joinCall()
           result(true)
+      case START_CALL_WITH_UUID:
+          let uuid = dataOmi["usrUuid"] as! String
+          var isVideo = false
+          if let isVideoCall = dataOmi["isVideo"] as? Bool {
+              isVideo = isVideoCall
+          }
+          let callResult = CallManager.shareInstance().startCallWithUuid(uuid, isVideo: isVideo)
+          sendOnMuteStatus()
+          result(callResult)
+          break
+      case LOG_OUT:
+          ///implement later
+          break
       default:
           break
       }

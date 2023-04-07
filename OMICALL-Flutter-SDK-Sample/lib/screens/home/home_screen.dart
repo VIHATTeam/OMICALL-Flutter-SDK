@@ -21,8 +21,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  // late final TextEditingController _phoneNumberController =
+  //     TextEditingController()..text = Platform.isAndroid ? '111' : '112';
   late final TextEditingController _phoneNumberController =
-      TextEditingController()..text = Platform.isAndroid ? '111' : '112';
+  TextEditingController()..text = Platform.isAndroid ? '123aaa' : '122aaa';
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,
     fontSize: 16,
@@ -268,7 +270,11 @@ class _HomeScreenState extends State<HomeScreen> {
         status: CallStatus.calling,
       );
     }
-    OmicallClient.instance.startCall(
+    // OmicallClient.instance.startCall(
+    //   phone,
+    //   _isVideoCall,
+    // );
+    OmicallClient.instance.startCallWithUUID(
       phone,
       _isVideoCall,
     );

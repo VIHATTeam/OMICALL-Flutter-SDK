@@ -113,12 +113,23 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
-  Future<void> startCall(
+  Future<bool> startCall(
     String phoneNumber,
     bool isVideo,
   ) async {
     final action = OmiAction(actionName: OmiActionName.START_CALL, data: {
       'phoneNumber': phoneNumber,
+      'isVideo': isVideo,
+    });
+    return await _controller.action(action);
+  }
+
+  Future<bool> startCallWithUUID(
+      String uuid,
+      bool isVideo,
+      ) async {
+    final action = OmiAction(actionName: OmiActionName.START_CALL_WITH_UUID, data: {
+      'usrUuid': uuid,
       'isVideo': isVideo,
     });
     return await _controller.action(action);
@@ -222,6 +233,14 @@ class OmicallClient {
       data: {
         "id": id,
       },
+    );
+    return await _controller.action(action);
+  }
+  ///Implement later
+  Future<dynamic> logout() async {
+    final action = OmiAction(
+      actionName: OmiActionName.LOG_OUT,
+      data: {},
     );
     return await _controller.action(action);
   }

@@ -59,7 +59,7 @@ class _MyAppState extends State<MyApp> {
     return GestureDetector(
       child: MaterialApp(
         theme: ThemeData.light(),
-        home: loginInfo != null ? const HomeScreen() : const LoginUserPasswordScreen(),
+        home: loginInfo != null ? const HomeScreen() : const LoginApiKeyScreen(),
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
       ),

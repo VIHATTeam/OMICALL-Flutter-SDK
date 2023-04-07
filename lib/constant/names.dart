@@ -21,4 +21,6 @@ class OmiActionName {
   static const String INPUTS = "INPUTS";
   static const String SET_INPUT = "SET_INPUT";
   static const String SET_OUTPUT = "SET_OUTPUT";
+  static const String START_CALL_WITH_UUID = "START_CALL_WITH_UUID";
+  static const String LOG_OUT = "LOG_OUT";
 }
