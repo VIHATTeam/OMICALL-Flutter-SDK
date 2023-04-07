@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+##2.2.1
+- **BREAKING CHANGE**
+  - We support call with uuid `Omiclient.instance.startCallWithUUID`
+  - Increase Android core version (fix crash on some devices)
+  - Update sample
+
 ##2.1.0
 - **BREAKING CHANGE**
   - We support config notification `Omiclient.instance.configPushNotification`, But it doesn't support on iOS
