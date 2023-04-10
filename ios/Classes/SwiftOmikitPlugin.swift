@@ -8,14 +8,8 @@ import OmiKit
 
 public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
 
-    @objc public static var instance: SwiftOmikitPlugin!
-    private var channel: FlutterMethodChannel!
-    private var callManager: CallManager? = nil
-    private var sharedProvider: CXProvider? = nil
-    private var data: Data?
-    private var onSpeakerStatus = false
-    private var isFromPushKit: Bool = false
-
+  @objc public static var instance: SwiftOmikitPlugin!
+  private var channel: FlutterMethodChannel!
 
   public static func register(with registrar: FlutterPluginRegistrar) {
       if (instance == nil) {
@@ -42,7 +36,7 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       channel.invokeMethod(VIDEO, arguments: cameraStatus)
   }
     
-  func sendOnMuteStatus() {
+  func sendMuteStatus() {
       if let call = CallManager.shareInstance().getAvailableCall() {
           if let isMuted = call.muted as? Bool {
               channel.invokeMethod(MUTED, arguments: isMuted)
@@ -50,8 +44,10 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       }
   }
     
-  func sendOnSpeakerStatus() {
-      channel.invokeMethod(SPEAKER, arguments: CallManager.shareInstance().isSpeaker)
+  func sendSpeakerStatus() {
+      if let call = CallManager.shareInstance().getAvailableCall() {
+          channel.invokeMethod(SPEAKER, arguments: call.speaker)
+      }
   }
 
 
@@ -99,7 +95,7 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
               isVideo = isVideoCall
           }
           let callResult = CallManager.shareInstance().startCall(phoneNumber, isVideo: isVideo)
-          sendOnMuteStatus()
+          sendMuteStatus()
           result(callResult)
           break
       case END_CALL:
@@ -108,15 +104,17 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           break
       case TOGGLE_MUTE:
           CallManager.shareInstance().toggleMute()
-          sendOnMuteStatus()
+          sendMuteStatus()
           if let call = CallManager.init().getAvailableCall() {
               result(call.muted)
           }
           break
       case TOGGLE_SPEAK:
           CallManager.shareInstance().toogleSpeaker()
-          result(true)
-          sendOnSpeakerStatus()
+          sendSpeakerStatus()
+          if let call = CallManager.init().getAvailableCall() {
+              result(call.speaker)
+          }
           break
       case SEND_DTMF:
           CallManager.shareInstance().sendDTMF(character: dataOmi["character"] as! String)
@@ -163,7 +161,7 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
               isVideo = isVideoCall
           }
           let callResult = CallManager.shareInstance().startCallWithUuid(uuid, isVideo: isVideo)
-          sendOnMuteStatus()
+          sendMuteStatus()
           result(callResult)
           break
       case LOG_OUT:

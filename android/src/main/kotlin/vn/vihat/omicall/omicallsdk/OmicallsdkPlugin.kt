@@ -5,6 +5,7 @@ import android.content.Context
 import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat.requestPermissions
@@ -37,12 +38,14 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private val callListener = object : OmiListener {
 
         override fun incomingReceived(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
-            channel.invokeMethod(
-                INCOMING_RECEIVED, mapOf(
-                    "isVideo" to isVideo,
-                    "callerNumber" to phoneNumber,
+            Handler(Looper.getMainLooper()).post {
+                channel.invokeMethod(
+                    INCOMING_RECEIVED, mapOf(
+                        "isVideo" to isVideo,
+                        "callerNumber" to phoneNumber,
+                    )
                 )
-            )
+            }
             Log.d("omikit", "incomingReceived: ")
         }
 
@@ -101,8 +104,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     private val accountListener = object : OmiAccountListener {
         override fun onAccountStatus(online: Boolean) {
             Log.d("aaa", "Account status $online")
-//            initResult?.success(online)
-//            initResult = null
         }
     }
 
@@ -142,6 +143,10 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 OmiClient(applicationContext!!)
                 OmiClient.instance.setListener(callListener)
                 OmiClient.instance.addAccountListener(accountListener)
+                val needSetupVideo = OmiClient.instance.needSetupCamera()
+                if (needSetupVideo) {
+                    setCamera()
+                }
                 result.success(true)
             }
             CONFIG_NOTIFICATION -> {
@@ -244,6 +249,10 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 OmiClient.instance.startCall(phoneNumber, isVideo)
                 result.success(true)
             }
+            JOIN_CALL -> {
+                OmiClient.instance.pickUp()
+                result.success(true)
+            }
             END_CALL -> {
                 OmiClient.instance.hangUp()
                 result.success(true)
@@ -281,9 +290,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     OmiClient.instance.sendDtmf(characterCode)
                 }
                 result.success(true)
-            }
-            JOIN_CALL -> {
-                OmiClient.instance.pickUp()
             }
             SWITCH_CAMERA -> {
                 OmiClient.instance.switchCamera()
