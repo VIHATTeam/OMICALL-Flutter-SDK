@@ -16,7 +16,6 @@ class CallManager {
     
     static private var instance: CallManager? = nil // Instance
     private let omiLib = OMISIPLib.sharedInstance()
-    var isSpeaker = false
     var videoManager: OMIVideoViewManager?
     
     /// Get instance
@@ -55,13 +54,11 @@ class CallManager {
     func initWithApiKeyEndpoint(params: [String: Any]) -> Bool {
         //request permission
         var result = true
-        if let usrUuid = params["usrUuid"] as? String, let fullName = params["fullName"] as? String, let apiKey = params["apiKey"] as? String, let isVideo = params["isVideo"] as? Bool {
+        if let usrUuid = params["usrUuid"] as? String, let fullName = params["fullName"] as? String, let apiKey = params["apiKey"] as? String {
             result = OmiClient.initWithUUID(usrUuid, fullName: fullName, apiKey: apiKey)
-            requestPermission(isVideo: isVideo)
         }
-        if let isVideo = params["isVideo"] as? Bool {
-            requestPermission(isVideo: isVideo)
-        }
+        let isVideo = (params["isVideo"] as? Bool) ?? true
+        requestPermission(isVideo: isVideo)
         return result
     }
     
@@ -69,9 +66,8 @@ class CallManager {
         if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String, let host = params["host"] as? String {
             OmiClient.initWithUsername(userName, password: password, realm: realm)
         }
-        if let isVideo = params["isVideo"] as? Bool {
-            requestPermission(isVideo: isVideo)
-        }
+        let isVideo = (params["isVideo"] as? Bool) ?? true
+        requestPermission(isVideo: isVideo)
         return true
     }
     
@@ -134,11 +130,11 @@ class CallManager {
             break
         case .confirmed:
             NSLog("Outgoing call, in CONFIRMED state, with UUID: \(call)")
-            if (videoManager == nil) {
+            if (videoManager == nil && call.isVideo) {
                 videoManager = OMIVideoViewManager.init()
             }
             SwiftOmikitPlugin.instance?.sendEvent(CALL_ESTABLISHED, ["isVideo": call.isVideo, "callerNumber": call.callerNumber])
-            SwiftOmikitPlugin.instance.sendOnMuteStatus()
+            SwiftOmikitPlugin.instance.sendMuteStatus()
             break
         case .disconnected:
             if (!call.connected) {
@@ -208,7 +204,7 @@ class CallManager {
     }
     
     func sendDTMF(character: String) {
-        guard let call = omiLib.getCurrentCall() else {
+        guard let call = getAvailableCall() else {
             return
         }
         try? call.sendDTMF(character)
@@ -232,19 +228,16 @@ class CallManager {
     
     /// Toogle speaker
     func toogleSpeaker() {
-        do {
-            if (!isSpeaker) {
-                isSpeaker = true
-                try AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
-                
-            } else {
-                isSpeaker = false
-                try AVAudioSession.sharedInstance().overrideOutputAudioPort(.none)
-            }
-        } catch (let error){
-            NSLog("Error toogleSpeaker current call: \(error)")
-            
+        guard let call = getAvailableCall() else {
+            return
         }
+        let speaker = call.speaker
+        if !speaker {
+            try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
+        } else {
+            try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.none)
+        }
+        call.setSpeaker(!speaker)
     }
     
     

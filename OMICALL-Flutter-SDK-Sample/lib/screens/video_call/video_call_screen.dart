@@ -226,8 +226,12 @@ class VideoCallState extends State<VideoCallScreen> {
                 child: RemoteCameraView(
                   width: double.infinity,
                   height: double.infinity,
-                  onCameraCreated: (controller) {
+                  onCameraCreated: (controller) async {
                     _remoteController = controller;
+                    if (widget.status == CallStatus.established) {
+                      await Future.delayed(const Duration(milliseconds: 200));
+                      controller.refresh();
+                    }
                   },
                 ),
               ),
@@ -240,8 +244,12 @@ class VideoCallState extends State<VideoCallScreen> {
               child: LocalCameraView(
                 width: double.infinity,
                 height: double.infinity,
-                onCameraCreated: (controller) {
+                onCameraCreated: (controller) async {
                   _localController = controller;
+                  if (widget.status == CallStatus.established) {
+                    await Future.delayed(const Duration(milliseconds: 200));
+                    controller.refresh();
+                  }
                 },
               ),
             ),

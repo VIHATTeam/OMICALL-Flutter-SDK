@@ -111,7 +111,6 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
 <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
-<uses-permission android:name="android.permission.WAKE_LOCK"/>
 <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>

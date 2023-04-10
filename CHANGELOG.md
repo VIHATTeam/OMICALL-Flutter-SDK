@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+##2.2.2
+  - Increase Android core version
+  - Update sample
+
 ##2.2.1
 - **BREAKING CHANGE**
   - We support call with uuid `Omiclient.instance.startCallWithUUID`
