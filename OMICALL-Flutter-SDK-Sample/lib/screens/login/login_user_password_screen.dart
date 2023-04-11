@@ -25,9 +25,9 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
   late final TextEditingController _passwordController = TextEditingController()
     ..text = Platform.isIOS ? 'VlAkzpm2Fn' : 'vWmFFBZwss';
   late final TextEditingController _serviceUrlController =
-      TextEditingController()..text = 'thaonguyennguyen1197';
+      TextEditingController()..text = '';
   late final TextEditingController _hostUrlController = TextEditingController()
-    ..text = '171.244.138.14';
+    ..text = '';
 
   bool _supportVideoCall = true;
   TextStyle basicStyle = const TextStyle(

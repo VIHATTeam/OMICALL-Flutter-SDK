@@ -223,6 +223,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     result.success(loginResult)
                 }
             }
+            GET_INITIAL_CALL -> {
+                result.success(false)
+            }
             UPDATE_TOKEN -> {
                 mainScope.launch {
                     val deviceTokenAndroid = dataOmi["fcmToken"] as String

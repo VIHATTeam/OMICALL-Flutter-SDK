@@ -225,7 +225,12 @@ await Firebase.initializeApp();
       apiKey: "",
     );
     ```
-    - Config push notification for Android:
+  - Get call when user open app from killed status(only iOS):
+    ```
+    final result = await OmicallClient.instance.getInitialCall();
+    ///if result is not equal False => have a calling.
+    ```
+  - Config push notification for Android:
     ```
     OmicallClient.instance.configPushNotification(
       prefix : "Cuộc gọi tới từ: ",
