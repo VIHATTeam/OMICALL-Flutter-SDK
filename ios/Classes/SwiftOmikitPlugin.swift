@@ -45,9 +45,7 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
   }
     
   func sendSpeakerStatus() {
-      if let call = CallManager.shareInstance().getAvailableCall() {
-          channel.invokeMethod(SPEAKER, arguments: call.speaker)
-      }
+      channel.invokeMethod(SPEAKER, arguments: CallManager.shareInstance().isSpeaker)
   }
 
 
@@ -87,6 +85,20 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       case INIT_CALL_USER_PASSWORD:
           let value = CallManager.shareInstance().initWithUserPasswordEndpoint(params: dataOmi)
           result(value)
+          break
+      case GET_INITIAL_CALL:
+          if let call = CallManager.shareInstance().getAvailableCall() {
+              let data : [String: Any] = [
+                  "callerNumber" : call.callerNumber,
+                  "status": call.lastStatus,
+                  "muted": call.muted,
+                  "speaker": call.speaker,
+                  "isVideo": call.isVideo
+              ]
+              result(data)
+          } else {
+              result(false)
+          }
           break
       case START_CALL:
           let phoneNumber = dataOmi["phoneNumber"] as! String

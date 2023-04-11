@@ -135,6 +135,15 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
+  Future<dynamic> getInitialCall() async {
+    final action = OmiAction(
+      actionName: OmiActionName.GET_INITIAL_CALL,
+      data: {},
+    );
+    final result = await _controller.action(action);
+    return result;
+  }
+
   Future<void> joinCall() async {
     final action = OmiAction(
       actionName: OmiActionName.JOIN_CALL,

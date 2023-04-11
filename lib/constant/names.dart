@@ -7,6 +7,7 @@ class OmiActionName {
   static const String CONFIG_NOTIFICATION = "CONFIG_NOTIFICATION";
   static const String INIT_CALL_USER_PASSWORD = "INIT_CALL_USER_PASSWORD";
   static const String UPDATE_TOKEN = "UPDATE_TOKEN";
+  static const String GET_INITIAL_CALL = "GET_INITIAL_CALL";
   static const String START_CALL = "START_CALL";
   static const String END_CALL = "END_CALL";
   static const String JOIN_CALL = "JOIN_CALL";
