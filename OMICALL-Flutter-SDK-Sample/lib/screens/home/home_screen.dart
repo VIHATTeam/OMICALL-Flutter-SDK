@@ -1,13 +1,18 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'dart:io';
 
 import 'package:calling/components/call_status.dart';
+import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/video_call/video_call_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
 import '../../main.dart';
 import '../dial/dial_screen.dart';
+import '../login/login_user_password_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -23,6 +28,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late final TextEditingController _phoneNumberController =
       TextEditingController()..text = Platform.isAndroid ? '115' : '116';
+
   // late final TextEditingController _phoneNumberController =
   // TextEditingController()..text = Platform.isAndroid ? '123aaa' : '122aaa';
   TextStyle basicStyle = const TextStyle(
@@ -187,6 +193,46 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: const Center(
                     child: Text(
                       'Call',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(
+                height: 24,
+              ),
+              GestureDetector(
+                onTap: () async {
+                  EasyLoading.show();
+                  await OmicallClient.instance.logout();
+                  await LocalStorage.instance.logout();
+                  EasyLoading.dismiss();
+                  Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(
+                      builder: (_) => const LoginUserPasswordScreen(),
+                    ),
+                  );
+                },
+                child: Container(
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.grey,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: const [
+                      BoxShadow(
+                        color: Colors.black12,
+                        offset: Offset(5, 5),
+                        blurRadius: 10,
+                      )
+                    ],
+                  ),
+                  child: const Center(
+                    child: Text(
+                      'Logout',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,

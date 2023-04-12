@@ -265,7 +265,6 @@ class VideoCallState extends State<VideoCallScreen> {
                       initialData: true,
                       stream: OmicallClient.instance.cameraEvent,
                       builder: (context, snapshot) {
-                        final cameraStatus = snapshot.data as bool;
                         return OptionItem(
                           icon: "video",
                           showDefaultIcon: true,

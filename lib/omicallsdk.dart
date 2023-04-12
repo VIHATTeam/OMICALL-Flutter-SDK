@@ -98,17 +98,13 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
-  Future<void> updateToken(
-    String deviceId,
-    String appId, {
+  Future<void> updateToken({
     String? fcmToken,
     String? apnsToken,
   }) async {
     final action = OmiAction(actionName: OmiActionName.UPDATE_TOKEN, data: {
       'fcmToken': fcmToken,
       'apnsToken': apnsToken,
-      'appId': appId,
-      'deviceId': deviceId,
     });
     return await _controller.action(action);
   }

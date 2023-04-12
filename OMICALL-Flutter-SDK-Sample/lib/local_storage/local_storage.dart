@@ -20,4 +20,9 @@ class LocalStorage {
     final loginInfoString = json.encode(loginInfo);
     await prefs.setString("login_info", loginInfoString);
   }
+
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+  }
 }
