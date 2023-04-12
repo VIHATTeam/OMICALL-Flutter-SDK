@@ -23,7 +23,7 @@ omicall_flutter_plugin: ^latest_version
 
 #### Android:
 
-- Add this settings in `build.gradle`:
+- Add these settings in `build.gradle`:
 
 ```
 jcenter() 
@@ -61,7 +61,7 @@ allprojects {
 
 You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/main/OMICALL-Flutter-SDK-Sample/android/build.gradle">android/build.gradle</a> to know more informations.
 
-- Add this settings in `app/build.gradle`:
+- Add these settings in `app/build.gradle`:
 
 ```
 apply plugin: 'com.android.application'
@@ -76,12 +76,12 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
 ```
 //need request this permission
 <uses-permission android:name="android.permission.INTERNET" />
-//add this lines inside <activity>
+//add these lines inside <activity>
 <intent-filter>
     <action android:name="com.omicall.sdk.CallingActivity"/>
     <category android:name="android.intent.category.DEFAULT" />
 </intent-filter>
-//add this lines outside <activity>
+//add these lines outside <activity>
 <service
     android:name="vn.vihat.omicall.omisdk.service.FMService"
     android:exported="false">
@@ -155,7 +155,7 @@ voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
 pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
 ```
 
--  Add this lines into `Info.plist`:
+-  Add these lines into `Info.plist`:
 
 ```
 <key>NSCameraUsageDescription</key>
@@ -164,7 +164,7 @@ pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
 <string>Need microphone access for make Call</string>
 ```
 
-- Save token for `OmiClient`: if you added `firebase_messaging` in your project so you don't need add this lines.
+- Save token for `OmiClient`: if you added `firebase_messaging` in your project so you don't need add these lines.
 
 ```
 - (void)application:(UIApplication*)app didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)devToken
@@ -197,7 +197,7 @@ pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
 
 ```
 await Firebase.initializeApp();
-// If you only use Firebase on Android. Add this line `if (Platform.isAndroid)`
+// If you only use Firebase on Android. Add these line `if (Platform.isAndroid)`
 // Because we use APNS to push notification on iOS so you don't need add Firebase for iOS.
 ```
 - Important function.
