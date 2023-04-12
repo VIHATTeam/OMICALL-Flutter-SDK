@@ -229,15 +229,11 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             UPDATE_TOKEN -> {
                 mainScope.launch {
                     val deviceTokenAndroid = dataOmi["fcmToken"] as String
-                    val deviceId = dataOmi["deviceId"] as String
-                    val appId = dataOmi["appId"] as String
                     withContext(Dispatchers.Default) {
                        try {
                            OmiClient.instance.updatePushToken(
                                "",
                                deviceTokenAndroid,
-                               deviceId,
-                               appId,
                            )
                        } catch (_ : Throwable) {
 
@@ -345,6 +341,16 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
             LOG_OUT -> {
                 ///implement later
+                mainScope.launch {
+                    withContext(Dispatchers.Default) {
+                        try {
+                            OmiClient.instance.logout()
+                        } catch (_ : Throwable) {
+
+                        }
+                    }
+                    result.success(true)
+                }
             }
         }
     }

@@ -337,6 +337,10 @@ class CallManager {
             }
         }
     }
+    
+    func logout() {
+        OmiClient.logout()
+    }
 }
 
 

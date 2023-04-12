@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.2.4
+  - Increase Android/iOS core version
+  - Add `logout` function
+  - Remove appId and deviceId in `updateToken`
+  - Update sample
+
 ## 2.2.3
   - Increase Android core version
   - Add initial call for iOS

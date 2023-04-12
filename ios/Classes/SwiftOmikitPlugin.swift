@@ -177,7 +177,8 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           result(callResult)
           break
       case LOG_OUT:
-          ///implement later
+          CallManager.shareInstance().logout()
+          result(true)
           break
       default:
           break
