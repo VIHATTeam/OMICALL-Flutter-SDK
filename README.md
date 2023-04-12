@@ -8,11 +8,11 @@ The most important part of the framework is :
 - Optimize codec voip for you.
 - Full inteface to interactive with core function like sound/ringtone/codec.
 
-## Status
-Currently active maintainance and improve performance
+### Status
+Currently active maintenance and improve performance
 
 
-## Running
+### Running
 Install via pubspec.yaml:
 
 ```
@@ -23,7 +23,7 @@ omicall_flutter_plugin: ^latest_version
 
 #### Android:
 
-- Add this setting in `build.gradle`:
+- Add this settings in `build.gradle`:
 
 ```
 jcenter() 
@@ -61,7 +61,7 @@ allprojects {
 
 You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/main/OMICALL-Flutter-SDK-Sample/android/build.gradle">android/build.gradle</a> to know more informations.
 
-- Add this setting In `app/build.gradle`:
+- Add this settings in `app/build.gradle`:
 
 ```
 apply plugin: 'com.android.application'
@@ -116,7 +116,7 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 ```
 
-- Setup push notification: We only support Firebase for push notification.
+- Setup push notification: Only support Firebase for remote push notification.
   - Add `google-service.json` in `android/app` (For more information, you can refer <a href="https://pub.dev/packages/firebase_core">firebase_core</a>)
   - Add Fire Messaging to receive `fcm_token` (You can refer <a href="https://pub.dev/packages/firebase_messaging">firebase_messaging</a> to setup notification for Flutter)
 
@@ -125,7 +125,7 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
 #### iOS:
 ----
 
-We support both Object-C and Swift. But we only support documents for Object-C. We will write for Swift language later. Thank you.
+We support both Object-C and Swift. But we only have documents for Object-C. We will write for Swift language later. Thank you.
 
 ---
 
@@ -164,7 +164,7 @@ pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
 <string>Need microphone access for make Call</string>
 ```
 
-- Save token for `OmiClient`: You use `firebase_messaging` into your project so you don't need add this lines.
+- Save token for `OmiClient`: if you added `firebase_messaging` in your project so you don't need add this lines.
 
 ```
 - (void)application:(UIApplication*)app didRegisterForRemoteNotificationsWithDeviceToken:(NSData*)devToken
@@ -184,7 +184,7 @@ pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
 
 ```
 
-*** Only use under lines when add `firebase_messaging` plugin ***
+*** Only use under lines when added `firebase_messaging` plugin in your project ***
 - Setup push notification: We only support Firebase for push notification.
   - Add `google-service.json` in `android/app` (For more information, you can refer <a href="https://pub.dev/packages/firebase_core">firebase_core</a>)
   - Add Firebase Messaging to receive `fcm_token` (You can refer <a href="https://pub.dev/packages/firebase_messaging">firebase_messaging</a> to setup notification for Flutter)
@@ -206,7 +206,7 @@ await Firebase.initializeApp();
     //Call in the root widget
     OmicallClient.instance.startServices();
     ```
-  - Create OmiKit: OmiKit need userName, password, realm, host to init enviroment. ViHAT Group will provide informations for you. Please contact for my sale:
+  - Create OmiKit: OmiKit need userName, password, realm, host to init enviroment. ViHAT Group will provides these informations for you. Please contact for my sales:
     ```
     await OmicallClient.instance.initCall(
       userName: "", 
@@ -216,7 +216,7 @@ await Firebase.initializeApp();
       isVideo: true/false,
     );
     ```
-  - Create OmiKit With ApiKey: OmiKit need apikey, username, user id to init enviroment. ViHAT Group will provide api key for you. Please contact for my sale:
+  - Create OmiKit With ApiKey: OmiKit need apikey, username, user id to init enviroment. ViHAT Group will provides api key for you. Please contact for my sales:
     ```
      await OmicallClient.instance.initCallWithApiKey(
       usrName: "",
@@ -246,34 +246,19 @@ await Firebase.initializeApp();
     );
     //incomingAcceptButtonImage, incomingDeclineButtonImage, backImage, userImage: Add these into `android/app/src/main/res/drawble`
     ```
-- Upload token: OmiKit need FCM for Android and APNS to push notification on user devices. We use more packages: <a href="https://pub.dev/packages/firebase_messaging">firebase_messaging</a> and <a href="https://pub.dev/packages/device_info_plus">device_info_plus</a>
+- Upload token: OmiKit need FCM for Android and APNS to push notification on user devices.
   ```
-  await FirebaseMessaging.instance.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
   final token = await FirebaseMessaging.instance.getToken();
   String? apnToken;
   if (Platform.isIOS) {
       apnToken = await FirebaseMessaging.instance.getAPNSToken();
   }
-  String id = "";
-  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  if (Platform.isAndroid) {
-      id = (await deviceInfo.androidInfo).id;
-  } else {
-      id = (await deviceInfo.iosInfo).identifierForVendor ?? "";
-  }
   String appId = 'Bundle id on iOS/ App id on Android'
   await OmicallClient.instance.updateToken(
-    id,
-    appId,
     fcmToken: token,
     apnsToken: apnToken,
   );
   ```
-
 
 - Other functions:
   -  Call with phone number (mobile phone or internal number):
