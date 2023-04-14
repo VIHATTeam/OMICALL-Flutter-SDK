@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.3.0
+- **BREAKING CHANGE**
+  - We replace camera event to video event. 
+  - Add `registerVideoEvent` and `removeVideoEvent` to register video event.
+  - Increase Android/iOS core version
+  - Update sample
+
 ## 2.2.4
   - Increase Android/iOS core version
   - Add `logout` function

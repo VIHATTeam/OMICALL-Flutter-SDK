@@ -89,6 +89,39 @@ class CallManager {
         }
     }
     
+    func registerVideoEvent() {
+        DispatchQueue.main.async {
+            NotificationCenter.default.addObserver(CallManager.instance!,
+                                                   selector: #selector(self.videoUpdate(_:)),
+                                                   name: NSNotification.Name.OMICallVideoInfo,
+                                                   object: nil
+            )
+        }
+    }
+    
+    @objc func videoUpdate(_ notification: NSNotification) {
+        guard let userInfo = notification.userInfo,
+              let state     = userInfo[OMIVideoInfoState] as? Int else {
+            return;
+        }
+        switch (state) {
+        case 0:
+            SwiftOmikitPlugin.instance?.sendEvent(LOCAL_VIDEO_READY, [:])
+            break
+        case 1:
+            SwiftOmikitPlugin.instance?.sendEvent(REMOTE_VIDEO_READY, [:])
+            break
+        default:
+            break
+        }
+    }
+    
+    func removeVideoEvent() {
+        DispatchQueue.main.async {
+            NotificationCenter.default.removeObserver(CallManager.instance!, name: NSNotification.Name.OMICallVideoInfo, object: nil)
+        }
+    }
+    
     @objc func callDealloc(_ notification: NSNotification) {
         guard let userInfo = notification.userInfo,
               let call     = userInfo[OMINotificationUserInfoCallKey] as? OMICall else {

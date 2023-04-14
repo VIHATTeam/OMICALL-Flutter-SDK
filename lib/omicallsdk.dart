@@ -15,7 +15,7 @@ class OmicallClient {
   ///streaming camera event
   Stream<OmiAction> get callStateChangeEvent => _controller.callStateChangeEvent;
   ///streaming camera event
-  Stream<bool> get cameraEvent => _controller.cameraEvent;
+  Stream<Map<String, dynamic>> get videoEvent => _controller.videoEvent;
   ///streaming mic event
   Stream<bool> get micEvent => _controller.micEvent;
   ///streaming mic event
@@ -34,7 +34,7 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
-  Future<void> initCallWithApiKey({
+  Future<bool> initCallWithApiKey({
     String? usrName,
     String? usrUuid,
     String? apiKey,
@@ -80,7 +80,7 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
-  Future<void> initCallWithUserPassword({
+  Future<bool> initCallWithUserPassword({
     String? userName,
     String? password,
     String? realm,
@@ -245,6 +245,24 @@ class OmicallClient {
   Future<dynamic> logout() async {
     final action = OmiAction(
       actionName: OmiActionName.LOG_OUT,
+      data: {},
+    );
+    return await _controller.action(action);
+  }
+
+  ///Implement later
+  Future<dynamic> registerVideoEvent() async {
+    final action = OmiAction(
+      actionName: OmiActionName.REGISTER_VIDEO_EVENT,
+      data: {},
+    );
+    return await _controller.action(action);
+  }
+
+  ///Implement later
+  Future<dynamic> removeVideoEvent() async {
+    final action = OmiAction(
+      actionName: OmiActionName.REMOVE_VIDEO_EVENT,
       data: {},
     );
     return await _controller.action(action);

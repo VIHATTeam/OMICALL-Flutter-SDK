@@ -180,6 +180,14 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           CallManager.shareInstance().logout()
           result(true)
           break
+      case REGISTER_VIDEO_EVENT:
+          CallManager.shareInstance().registerVideoEvent()
+          result(true)
+          break
+      case REMOVE_VIDEO_EVENT:
+          CallManager.shareInstance().removeVideoEvent()
+          result(true)
+          break
       default:
           break
       }

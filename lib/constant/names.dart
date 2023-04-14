@@ -24,4 +24,6 @@ class OmiActionName {
   static const String SET_OUTPUT = "SET_OUTPUT";
   static const String START_CALL_WITH_UUID = "START_CALL_WITH_UUID";
   static const String LOG_OUT = "LOG_OUT";
+  static const String REMOVE_VIDEO_EVENT = "REMOVE_VIDEO_EVENT";
+  static const String REGISTER_VIDEO_EVENT = "REGISTER_VIDEO_EVENT";
 }
