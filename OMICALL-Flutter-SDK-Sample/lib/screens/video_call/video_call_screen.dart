@@ -26,16 +26,17 @@ class VideoCallState extends State<VideoCallScreen> {
   RemoteCameraController? _remoteController;
   LocalCameraController? _localController;
   late StreamSubscription _subscription;
+  late StreamSubscription _videoSubscription;
   String _callingStatus = '';
 
   @override
   void initState() {
     _callingStatus = widget.status.value;
+    OmicallClient.instance.registerVideoEvent();
     super.initState();
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
       if (omiAction.actionName == OmiEventList.onCallEstablished) {
-        refreshRemoteCamera();
         localRemoteCamera();
         if (omiAction.actionName == OmiEventList.onCallEstablished) {
           updateVideoScreen(null, CallStatus.established);
@@ -50,11 +51,18 @@ class VideoCallState extends State<VideoCallScreen> {
         return;
       }
     });
+    _videoSubscription = OmicallClient.instance.videoEvent.listen((action) {
+      final name = action["name"];
+      final data = action["data"];
+      refreshRemoteCamera();
+    });
   }
 
   @override
   void dispose() {
+    OmicallClient.instance.removeVideoEvent();
     _subscription.cancel();
+    _videoSubscription.cancel();
     super.dispose();
   }
 
@@ -263,7 +271,7 @@ class VideoCallState extends State<VideoCallScreen> {
                   children: [
                     StreamBuilder(
                       initialData: true,
-                      stream: OmicallClient.instance.cameraEvent,
+                      stream: OmicallClient.instance.videoEvent,
                       builder: (context, snapshot) {
                         return OptionItem(
                           icon: "video",

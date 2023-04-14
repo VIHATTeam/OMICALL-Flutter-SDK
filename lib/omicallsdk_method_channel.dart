@@ -10,7 +10,7 @@ class OmicallSDKController {
   /// The method channel used to interact with the native platform.
 
   final _methodChannel = const MethodChannel('omicallsdk');
-  final _videoController = StreamController<bool>.broadcast();
+  final _videoController = StreamController<Map<String, dynamic>>.broadcast();
   final _mutedController = StreamController<bool>.broadcast();
   final _speakerController = StreamController<bool>.broadcast();
   final StreamController<OmiAction> _callStateChangeController =
@@ -28,8 +28,12 @@ class OmicallSDKController {
         _speakerController.sink.add(data);
         return;
       }
-      if (method == OmiEventList.onVideo) {
-        _videoController.sink.add(data);
+      if (method == OmiEventList.onLocalVideoReady || method == OmiEventList.onRemoteVideoReady) {
+        final param = {
+          "name": method,
+          "data": data,
+        };
+        _videoController.sink.add(param);
         return;
       }
       _callStateChangeController.sink.add(
@@ -51,7 +55,7 @@ class OmicallSDKController {
   Stream<OmiAction> get callStateChangeEvent =>
       _callStateChangeController.stream;
 
-  Stream<bool> get cameraEvent => _videoController.stream;
+  Stream<Map<String, dynamic>> get videoEvent => _videoController.stream;
 
   Stream<bool> get mutedEvent => _mutedController.stream;
 

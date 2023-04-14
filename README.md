@@ -302,7 +302,15 @@ await Firebase.initializeApp();
   ```
   - Toggle a video in video call: On/off video in video call
   ```
-  OmicallClient.instance.toggleVideo();
+  - OmicallClient.instance.toggleVideo();
+  ```
+  - Register video event: Need to listen remote video ready
+  ```
+   OmicallClient.instance.toggleVideo();
+  ```
+  - Remove video event: Need to remove video event
+  ```
+  OmicallClient.instance.removeVideoEvent();
   ```
   - Local Camera Widget: Your camera view in a call
   ```
@@ -362,4 +370,8 @@ await Firebase.initializeApp();
   - Mute event: Listen on/off muted in a call
   ```
   OmicallClient.instance.onMuteEvent() //StreamSubscription
+  ```
+  - Remote video ready: Listen remote video ready.
+  ```
+  OmicallClient.instance.videoEvent.listen((action){}) //StreamSubscription
   ```
