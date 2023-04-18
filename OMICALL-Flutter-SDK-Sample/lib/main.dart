@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
+import 'screens/login/login_apikey_screen.dart';
 import 'screens/login/login_user_password_screen.dart';
 
 void main() async {
@@ -59,7 +60,7 @@ class _MyAppState extends State<MyApp> {
     return GestureDetector(
       child: MaterialApp(
         theme: ThemeData.light(),
-        home: loginInfo != null ? const HomeScreen() : const LoginUserPasswordScreen(),
+        home: loginInfo != null ? const HomeScreen() : const LoginApiKeyScreen(),
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
       ),

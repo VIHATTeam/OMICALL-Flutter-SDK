@@ -18,6 +18,9 @@
   provider = [[CallKitProviderDelegate alloc] initWithCallManager: [OMISIPLib sharedInstance].callManager];
   voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
   pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
+  if (@available(iOS 10.0, *)) {
+      [UNUserNotificationCenter currentNotificationCenter].delegate = (id<UNUserNotificationCenterDelegate>) self;
+  }
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
 }
 

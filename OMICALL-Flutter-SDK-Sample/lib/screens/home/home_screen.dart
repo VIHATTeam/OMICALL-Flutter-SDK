@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
     end: Alignment.centerRight,
   );
   bool _isVideoCall = false;
-  late StreamSubscription _subscription;
+  late StreamSubscription _subscription, _missedCallSubscription;
   GlobalKey<DialScreenState>? _dialScreenKey;
   GlobalKey<VideoCallState>? _videoScreenKey;
 
@@ -53,6 +53,11 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     updateToken();
+    _missedCallSubscription = OmicallClient.instance.missedCallEvent.listen((data) {
+      final String callerNumber = data["callerNumber"];
+      final bool isVideo = data["isVideo"];
+      makeCallWithParams(context, callerNumber, isVideo);
+    });
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
       if (omiAction.actionName == OmiEventList.incomingReceived) {
@@ -324,5 +329,20 @@ class _HomeScreenState extends State<HomeScreen> {
     //   phone,
     //   _isVideoCall,
     // );
+  }
+
+  Future<void> makeCallWithParams(BuildContext context, String callerNumber, bool isVideo) async {
+    if (isVideo) {
+      pushToVideoScreen(callerNumber, status: CallStatus.calling);
+    } else {
+      pushToDialScreen(
+        callerNumber,
+        status: CallStatus.calling,
+      );
+    }
+    OmicallClient.instance.startCall(
+      callerNumber,
+      isVideo,
+    );
   }
 }
