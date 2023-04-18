@@ -20,6 +20,8 @@ class OmicallClient {
   Stream<bool> get micEvent => _controller.micEvent;
   ///streaming mic event
   Stream<bool> get mutedEvent => _controller.mutedEvent;
+  ///streaming click missed call
+  Stream<Map> get missedCallEvent => _controller.missedCallEvent;
 
   ///destroy event
   void dispose() {

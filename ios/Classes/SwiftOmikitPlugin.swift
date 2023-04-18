@@ -21,6 +21,7 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       registrar.register(localFactory, withId: "omicallsdk/local_camera_view")
       let remoteFactory = FLRemoteCameraFactory(messenger: registrar.messenger())
       registrar.register(remoteFactory, withId: "omicallsdk/remote_camera_view")
+      registrar.addApplicationDelegate(instance)
   }
 
 
@@ -193,6 +194,21 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       }
 
   }
+    
+    public func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.alert, .sound, .badge])
+    }
+    
+    public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let userInfo = response.notification.request.content.userInfo
+        if let callerNumer = userInfo["callerNumber"] as? String, let isVideo = userInfo["isVideo"] as? Bool {
+            channel.invokeMethod(CLICK_MISSED_CALL, arguments: [
+                "callerNumber": callerNumer,
+                "isVideo": isVideo,
+            ])
+            completionHandler()
+        }
+    }
 }
 
 @objc public extension FlutterAppDelegate {

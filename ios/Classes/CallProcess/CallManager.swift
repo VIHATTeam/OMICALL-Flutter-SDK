@@ -72,6 +72,34 @@ class CallManager {
         return true
     }
     
+    func showMissedCall() {
+        OMISIPLib.sharedInstance().setMissedCall { call in
+            UNUserNotificationCenter.current().getNotificationSettings { settings in
+                switch settings.authorizationStatus {
+                    case .notDetermined:
+                       break
+                    case .authorized, .provisional:
+                        let content      = UNMutableNotificationContent()
+                        content.title    = "Missed call"
+                        content.body = "Call from \(call.callerNumber!)"
+                        content.sound    = .default
+                        content.userInfo = [
+                            "callerNumber": call.callerNumber,
+                            "isVideo": call.isVideo,
+                        ]
+                        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+                        //getting the notification request
+                        let id = Int.random(in: 0..<10000000)
+                        let request = UNNotificationRequest(identifier: "\(id)", content: content, trigger: trigger)
+                        //adding the notification to notification center
+                        UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
+                    default:
+                        break // Do nothing
+                }
+            }
+        }
+    }
+    
     func registerNotificationCenter() {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
@@ -86,6 +114,7 @@ class CallManager {
                                                    name: NSNotification.Name.OMICallDealloc,
                                                    object: nil
             )
+            self.showMissedCall()
         }
     }
     
@@ -184,7 +213,12 @@ class CallManager {
             SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
             break
         case .incoming:
-            SwiftOmikitPlugin.instance?.sendEvent(INCOMING_RECEIVED, ["isVideo": call.isVideo, "callerNumber": call.callerNumber ?? ""])
+            DispatchQueue.main.async {
+                let state: UIApplication.State = UIApplication.shared.applicationState
+                if (state == .active) {
+                    SwiftOmikitPlugin.instance?.sendEvent(INCOMING_RECEIVED, ["isVideo": call.isVideo, "callerNumber": call.callerNumber ?? ""])
+                }
+            }
             break
         case .muted:
             print("muteddddddd")

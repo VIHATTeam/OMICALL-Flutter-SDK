@@ -7,5 +7,6 @@ class OmiEventList {
   static const String onMuted = "MUTED";
   static const String onLocalVideoReady = "LOCAL_VIDEO_READY";
   static const String onRemoteVideoReady = "REMOTE_VIDEO_READY";
+  static const String onMissedCall = "CLICK_MISSED_CALL";
 
 }
