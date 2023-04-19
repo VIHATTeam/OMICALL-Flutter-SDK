@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
         ? '122aaa'
         : '123aaa';
   late final TextEditingController _apiKeyController = TextEditingController()
-    ..text = '';
+    ..text = '0ACE08B2F03BE1D6B3F7F5CCD34D9AC08CB92976E2AB6CEE6EA38C5C96F1B858';
   bool _supportVideoCall = true;
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,

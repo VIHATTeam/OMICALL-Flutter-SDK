@@ -32,4 +32,5 @@ const val INCOMING_RECEIVED = "INCOMING_RECEIVED"
 const val SPEAKER = "SPEAKER"
 const val VIDEO = "VIDEO"
 const val MUTED = "MUTED"
+const val CLICK_MISSED_CALL = "CLICK_MISSED_CALL"
 
