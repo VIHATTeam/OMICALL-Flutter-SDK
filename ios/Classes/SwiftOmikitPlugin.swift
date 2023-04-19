@@ -73,6 +73,7 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           result(true)
           break
       case CONFIG_NOTIFICATION:
+          CallManager.shareInstance().configNotification(data: dataOmi)
           result(true)
           break
       case UPDATE_TOKEN:

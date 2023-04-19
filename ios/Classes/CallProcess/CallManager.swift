@@ -41,6 +41,14 @@ class CallManager {
         }
     }
     
+    func configNotification(data: [String: Any]) {
+        if let title = data["missedCallTitle"] as? String, let message = data["prefixMissedCallMessage"] as? String {
+            let user = UserDefaults.standard
+            user.set(title, forKey: "missedCallTitle")
+            user.set(message, forKey: "prefixMissedCallMessage")
+        }
+    }
+    
     private func requestPermission(isVideo: Bool) {
         AVCaptureDevice.requestAccess(for: .audio) { _ in
             print("request audio")
@@ -73,15 +81,18 @@ class CallManager {
     }
     
     func showMissedCall() {
-        OMISIPLib.sharedInstance().setMissedCall { call in
+        OmiClient.setMissedCall { call in
             UNUserNotificationCenter.current().getNotificationSettings { settings in
                 switch settings.authorizationStatus {
                     case .notDetermined:
                        break
                     case .authorized, .provisional:
+                        let user = UserDefaults.standard
+                        let title = user.string(forKey: "missedCallTitle") ?? ""
+                        let message = user.string(forKey: "prefixMissedCallMessage") ?? ""
                         let content      = UNMutableNotificationContent()
-                        content.title    = "Missed call"
-                        content.body = "Call from \(call.callerNumber!)"
+                        content.title    = title
+                        content.body = "\(message) \(call.callerNumber!)"
                         content.sound    = .default
                         content.userInfo = [
                             "callerNumber": call.callerNumber,
@@ -219,12 +230,6 @@ class CallManager {
                     SwiftOmikitPlugin.instance?.sendEvent(INCOMING_RECEIVED, ["isVideo": call.isVideo, "callerNumber": call.callerNumber ?? ""])
                 }
             }
-            break
-        case .muted:
-            print("muteddddddd")
-            break
-        case .hold:
-            print("holdddddddd")
             break
         default:
             NSLog("Default call state")

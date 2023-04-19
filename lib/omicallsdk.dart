@@ -63,6 +63,8 @@ class OmicallClient {
     String? incomingDeclineButtonImage,
     String? backImage,
     String? userImage,
+    String? missedCallTitle,
+    String? prefixMissedCallMessage,
   }) async {
     final action = OmiAction(
       actionName: OmiActionName.CONFIG_NOTIFICATION,
@@ -77,6 +79,8 @@ class OmicallClient {
         'incomingDeclineButtonImage': incomingDeclineButtonImage,
         'backImage': backImage,
         'userImage': userImage,
+        'missedCallTitle': missedCallTitle,
+        'prefixMissedCallMessage': prefixMissedCallMessage,
       },
     );
     return await _controller.action(action);

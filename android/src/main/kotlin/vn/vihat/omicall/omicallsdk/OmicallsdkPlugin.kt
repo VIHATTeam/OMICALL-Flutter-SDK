@@ -162,6 +162,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val incomingBackgroundColor = dataOmi["incomingBackgroundColor"] as? String
                 val incomingAcceptButtonImage = dataOmi["incomingAcceptButtonImage"] as? String
                 val incomingDeclineButtonImage = dataOmi["incomingDeclineButtonImage"] as? String
+                val missedCallTitle = dataOmi["missedCallTitle"] as? String
+                val prefixMissedCallMessage = dataOmi["prefixMissedCallMessage"] as? String
                 val backImage = dataOmi["backImage"] as? String
                 val userImage = dataOmi["userImage"] as? String
                 OmiClient.instance.configPushNotification(
@@ -175,6 +177,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     incomingDeclineButtonImage = incomingDeclineButtonImage ?: "hangup",
                     backImage = backImage ?: "ic_back",
                     userImage = userImage ?: "calling_face",
+                    prefixMissedCallMessage = prefixMissedCallMessage ?: "Cuộc gọi nhỡ từ",
+                    missedCallTitle = missedCallTitle ?: ""
                 )
                 result.success(true)
             }
