@@ -2,6 +2,7 @@ package vn.vihat.omicall.omicallsdk
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.os.Handler
@@ -17,6 +18,7 @@ import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
+import io.flutter.plugin.common.PluginRegistry
 import kotlinx.coroutines.*
 import vn.vihat.omicall.omicallsdk.constants.*
 import vn.vihat.omicall.omicallsdk.video_call.FLLocalCameraFactory
@@ -24,11 +26,14 @@ import vn.vihat.omicall.omicallsdk.video_call.FLRemoteCameraFactory
 import vn.vihat.omicall.omisdk.OmiAccountListener
 import vn.vihat.omicall.omisdk.OmiClient
 import vn.vihat.omicall.omisdk.OmiListener
+import vn.vihat.omicall.omisdk.service.showMissedCall
 import vn.vihat.omicall.omisdk.utils.OmiSDKUtils
+import vn.vihat.omicall.omisdk.utils.SipServiceConstants
 import java.util.*
 
 /** OmicallsdkPlugin */
-class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
+class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
+    PluginRegistry.NewIntentListener {
 
     private lateinit var channel: MethodChannel
     private var activity: FlutterActivity? = null
@@ -51,7 +56,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
         override fun onCallEnd() {
             Log.d("omikit-endCall", "onCallEnd: ")
-            print("omikit-endCall");
+            print("omikit-endCall")
             channel.invokeMethod(CALL_END, null)
         }
 
@@ -124,7 +129,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 "omicallsdk/remote_camera_view",
                 FLRemoteCameraFactory(flutterPluginBinding.binaryMessenger)
             )
-//        setupSIP()
     }
 
 
@@ -203,18 +207,18 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     val apiKey = dataOmi["apiKey"] as? String
                     val isVideo = dataOmi["isVideo"] as? Boolean
                     withContext(Dispatchers.Default) {
-                       try {
-                           if (usrName != null && usrUuid != null && apiKey != null) {
-                               loginResult = OmiClient.registerWithApiKey(
-                                   apiKey = apiKey,
-                                   userName = usrName,
-                                   uuid = usrUuid,
-                                   isVideo ?: true,
-                               )
-                           }
-                       } catch (_ : Throwable) {
+                        try {
+                            if (usrName != null && usrUuid != null && apiKey != null) {
+                                loginResult = OmiClient.registerWithApiKey(
+                                    apiKey = apiKey,
+                                    userName = usrName,
+                                    uuid = usrUuid,
+                                    isVideo ?: true,
+                                )
+                            }
+                        } catch (_: Throwable) {
 
-                       }
+                        }
                     }
                     requestPermission(isVideo ?: true)
                     if (isVideo == true) {
@@ -230,14 +234,14 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                 mainScope.launch {
                     val deviceTokenAndroid = dataOmi["fcmToken"] as String
                     withContext(Dispatchers.Default) {
-                       try {
-                           OmiClient.instance.updatePushToken(
-                               "",
-                               deviceTokenAndroid,
-                           )
-                       } catch (_ : Throwable) {
+                        try {
+                            OmiClient.instance.updatePushToken(
+                                "",
+                                deviceTokenAndroid,
+                            )
+                        } catch (_: Throwable) {
 
-                       }
+                        }
                     }
                     result.success(true)
                 }
@@ -258,11 +262,11 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
             }
             TOGGLE_MUTE -> {
                 mainScope.launch {
-                    var newStatus : Boolean? = null
+                    var newStatus: Boolean? = null
                     withContext(Dispatchers.Default) {
                         try {
                             newStatus = OmiClient.instance.toggleMute()
-                        } catch (_ : Throwable) {
+                        } catch (_: Throwable) {
 
                         }
                     }
@@ -331,8 +335,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                         try {
                             val uuid = dataOmi["usrUuid"] as String
                             val isVideo = dataOmi["isVideo"] as Boolean
-                            callResult = OmiClient.instance.startCallWithUuid(uuid = uuid, isVideo = isVideo)
-                        } catch (_ : Throwable) {
+                            callResult =
+                                OmiClient.instance.startCallWithUuid(uuid = uuid, isVideo = isVideo)
+                        } catch (_: Throwable) {
 
                         }
                     }
@@ -345,7 +350,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
                     withContext(Dispatchers.Default) {
                         try {
                             OmiClient.instance.logout()
-                        } catch (_ : Throwable) {
+                        } catch (_: Throwable) {
 
                         }
                     }
@@ -360,19 +365,21 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-        this.activity = binding.activity as FlutterActivity
-    }
-
-    override fun onDetachedFromActivityForConfigChanges() {
-
-    }
-
-    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-
+        binding.addOnNewIntentListener(this)
+        activity = binding.activity as FlutterActivity
     }
 
     override fun onDetachedFromActivity() {
+        activity = null
+    }
 
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        binding.addOnNewIntentListener(this)
+        activity = binding.activity as FlutterActivity
+    }
+
+    override fun onDetachedFromActivityForConfigChanges() {
+        activity = null
     }
 
     companion object {
@@ -390,7 +397,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         }
     }
 
-    private fun requestPermission(isVideo : Boolean) {
+    private fun requestPermission(isVideo: Boolean) {
         var permissions = arrayOf(
             Manifest.permission.USE_SIP,
             Manifest.permission.CALL_PHONE,
@@ -414,5 +421,19 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         val cm =
             applicationContext!!.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         OmiClient.instance.setCameraManager(cm)
+    }
+
+    override fun onNewIntent(intent: Intent): Boolean {
+        if (intent.hasExtra(SipServiceConstants.PARAM_NUMBER)) {
+            //do your Stuff
+            channel.invokeMethod(
+                CLICK_MISSED_CALL,
+                mapOf(
+                    "callerNumber" to intent.getStringExtra(SipServiceConstants.PARAM_NUMBER),
+                    "isVideo" to intent.getBooleanExtra(SipServiceConstants.PARAM_IS_VIDEO, false),
+                ),
+            )
+        }
+        return false
     }
 }

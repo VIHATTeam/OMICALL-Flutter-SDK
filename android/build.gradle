@@ -70,8 +70,9 @@ android {
 
 
 dependencies {
-    api 'vn.vihat.omicall:omi-sdk:1.1.0'
-//    compileOnly files('libs/OmiSDK.aar')
+//    api 'vn.vihat.omicall:omi-sdk:1.1.3'
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation files('OmiSDK.aar')
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.fragment:fragment-ktx:1.4.0'
     implementation 'androidx.activity:activity-ktx:1.4.0'
