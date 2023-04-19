@@ -153,6 +153,9 @@ PKPushRegistry * voipRegistry;
 provider = [[CallKitProviderDelegate alloc] initWithCallManager: [OMISIPLib sharedInstance].callManager];
 voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
 pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
+if (@available(iOS 10.0, *)) {
+    [UNUserNotificationCenter currentNotificationCenter].delegate = (id<UNUserNotificationCenterDelegate>) self;
+}
 ```
 
 -  Add these lines into `Info.plist`:
@@ -230,7 +233,7 @@ await Firebase.initializeApp();
     final result = await OmicallClient.instance.getInitialCall();
     ///if result is not equal False => have a calling.
     ```
-  - Config push notification for Android:
+  - Config push notification: With iOS, I only support these keys: `prefixMissedCallMessage`, `missedCallTitle`. With Android, We don't support `missedCallTitle`:
     ```
     OmicallClient.instance.configPushNotification(
       prefix : "Cuộc gọi tới từ: ",
@@ -243,6 +246,8 @@ await Firebase.initializeApp();
       incomingDeclineButtonImage : "hangup", //image name
       backImage : "ic_back", //image name: icon of back button
       userImage : "calling_face", //image name: icon of user default
+      prefixMissedCallMessage: 'Cuộc gọi nhỡ từ' //config prefix message for the missed call
+      missedCallTitle: 'Cuộc gọi nhỡ' //config title for the missed call
     );
     //incomingAcceptButtonImage, incomingDeclineButtonImage, backImage, userImage: Add these into `android/app/src/main/res/drawble`
     ```
@@ -374,4 +379,9 @@ await Firebase.initializeApp();
   - Remote video ready: Listen remote video ready.
   ```
   OmicallClient.instance.videoEvent.listen((action){}) //StreamSubscription
+  ```
+  - User tab a missed call:.
+  ```
+  OmicallClient.instance.missedCallEvent.listen((data){}) //StreamSubscription
+  // data is Map. Data has 2 keys: callerNumber, isVideo
   ```
