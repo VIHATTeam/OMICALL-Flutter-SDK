@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +39,9 @@ class VideoCallState extends State<VideoCallScreen> {
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
       if (omiAction.actionName == OmiEventList.onCallEstablished) {
         localRemoteCamera();
+        if (Platform.isAndroid) {
+          refreshRemoteCamera();
+        }
         if (omiAction.actionName == OmiEventList.onCallEstablished) {
           updateVideoScreen(null, CallStatus.established);
         }

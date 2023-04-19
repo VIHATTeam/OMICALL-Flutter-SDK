@@ -42,16 +42,18 @@ class _MyAppState extends State<MyApp> {
     EasyLoading.instance.userInteractions = false;
     OmicallClient.instance.startServices();
     OmicallClient.instance.configPushNotification(
-      prefix : "Cuộc gọi tới từ: ",
-      declineTitle : "Từ chối",
-      acceptTitle : "Chấp nhận",
-      acceptBackgroundColor : "#FF3700B3",
-      declineBackgroundColor : "#FF000000",
-      incomingBackgroundColor : "#FFFFFFFF",
-      incomingAcceptButtonImage : "join_call",
-      incomingDeclineButtonImage : "hangup",
-      backImage : "ic_back",
-      userImage : "calling_face",
+      prefix: "Cuộc gọi tới từ: ",
+      declineTitle: "Từ chối",
+      acceptTitle: "Chấp nhận",
+      acceptBackgroundColor: "#FF3700B3",
+      declineBackgroundColor: "#FF000000",
+      incomingBackgroundColor: "#FFFFFFFF",
+      incomingAcceptButtonImage: "join_call",
+      incomingDeclineButtonImage: "hangup",
+      backImage: "ic_back",
+      userImage: "calling_face",
+      prefixMissedCallMessage: 'Cuộc gọi nhỡ từ',
+      missedCallTitle: 'Cuộc gọi nhỡ',
     );
   }
 
@@ -60,7 +62,8 @@ class _MyAppState extends State<MyApp> {
     return GestureDetector(
       child: MaterialApp(
         theme: ThemeData.light(),
-        home: loginInfo != null ? const HomeScreen() : const LoginApiKeyScreen(),
+        home:
+            loginInfo != null ? const HomeScreen() : const LoginApiKeyScreen(),
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
       ),
@@ -103,10 +106,10 @@ class MyHttpOverrides extends HttpOverrides {
   HttpClient createHttpClient(SecurityContext? context) {
     return super.createHttpClient(context)
       ..badCertificateCallback = (
-          X509Certificate cert,
-          String host,
-          int port,
-          ) {
+        X509Certificate cert,
+        String host,
+        int port,
+      ) {
         return true;
       };
   }
