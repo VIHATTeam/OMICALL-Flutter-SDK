@@ -6,6 +6,8 @@ All notable changes to this project will be documented in this file.
 - **BREAKING CHANGE**
   - We replace camera event to video event. 
   - Add `registerVideoEvent` and `removeVideoEvent` to register video event.
+  - Support the missed call
+  - We add more input in `configPushNotification`
   - Increase Android/iOS core version
   - Update sample
 
