@@ -300,6 +300,10 @@ await Firebase.initializeApp();
     ```
     OmicallClient.instance.sendDTMF(value);
     ```
+  - Logout:
+    ```
+    OmicallClient.instance.logout();
+    ```
 - Video Call functions: Support only video call, We need enable video in `init functions` and `start call` to implements under functions.
   - Switch front/back camera: We use the front camera for first time.
   ```
