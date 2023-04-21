@@ -49,6 +49,7 @@ class FLRemoteCameraView: NSObject, FlutterPlatformView {
         binaryMessenger messenger: FlutterBinaryMessenger?
     ) {
         _view = OMIVideoPreviewView.init()
+        _view.contentMode = .scaleAspectFill;
         _arg = args as? [String: Any]
         methodChannel = FlutterMethodChannel(name: "omicallsdk/remote_camera_controller/\(viewId)", binaryMessenger: messenger!)
         super.init()
@@ -70,15 +71,11 @@ class FLRemoteCameraView: NSObject, FlutterPlatformView {
     }
 
     func setupViews() {
-        self._view.layer.cornerRadius = 5
-//        self._view.layer.borderColor = UIColor.gray.cgColor
-//        self._view.layer.borderWidth = 1.0
-        self._view.clipsToBounds = true
-        CallManager.shareInstance().getRemotePreviewView(callback: { previewView in
-            self._view.setView(previewView)
-            print("\(previewView.frame)")
-            print("\(self._view.frame)")
-            print("AAAA")
-        })
+        DispatchQueue.main.async {[weak self] in
+            guard let self = self else { return }
+            if let videoView = CallManager.shareInstance().getRemotePreviewView(frame: self._view.frame) {
+                self._view.setView(videoView)
+            }
+        }
     }
 }
