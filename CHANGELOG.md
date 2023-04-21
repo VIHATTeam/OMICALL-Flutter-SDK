@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.4.0
+- **BREAKING CHANGE**
+  - We replace `FMService` to `FirebaseMessageReceiver`
+  - Increase iOS/Android core
+  - Update video widget for iOS
+  - Update sample
+
 ## 2.3.2
   - Fix keep alive state speaker and mute
 
