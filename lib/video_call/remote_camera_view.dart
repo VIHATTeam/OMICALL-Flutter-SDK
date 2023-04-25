@@ -25,7 +25,7 @@ class RemoteCameraView extends StatelessWidget {
     this.onCameraCreated,
   }) : super(key: key);
 
-  Widget getPlatformView() {
+  Widget get cameraPlatformView {
     if (Platform.isIOS) {
       return UiKitView(
         viewType: viewType,
@@ -55,7 +55,7 @@ class RemoteCameraView extends StatelessWidget {
     return SizedBox(
       width: width,
       height: height,
-      child: getPlatformView(),
+      child: cameraPlatformView,
     );
   }
 }
@@ -72,6 +72,10 @@ class RemoteCameraController {
     _channel.setMethodCallHandler((method) async {
       callback(method.method, method.arguments);
     });
+  }
+
+  Future<bool> checkPermission() async {
+    return true;
   }
 
   void refresh() {

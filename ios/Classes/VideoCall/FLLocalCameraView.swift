@@ -58,6 +58,9 @@ class FLLocalCameraView: NSObject, FlutterPlatformView {
     
     func onMethodCall(call: FlutterMethodCall, result: FlutterResult) {
             switch(call.method){
+            case "permission":
+                result(AVCaptureDevice.authorizationStatus(for: .video) ==  .authorized)
+                break
             case "refresh":
                 setupViews()
                 break
@@ -71,10 +74,12 @@ class FLLocalCameraView: NSObject, FlutterPlatformView {
     }
 
     func setupViews() {
-        DispatchQueue.main.async {[weak self] in
-            guard let self = self else { return }
-            if let videoView = CallManager.shareInstance().getLocalPreviewView(frame: self._view.frame) {
-                self._view.setView(videoView)
+        if AVCaptureDevice.authorizationStatus(for: .video) ==  .authorized {
+            DispatchQueue.main.async {[weak self] in
+                guard let self = self else { return }
+                if let videoView = CallManager.shareInstance().getLocalPreviewView(frame: self._view.frame) {
+                    self._view.setView(videoView)
+                }
             }
         }
     }    

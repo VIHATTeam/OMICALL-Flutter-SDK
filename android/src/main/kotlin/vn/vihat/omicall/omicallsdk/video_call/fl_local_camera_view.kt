@@ -1,11 +1,14 @@
 package vn.vihat.omicall.omicallsdk.video_call
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.SurfaceTexture
 import android.util.Log
 import android.view.Surface
 import android.view.TextureView
 import android.view.View
+import androidx.core.content.ContextCompat
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -14,10 +17,15 @@ import vn.vihat.omicall.omisdk.OmiClient
 import vn.vihat.omicall.omisdk.videoutils.ScaleManager
 import vn.vihat.omicall.omisdk.videoutils.Size
 
-internal class FLLocalCameraView(context: Context, id: Int, creationParams: Map<String?, Any?>?,  messenger: BinaryMessenger) :
+internal class FLLocalCameraView(
+    context: Context,
+    id: Int,
+    creationParams: Map<String?, Any?>?,
+    messenger: BinaryMessenger,
+) :
     PlatformView, MethodChannel.MethodCallHandler, TextureView.SurfaceTextureListener {
-    private val localView : TextureView
-    private var methodChannel : MethodChannel
+    private val localView: TextureView
+    private var methodChannel: MethodChannel
 
     override fun getView(): View {
         return localView
@@ -36,11 +44,20 @@ internal class FLLocalCameraView(context: Context, id: Int, creationParams: Map<
         if (call.method == "refresh") {
             localView.surfaceTexture?.let {
                 OmiClient.instance.setupLocalVideoFeed(Surface(it))
-                ScaleManager.adjustAspectRatio(localView,
+                ScaleManager.adjustAspectRatio(
+                    localView,
                     Size(localView.width, localView.height),
-                    Size(1280,720)
+                    Size(1280, 720)
                 )
             }
+        }
+        if (call.method == "permission") {
+            val permission = ContextCompat.checkSelfPermission(
+                OmiClient.instance.context,
+                Manifest.permission.CAMERA
+            )
+            val isGranted = permission != PackageManager.PERMISSION_GRANTED
+            result.success(isGranted)
         }
     }
 

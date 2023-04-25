@@ -4,27 +4,38 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 typedef LocalCameraCreatedCallback = void Function(
-    LocalCameraController controller, );
+  LocalCameraController controller,
+);
 
-class LocalCameraView extends StatelessWidget {
-  // This is used in the platform side to register the view.
-  final String viewType = 'omicallsdk/local_camera_view';
+class LocalCameraView extends StatefulWidget {
   final LocalCameraCreatedCallback? onCameraCreated;
 
-  // Pass parameters to the platform side.
-  final Map<String, dynamic> creationParams = <String, dynamic>{};
   final double width;
   final double height;
-  late final LocalCameraController _controller;
+  final Widget? errorWidget;
 
-  LocalCameraView({
+  const LocalCameraView({
     Key? key,
     required this.width,
     required this.height,
     this.onCameraCreated,
+    this.errorWidget,
   }) : super(key: key);
 
-  Widget getPlatformView() {
+  @override
+  State<LocalCameraView> createState() => _LocalCameraViewState();
+}
+
+class _LocalCameraViewState extends State<LocalCameraView> {
+  // This is used in the platform side to register the view.
+  final String viewType = 'omicallsdk/local_camera_view';
+
+  // Pass parameters to the platform side.
+  final Map<String, dynamic> creationParams = <String, dynamic>{};
+  late final LocalCameraController _controller;
+  bool? _hasPermission;
+
+  Widget get cameraPlatformView {
     if (Platform.isIOS) {
       return UiKitView(
         viewType: viewType,
@@ -46,31 +57,51 @@ class LocalCameraView extends StatelessWidget {
   // Callback method when platform view is created
   void _onPlatformViewCreated(int id) {
     _controller = LocalCameraController._(id);
-    onCameraCreated?.call(_controller);
+    widget.onCameraCreated?.call(_controller);
+    checkCameraPermission();
+  }
+
+  Future<void> checkCameraPermission() async {
+    final result = await _controller.isGrantedCameraPermission();
+    setState(() {
+      _hasPermission = result;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: width,
-      height: height,
-      child: getPlatformView(),
+      width: widget.width,
+      height: widget.height,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          const SizedBox.expand(),
+          cameraPlatformView,
+          if (_hasPermission == false) widget.errorWidget ?? const SizedBox(),
+        ],
+      ),
     );
   }
 }
 
 class LocalCameraController {
   LocalCameraController._(int id)
-      : _channel =
-  MethodChannel('omicallsdk/local_camera_controller/$id');
+      : _channel = MethodChannel('omicallsdk/local_camera_controller/$id');
 
   final MethodChannel _channel;
 
+  MethodChannel get channel => _channel;
 
   void addListener(Function(String, dynamic) callback) {
     _channel.setMethodCallHandler((method) async {
       callback(method.method, method.arguments);
     });
+  }
+
+  Future<bool> isGrantedCameraPermission() async {
+    final result = await _channel.invokeMethod<bool>("permission");
+    return result ?? false;
   }
 
   void refresh() {

@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:calling/components/call_status.dart';
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/video_call/video_call_screen.dart';
+import 'package:easy_dialog/easy_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
@@ -53,7 +54,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     updateToken();
-    _missedCallSubscription = OmicallClient.instance.missedCallEvent.listen((data) {
+    _missedCallSubscription =
+        OmicallClient.instance.missedCallEvent.listen((data) {
       final String callerNumber = data["callerNumber"];
       final bool isVideo = data["isVideo"];
       makeCallWithParams(context, callerNumber, isVideo);
@@ -315,25 +317,33 @@ class _HomeScreenState extends State<HomeScreen> {
     if (phone.isEmpty) {
       return;
     }
-    if (_isVideoCall) {
-      pushToVideoScreen(phone, status: CallStatus.calling);
-    } else {
-      pushToDialScreen(
-        phone,
-        status: CallStatus.calling,
-      );
-    }
-    OmicallClient.instance.startCall(
+    final result = await OmicallClient.instance.startCall(
       phone,
       _isVideoCall,
     );
+    if (result) {
+      if (_isVideoCall) {
+        pushToVideoScreen(phone, status: CallStatus.calling);
+      } else {
+        pushToDialScreen(
+          phone,
+          status: CallStatus.calling,
+        );
+      }
+    } else {
+      EasyDialog(
+        title: const Text("Notification"),
+        description: const Text("Please check microphone permission"),
+      ).show(context);
+    }
     // OmicallClient.instance.startCallWithUUID(
     //   phone,
     //   _isVideoCall,
     // );
   }
 
-  Future<void> makeCallWithParams(BuildContext context, String callerNumber, bool isVideo) async {
+  Future<void> makeCallWithParams(
+      BuildContext context, String callerNumber, bool isVideo) async {
     if (isVideo) {
       pushToVideoScreen(callerNumber, status: CallStatus.calling);
     } else {

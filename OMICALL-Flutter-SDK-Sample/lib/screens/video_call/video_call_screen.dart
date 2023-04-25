@@ -263,6 +263,18 @@ class VideoCallState extends State<VideoCallScreen> {
                     controller.refresh();
                   }
                 },
+                errorWidget: Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: Colors.white,
+                  child: const Center(
+                    child: Icon(
+                      Icons.remove_red_eye,
+                      color: Colors.black,
+                      size: 24,
+                    ),
+                  ),
+                ),
               ),
             ),
             if (_callingStatus == CallStatus.established.value)
