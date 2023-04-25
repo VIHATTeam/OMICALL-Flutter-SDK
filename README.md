@@ -361,13 +361,13 @@ await Firebase.initializeApp();
 - Event listener:
   - Important event `eventTransferStream`: We provide it to listen call state change.
  ```
- OmicallClient.instance.controller.eventTransferStream..listen((omiAction) {
+ OmicallClient.instance.controller.eventTransferStream.listen((omiAction) {
  }
  //OmiAction have 2 variables: actionName and data
  ```
     - Action Name value: 
         - `incomingReceived`: Have a incoming call. On Android this event work only foreground
-        - `onCallEstablished`: Connected a call.
+        - `onCallEstablished`: Connected a call, you will receive `transactionId` in this.
         - `onCallEnd`: End a call.
         - `onHold`: `Comming soon....`
         - `onMuted`: `Comming soon...`
@@ -388,5 +388,5 @@ await Firebase.initializeApp();
   - User tab a missed call:.
   ```
   OmicallClient.instance.missedCallEvent.listen((data){}) //StreamSubscription
-  // data is Map. Data has 2 keys: callerNumber, isVideo
+  // data is Map. Data has 3 keys: callerNumber, isVideo, transactionId (only onCallEstablished)
   ```
