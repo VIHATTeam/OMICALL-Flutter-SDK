@@ -208,7 +208,7 @@ class CallManager {
                 videoManager = OMIVideoViewManager.init()
             }
             isSpeaker = call.isVideo
-            SwiftOmikitPlugin.instance?.sendEvent(CALL_ESTABLISHED, ["isVideo": call.isVideo, "callerNumber": call.callerNumber])
+            SwiftOmikitPlugin.instance?.sendEvent(CALL_ESTABLISHED, ["isVideo": call.isVideo, "callerNumber": call.callerNumber, "transactionId": call.omiId])
             SwiftOmikitPlugin.instance.sendMuteStatus()
             break
         case .disconnected:

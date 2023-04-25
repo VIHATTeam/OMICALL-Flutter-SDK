@@ -27,7 +27,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final TextEditingController _phoneNumberController =
-      TextEditingController()..text = Platform.isAndroid ? '115' : '116';
+      TextEditingController()..text = Platform.isAndroid ? '110' : '111';
 
   // late final TextEditingController _phoneNumberController =
   // TextEditingController()..text = Platform.isAndroid ? '123aaa' : '122aaa';
@@ -63,6 +63,8 @@ class _HomeScreenState extends State<HomeScreen> {
       if (omiAction.actionName == OmiEventList.incomingReceived) {
         //having a incoming call
         final data = omiAction.data;
+        final transactionId = data["transactionId"];
+        debugPrint("transactionId $transactionId");
         final callerNumber = data["callerNumber"];
         final bool isVideo = data["isVideo"];
         if (isVideo) {

@@ -26,7 +26,6 @@ import vn.vihat.omicall.omicallsdk.video_call.FLRemoteCameraFactory
 import vn.vihat.omicall.omisdk.OmiAccountListener
 import vn.vihat.omicall.omisdk.OmiClient
 import vn.vihat.omicall.omisdk.OmiListener
-import vn.vihat.omicall.omisdk.service.showMissedCall
 import vn.vihat.omicall.omisdk.utils.OmiSDKUtils
 import vn.vihat.omicall.omisdk.utils.SipServiceConstants
 import java.util.*
@@ -65,12 +64,15 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             phoneNumber: String?,
             isVideo: Boolean?,
             startTime: Long,
+            transactionId: String?,
         ) {
             Handler().postDelayed({
+                Log.d("aaaa", transactionId ?: "")
                 channel.invokeMethod(
                     CALL_ESTABLISHED, mapOf(
                         "callerNumber" to phoneNumber,
                         "isVideo" to isVideo,
+                        "transactionId" to transactionId,
                     )
                 )
             }, 500)
