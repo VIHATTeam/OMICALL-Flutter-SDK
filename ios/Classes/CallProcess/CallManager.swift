@@ -239,20 +239,28 @@ class CallManager {
     
     /// Start call
     func startCall(_ phoneNumber: String, isVideo: Bool) -> Bool {
-        if (isVideo) {
-            return OmiClient.startVideoCall(phoneNumber)
+        //check permission
+        let auth = AVAudioSession.sharedInstance().recordPermission
+        if (auth == .granted) {
+            if (isVideo) {
+                return OmiClient.startVideoCall(phoneNumber)
+            }
+            return OmiClient.startCall(phoneNumber)
         }
-        return OmiClient.startCall(phoneNumber)
+        return false
     }
     
     /// Start call
     func startCallWithUuid(_ uuid: String, isVideo: Bool) -> Bool {
-        let phoneNumber = OmiClient.getPhone(uuid)
-        if let phone = phoneNumber {
-            if (isVideo) {
-                return OmiClient.startVideoCall(phone)
+        let auth = AVAudioSession.sharedInstance().recordPermission
+        if (auth == .granted) {
+            let phoneNumber = OmiClient.getPhone(uuid)
+            if let phone = phoneNumber {
+                if (isVideo) {
+                    return OmiClient.startVideoCall(phone)
+                }
+                return OmiClient.startCall(phone)
             }
-            return OmiClient.startCall(phone)
         }
         return false
     }
