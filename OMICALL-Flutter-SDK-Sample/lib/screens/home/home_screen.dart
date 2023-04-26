@@ -10,6 +10,7 @@ import 'package:easy_dialog/easy_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../main.dart';
 import '../dial/dial_screen.dart';
@@ -331,9 +332,14 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
     } else {
+      final isGrantedMicrophone = await Permission.microphone.isGranted;
+      String message = "Start call error!";
+      if (!isGrantedMicrophone) {
+        message = "Please check microphone permission!";
+      }
       EasyDialog(
         title: const Text("Notification"),
-        description: const Text("Please check microphone permission"),
+        description: Text(message),
       ).show(context);
     }
     // OmicallClient.instance.startCallWithUUID(

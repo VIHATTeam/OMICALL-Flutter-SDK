@@ -3,6 +3,7 @@ package vn.vihat.omicall.omicallsdk
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.hardware.camera2.CameraManager
 import android.os.Build
 import android.os.Handler
@@ -10,6 +11,7 @@ import android.os.Looper
 import android.util.Log
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat.requestPermissions
+import androidx.core.content.ContextCompat
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -253,10 +255,19 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 }
             }
             START_CALL -> {
-                val phoneNumber = dataOmi["phoneNumber"] as String
-                val isVideo = dataOmi["isVideo"] as Boolean
-                OmiClient.instance.startCall(phoneNumber, isVideo)
-                result.success(true)
+                val audio: Int =
+                    ContextCompat.checkSelfPermission(
+                        applicationContext!!,
+                        Manifest.permission.RECORD_AUDIO
+                    )
+                if (audio == PackageManager.PERMISSION_GRANTED) {
+                    val phoneNumber = dataOmi["phoneNumber"] as String
+                    val isVideo = dataOmi["isVideo"] as Boolean
+                    OmiClient.instance.startCall(phoneNumber, isVideo)
+                    result.success(true)
+                } else {
+                    result.success(false)
+                }
             }
             JOIN_CALL -> {
                 OmiClient.instance.pickUp()
@@ -335,19 +346,31 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
             }
             START_CALL_WITH_UUID -> {
-                mainScope.launch {
-                    var callResult = false
-                    withContext(Dispatchers.Default) {
-                        try {
-                            val uuid = dataOmi["usrUuid"] as String
-                            val isVideo = dataOmi["isVideo"] as Boolean
-                            callResult =
-                                OmiClient.instance.startCallWithUuid(uuid = uuid, isVideo = isVideo)
-                        } catch (_: Throwable) {
+                val audio: Int =
+                    ContextCompat.checkSelfPermission(
+                        applicationContext!!,
+                        Manifest.permission.RECORD_AUDIO
+                    )
+                if (audio == PackageManager.PERMISSION_GRANTED) {
+                    mainScope.launch {
+                        var callResult = false
+                        withContext(Dispatchers.Default) {
+                            try {
+                                val uuid = dataOmi["usrUuid"] as String
+                                val isVideo = dataOmi["isVideo"] as Boolean
+                                callResult =
+                                    OmiClient.instance.startCallWithUuid(
+                                        uuid = uuid,
+                                        isVideo = isVideo
+                                    )
+                            } catch (_: Throwable) {
 
+                            }
                         }
+                        result.success(callResult)
                     }
-                    result.success(callResult)
+                } else {
+                    result.success(false)
                 }
             }
             LOG_OUT -> {
