@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:omicall_flutter_plugin/omicallsdk_method_channel.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'action/action_model.dart';
 import 'constant/names.dart';
@@ -119,22 +120,31 @@ class OmicallClient {
     String phoneNumber,
     bool isVideo,
   ) async {
-    final action = OmiAction(actionName: OmiActionName.START_CALL, data: {
-      'phoneNumber': phoneNumber,
-      'isVideo': isVideo,
-    });
-    return await _controller.action(action);
+    //check permission
+    final microphoneRequest = await Permission.microphone.request();
+    if (microphoneRequest.isGranted) {
+      final action = OmiAction(actionName: OmiActionName.START_CALL, data: {
+        'phoneNumber': phoneNumber,
+        'isVideo': isVideo,
+      });
+      return await _controller.action(action);
+    }
+    return false;
   }
 
   Future<bool> startCallWithUUID(
       String uuid,
       bool isVideo,
       ) async {
-    final action = OmiAction(actionName: OmiActionName.START_CALL_WITH_UUID, data: {
-      'usrUuid': uuid,
-      'isVideo': isVideo,
-    });
-    return await _controller.action(action);
+    final microphoneRequest = await Permission.microphone.request();
+    if (microphoneRequest.isGranted) {
+      final action = OmiAction(actionName: OmiActionName.START_CALL_WITH_UUID, data: {
+        'usrUuid': uuid,
+        'isVideo': isVideo,
+      });
+      return await _controller.action(action);
+    }
+    return false;
   }
 
   Future<dynamic> getInitialCall() async {
