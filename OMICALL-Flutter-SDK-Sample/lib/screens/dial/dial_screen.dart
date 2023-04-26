@@ -1,7 +1,10 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 
 import 'package:calling/components/call_status.dart';
 import 'package:calling/constants.dart';
+import 'package:easy_dialog/easy_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
@@ -182,8 +185,11 @@ class DialScreenState extends State<DialScreen> {
                         if (_callingStatus == "Ringing")
                           RoundedCircleButton(
                             iconSrc: "assets/icons/call_end.svg",
-                            press: () {
-                              OmicallClient.instance.joinCall();
+                            press: () async {
+                              final result = await OmicallClient.instance.joinCall();
+                              if (result == false) {
+                                Navigator.pop(context);
+                              }
                             },
                             color: kGreenColor,
                             iconColor: Colors.white,

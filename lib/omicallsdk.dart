@@ -156,12 +156,17 @@ class OmicallClient {
     return result;
   }
 
-  Future<void> joinCall() async {
-    final action = OmiAction(
-      actionName: OmiActionName.JOIN_CALL,
-      data: {},
-    );
-    return await _controller.action(action);
+  Future<bool> joinCall() async {
+    final microphoneRequest = await Permission.microphone.request();
+    if (microphoneRequest.isGranted) {
+      final action = OmiAction(
+        actionName: OmiActionName.JOIN_CALL,
+        data: {},
+      );
+      await _controller.action(action);
+      return true;
+    }
+    return false;
   }
 
   Future<void> endCall() async {

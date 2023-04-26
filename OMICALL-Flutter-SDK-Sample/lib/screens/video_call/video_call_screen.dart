@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'dart:io';
 
@@ -353,8 +355,11 @@ class VideoCallState extends State<VideoCallScreen> {
                     if (_callingStatus == "Ringing")
                       RoundedCircleButton(
                         iconSrc: "assets/icons/call_end.svg",
-                        press: () {
-                          OmicallClient.instance.joinCall();
+                        press: () async {
+                          final result = await OmicallClient.instance.joinCall();
+                          if (result == false) {
+                            Navigator.pop(context);
+                          }
                         },
                         color: kGreenColor,
                         iconColor: Colors.white,
