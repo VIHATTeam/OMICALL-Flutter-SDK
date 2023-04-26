@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.4.2
+  - Check microphone when user `startCall`
+  - Update sample and document
+
 ## 2.4.1
   - Return `transactionId` in `establisedCall` listener
   - Update sample and document
