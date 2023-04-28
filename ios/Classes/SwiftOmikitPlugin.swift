@@ -191,10 +191,14 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           result(true)
           break
       case GET_CURRENT_USER:
-          result([:])
+          CallManager.shareInstance().getCurrentUser { data in
+              result(data)
+          }
           break
       case GET_GUEST_USER:
-          result([:])
+          CallManager.shareInstance().getGuestUser { data in
+              result(data)
+          }
           break
       default:
           break

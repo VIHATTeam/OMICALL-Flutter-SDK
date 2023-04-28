@@ -18,6 +18,7 @@ class CallManager {
     private let omiLib = OMISIPLib.sharedInstance()
     var videoManager: OMIVideoViewManager?
     var isSpeaker = false
+    private var guestPhone : String = ""
     
     /// Get instance
     static func shareInstance() -> CallManager {
@@ -239,6 +240,7 @@ class CallManager {
     
     /// Start call
     func startCall(_ phoneNumber: String, isVideo: Bool) -> Bool {
+        guestPhone = phoneNumber
         //check permission
         let auth = AVAudioSession.sharedInstance().recordPermission
         if (auth == .granted) {
@@ -256,6 +258,7 @@ class CallManager {
         if (auth == .granted) {
             let phoneNumber = OmiClient.getPhone(uuid)
             if let phone = phoneNumber {
+                guestPhone = phoneNumber ?? ""
                 if (isVideo) {
                     return OmiClient.startVideoCall(phone)
                 }
@@ -406,6 +409,38 @@ class CallManager {
     
     func logout() {
         OmiClient.logout()
+    }
+    
+    func getCurrentUser(completion: @escaping (([String: Any]) -> Void)) {
+        guard let accountConfiguration = omiLib.firstAccount()?.accountConfiguration else {
+            return
+        }
+        getUserInfo(phone: accountConfiguration.sipAccount, completion: completion)
+    }
+    
+    func getGuestUser(completion: @escaping (([String: Any]) -> Void)) {
+        getUserInfo(phone: guestPhone, completion: completion)
+    }
+    
+    private func getUserInfo(phone: String, completion: @escaping (([String: Any]) -> Void)) {
+        guard let accountConfiguration = omiLib.firstAccount()?.accountConfiguration else {
+            return
+        }
+        let sipAccount = accountConfiguration.sipAccount
+        let url = URL(string: "https://public-v1-stg.omicall.com/api/call_center/extensions/detail/\(phone)?type=sip_user")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("extension", forHTTPHeaderField: sipAccount)
+        request.setValue("password", forHTTPHeaderField: accountConfiguration.sipPassword)
+        request.setValue("domain", forHTTPHeaderField: accountConfiguration.sipDomain)
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            if error != nil || data == nil {
+                return
+            }
+            if let result = try? JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any], let payload = result["payload"] as? [String: Any] {
+                completion(payload)
+            }
+        }.resume()
     }
 }
 
