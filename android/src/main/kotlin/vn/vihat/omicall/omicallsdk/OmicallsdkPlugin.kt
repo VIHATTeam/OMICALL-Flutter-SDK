@@ -386,6 +386,32 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     result.success(true)
                 }
             }
+            GET_CURRENT_USER -> {
+                mainScope.launch {
+                    var callResult : Any? = null
+                    withContext(Dispatchers.Default) {
+                        try {
+                            callResult = OmiClient.instance.getCurrentUser()
+                        } catch (_: Throwable) {
+
+                        }
+                    }
+                    result.success(callResult)
+                }
+            }
+            GET_GUEST_USER -> {
+                mainScope.launch {
+                    var callResult : Any? = null
+                    withContext(Dispatchers.Default) {
+                        try {
+                            callResult = OmiClient.instance.getIncomingCallUser()
+                        } catch (_: Throwable) {
+
+                        }
+                    }
+                    result.success(callResult)
+                }
+            }
         }
     }
 
