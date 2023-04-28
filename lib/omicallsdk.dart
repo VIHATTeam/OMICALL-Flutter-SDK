@@ -262,7 +262,7 @@ class OmicallClient {
     );
     return await _controller.action(action);
   }
-  ///Implement later
+
   Future<dynamic> logout() async {
     final action = OmiAction(
       actionName: OmiActionName.LOG_OUT,
@@ -271,7 +271,6 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
-  ///Implement later
   Future<dynamic> registerVideoEvent() async {
     final action = OmiAction(
       actionName: OmiActionName.REGISTER_VIDEO_EVENT,
@@ -280,12 +279,35 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
-  ///Implement later
   Future<dynamic> removeVideoEvent() async {
     final action = OmiAction(
       actionName: OmiActionName.REMOVE_VIDEO_EVENT,
       data: {},
     );
     return await _controller.action(action);
+  }
+
+  Future<Map?> getCurrentUser() async {
+    final action = OmiAction(
+      actionName: OmiActionName.GET_CURRENT_USER,
+      data: {},
+    );
+    final result = await _controller.action(action);
+    if (result != null) {
+      return result as Map;
+    }
+    return null;
+  }
+
+  Future<Map?> getGuestUser() async {
+    final action = OmiAction(
+      actionName: OmiActionName.GET_GUEST_USER,
+      data: {},
+    );
+    final result = await _controller.action(action);
+    if (result != null) {
+      return result as Map;
+    }
+    return null;
   }
 }

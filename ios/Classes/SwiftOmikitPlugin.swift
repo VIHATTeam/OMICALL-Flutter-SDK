@@ -190,6 +190,12 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           CallManager.shareInstance().removeVideoEvent()
           result(true)
           break
+      case GET_CURRENT_USER:
+          result([:])
+          break
+      case GET_GUEST_USER:
+          result([:])
+          break
       default:
           break
       }

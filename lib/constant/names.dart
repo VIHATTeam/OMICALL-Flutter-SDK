@@ -26,4 +26,6 @@ class OmiActionName {
   static const String LOG_OUT = "LOG_OUT";
   static const String REMOVE_VIDEO_EVENT = "REMOVE_VIDEO_EVENT";
   static const String REGISTER_VIDEO_EVENT = "REGISTER_VIDEO_EVENT";
+  static const String GET_CURRENT_USER = "GET_CURRENT_USER";
+  static const String GET_GUEST_USER = "GET_GUEST_USER";
 }

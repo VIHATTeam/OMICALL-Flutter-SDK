@@ -28,7 +28,7 @@ dependencies:
     path: ../../OMICALL-Flutter-SDK
   firebase_messaging: 14.4.1
   firebase_core: 2.10.0
-  flutter_svg: 2.0.3
+  flutter_svg:
   device_info_plus: 8.1.0
   permission_handler: 10.2.0
   shared_preferences: 2.0.18

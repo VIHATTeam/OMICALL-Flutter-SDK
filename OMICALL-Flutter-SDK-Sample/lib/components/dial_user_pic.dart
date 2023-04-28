@@ -28,10 +28,15 @@ class DialUserPic extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: const BorderRadius.all(Radius.circular(100)),
-        child: Image.asset(
-          image,
-          fit: BoxFit.cover,
-        ),
+        child: image.contains("http")
+            ? Image.network(
+                image,
+                fit: BoxFit.cover,
+              )
+            : Image.asset(
+                image,
+                fit: BoxFit.cover,
+              ),
       ),
     );
   }

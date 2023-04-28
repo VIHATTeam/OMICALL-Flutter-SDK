@@ -4,7 +4,6 @@ import 'dart:async';
 
 import 'package:calling/components/call_status.dart';
 import 'package:calling/constants.dart';
-import 'package:easy_dialog/easy_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
@@ -33,6 +32,8 @@ class DialScreenState extends State<DialScreen> {
   bool _isShowKeyboard = false;
   String _keyboardMessage = "";
   late StreamSubscription _subscription;
+  Map? current;
+  Map? guestUser;
 
   Stopwatch watch = Stopwatch();
   Timer? timer;
@@ -58,6 +59,26 @@ class DialScreenState extends State<DialScreen> {
         return;
       }
     });
+    getCurrentUser();
+    getGuestUser();
+  }
+
+  Future<void> getCurrentUser() async {
+    final user = await OmicallClient.instance.getCurrentUser();
+    if (user != null) {
+      setState(() {
+        current = user;
+      });
+    }
+  }
+
+  Future<void> getGuestUser() async {
+    final user = await OmicallClient.instance.getGuestUser();
+    if (user != null) {
+      setState(() {
+        guestUser = user;
+      });
+    }
   }
 
   void updateDialScreen(Map<String, dynamic>? callInfo, CallStatus? status) {
@@ -83,24 +104,63 @@ class DialScreenState extends State<DialScreen> {
                 padding: const EdgeInsets.all(20.0),
                 child: Column(
                   children: [
-                    Text(
-                      "#${widget.phoneNumber ?? ""}",
-                      style: Theme.of(context)
-                          .textTheme
-                          .headline4!
-                          .copyWith(color: Colors.white),
-                    ),
-                    Text(
-                      _callTime ?? _callingStatus,
-                      style: const TextStyle(
-                        color: Colors.white60,
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    const DialUserPic(
-                      image: "assets/images/calling_face.png",
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Column(
+                          children: [
+                            Text(
+                              "${current?["full_name"] ?? "..."}",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headline4!
+                                  .copyWith(color: Colors.white, fontSize: 24),
+                            ),
+                            const SizedBox(
+                              height: 16,
+                            ),
+                            DialUserPic(
+                              size: 100,
+                              image: current?["avatar_url"] != "" && current?["avatar_url"] != null ? current!["avatar_url"] : "assets/images/calling_face.png",
+                            ),
+                          ],
+                        ),
+                        const SizedBox(
+                          width: 16,
+                        ),
+                        Container(
+                          margin: const EdgeInsets.only(top: 32),
+                          child: Text(
+                            _callTime ?? _callingStatus,
+                            style: const TextStyle(
+                              color: Colors.white60,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 16,
+                        ),
+                        Column(
+                          children: [
+                            Text(
+                              "${guestUser?["full_name"] ?? "..."}",
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headline4!
+                                  .copyWith(color: Colors.white, fontSize: 24),
+                            ),
+                            const SizedBox(
+                              height: 16,
+                            ),
+                            DialUserPic(
+                              size: 100,
+                              image: guestUser?["avatar_url"] != "" && guestUser?["avatar_url"] != null ? guestUser!["avatar_url"] : "assets/images/calling_face.png",
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
                     const Spacer(),
                     if (_callingStatus == CallStatus.established.value) ...[
