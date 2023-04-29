@@ -70,7 +70,7 @@ android {
 
 
 dependencies {
-    api 'vn.vihat.omicall:omi-sdk:1.1.15'
+    api 'vn.vihat.omicall:omi-sdk:1.1.23'
 //    implementation fileTree(include: ['*.jar'], dir: 'libs')
 //    implementation files('OmiSDK.aar')
     implementation 'androidx.core:core-ktx:1.7.0'
@@ -94,4 +94,5 @@ dependencies {
     implementation "com.squareup.okhttp3:okhttp:4.9.1"
     implementation "com.squareup.okhttp3:okhttp-urlconnection:4.9.1"
     implementation "com.squareup.okhttp3:logging-interceptor:4.9.1"
+    implementation "androidx.security:security-crypto:1.1.0-alpha06"
 }

@@ -425,11 +425,8 @@ class CallManager {
         getUserInfo(phone: guestPhone, completion: completion)
     }
     
-    private func getUserInfo(phone: String, completion: @escaping (([String: Any]) -> Void)) {
-        print("account info of begin call \(phone)")
-        print("account info of begin call has account")
+    func getUserInfo(phone: String, completion: @escaping (([String: Any]) -> Void)) {
         if let account = OmiClient.getAccountInfo(phone) as? [String: Any] {
-            print("account info of \(phone) \(account)")
             completion(account)
         }
     }

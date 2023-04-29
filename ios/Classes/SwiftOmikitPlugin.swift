@@ -114,7 +114,7 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           break
       case END_CALL:
           CallManager.shareInstance().endAvailableCall()
-          result(true)
+          result([:])
           break
       case TOGGLE_MUTE:
           CallManager.shareInstance().toggleMute()
@@ -197,6 +197,12 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           break
       case GET_GUEST_USER:
           CallManager.shareInstance().getGuestUser { data in
+              result(data)
+          }
+          break
+      case GET_USER_INFO:
+          let phone = dataOmi["phone"] as! String
+          CallManager.shareInstance().getUserInfo(phone: phone) { data in
               result(data)
           }
           break

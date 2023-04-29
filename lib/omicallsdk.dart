@@ -1,10 +1,9 @@
 import 'dart:async';
-
-import 'package:omicall_flutter_plugin/omicallsdk_method_channel.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'action/action_model.dart';
 import 'constant/names.dart';
+import 'omicallsdk_controller.dart';
 
 class OmicallClient {
   OmicallClient._();
@@ -169,7 +168,7 @@ class OmicallClient {
     return false;
   }
 
-  Future<void> endCall() async {
+  Future<Map?> endCall() async {
     final action = OmiAction(
       actionName: OmiActionName.END_CALL,
       data: {},
@@ -303,6 +302,20 @@ class OmicallClient {
     final action = OmiAction(
       actionName: OmiActionName.GET_GUEST_USER,
       data: {},
+    );
+    final result = await _controller.action(action);
+    if (result != null) {
+      return result as Map;
+    }
+    return null;
+  }
+
+  Future<Map?> getUserInfo({required String phone}) async {
+    final action = OmiAction(
+      actionName: OmiActionName.GET_USER_INFO,
+      data: {
+        "phone": phone,
+      },
     );
     final result = await _controller.action(action);
     if (result != null) {
