@@ -55,10 +55,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             Log.d("omikit", "incomingReceived: ")
         }
 
-        override fun onCallEnd() {
-            Log.d("omikit-endCall", "onCallEnd: ")
-            print("omikit-endCall")
-            channel.invokeMethod(CALL_END, null)
+        override fun onCallEnd(callInfo: Any?) {
+            channel.invokeMethod(CALL_END, callInfo)
         }
 
         override fun onCallEstablished(
@@ -274,8 +272,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 result.success(true)
             }
             END_CALL -> {
-                OmiClient.instance.hangUp()
-                result.success(true)
+                val callInfo = OmiClient.instance.hangUp()
+                result.success(callInfo)
             }
             TOGGLE_MUTE -> {
                 mainScope.launch {
@@ -405,6 +403,20 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     withContext(Dispatchers.Default) {
                         try {
                             callResult = OmiClient.instance.getIncomingCallUser()
+                        } catch (_: Throwable) {
+
+                        }
+                    }
+                    result.success(callResult)
+                }
+            }
+            GET_USER_INFO -> {
+                mainScope.launch {
+                    var callResult : Any? = null
+                    withContext(Dispatchers.Default) {
+                        try {
+                            val phone = dataOmi["phone"] as String
+                            callResult = OmiClient.instance.getUserInfo(phone)
                         } catch (_: Throwable) {
 
                         }

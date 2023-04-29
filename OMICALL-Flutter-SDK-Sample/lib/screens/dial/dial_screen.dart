@@ -374,7 +374,10 @@ class DialScreenState extends State<DialScreen> {
     bool needShowStatus = true,
   }) async {
     if (needRequest) {
-      OmicallClient.instance.endCall();
+      OmicallClient.instance.endCall().then((value) {
+        debugPrint("End calllllll");
+        debugPrint(value.toString());
+      });
     }
     if (needShowStatus) {
       _stopWatch();

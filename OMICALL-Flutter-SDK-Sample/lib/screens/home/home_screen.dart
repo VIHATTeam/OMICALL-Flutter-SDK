@@ -105,6 +105,10 @@ class _HomeScreenState extends State<HomeScreen> {
           status: CallStatus.established,
         );
       }
+      if (omiAction.actionName == OmiEventList.onCallEnd) {
+        //having a incoming call
+        debugPrint(omiAction.data.toString());
+      }
     });
   }
 

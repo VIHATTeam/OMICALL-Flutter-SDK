@@ -28,4 +28,5 @@ class OmiActionName {
   static const String REGISTER_VIDEO_EVENT = "REGISTER_VIDEO_EVENT";
   static const String GET_CURRENT_USER = "GET_CURRENT_USER";
   static const String GET_GUEST_USER = "GET_GUEST_USER";
+  static const String GET_USER_INFO = "GET_USER_INFO";
 }
