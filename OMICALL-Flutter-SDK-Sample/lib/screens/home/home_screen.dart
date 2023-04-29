@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:calling/components/call_status.dart';
 import 'package:calling/local_storage/local_storage.dart';
+import 'package:calling/screens/login/login_apikey_screen.dart';
 import 'package:calling/screens/video_call/video_call_screen.dart';
 import 'package:easy_dialog/easy_dialog.dart';
 import 'package:flutter/material.dart';
@@ -223,7 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   EasyLoading.dismiss();
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                      builder: (_) => const LoginUserPasswordScreen(),
+                      builder: (_) => const LoginApiKeyScreen(),
                     ),
                   );
                 },

@@ -174,6 +174,7 @@ class CallManager {
                 if (self.videoManager != nil) {
                     self.videoManager = nil
                 }
+                self.guestPhone = ""
                 SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
             }
         }
@@ -222,9 +223,11 @@ class CallManager {
             if (videoManager != nil) {
                 videoManager = nil
             }
+            guestPhone = ""
             SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
             break
         case .incoming:
+            guestPhone = call.callerNumber ?? ""
             DispatchQueue.main.async {
                 let state: UIApplication.State = UIApplication.shared.applicationState
                 if (state == .active) {
@@ -412,10 +415,10 @@ class CallManager {
     }
     
     func getCurrentUser(completion: @escaping (([String: Any]) -> Void)) {
-        guard let accountConfiguration = omiLib.firstAccount()?.accountConfiguration else {
-            return
+        let prefs = UserDefaults.standard
+        if let user = prefs.value(forKey: "User") as? String {
+            getUserInfo(phone: user, completion: completion)
         }
-        getUserInfo(phone: accountConfiguration.sipAccount, completion: completion)
     }
     
     func getGuestUser(completion: @escaping (([String: Any]) -> Void)) {
@@ -423,24 +426,12 @@ class CallManager {
     }
     
     private func getUserInfo(phone: String, completion: @escaping (([String: Any]) -> Void)) {
-        guard let accountConfiguration = omiLib.firstAccount()?.accountConfiguration else {
-            return
+        print("account info of begin call \(phone)")
+        print("account info of begin call has account")
+        if let account = OmiClient.getAccountInfo(phone) as? [String: Any] {
+            print("account info of \(phone) \(account)")
+            completion(account)
         }
-        let sipAccount = accountConfiguration.sipAccount
-        let url = URL(string: "https://public-v1-stg.omicall.com/api/call_center/extensions/detail/\(phone)?type=sip_user")!
-        var request = URLRequest(url: url)
-        request.httpMethod = "GET"
-        request.setValue("extension", forHTTPHeaderField: sipAccount)
-        request.setValue("password", forHTTPHeaderField: accountConfiguration.sipPassword)
-        request.setValue("domain", forHTTPHeaderField: accountConfiguration.sipDomain)
-        URLSession.shared.dataTask(with: request) { (data, response, error) in
-            if error != nil || data == nil {
-                return
-            }
-            if let result = try? JSONSerialization.jsonObject(with: data!, options: []) as? [String: Any], let payload = result["payload"] as? [String: Any] {
-                completion(payload)
-            }
-        }.resume()
     }
 }
 
