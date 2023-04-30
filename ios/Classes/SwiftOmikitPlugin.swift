@@ -113,8 +113,8 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           result(callResult)
           break
       case END_CALL:
-          CallManager.shareInstance().endAvailableCall()
-          result([:])
+          let callInfo = CallManager.shareInstance().endAvailableCall()
+          result(callInfo)
           break
       case TOGGLE_MUTE:
           CallManager.shareInstance().toggleMute()
