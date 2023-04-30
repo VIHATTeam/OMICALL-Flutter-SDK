@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.5.0
+- **BREAKING CHANGE**
+  - We return call information after the call ending.
+  - Add `getCurrentUser`, `getGuestUser` and `getUserInfo` to get user information.
+  - Update sample.
+
 ## 2.4.2
   - Check microphone when user `startCall`
   - Update sample and document

@@ -59,7 +59,7 @@ allprojects {
 }
 ```
 
-You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/main/OMICALL-Flutter-SDK-Sample/android/build.gradle">android/build.gradle</a> to know more informations.
+You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/main/OMICALL-Flutter-SDK-Sample/android/build.gradle">android/build.gradle</a> to know more information.
 
 - Add these settings in `app/build.gradle`:
 
@@ -69,7 +69,7 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.google.gms.google-services'
 ```
 
-You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/main/OMICALL-Flutter-SDK-Sample/android/app/build.gradle">android/app/build.gradle</a> to know more informations.
+You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/main/OMICALL-Flutter-SDK-Sample/android/app/build.gradle">android/app/build.gradle</a> to know more information.
 
 - Update AndroidManifest.xml:
 
@@ -95,7 +95,7 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
     android:exported="false">
 </service>
 ```
-You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/main/OMICALL-Flutter-SDK-Sample/android/app/src/main/AndroidManifest.xml">AndroidManifest</a> to know more informations.
+You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/main/OMICALL-Flutter-SDK-Sample/android/app/src/main/AndroidManifest.xml">AndroidManifest</a> to know more information.
 
 
 - We registered permissions into my plugin:
@@ -124,11 +124,6 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
   - For more setting information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/android-sdk/cau-hinh-push-notification">Config Push for Android</a>
 
 #### iOS:
-----
-
-We support both Object-C and Swift. But we only have documents for Object-C. We will write for Swift language later. Thank you.
-
----
 
 - Add variables in Appdelegate.h:
 
@@ -210,7 +205,7 @@ await Firebase.initializeApp();
     //Call in the root widget
     OmicallClient.instance.startServices();
     ```
-  - Create OmiKit: OmiKit need userName, password, realm, host to init enviroment. ViHAT Group will provides these informations for you. Please contact for my sales:
+  - Create OmiKit: OmiKit need userName, password, realm, host to init enviroment. ViHAT Group will provides these information for you. Please contact for my sales:
     ```
     await OmicallClient.instance.initCall(
       userName: "", 
@@ -285,9 +280,22 @@ await Firebase.initializeApp();
     ```
     OmicallClient.instance.joinCall();
     ```
-  - End a call: We will push a event `endCall` for you.
+  - End a call: We will push a event `endCall` and return call information for you.
     ```
-    OmicallClient.instance.endCall();
+    OmicallClient.instance.endCall().then((value) {
+        //value is call information
+    });
+    Sample output:
+    {
+       "transaction_id":ea7dff38-cb1e-483d-8576...........,
+       "direction":"inbound",
+       "source_number":111,
+       "destination_number":110,
+       "time_start_to_answer":1682858097393,
+       "time_end":1682858152181,
+       "sip_user":111,
+       "disposition":"answered"
+    }
     ```
   - Toggle the audio: On/off audio a call
     ```
@@ -300,6 +308,39 @@ await Firebase.initializeApp();
   - Send character: We only support `1 to 9` and `* #`.
     ```
     OmicallClient.instance.sendDTMF(value);
+    ```
+  - Get current user information:
+    ```
+    final user = await OmicallClient.instance.getCurrentUser();
+    Output Sample:  
+    {
+        "extension": "111",
+        "full_name": "chau1",
+        "avatar_url": "",
+        "uuid": "122aaa"
+    }
+    ```
+  - Get guest user information:
+    ```
+    final user = await OmicallClient.instance.getGuestUser();
+    Output Sample:  
+    {
+        "extension": "111",
+        "full_name": "chau1",
+        "avatar_url": "",
+        "uuid": "122aaa"
+    }
+    ```
+  - Get user information from sip:
+    ```
+    final user = await OmicallClient.instance.getUserInfo(phone: "111");
+    Output Sample:  
+    {
+        "extension": "111",
+        "full_name": "chau1",
+        "avatar_url": "",
+        "uuid": "122aaa"
+    }
     ```
   - Logout:
     ```
@@ -368,7 +409,7 @@ await Firebase.initializeApp();
     - Action Name value: 
         - `incomingReceived`: Have a incoming call. On Android this event work only foreground
         - `onCallEstablished`: Connected a call, you will receive `transactionId` in this.
-        - `onCallEnd`: End a call.
+        - `onCallEnd`: End a call and return call information (like endCall)
         - `onHold`: `Comming soon....`
         - `onMuted`: `Comming soon...`
     - Data value: We return `callerNumber`, `isVideo: true/false` information

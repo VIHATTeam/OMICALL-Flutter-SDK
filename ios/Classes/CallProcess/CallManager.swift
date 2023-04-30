@@ -19,6 +19,7 @@ class CallManager {
     var videoManager: OMIVideoViewManager?
     var isSpeaker = false
     private var guestPhone : String = ""
+    private var lastStatusCall : String?
     
     /// Get instance
     static func shareInstance() -> CallManager {
@@ -174,6 +175,7 @@ class CallManager {
                 if (self.videoManager != nil) {
                     self.videoManager = nil
                 }
+                self.lastStatusCall = nil
                 self.guestPhone = ""
                 SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
             }
@@ -210,6 +212,7 @@ class CallManager {
                 videoManager = OMIVideoViewManager.init()
             }
             isSpeaker = call.isVideo
+            lastStatusCall = "answered"
             SwiftOmikitPlugin.instance?.sendEvent(CALL_ESTABLISHED, ["isVideo": call.isVideo, "callerNumber": call.callerNumber, "transactionId": call.omiId])
             SwiftOmikitPlugin.instance.sendMuteStatus()
             break
@@ -219,12 +222,14 @@ class CallManager {
             } else if (!call.userDidHangUp) {
                 NSLog("Call remotly ended, in DISCONNECTED state, with UUID: \(call.uuid)")
             }
-            print(call.uuid.uuidString)
+            let callInfo = getCallInfo(call: call)
+            print("call infooooo \(callInfo)")
             if (videoManager != nil) {
                 videoManager = nil
             }
+            lastStatusCall = nil
             guestPhone = ""
-            SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
+            SwiftOmikitPlugin.instance?.sendEvent(CALL_END, callInfo)
             break
         case .incoming:
             guestPhone = call.callerNumber ?? ""
@@ -239,6 +244,27 @@ class CallManager {
             NSLog("Default call state")
             break
         }
+    }
+    
+    private func getCallInfo(call: OMICall) -> [String: Any] {
+        var direction = "outbound"
+        if (guestPhone.count < 10) {
+            direction = "inbound"
+        }
+        let prefs = UserDefaults.standard
+        let user = prefs.value(forKey: "User") as? String
+        let status = call.callState == .confirmed ? "answered" : "no_answered"
+        let timeEnd = Int(Date().timeIntervalSince1970)
+        return [
+            "transaction_id" : call.omiId,
+            "direction" : direction,
+            "source_number" : user,
+            "destination_number" : guestPhone,
+            "time_start_to_answer" : call.createDate,
+            "time_end" : timeEnd,
+            "sip_user": user,
+            "disposition" : lastStatusCall == nil ? "no_answered" : "answered",
+        ]
     }
     
     /// Start call
@@ -271,12 +297,14 @@ class CallManager {
         return false
     }
     
-    func endAvailableCall() {
+    func endAvailableCall() -> [String: Any] {
         guard let call = getAvailableCall() else {
             SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
-            return
+            return [:]
         }
+        let callInfo = getCallInfo(call: call)
         omiLib.callManager.end(call)
+        return callInfo
     }
     
     
