@@ -175,9 +175,10 @@ class CallManager {
                 if (self.videoManager != nil) {
                     self.videoManager = nil
                 }
+                let callInfo = self.getCallInfo(call: call)
                 self.lastStatusCall = nil
                 self.guestPhone = ""
-                SwiftOmikitPlugin.instance?.sendEvent(CALL_END, [:])
+                SwiftOmikitPlugin.instance?.sendEvent(CALL_END, callInfo)
             }
         }
     }
