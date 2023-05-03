@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.5.1
+  - Increase android core
+  - Fix incoming notification activity show empty screen, correct sip number in established call.
+
 ## 2.5.0
 - **BREAKING CHANGE**
   - We return call information after the call ending.
