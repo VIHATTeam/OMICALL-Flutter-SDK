@@ -232,6 +232,7 @@ await Firebase.initializeApp();
   - Config push notification: With iOS, I only support these keys: `prefixMissedCallMessage`, `missedCallTitle`. With Android, We don't support `missedCallTitle`:
     ```
     OmicallClient.instance.configPushNotification(
+      notificationIcon : "calling_face", //notification icon on Android
       prefix : "Cuộc gọi tới từ: ",
       declineTitle : "Từ chối",
       acceptTitle : "Chấp nhận",
