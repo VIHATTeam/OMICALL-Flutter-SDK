@@ -70,7 +70,7 @@ android {
 
 
 dependencies {
-    api 'vn.vihat.omicall:omi-sdk:1.2.0'
+    api 'vn.vihat.omicall:omi-sdk:1.2.1'
 //    implementation fileTree(include: ['*.jar'], dir: 'libs')
 //    implementation files('OmiSDK.aar')
     implementation 'androidx.core:core-ktx:1.7.0'
