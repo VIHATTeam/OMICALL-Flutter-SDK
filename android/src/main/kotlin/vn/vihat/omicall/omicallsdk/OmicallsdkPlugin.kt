@@ -156,6 +156,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 result.success(true)
             }
             CONFIG_NOTIFICATION -> {
+                val notificationIcon = dataOmi["notificationIcon"] as? String
                 val prefix = dataOmi["prefix"] as? String
                 val declineTitle = dataOmi["declineTitle"] as? String
                 val acceptTitle = dataOmi["acceptTitle"] as? String
@@ -169,6 +170,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val backImage = dataOmi["backImage"] as? String
                 val userImage = dataOmi["userImage"] as? String
                 OmiClient.instance.configPushNotification(
+                    notificationIcon = notificationIcon ?: "",
                     prefix = prefix ?: "Cuộc gọi tới từ: ",
                     declineTitle = declineTitle ?: "Từ chối",
                     acceptTitle = acceptTitle ?: "Chấp nhận",

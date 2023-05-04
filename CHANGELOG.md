@@ -1,6 +1,10 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## 2.5.2
+  - Increase android/ ios core
+  - Support to change notification icon on Android
+  - Update sample
 
 ## 2.5.1
   - Increase android core

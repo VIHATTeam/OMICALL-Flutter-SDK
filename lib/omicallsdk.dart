@@ -53,6 +53,7 @@ class OmicallClient {
   }
 
   Future<void> configPushNotification({
+    required String notificationIcon,
     String? prefix,
     String? declineTitle,
     String? acceptTitle,
@@ -69,6 +70,7 @@ class OmicallClient {
     final action = OmiAction(
       actionName: OmiActionName.CONFIG_NOTIFICATION,
       data: {
+        'notificationIcon': notificationIcon,
         'prefix': prefix,
         'declineTitle': declineTitle,
         'acceptTitle': acceptTitle,
