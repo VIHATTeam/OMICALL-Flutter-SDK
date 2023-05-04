@@ -42,6 +42,7 @@ class _MyAppState extends State<MyApp> {
     EasyLoading.instance.userInteractions = false;
     OmicallClient.instance.startServices();
     OmicallClient.instance.configPushNotification(
+      notificationIcon: "calling_face",
       prefix: "Cuộc gọi tới từ: ",
       declineTitle: "Từ chối",
       acceptTitle: "Chấp nhận",
