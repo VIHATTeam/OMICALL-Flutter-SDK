@@ -56,7 +56,7 @@ internal class FLLocalCameraView(
                 OmiClient.instance.context,
                 Manifest.permission.CAMERA
             )
-            val isGranted = permission != PackageManager.PERMISSION_GRANTED
+            val isGranted = permission == PackageManager.PERMISSION_GRANTED
             result.success(isGranted)
         }
     }

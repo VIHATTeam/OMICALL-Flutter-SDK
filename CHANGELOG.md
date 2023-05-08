@@ -1,6 +1,10 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## 2.5.3
+  - Increase android core
+  - Fix bug: Local video is not showing.
+
 ## 2.5.2
   - Increase android/ ios core
   - Support to change notification icon on Android

@@ -6,7 +6,7 @@ The most important part of the framework is :
 - Help to easy integrate with Omicall.
 - Easy custom Call UI/UX.
 - Optimize codec voip for you.
-- Full inteface to interactive with core function like sound/ringtone/codec.
+- Full interface to interactive with core function like sound/ringtone/codec.
 
 ### Status
 Currently active maintenance and improve performance
