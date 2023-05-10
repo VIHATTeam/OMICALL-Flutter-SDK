@@ -158,10 +158,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             CONFIG_NOTIFICATION -> {
                 val notificationIcon = dataOmi["notificationIcon"] as? String
                 val prefix = dataOmi["prefix"] as? String
-                val declineTitle = dataOmi["declineTitle"] as? String
-                val acceptTitle = dataOmi["acceptTitle"] as? String
-                val acceptBackgroundColor = dataOmi["acceptBackgroundColor"] as? String
-                val declineBackgroundColor = dataOmi["declineBackgroundColor"] as? String
                 val incomingBackgroundColor = dataOmi["incomingBackgroundColor"] as? String
                 val incomingAcceptButtonImage = dataOmi["incomingAcceptButtonImage"] as? String
                 val incomingDeclineButtonImage = dataOmi["incomingDeclineButtonImage"] as? String
@@ -172,10 +168,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 OmiClient.instance.configPushNotification(
                     notificationIcon = notificationIcon ?: "",
                     prefix = prefix ?: "Cuộc gọi tới từ: ",
-                    declineTitle = declineTitle ?: "Từ chối",
-                    acceptTitle = acceptTitle ?: "Chấp nhận",
-                    acceptBackgroundColor = acceptBackgroundColor ?: "#FF3700B3",
-                    declineBackgroundColor = declineBackgroundColor ?: "#FF000000",
                     incomingBackgroundColor = incomingBackgroundColor ?: "#FFFFFFFF",
                     incomingAcceptButtonImage = incomingAcceptButtonImage ?: "join_call",
                     incomingDeclineButtonImage = incomingDeclineButtonImage ?: "hangup",

@@ -55,10 +55,6 @@ class OmicallClient {
   Future<void> configPushNotification({
     required String notificationIcon,
     String? prefix,
-    String? declineTitle,
-    String? acceptTitle,
-    String? acceptBackgroundColor,
-    String? declineBackgroundColor,
     String? incomingBackgroundColor,
     String? incomingAcceptButtonImage,
     String? incomingDeclineButtonImage,
@@ -72,10 +68,6 @@ class OmicallClient {
       data: {
         'notificationIcon': notificationIcon,
         'prefix': prefix,
-        'declineTitle': declineTitle,
-        'acceptTitle': acceptTitle,
-        'acceptBackgroundColor': acceptBackgroundColor,
-        'declineBackgroundColor': declineBackgroundColor,
         'incomingBackgroundColor': incomingBackgroundColor,
         'incomingAcceptButtonImage': incomingAcceptButtonImage,
         'incomingDeclineButtonImage': incomingDeclineButtonImage,

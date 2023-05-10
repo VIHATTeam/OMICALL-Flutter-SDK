@@ -1,6 +1,10 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## 2.5.4
+  - Increase android core
+  - Change requests: allow to set images for the incoming notification.
+
 ## 2.5.3
   - Increase android core
   - Fix bug: Local video is not showing.
