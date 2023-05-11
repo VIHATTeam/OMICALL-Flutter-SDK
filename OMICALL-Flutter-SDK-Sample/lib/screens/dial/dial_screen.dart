@@ -58,6 +58,13 @@ class DialScreenState extends State<DialScreen> {
         );
         return;
       }
+      if (omiAction.actionName == OmiEventList.onSwitchboardAnswer) {
+        final data = omiAction.data;
+        final sip = data["sip"];
+        //switchboard sip => use get profile
+        // OmicallClient.instance.getUserInfo(phone: sip);
+        getGuestUser();
+      }
     });
     getCurrentUser();
     getGuestUser();
@@ -111,7 +118,7 @@ class DialScreenState extends State<DialScreen> {
                         Column(
                           children: [
                             Text(
-                              "${current?["full_name"] ?? "..."}",
+                              "${current?["extension"] ?? "..."}",
                               style: Theme.of(context)
                                   .textTheme
                                   .headline4!
@@ -145,7 +152,7 @@ class DialScreenState extends State<DialScreen> {
                         Column(
                           children: [
                             Text(
-                              "${guestUser?["full_name"] ?? "..."}",
+                              "${guestUser?["extension"] ?? "..."}",
                               style: Theme.of(context)
                                   .textTheme
                                   .headline4!

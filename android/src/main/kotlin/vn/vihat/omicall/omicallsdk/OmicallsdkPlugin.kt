@@ -94,6 +94,14 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         override fun onRinging() {
         }
 
+        override fun onSwitchBoardAnswer(sip: String) {
+            channel.invokeMethod(
+                SWITCHBOARD_ANSWER, mapOf(
+                    "sip" to sip,
+                )
+            )
+        }
+
         override fun onVideoSize(width: Int, height: Int) {
 
         }
@@ -380,7 +388,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
             GET_CURRENT_USER -> {
                 mainScope.launch {
-                    var callResult : Any? = null
+                    var callResult: Any? = null
                     withContext(Dispatchers.Default) {
                         try {
                             callResult = OmiClient.instance.getCurrentUser()
@@ -393,7 +401,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
             GET_GUEST_USER -> {
                 mainScope.launch {
-                    var callResult : Any? = null
+                    var callResult: Any? = null
                     withContext(Dispatchers.Default) {
                         try {
                             callResult = OmiClient.instance.getIncomingCallUser()
@@ -406,7 +414,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
             GET_USER_INFO -> {
                 mainScope.launch {
-                    var callResult : Any? = null
+                    var callResult: Any? = null
                     withContext(Dispatchers.Default) {
                         try {
                             val phone = dataOmi["phone"] as String

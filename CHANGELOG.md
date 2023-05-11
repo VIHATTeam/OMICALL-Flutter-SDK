@@ -1,6 +1,11 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## 2.6.0
+  - Increase android/iOS core
+  - Support to receive switchboard
+  - Update sample
+
 ## 2.5.4
   - Increase android core
   - Change requests: allow to set images for the incoming notification.
