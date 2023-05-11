@@ -413,7 +413,8 @@ await Firebase.initializeApp();
         - `onCallEnd`: End a call and return call information (like endCall)
         - `onHold`: `Comming soon....`
         - `onMuted`: `Comming soon...`
-    - Data value: We return `callerNumber`, `isVideo: true/false` information
+        - `onSwitchboardAnswer`: Switchboard sip is listening. 
+    - Data value: We return `callerNumber`, `sip`, `isVideo: true/false` information
 - Other events:
   - Mic event: Listen on/off mic in a call
   ```
