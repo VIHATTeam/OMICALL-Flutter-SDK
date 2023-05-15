@@ -1,6 +1,13 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## 2.6.1
+  - Increase android core
+  - Improve set camera for Android
+  - Support dart 3.0.0
+  - Update sample
+
 ## 2.6.0
   - Increase android/iOS core
   - Support to receive switchboard
