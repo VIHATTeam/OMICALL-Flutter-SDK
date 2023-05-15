@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/home/home_screen.dart';
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +9,6 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
 import 'screens/login/login_apikey_screen.dart';
-import 'screens/login/login_user_password_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

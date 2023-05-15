@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:async';
 
 import 'package:calling/components/call_status.dart';
@@ -59,8 +57,8 @@ class DialScreenState extends State<DialScreen> {
         return;
       }
       if (omiAction.actionName == OmiEventList.onSwitchboardAnswer) {
-        final data = omiAction.data;
-        final sip = data["sip"];
+        // final data = omiAction.data;
+        // final sip = data["sip"];
         //switchboard sip => use get profile
         // OmicallClient.instance.getUserInfo(phone: sip);
         getGuestUser();
@@ -121,7 +119,7 @@ class DialScreenState extends State<DialScreen> {
                               "${current?["extension"] ?? "..."}",
                               style: Theme.of(context)
                                   .textTheme
-                                  .headline4!
+                                  .headlineMedium!
                                   .copyWith(color: Colors.white, fontSize: 24),
                             ),
                             const SizedBox(
@@ -155,7 +153,7 @@ class DialScreenState extends State<DialScreen> {
                               "${guestUser?["extension"] ?? "..."}",
                               style: Theme.of(context)
                                   .textTheme
-                                  .headline4!
+                                  .headlineMedium!
                                   .copyWith(color: Colors.white, fontSize: 24),
                             ),
                             const SizedBox(
@@ -254,7 +252,7 @@ class DialScreenState extends State<DialScreen> {
                             iconSrc: "assets/icons/call_end.svg",
                             press: () async {
                               final result = await OmicallClient.instance.joinCall();
-                              if (result == false) {
+                              if (result == false && context.mounted) {
                                 Navigator.pop(context);
                               }
                             },

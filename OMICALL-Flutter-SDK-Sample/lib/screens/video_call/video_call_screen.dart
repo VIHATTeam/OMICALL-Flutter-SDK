@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:async';
 import 'dart:io';
 
@@ -58,8 +56,8 @@ class VideoCallState extends State<VideoCallScreen> {
       }
     });
     _videoSubscription = OmicallClient.instance.videoEvent.listen((action) {
-      final name = action["name"];
-      final data = action["data"];
+      // final name = action["name"];
+      // final data = action["data"];
       refreshRemoteCamera();
     });
   }
@@ -357,7 +355,7 @@ class VideoCallState extends State<VideoCallScreen> {
                         iconSrc: "assets/icons/call_end.svg",
                         press: () async {
                           final result = await OmicallClient.instance.joinCall();
-                          if (result == false) {
+                          if (result == false && context.mounted) {
                             Navigator.pop(context);
                           }
                         },

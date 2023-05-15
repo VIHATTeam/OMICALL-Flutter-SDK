@@ -15,7 +15,6 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../main.dart';
 import '../dial/dial_screen.dart';
-import '../login/login_user_password_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -30,7 +29,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final TextEditingController _phoneNumberController =
-      TextEditingController()..text = Platform.isAndroid ? '110' : '111';
+      TextEditingController()..text = Platform.isAndroid ? '110' : '115';
 
   // late final TextEditingController _phoneNumberController =
   // TextEditingController()..text = Platform.isAndroid ? '123aaa' : '122aaa';
@@ -114,6 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _missedCallSubscription.cancel();
     _subscription.cancel();
     _phoneNumberController.dispose();
     super.dispose();
