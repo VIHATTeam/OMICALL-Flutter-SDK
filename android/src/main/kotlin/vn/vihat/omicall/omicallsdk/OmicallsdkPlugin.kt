@@ -157,10 +157,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 OmiClient(applicationContext!!)
                 OmiClient.instance.setListener(callListener)
                 OmiClient.instance.addAccountListener(accountListener)
-                val needSetupVideo = OmiClient.instance.needSetupCamera()
-                if (needSetupVideo) {
-                    setCamera()
-                }
                 result.success(true)
             }
             CONFIG_NOTIFICATION -> {
@@ -202,9 +198,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     )
                 }
                 requestPermission(isVideo ?: true)
-                if (isVideo == true) {
-                    setCamera()
-                }
                 result.success(true)
             }
             INIT_CALL_API_KEY -> {
@@ -229,9 +222,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                         }
                     }
                     requestPermission(isVideo ?: true)
-                    if (isVideo == true) {
-                        setCamera()
-                    }
                     result.success(loginResult)
                 }
             }
@@ -484,12 +474,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             permissions,
             0,
         )
-    }
-
-    private fun setCamera() {
-        val cm =
-            applicationContext!!.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        OmiClient.instance.setCameraManager(cm)
     }
 
     override fun onNewIntent(intent: Intent): Boolean {
