@@ -62,6 +62,7 @@ class OmicallClient {
     String? userImage,
     String? missedCallTitle,
     String? prefixMissedCallMessage,
+    String? userNameKey,
   }) async {
     final action = OmiAction(
       actionName: OmiActionName.CONFIG_NOTIFICATION,
@@ -75,6 +76,7 @@ class OmicallClient {
         'userImage': userImage,
         'missedCallTitle': missedCallTitle,
         'prefixMissedCallMessage': prefixMissedCallMessage,
+        'userNameKey': userNameKey,
       },
     );
     return await _controller.action(action);

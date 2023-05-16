@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 typedef RemoteCameraCreatedCallback = void Function(
-    RemoteCameraController controller, );
+  RemoteCameraController controller,
+);
 
 class RemoteCameraView extends StatelessWidget {
   // This is used in the platform side to register the view.
@@ -62,11 +63,9 @@ class RemoteCameraView extends StatelessWidget {
 
 class RemoteCameraController {
   RemoteCameraController._(int id)
-      : _channel =
-  MethodChannel('omicallsdk/remote_camera_controller/$id');
+      : _channel = MethodChannel('omicallsdk/remote_camera_controller/$id');
 
   final MethodChannel _channel;
-
 
   void addListener(Function(String, dynamic) callback) {
     _channel.setMethodCallHandler((method) async {
