@@ -41,7 +41,7 @@ class _MyAppState extends State<MyApp> {
     OmicallClient.instance.startServices();
     OmicallClient.instance.configPushNotification(
       notificationIcon: "calling_face",
-      prefix: "Cuộc gọi tới từ: ",
+      prefix: Platform.isIOS ? "" : "Cuộc gọi tới từ: ",
       incomingBackgroundColor: "#FFFFFFFF",
       incomingAcceptButtonImage: "join_call",
       incomingDeclineButtonImage: "hangup",
@@ -49,6 +49,7 @@ class _MyAppState extends State<MyApp> {
       userImage: "calling_face",
       prefixMissedCallMessage: 'Cuộc gọi nhỡ từ',
       missedCallTitle: 'Cuộc gọi nhỡ',
+      userNameKey: 'uuid'
     );
   }
 

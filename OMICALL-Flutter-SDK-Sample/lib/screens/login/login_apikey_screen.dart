@@ -27,7 +27,7 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
         ? '124aaa'
         : '123aaa';
   late final TextEditingController _apiKeyController = TextEditingController()
-    ..text = '0ACE08B2F03BE1D6B3F7F5CCD34D9AC08CB92976E2AB6CEE6EA38C5C96F1B858';
+    ..text = '';
   bool _supportVideoCall = true;
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,
@@ -212,20 +212,24 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
       return;
     }
     EasyLoading.show();
-    await OmicallClient.instance.initCallWithApiKey(
+    final result = await OmicallClient.instance.initCallWithApiKey(
       usrName: _userNameController.text,
       usrUuid: _usrUuidController.text,
       isVideo: _supportVideoCall,
       apiKey: _apiKeyController.text,
     );
-
+    EasyLoading.dismiss();
+    debugPrint(result.toString());
+    if (result == false) {
+      return;
+    }
     await LocalStorage.instance.setLoginInfo({
       "usrName": _userNameController.text,
       "usrUuid": _usrUuidController.text,
       "isVideo": _supportVideoCall,
       "apiKey": _apiKeyController.text,
     });
-    EasyLoading.dismiss();
+
     if (!mounted) {
       return;
     }

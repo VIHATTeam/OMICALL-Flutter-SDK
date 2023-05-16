@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.6.2
+  - Increase android/ios core
+  - Fix return true when login have some error on iOS.
+  - Support custom title on notification and show user avatar.
+  - Update sample
+
 ## 2.6.1
   - Increase android core
   - Improve set camera for Android

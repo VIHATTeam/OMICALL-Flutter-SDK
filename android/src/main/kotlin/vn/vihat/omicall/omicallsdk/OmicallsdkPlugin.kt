@@ -169,6 +169,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val prefixMissedCallMessage = dataOmi["prefixMissedCallMessage"] as? String
                 val backImage = dataOmi["backImage"] as? String
                 val userImage = dataOmi["userImage"] as? String
+                val userNameKey = dataOmi["userNameKey"] as? String
                 OmiClient.instance.configPushNotification(
                     notificationIcon = notificationIcon ?: "",
                     prefix = prefix ?: "Cuộc gọi tới từ: ",
@@ -178,7 +179,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     backImage = backImage ?: "ic_back",
                     userImage = userImage ?: "calling_face",
                     prefixMissedCallMessage = prefixMissedCallMessage ?: "Cuộc gọi nhỡ từ",
-                    missedCallTitle = missedCallTitle ?: ""
+                    missedCallTitle = missedCallTitle ?: "",
+                    userNameKey = userNameKey ?: "",
                 )
                 result.success(true)
             }

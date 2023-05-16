@@ -234,17 +234,14 @@ await Firebase.initializeApp();
     OmicallClient.instance.configPushNotification(
       notificationIcon : "calling_face", //notification icon on Android
       prefix : "Cuộc gọi tới từ: ",
-      declineTitle : "Từ chối",
-      acceptTitle : "Chấp nhận",
-      acceptBackgroundColor : "#FF3700B3",
-      declineBackgroundColor : "#FF000000",
       incomingBackgroundColor : "#FFFFFFFF",
       incomingAcceptButtonImage : "join_call", //image name
       incomingDeclineButtonImage : "hangup", //image name
       backImage : "ic_back", //image name: icon of back button
       userImage : "calling_face", //image name: icon of user default
       prefixMissedCallMessage: 'Cuộc gọi nhỡ từ' //config prefix message for the missed call
-      missedCallTitle: 'Cuộc gọi nhỡ' //config title for the missed call
+      missedCallTitle: 'Cuộc gọi nhỡ', //config title for the missed call
+      userNameKey: 'uuid', //we have 3 values: uuid, full_name, extension.
     );
     //incomingAcceptButtonImage, incomingDeclineButtonImage, backImage, userImage: Add these into `android/app/src/main/res/drawble`
     ```
