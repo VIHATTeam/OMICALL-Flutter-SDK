@@ -229,7 +229,7 @@ await Firebase.initializeApp();
     final result = await OmicallClient.instance.getInitialCall();
     ///if result is not equal False => have a calling.
     ```
-  - Config push notification: With iOS, I only support these keys: `prefixMissedCallMessage`, `missedCallTitle`. With Android, We don't support `missedCallTitle`:
+  - Config push notification: With iOS, I only support these keys: `prefixMissedCallMessage`, `missedCallTitle`, `userNameKey`. With Android, We don't support `missedCallTitle`:
     ```
     OmicallClient.instance.configPushNotification(
       notificationIcon : "calling_face", //notification icon on Android

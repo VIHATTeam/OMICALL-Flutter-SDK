@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.6.3
+   - Increase android core
+   - Improve background and kill app state on Android
+
 ## 2.6.2
   - Increase android/ios core
   - Fix return true when login have some error on iOS.
