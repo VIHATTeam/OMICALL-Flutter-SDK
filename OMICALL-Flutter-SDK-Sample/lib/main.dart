@@ -7,6 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import 'screens/login/login_apikey_screen.dart';
 
@@ -51,6 +52,7 @@ class _MyAppState extends State<MyApp> {
       missedCallTitle: 'Cuộc gọi nhỡ',
       userNameKey: 'uuid'
     );
+
   }
 
   @override

@@ -139,6 +139,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 "omicallsdk/remote_camera_view",
                 FLRemoteCameraFactory(flutterPluginBinding.binaryMessenger)
             )
+        OmiClient(applicationContext!!)
+        OmiClient.instance.setListener(callListener)
     }
 
 
@@ -154,8 +156,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         val dataOmi = data["data"] as HashMap<String, Any>
         when (data["actionName"]) {
             START_SERVICES -> {
-                OmiClient(applicationContext!!)
-                OmiClient.instance.setListener(callListener)
                 OmiClient.instance.addAccountListener(accountListener)
                 result.success(true)
             }

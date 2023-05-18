@@ -109,6 +109,16 @@ class _HomeScreenState extends State<HomeScreen> {
         debugPrint(omiAction.data.toString());
       }
     });
+    checkSystemAlertPermission();
+  }
+
+  Future<void> checkSystemAlertPermission() async {
+    if (Platform.isAndroid) {
+      final systemAlertWindowStatus = await Permission.systemAlertWindow.status;
+      if (!systemAlertWindowStatus.isGranted) {
+        Permission.systemAlertWindow.request();
+      }
+    }
   }
 
   @override
