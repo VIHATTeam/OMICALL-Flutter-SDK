@@ -50,7 +50,8 @@ class _MyAppState extends State<MyApp> {
       userImage: "calling_face",
       prefixMissedCallMessage: 'Cuộc gọi nhỡ từ',
       missedCallTitle: 'Cuộc gọi nhỡ',
-      userNameKey: 'uuid'
+      userNameKey: 'uuid',
+      channelId: 'comcung.channelid.notification'
     );
 
   }
