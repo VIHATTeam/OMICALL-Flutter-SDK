@@ -1,6 +1,10 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## 2.6.5
+  - Increase android core
+
 ## 2.6.4
   - Increase android core
   - Fix null phone number in missing call
