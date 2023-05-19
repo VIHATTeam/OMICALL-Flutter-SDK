@@ -33,86 +33,83 @@ import java.util.*
 
 /** OmicallsdkPlugin */
 class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
-    PluginRegistry.NewIntentListener {
+    PluginRegistry.NewIntentListener, OmiListener {
 
     private lateinit var channel: MethodChannel
     private var activity: FlutterActivity? = null
     private var applicationContext: Context? = null
     private val mainScope = CoroutineScope(Dispatchers.Main)
 
-    private val callListener = object : OmiListener {
-
-        override fun incomingReceived(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
-            Handler(Looper.getMainLooper()).post {
-                channel.invokeMethod(
-                    INCOMING_RECEIVED, mapOf(
-                        "isVideo" to isVideo,
-                        "callerNumber" to phoneNumber,
-                    )
-                )
-            }
-            Log.d("omikit", "incomingReceived: ")
-        }
-
-        override fun onCallEnd(callInfo: Any?) {
-            channel.invokeMethod(CALL_END, callInfo)
-        }
-
-        override fun onCallEstablished(
-            callerId: Int,
-            phoneNumber: String?,
-            isVideo: Boolean?,
-            startTime: Long,
-            transactionId: String?,
-        ) {
-            Handler().postDelayed({
-                Log.d("aaaa", transactionId ?: "")
-                channel.invokeMethod(
-                    CALL_ESTABLISHED, mapOf(
-                        "callerNumber" to phoneNumber,
-                        "isVideo" to isVideo,
-                        "transactionId" to transactionId,
-                    )
-                )
-            }, 500)
-            Log.d("omikit", "onCallEstablished: ")
-        }
-
-        override fun onHold(isHold: Boolean) {
-        }
-
-        override fun onMuted(isMuted: Boolean) {
+    override fun incomingReceived(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
+        Handler(Looper.getMainLooper()).post {
             channel.invokeMethod(
-                MUTED, mapOf(
-                    "isMuted" to isMuted,
-                )
-            )
-            Log.d("omikit", "onMuted: $isMuted")
-        }
-
-        override fun onRinging() {
-        }
-
-        override fun onSwitchBoardAnswer(sip: String) {
-            channel.invokeMethod(
-                SWITCHBOARD_ANSWER, mapOf(
-                    "sip" to sip,
+                INCOMING_RECEIVED, mapOf(
+                    "isVideo" to isVideo,
+                    "callerNumber" to phoneNumber,
                 )
             )
         }
+        Log.d("omikit", "incomingReceived: ")
+    }
 
-        override fun onVideoSize(width: Int, height: Int) {
+    override fun onCallEnd(callInfo: Any?) {
+        channel.invokeMethod(CALL_END, callInfo)
+    }
 
-        }
+    override fun onCallEstablished(
+        callerId: Int,
+        phoneNumber: String?,
+        isVideo: Boolean?,
+        startTime: Long,
+        transactionId: String?,
+    ) {
+        Handler().postDelayed({
+            Log.d("aaaa", transactionId ?: "")
+            channel.invokeMethod(
+                CALL_ESTABLISHED, mapOf(
+                    "callerNumber" to phoneNumber,
+                    "isVideo" to isVideo,
+                    "transactionId" to transactionId,
+                )
+            )
+        }, 500)
+        Log.d("omikit", "onCallEstablished: ")
+    }
 
-        override fun onConnectionTimeout() {
+    override fun onHold(isHold: Boolean) {
+    }
+
+    override fun onMuted(isMuted: Boolean) {
+        channel.invokeMethod(
+            MUTED, mapOf(
+                "isMuted" to isMuted,
+            )
+        )
+        Log.d("omikit", "onMuted: $isMuted")
+    }
+
+    override fun onRinging() {
+    }
+
+    override fun onSwitchBoardAnswer(sip: String) {
+        channel.invokeMethod(
+            SWITCHBOARD_ANSWER, mapOf(
+                "sip" to sip,
+            )
+        )
+    }
+
+    override fun onVideoSize(width: Int, height: Int) {
+
+    }
+
+    override fun onConnectionTimeout() {
 //            channel.invokeMethod(onConnectionTimeout, null)
 //            Log.d("omikit", "onConnectionTimeout: ")
-        }
+    }
 
-        override fun onOutgoingStarted(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
-            Log.d("aa", "aa")
-        }
+    override fun onOutgoingStarted(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
+        Log.d("aa", "aa")
     }
 
     private val accountListener = object : OmiAccountListener {
@@ -139,7 +136,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 FLRemoteCameraFactory(flutterPluginBinding.binaryMessenger)
             )
         OmiClient(applicationContext!!)
-        OmiClient.instance.setListener(callListener)
+        OmiClient.instance.setListener(this)
     }
 
 
@@ -169,6 +166,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val backImage = dataOmi["backImage"] as? String
                 val userImage = dataOmi["userImage"] as? String
                 val userNameKey = dataOmi["userNameKey"] as? String
+                val channelId = dataOmi["channelId"] as? String
                 OmiClient.instance.configPushNotification(
                     notificationIcon = notificationIcon ?: "",
                     prefix = prefix ?: "Cuộc gọi tới từ: ",
@@ -180,6 +178,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     prefixMissedCallMessage = prefixMissedCallMessage ?: "Cuộc gọi nhỡ từ",
                     missedCallTitle = missedCallTitle ?: "",
                     userNameKey = userNameKey ?: "",
+                    channelId = channelId ?: "",
                 )
                 result.success(true)
             }

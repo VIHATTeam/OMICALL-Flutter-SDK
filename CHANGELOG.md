@@ -4,6 +4,9 @@ All notable changes to this project will be documented in this file.
 
 ## 2.6.5
   - Increase android core
+  - Kill all services when user logout
+  - Support to change channel id in the call notification
+  - Update sample
 
 ## 2.6.4
   - Increase android core
