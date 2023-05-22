@@ -52,7 +52,14 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         Log.d("omikit", "incomingReceived: ")
     }
 
-    override fun onCallEnd(callInfo: Any?) {
+    override fun networkHealth(mos: Float, quality: Int) {
+        channel.invokeMethod(CALL_QUALITY, mapOf(
+            "quality" to quality,
+            "mos" to mos,
+        ))
+    }
+
+    override fun onCallEnd(callInfo: Any?, statusCode: Int) {
         channel.invokeMethod(CALL_END, callInfo)
     }
 
