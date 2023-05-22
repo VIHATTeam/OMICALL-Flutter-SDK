@@ -411,6 +411,7 @@ await Firebase.initializeApp();
         - `onHold`: `Comming soon....`
         - `onMuted`: `Comming soon...`
         - `onSwitchboardAnswer`: Switchboard sip is listening. 
+        - `callQualityEvent`: Call quality with 0 is GOOD, 1 is NORMAL, 2 is BAD
     - Data value: We return `callerNumber`, `sip`, `isVideo: true/false` information
 - Other events:
   - Mic event: Listen on/off mic in a call
