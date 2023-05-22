@@ -38,7 +38,6 @@ class VideoCallState extends State<VideoCallScreen> {
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
       if (omiAction.actionName == OmiEventList.onCallEstablished) {
-        localRemoteCamera();
         if (Platform.isAndroid) {
           refreshRemoteCamera();
         }
@@ -59,6 +58,7 @@ class VideoCallState extends State<VideoCallScreen> {
       // final name = action["name"];
       // final data = action["data"];
       refreshRemoteCamera();
+      refreshLocalCamera();
     });
   }
 
@@ -183,7 +183,7 @@ class VideoCallState extends State<VideoCallScreen> {
     _remoteController?.refresh();
   }
 
-  void localRemoteCamera() {
+  void refreshLocalCamera() {
     _localController?.refresh();
   }
 
@@ -258,9 +258,11 @@ class VideoCallState extends State<VideoCallScreen> {
                 height: double.infinity,
                 onCameraCreated: (controller) async {
                   _localController = controller;
-                  if (widget.status == CallStatus.established) {
-                    await Future.delayed(const Duration(milliseconds: 200));
-                    controller.refresh();
+                  if (Platform.isAndroid) {
+                    if (widget.status == CallStatus.established) {
+                      await Future.delayed(const Duration(milliseconds: 200));
+                      controller.refresh();
+                    }
                   }
                 },
                 errorWidget: Container(
