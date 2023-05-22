@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:calling/components/call_status.dart';
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/login/login_apikey_screen.dart';
+import 'package:calling/screens/login/login_user_password_screen.dart';
 import 'package:calling/screens/video_call/video_call_screen.dart';
 import 'package:easy_dialog/easy_dialog.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +30,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final TextEditingController _phoneNumberController =
-      TextEditingController()..text = Platform.isAndroid ? '110' : '115';
+      TextEditingController()..text = Platform.isAndroid ? '101' : '100';
 
   // late final TextEditingController _phoneNumberController =
   // TextEditingController()..text = Platform.isAndroid ? '123aaa' : '122aaa';
@@ -238,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   EasyLoading.dismiss();
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                      builder: (_) => const LoginApiKeyScreen(),
+                      builder: (_) => const LoginUserPasswordScreen(),
                     ),
                   );
                 },

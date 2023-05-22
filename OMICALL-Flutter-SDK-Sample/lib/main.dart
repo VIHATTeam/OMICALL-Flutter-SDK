@@ -2,12 +2,12 @@ import 'dart:io';
 
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/home/home_screen.dart';
+import 'package:calling/screens/login/login_user_password_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import 'screens/login/login_apikey_screen.dart';
 
@@ -50,7 +50,7 @@ class _MyAppState extends State<MyApp> {
       userImage: "calling_face",
       prefixMissedCallMessage: 'Cuộc gọi nhỡ từ',
       missedCallTitle: 'Cuộc gọi nhỡ',
-      userNameKey: 'uuid',
+      userNameKey: 'extension',
       channelId: 'comcung.channelid.notification'
     );
 
@@ -62,7 +62,7 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         theme: ThemeData.light(),
         home:
-            loginInfo != null ? const HomeScreen() : const LoginApiKeyScreen(),
+            loginInfo != null ? const HomeScreen() : const LoginUserPasswordScreen(),
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
       ),
