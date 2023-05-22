@@ -22,6 +22,8 @@ class OmicallClient {
   Stream<bool> get mutedEvent => _controller.mutedEvent;
   ///streaming click missed call
   Stream<Map> get missedCallEvent => _controller.missedCallEvent;
+  ///streaming call quality
+  Stream<Map> get callQualityEvent => _controller.callQualityEvent;
 
   ///destroy event
   void dispose() {

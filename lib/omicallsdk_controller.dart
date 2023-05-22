@@ -14,6 +14,7 @@ class OmicallSDKController {
   final _mutedController = StreamController<bool>.broadcast();
   final _speakerController = StreamController<bool>.broadcast();
   final _missedCallController = StreamController<Map>.broadcast();
+  final _callQualityController = StreamController<Map>.broadcast();
   final StreamController<OmiAction> _callStateChangeController =
       StreamController<OmiAction>.broadcast();
 
@@ -41,6 +42,10 @@ class OmicallSDKController {
         _missedCallController.sink.add(data);
         return;
       }
+      if (method == OmiEventList.onCallQuality) {
+        _callQualityController.sink.add(data);
+        return;
+      }
       _callStateChangeController.sink.add(
         OmiAction(
           actionName: call.method,
@@ -55,6 +60,7 @@ class OmicallSDKController {
     _mutedController.close();
     _speakerController.close();
     _callStateChangeController.close();
+    _callQualityController.close();
   }
 
   Stream<OmiAction> get callStateChangeEvent =>
@@ -67,6 +73,8 @@ class OmicallSDKController {
   Stream<bool> get micEvent => _speakerController.stream;
 
   Stream<Map> get missedCallEvent => _missedCallController.stream;
+
+  Stream<Map> get callQualityEvent => _callQualityController.stream;
 
   Future<dynamic> action(OmiAction action) async {
     final response = await _methodChannel.invokeMethod<dynamic>(
