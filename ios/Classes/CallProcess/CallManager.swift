@@ -136,8 +136,19 @@ class CallManager {
                                                    name: NSNotification.Name.OMICallSwitchBoardAnswer,
                                                    object: nil
             )
+            NotificationCenter.default.addObserver(CallManager.instance!, selector: #selector(self.updateNetworkHealth(_:)), name: NSNotification.Name.OMICallNetworkQuality, object: nil)
             self.showMissedCall()
         }
+    }
+    
+    
+    @objc func updateNetworkHealth(_ notification: NSNotification) {
+        guard let userInfo = notification.userInfo,
+              let state     = userInfo[OMINotificationNetworkStatusKey] as? Int else {
+            return;
+        }
+        SwiftOmikitPlugin.instance?.sendEvent(CALL_QUALITY, ["quality": state])
+        
     }
     
     func registerVideoEvent() {

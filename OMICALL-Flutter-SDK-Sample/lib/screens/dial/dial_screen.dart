@@ -29,12 +29,13 @@ class DialScreenState extends State<DialScreen> {
   String? _callTime;
   bool _isShowKeyboard = false;
   String _keyboardMessage = "";
-  late StreamSubscription _subscription;
+  late StreamSubscription _subscription, _callQualitySubscription;
   Map? current;
   Map? guestUser;
 
   Stopwatch watch = Stopwatch();
   Timer? timer;
+  String _callQuality = "";
 
   @override
   void initState() {
@@ -66,6 +67,21 @@ class DialScreenState extends State<DialScreen> {
     });
     getCurrentUser();
     getGuestUser();
+    _callQualitySubscription =
+        OmicallClient.instance.callQualityEvent.listen((event) {
+      final quality = event["quality"] as int;
+      setState(() {
+        if (quality == 0) {
+          _callQuality = "GOOD";
+        }
+        if (quality == 1) {
+          _callQuality = "NORMAL";
+        }
+        if (quality == 2) {
+          _callQuality = "BAD";
+        }
+      });
+    });
   }
 
   Future<void> getCurrentUser() async {
@@ -97,6 +113,11 @@ class DialScreenState extends State<DialScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenWith = MediaQuery.of(context).size.width;
+    var correctWidth = (screenWith - 20) / 4;
+    if (correctWidth > 100) {
+      correctWidth = 100;
+    }
     return WillPopScope(
       child: Scaffold(
         backgroundColor: kBackgoundColor,
@@ -126,8 +147,11 @@ class DialScreenState extends State<DialScreen> {
                               height: 16,
                             ),
                             DialUserPic(
-                              size: 100,
-                              image: current?["avatar_url"] != "" && current?["avatar_url"] != null ? current!["avatar_url"] : "assets/images/calling_face.png",
+                              size: correctWidth,
+                              image: current?["avatar_url"] != "" &&
+                                      current?["avatar_url"] != null
+                                  ? current!["avatar_url"]
+                                  : "assets/images/calling_face.png",
                             ),
                           ],
                         ),
@@ -160,8 +184,11 @@ class DialScreenState extends State<DialScreen> {
                               height: 16,
                             ),
                             DialUserPic(
-                              size: 100,
-                              image: guestUser?["avatar_url"] != "" && guestUser?["avatar_url"] != null ? guestUser!["avatar_url"] : "assets/images/calling_face.png",
+                              size: correctWidth,
+                              image: guestUser?["avatar_url"] != "" &&
+                                      guestUser?["avatar_url"] != null
+                                  ? guestUser!["avatar_url"]
+                                  : "assets/images/calling_face.png",
                             ),
                           ],
                         ),
@@ -251,7 +278,8 @@ class DialScreenState extends State<DialScreen> {
                           RoundedCircleButton(
                             iconSrc: "assets/icons/call_end.svg",
                             press: () async {
-                              final result = await OmicallClient.instance.joinCall();
+                              final result =
+                                  await OmicallClient.instance.joinCall();
                               if (result == false && context.mounted) {
                                 Navigator.pop(context);
                               }
@@ -356,7 +384,21 @@ class DialScreenState extends State<DialScreen> {
                       ),
                     ],
                   ),
-                )
+                ),
+              Positioned(
+                top: 10,
+                left: 12,
+                right: 12,
+                child: Text(
+                  _callQuality,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              )
             ],
           ),
         ),
@@ -442,6 +484,7 @@ class DialScreenState extends State<DialScreen> {
   @override
   void dispose() {
     _subscription.cancel();
+    _callQualitySubscription.cancel();
     _stopWatch();
     super.dispose();
   }
