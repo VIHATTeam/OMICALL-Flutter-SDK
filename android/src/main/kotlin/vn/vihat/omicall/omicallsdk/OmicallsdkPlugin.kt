@@ -22,11 +22,13 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry
 import kotlinx.coroutines.*
 import vn.vihat.omicall.omicallsdk.constants.*
+import vn.vihat.omicall.omicallsdk.state.CallState
 import vn.vihat.omicall.omicallsdk.video_call.FLLocalCameraFactory
 import vn.vihat.omicall.omicallsdk.video_call.FLRemoteCameraFactory
 import vn.vihat.omicall.omisdk.OmiAccountListener
 import vn.vihat.omicall.omisdk.OmiClient
 import vn.vihat.omicall.omisdk.OmiListener
+import vn.vihat.omicall.omisdk.service.NotificationService
 import vn.vihat.omicall.omisdk.utils.OmiSDKUtils
 import vn.vihat.omicall.omisdk.utils.SipServiceConstants
 import java.util.*
@@ -43,24 +45,25 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     override fun incomingReceived(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
         Handler(Looper.getMainLooper()).post {
             channel.invokeMethod(
-                INCOMING_RECEIVED, mapOf(
+                CALL_STATE_CHANGED, mapOf(
                     "isVideo" to isVideo,
+                    "status" to CallState.incoming.value,
                     "callerNumber" to phoneNumber,
                 )
             )
         }
-        Log.d("omikit", "incomingReceived: ")
     }
 
-    override fun networkHealth(mos: Float, quality: Int) {
+    override fun networkHealth(stat: Map<String, *>, quality: Int) {
         channel.invokeMethod(CALL_QUALITY, mapOf(
             "quality" to quality,
-            "mos" to mos,
+            "stat" to stat,
         ))
     }
 
-    override fun onCallEnd(callInfo: Any?, statusCode: Int) {
-        channel.invokeMethod(CALL_END, callInfo)
+    override fun onCallEnd(callInfo: MutableMap<String, Any?>, statusCode: Int) {
+        callInfo["status"] = CallState.disconnected.value
+        channel.invokeMethod(CALL_STATE_CHANGED, callInfo)
     }
 
     override fun onCallEstablished(
@@ -73,14 +76,25 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         Handler().postDelayed({
             Log.d("aaaa", transactionId ?: "")
             channel.invokeMethod(
-                CALL_ESTABLISHED, mapOf(
+                CALL_STATE_CHANGED, mapOf(
                     "callerNumber" to phoneNumber,
+                    "status" to CallState.confirmed.value,
                     "isVideo" to isVideo,
                     "transactionId" to transactionId,
                 )
             )
         }, 500)
         Log.d("omikit", "onCallEstablished: ")
+    }
+
+    override fun onConnecting() {
+        channel.invokeMethod(
+            CALL_STATE_CHANGED, mapOf(
+                "status" to CallState.connecting.value,
+                "isVideo" to NotificationService.isVideo,
+                "callerNumber" to "",
+            )
+        )
     }
 
     override fun onHold(isHold: Boolean) {
@@ -96,6 +110,23 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onRinging() {
+        channel.invokeMethod(
+            CALL_STATE_CHANGED, mapOf(
+                "status" to CallState.early.value,
+                "isVideo" to NotificationService.isVideo,
+                "callerNumber" to "",
+            )
+        )
+    }
+
+    override fun onOutgoingStarted(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
+        channel.invokeMethod(
+            CALL_STATE_CHANGED, mapOf(
+                "status" to CallState.calling.value,
+                "isVideo" to isVideo,
+                "callerNumber" to "",
+            )
+        )
     }
 
     override fun onSwitchBoardAnswer(sip: String) {
@@ -108,15 +139,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     override fun onVideoSize(width: Int, height: Int) {
 
-    }
-
-    override fun onConnectionTimeout() {
-//            channel.invokeMethod(onConnectionTimeout, null)
-//            Log.d("omikit", "onConnectionTimeout: ")
-    }
-
-    override fun onOutgoingStarted(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
-        Log.d("aa", "aa")
     }
 
     private val accountListener = object : OmiAccountListener {
@@ -199,8 +221,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     OmiClient.register(
                         userName,
                         password,
-                        isVideo ?: true,
                         realm,
+                        isVideo ?: true,
                         host,
                     )
                 }
