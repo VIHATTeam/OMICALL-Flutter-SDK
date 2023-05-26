@@ -123,7 +123,7 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
 
   - For more setting information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/android-sdk/cau-hinh-push-notification">Config Push for Android</a>
 
-#### iOS:
+#### iOS(Object-C):
 
 - Add variables in Appdelegate.h:
 
@@ -190,6 +190,61 @@ if (@available(iOS 10.0, *)) {
 
   - For more setting information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/ios-sdk/cau-hinh-push-notification">Config Push for iOS</a>
 
+#### iOS(Swift):
+
+- Add variables in Appdelegate.swift:
+
+```
+import OmiKit
+import PushKit
+import NotificationCenter
+
+var pushkitManager: PushKitManager?
+var provider: CallKitProviderDelegate?
+var voipRegistry: PKPushRegistry?
+```
+
+- Add these lines into `didFinishLaunchingWithOptions`:
+
+```
+OmiClient.setEnviroment(KEY_OMI_APP_ENVIROMENT_SANDBOX)
+provider = CallKitProviderDelegate.init(callManager: OMISIPLib.sharedInstance().callManager)
+voipRegistry = PKPushRegistry.init(queue: .main)
+pushkitManager = PushKitManager.init(voipRegistry: voipRegistry)
+```
+
+-  Add these lines into `Info.plist`:
+
+```
+<key>NSCameraUsageDescription</key>
+<string>Need camera access for video call functions</string>
+<key>NSMicrophoneUsageDescription</key>
+<string>Need microphone access for make Call</string>
+```
+
+- Save token for `OmiClient`: if you added `firebase_messaging` in your project so you don't need add these lines.
+
+```
+func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+    let deviceTokenString = deviceToken.hexString
+    OmiClient.setUserPushNotificationToken(deviceTokenString)
+}
+
+extension Data {
+    var hexString: String {
+        let hexString = map { String(format: "%02.2hhx", $0) }.joined()
+        return hexString
+    }
+}
+```
+
+*** Only use under lines when added `firebase_messaging` plugin in your project ***
+- Setup push notification: We only support Firebase for push notification.
+  - Add `google-service.json` in `android/app` (For more information, you can refer <a href="https://pub.dev/packages/firebase_core">firebase_core</a>)
+  - Add Firebase Messaging to receive `fcm_token` (You can refer <a href="https://pub.dev/packages/firebase_messaging">firebase_messaging</a> to setup notification for Flutter)
+
+  - For more setting information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/ios-sdk/cau-hinh-push-notification">Config Push for iOS</a>
+
 
 ## Implement
 - Set up for Firebase:
@@ -241,7 +296,8 @@ await Firebase.initializeApp();
       userImage : "calling_face", //image name: icon of user default
       prefixMissedCallMessage: 'Cuộc gọi nhỡ từ' //config prefix message for the missed call
       missedCallTitle: 'Cuộc gọi nhỡ', //config title for the missed call
-      userNameKey: 'uuid', //we have 3 values: uuid, full_name, extension.
+      userNameKey: 'uuid', //we have 3 values: uuid, full_name, extension
+      channelId: 'channelid.callnotification' // need to use call notification
     );
     //incomingAcceptButtonImage, incomingDeclineButtonImage, backImage, userImage: Add these into `android/app/src/main/res/drawble`
     ```
@@ -398,33 +454,37 @@ await Firebase.initializeApp();
   ```
 
 - Event listener:
-  - Important event `eventTransferStream`: We provide it to listen call state change.
+  - Important event `callStateChangeEvent`: We provide it to listen call state change.
  ```
- OmicallClient.instance.controller.eventTransferStream.listen((omiAction) {
- }
+ OmicallClient.instance.controller.callStateChangeEvent
  //OmiAction have 2 variables: actionName and data
  ```
     - Action Name value: 
-        - `incomingReceived`: Have a incoming call. On Android this event work only foreground
-        - `onCallEstablished`: Connected a call, you will receive `transactionId` in this.
-        - `onCallEnd`: End a call and return call information (like endCall)
-        - `onHold`: `Comming soon....`
-        - `onMuted`: `Comming soon...`
+        - `onCallStateChanged`: Have a incoming call. On Android this event work only foreground
         - `onSwitchboardAnswer`: Switchboard sip is listening. 
-        - `callQualityEvent`: Call quality with 0 is GOOD, 1 is NORMAL, 2 is BAD
-    - Data value: We return `callerNumber`, `sip`, `isVideo: true/false` information
+    + onCallStateChanged is event call state tracking. We will return status of state. Please refer `OmiCallState`.
+    + Incoming call state lifecycle: incoming -> early -> connecting -> confirmed -> disconnected
+    + Outgoing call state lifecycle: calling -> early (call created) -> connecting -> confirmed -> disconnected
+    + onSwitchboardAnswer have callback when employee answered script call.
 - Other events:
+  - Call Quality event: Listen call quality event changed
+  ```
+  OmicallClient.instance.callQualityEvent()
+  //we return `quality` key with: 0 is GOOD, 1 is NORMAL, 2 is BAD
+  ```
   - Mic event: Listen on/off mic in a call
   ```
-  OmicallClient.instance.onMicEvent() //StreamSubscription
+  OmicallClient.instance.onMicEvent()
   ```
   - Mute event: Listen on/off muted in a call
   ```
-  OmicallClient.instance.onMuteEvent() //StreamSubscription
+  OmicallClient.instance.onMuteEvent()
   ```
   - Remote video ready: Listen remote video ready.
   ```
-  OmicallClient.instance.videoEvent.listen((action){}) //StreamSubscription
+  OmicallClient.instance.videoEvent.listen((action){
+    //refresh remote and local video stream.
+  })
   ```
   - User tab a missed call:.
   ```
