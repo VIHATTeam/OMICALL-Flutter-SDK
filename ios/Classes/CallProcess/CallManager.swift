@@ -208,26 +208,20 @@ class CallManager {
         }
         switch (call.callState) {
         case .calling:
-            if (!call.isIncoming) {
-                NSLog("Outgoing call, in CALLING state, with UUID \(call.uuid)")
-                var callInfo = baseInfoFromCall(call: call)
-                callInfo["status"] = CallState.calling.rawValue
-                SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
-            }
+            NSLog("Outgoing call, in CALLING state, with UUID \(call.uuid)")
+            var callInfo = baseInfoFromCall(call: call)
+            callInfo["status"] = CallState.calling.rawValue
+            SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             break
         case .early:
-            if (!call.isIncoming) {
-                var callInfo = baseInfoFromCall(call: call)
-                callInfo["status"] = CallState.early.rawValue
-                SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
-            }
+            var callInfo = baseInfoFromCall(call: call)
+            callInfo["status"] = CallState.early.rawValue
+            SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             break
         case .connecting:
-            if (!call.isIncoming) {
-                var callInfo = baseInfoFromCall(call: call)
-                callInfo["status"] = CallState.connecting.rawValue
-                SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
-            }
+            var callInfo = baseInfoFromCall(call: call)
+            callInfo["status"] = CallState.connecting.rawValue
+            SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             break
         case .confirmed:
             NSLog("Outgoing call, in CONFIRMED state, with UUID: \(call)")

@@ -15,10 +15,12 @@ class DialScreen extends StatefulWidget {
     Key? key,
     this.phoneNumber,
     required this.status,
+    required this.isOutGoingCall,
   }) : super(key: key);
 
   final String? phoneNumber;
   final int status;
+  final bool isOutGoingCall;
 
   @override
   State<DialScreen> createState() => DialScreenState();
@@ -273,7 +275,7 @@ class DialScreenState extends State<DialScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        if (_callStatus == OmiCallState.incoming.rawValue)
+                        if ((_callStatus == OmiCallState.early.rawValue || _callStatus == OmiCallState.incoming.rawValue) && widget.isOutGoingCall == false)
                           RoundedCircleButton(
                             iconSrc: "assets/icons/call_end.svg",
                             press: () async {

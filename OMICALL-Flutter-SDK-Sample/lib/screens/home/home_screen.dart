@@ -15,7 +15,6 @@ import '../../main.dart';
 import '../dial/dial_screen.dart';
 import '../login/login_user_password_screen.dart';
 
-
 String statusToDescription(int status) {
   if (status == OmiCallState.calling.rawValue) {
     return "Đang kết nối tới cuộc gọi";
@@ -80,8 +79,11 @@ class _HomeScreenState extends State<HomeScreen> {
       final bool isVideo = data["isVideo"];
       makeCallWithParams(context, callerNumber, isVideo);
     });
-    _subscription = OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
-      if (omiAction.actionName != OmiEventList.onCallStateChanged) { return; }
+    _subscription =
+        OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
+      if (omiAction.actionName != OmiEventList.onCallStateChanged) {
+        return;
+      }
       final data = omiAction.data;
       final status = data["status"] as int;
       if (status == OmiCallState.incoming.rawValue) {
@@ -92,13 +94,14 @@ class _HomeScreenState extends State<HomeScreen> {
         if (isVideo) {
           pushToVideoScreen(
             callerNumber,
-            status: OmiCallState.calling.rawValue,
+            status: status,
           );
           return;
         }
         pushToDialScreen(
           callerNumber ?? "",
-          status: OmiCallState.calling.rawValue,
+          status: status,
+          isOutGoingCall: false,
         );
         return;
       }
@@ -115,13 +118,14 @@ class _HomeScreenState extends State<HomeScreen> {
         if (isVideo && _videoScreenKey?.currentState == null) {
           pushToVideoScreen(
             callerNumber,
-            status: OmiCallState.confirmed.rawValue,
+            status: status,
           );
           return;
         }
         pushToDialScreen(
           callerNumber ?? "",
-          status: OmiCallState.confirmed.rawValue,
+          status: status,
+          isOutGoingCall: false,
         );
       }
     });
@@ -333,6 +337,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void pushToDialScreen(
     String phoneNumber, {
     required int status,
+    required bool isOutGoingCall,
   }) {
     _dialScreenKey = GlobalKey();
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
@@ -340,6 +345,7 @@ class _HomeScreenState extends State<HomeScreen> {
         key: _dialScreenKey,
         phoneNumber: phoneNumber,
         status: status,
+        isOutGoingCall: isOutGoingCall,
       );
     }));
   }
@@ -360,6 +366,7 @@ class _HomeScreenState extends State<HomeScreen> {
         pushToDialScreen(
           phone,
           status: OmiCallState.calling.rawValue,
+          isOutGoingCall: true,
         );
       }
     } else {
@@ -387,6 +394,7 @@ class _HomeScreenState extends State<HomeScreen> {
       pushToDialScreen(
         callerNumber,
         status: OmiCallState.calling.rawValue,
+        isOutGoingCall: true,
       );
     }
     OmicallClient.instance.startCall(
