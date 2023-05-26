@@ -1,13 +1,13 @@
 import 'dart:async';
-
-import 'package:calling/components/call_status.dart';
 import 'package:calling/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:omicall_flutter_plugin/action/action_model.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
 import '../../components/dial_user_pic.dart';
 import '../../components/rounded_button.dart';
 import '../../numeric_keyboard/numeric_keyboard.dart';
+import '../home/home_screen.dart';
 import 'widgets/dial_button.dart';
 
 class DialScreen extends StatefulWidget {
@@ -18,14 +18,14 @@ class DialScreen extends StatefulWidget {
   }) : super(key: key);
 
   final String? phoneNumber;
-  final CallStatus status;
+  final int status;
 
   @override
   State<DialScreen> createState() => DialScreenState();
 }
 
 class DialScreenState extends State<DialScreen> {
-  String _callingStatus = '';
+  int _callStatus = 0;
   String? _callTime;
   bool _isShowKeyboard = false;
   String _keyboardMessage = "";
@@ -39,23 +39,25 @@ class DialScreenState extends State<DialScreen> {
 
   @override
   void initState() {
-    _callingStatus = widget.status.value;
-    if (widget.status == CallStatus.established) {
+    _callStatus = widget.status;
+    if (widget.status == OmiCallState.confirmed.rawValue) {
       _startWatch();
     }
     super.initState();
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
-      if (omiAction.actionName == OmiEventList.onCallEstablished) {
-        updateDialScreen(null, CallStatus.established);
-      }
-      if (omiAction.actionName == OmiEventList.onCallEnd) {
-        endCall(
-          context,
-          needShowStatus: true,
-          needRequest: false,
-        );
-        return;
+      if (omiAction.actionName == OmiEventList.onCallStateChanged) {
+        final data = omiAction.data;
+        final status = data["status"] as int;
+        updateDialScreen(status);
+        if (status == OmiCallState.disconnected.rawValue) {
+          endCall(
+            context,
+            needShowStatus: true,
+            needRequest: false,
+          );
+          return;
+        }
       }
       if (omiAction.actionName == OmiEventList.onSwitchboardAnswer) {
         // final data = omiAction.data;
@@ -102,12 +104,12 @@ class DialScreenState extends State<DialScreen> {
     }
   }
 
-  void updateDialScreen(Map<String, dynamic>? callInfo, CallStatus? status) {
-    if (status == CallStatus.established) {
+  void updateDialScreen(int status) {
+    setState(() {
+      _callStatus = status;
+    });
+    if (status == OmiCallState.confirmed.rawValue) {
       _startWatch();
-      setState(() {
-        _callingStatus = status!.value;
-      });
     }
   }
 
@@ -131,7 +133,7 @@ class DialScreenState extends State<DialScreen> {
                 child: Column(
                   children: [
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Column(
@@ -154,19 +156,6 @@ class DialScreenState extends State<DialScreen> {
                                   : "assets/images/calling_face.png",
                             ),
                           ],
-                        ),
-                        const SizedBox(
-                          width: 16,
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(top: 32),
-                          child: Text(
-                            _callTime ?? _callingStatus,
-                            style: const TextStyle(
-                              color: Colors.white60,
-                              fontSize: 18,
-                            ),
-                          ),
                         ),
                         const SizedBox(
                           width: 16,
@@ -194,8 +183,18 @@ class DialScreenState extends State<DialScreen> {
                         ),
                       ],
                     ),
+                    Container(
+                      margin: const EdgeInsets.only(top: 16),
+                      child: Text(
+                        _callTime ?? statusToDescription(_callStatus),
+                        style: const TextStyle(
+                          color: Colors.white60,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
                     const Spacer(),
-                    if (_callingStatus == CallStatus.established.value) ...[
+                    if (_callStatus == OmiCallState.confirmed.rawValue) ...[
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -274,7 +273,7 @@ class DialScreenState extends State<DialScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        if (_callingStatus == "Ringing")
+                        if (_callStatus == OmiCallState.incoming.rawValue)
                           RoundedCircleButton(
                             iconSrc: "assets/icons/call_end.svg",
                             press: () async {
@@ -287,17 +286,18 @@ class DialScreenState extends State<DialScreen> {
                             color: kGreenColor,
                             iconColor: Colors.white,
                           ),
-                        RoundedCircleButton(
-                          iconSrc: "assets/icons/call_end.svg",
-                          press: () {
-                            endCall(
-                              context,
-                              needShowStatus: false,
-                            );
-                          },
-                          color: kRedColor,
-                          iconColor: Colors.white,
-                        ),
+                        if (_callStatus > OmiCallState.calling.rawValue)
+                          RoundedCircleButton(
+                            iconSrc: "assets/icons/call_end.svg",
+                            press: () {
+                              endCall(
+                                context,
+                                needShowStatus: false,
+                              );
+                            },
+                            color: kRedColor,
+                            iconColor: Colors.white,
+                          ),
                       ],
                     )
                   ],
@@ -428,9 +428,7 @@ class DialScreenState extends State<DialScreen> {
     }
     if (needShowStatus) {
       _stopWatch();
-      setState(() {
-        _callingStatus = CallStatus.end.value;
-      });
+      updateDialScreen(OmiCallState.disconnected.rawValue);
       await Future.delayed(const Duration(milliseconds: 400));
     }
     if (!mounted) {

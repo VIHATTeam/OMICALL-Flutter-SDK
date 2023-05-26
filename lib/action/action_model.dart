@@ -14,3 +14,19 @@ class OmiAction {
     };
   }
 }
+
+
+enum OmiCallState {
+  calling,
+  early,
+  connecting,
+  confirmed,
+  incoming,
+  disconnected,
+}
+
+extension ExtensionCallState on OmiCallState {
+  int get rawValue {
+    return index;
+  }
+}

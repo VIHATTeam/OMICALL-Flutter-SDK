@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:calling/screens/home/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:omicall_flutter_plugin/action/action_model.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
-
-import '../../components/call_status.dart';
 import '../../components/rounded_button.dart';
 import '../../constants.dart';
 
@@ -15,7 +15,7 @@ class VideoCallScreen extends StatefulWidget {
     required this.status,
   }) : super(key: key);
 
-  final CallStatus status;
+  final int status;
 
   @override
   State<StatefulWidget> createState() {
@@ -32,26 +32,28 @@ class VideoCallState extends State<VideoCallScreen> {
 
   @override
   void initState() {
-    _callingStatus = widget.status.value;
+    _callingStatus = statusToDescription(widget.status);
     OmicallClient.instance.registerVideoEvent();
     super.initState();
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
-      if (omiAction.actionName == OmiEventList.onCallEstablished) {
-        if (Platform.isAndroid) {
-          refreshRemoteCamera();
+      if (omiAction.actionName == OmiEventList.onCallStateChanged) {
+        final data = omiAction.data;
+        final status = data["stauts"] as int;
+        updateVideoScreen(null, status);
+        if (status == OmiCallState.confirmed.rawValue) {
+          if (Platform.isAndroid) {
+            refreshRemoteCamera();
+          }
         }
-        if (omiAction.actionName == OmiEventList.onCallEstablished) {
-          updateVideoScreen(null, CallStatus.established);
+        if (status == OmiCallState.disconnected.rawValue) {
+          endCall(
+            context,
+            needShowStatus: true,
+            needRequest: false,
+          );
+          return;
         }
-      }
-      if (omiAction.actionName == OmiEventList.onCallEnd) {
-        endCall(
-          context,
-          needShowStatus: true,
-          needRequest: false,
-        );
-        return;
       }
     });
     _videoSubscription = OmicallClient.instance.videoEvent.listen((action) {
@@ -70,12 +72,10 @@ class VideoCallState extends State<VideoCallScreen> {
     super.dispose();
   }
 
-  void updateVideoScreen(Map<String, dynamic>? callInfo, CallStatus? status) {
-    if (status == CallStatus.established) {
-      setState(() {
-        _callingStatus = status!.value;
-      });
-    }
+  void updateVideoScreen(Map<String, dynamic>? callInfo, int? status) {
+    setState(() {
+      _callingStatus = statusToDescription(status ?? 0);
+    });
   }
 
   Future<void> endCall(
@@ -211,7 +211,7 @@ class VideoCallState extends State<VideoCallScreen> {
             },
           ),
           actions: [
-            if (_callingStatus == CallStatus.established.value) ...[
+            if (_callingStatus == statusToDescription(OmiCallState.confirmed.rawValue)) ...[
               IconButton(
                 onPressed: () {
                   OmicallClient.instance.switchCamera();
@@ -240,7 +240,7 @@ class VideoCallState extends State<VideoCallScreen> {
                   height: double.infinity,
                   onCameraCreated: (controller) async {
                     _remoteController = controller;
-                    if (widget.status == CallStatus.established) {
+                    if (_callingStatus == statusToDescription(OmiCallState.confirmed.rawValue) && Platform.isAndroid) {
                       await Future.delayed(const Duration(milliseconds: 200));
                       controller.refresh();
                     }
@@ -258,11 +258,9 @@ class VideoCallState extends State<VideoCallScreen> {
                 height: double.infinity,
                 onCameraCreated: (controller) async {
                   _localController = controller;
-                  if (Platform.isAndroid) {
-                    if (widget.status == CallStatus.established) {
-                      await Future.delayed(const Duration(milliseconds: 200));
-                      controller.refresh();
-                    }
+                  if (_callingStatus == statusToDescription(OmiCallState.confirmed.rawValue) && Platform.isAndroid) {
+                    await Future.delayed(const Duration(milliseconds: 200));
+                    controller.refresh();
                   }
                 },
                 errorWidget: Container(
@@ -279,7 +277,7 @@ class VideoCallState extends State<VideoCallScreen> {
                 ),
               ),
             ),
-            if (_callingStatus == CallStatus.established.value)
+            if (_callingStatus == statusToDescription(OmiCallState.confirmed.rawValue))
               Positioned(
                 left: 0,
                 right: 0,
@@ -334,8 +332,8 @@ class VideoCallState extends State<VideoCallScreen> {
                   ],
                 ),
               ),
-            if (_callingStatus == CallStatus.ringing.value ||
-                _callingStatus == CallStatus.calling.value)
+            if (_callingStatus == statusToDescription(OmiCallState.calling.rawValue) ||
+                _callingStatus == statusToDescription(OmiCallState.early.rawValue))
               Text(
                 _callingStatus,
                 style: const TextStyle(
@@ -343,8 +341,8 @@ class VideoCallState extends State<VideoCallScreen> {
                   fontSize: 18,
                 ),
               ),
-            if (_callingStatus == CallStatus.ringing.value ||
-                _callingStatus == CallStatus.calling.value)
+            if (_callingStatus == statusToDescription(OmiCallState.calling.rawValue) ||
+                _callingStatus == statusToDescription(OmiCallState.early.rawValue))
               Positioned(
                 left: 0,
                 right: 0,
@@ -356,7 +354,8 @@ class VideoCallState extends State<VideoCallScreen> {
                       RoundedCircleButton(
                         iconSrc: "assets/icons/call_end.svg",
                         press: () async {
-                          final result = await OmicallClient.instance.joinCall();
+                          final result =
+                              await OmicallClient.instance.joinCall();
                           if (result == false && context.mounted) {
                             Navigator.pop(context);
                           }

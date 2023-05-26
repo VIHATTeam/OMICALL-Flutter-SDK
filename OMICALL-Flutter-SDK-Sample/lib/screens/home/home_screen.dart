@@ -2,19 +2,38 @@
 
 import 'dart:async';
 import 'dart:io';
-
-import 'package:calling/components/call_status.dart';
 import 'package:calling/local_storage/local_storage.dart';
-import 'package:calling/screens/login/login_apikey_screen.dart';
 import 'package:calling/screens/video_call/video_call_screen.dart';
 import 'package:easy_dialog/easy_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:omicall_flutter_plugin/action/action_model.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../../main.dart';
 import '../dial/dial_screen.dart';
+import '../login/login_user_password_screen.dart';
+
+
+String statusToDescription(int status) {
+  if (status == OmiCallState.calling.rawValue) {
+    return "Đang kết nối tới cuộc gọi";
+  }
+  if (status == OmiCallState.connecting.rawValue) {
+    return "Đang kết nối";
+  }
+  if (status == OmiCallState.early.rawValue) {
+    return "Cuộc gọi đang đổ chuông";
+  }
+  if (status == OmiCallState.confirmed.rawValue) {
+    return "Cuộc gọi bắt đầu";
+  }
+  if (status == OmiCallState.disconnected.rawValue) {
+    return "Cuộc gọi kết thúc";
+  }
+  return "";
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({
@@ -29,7 +48,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final TextEditingController _phoneNumberController =
-      TextEditingController()..text = Platform.isAndroid ? '110' : '115';
+      TextEditingController()..text = Platform.isAndroid ? '102' : '103';
 
   // late final TextEditingController _phoneNumberController =
   // TextEditingController()..text = Platform.isAndroid ? '123aaa' : '122aaa';
@@ -61,11 +80,11 @@ class _HomeScreenState extends State<HomeScreen> {
       final bool isVideo = data["isVideo"];
       makeCallWithParams(context, callerNumber, isVideo);
     });
-    _subscription =
-        OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
-      if (omiAction.actionName == OmiEventList.incomingReceived) {
-        //having a incoming call
-        final data = omiAction.data;
+    _subscription = OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
+      if (omiAction.actionName != OmiEventList.onCallStateChanged) { return; }
+      final data = omiAction.data;
+      final status = data["status"] as int;
+      if (status == OmiCallState.incoming.rawValue) {
         final transactionId = data["transactionId"];
         debugPrint("transactionId $transactionId");
         final callerNumber = data["callerNumber"];
@@ -73,16 +92,17 @@ class _HomeScreenState extends State<HomeScreen> {
         if (isVideo) {
           pushToVideoScreen(
             callerNumber,
-            status: CallStatus.ringing,
+            status: OmiCallState.calling.rawValue,
           );
           return;
         }
         pushToDialScreen(
           callerNumber ?? "",
-          status: CallStatus.ringing,
+          status: OmiCallState.calling.rawValue,
         );
+        return;
       }
-      if (omiAction.actionName == OmiEventList.onCallEstablished) {
+      if (status == OmiCallState.confirmed.rawValue) {
         if (_dialScreenKey?.currentState != null) {
           return;
         }
@@ -95,18 +115,14 @@ class _HomeScreenState extends State<HomeScreen> {
         if (isVideo && _videoScreenKey?.currentState == null) {
           pushToVideoScreen(
             callerNumber,
-            status: CallStatus.established,
+            status: OmiCallState.confirmed.rawValue,
           );
           return;
         }
         pushToDialScreen(
           callerNumber ?? "",
-          status: CallStatus.established,
+          status: OmiCallState.confirmed.rawValue,
         );
-      }
-      if (omiAction.actionName == OmiEventList.onCallEnd) {
-        //having a incoming call
-        debugPrint(omiAction.data.toString());
       }
     });
     checkSystemAlertPermission();
@@ -238,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   EasyLoading.dismiss();
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                      builder: (_) => const LoginApiKeyScreen(),
+                      builder: (_) => const LoginUserPasswordScreen(),
                     ),
                   );
                 },
@@ -303,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void pushToVideoScreen(
     String phoneNumber, {
-    required CallStatus status,
+    required int status,
   }) {
     _videoScreenKey = GlobalKey();
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
@@ -316,7 +332,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void pushToDialScreen(
     String phoneNumber, {
-    required CallStatus status,
+    required int status,
   }) {
     _dialScreenKey = GlobalKey();
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
@@ -339,11 +355,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
     if (result) {
       if (_isVideoCall) {
-        pushToVideoScreen(phone, status: CallStatus.calling);
+        pushToVideoScreen(phone, status: OmiCallState.calling.rawValue);
       } else {
         pushToDialScreen(
           phone,
-          status: CallStatus.calling,
+          status: OmiCallState.calling.rawValue,
         );
       }
     } else {
@@ -366,11 +382,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> makeCallWithParams(
       BuildContext context, String callerNumber, bool isVideo) async {
     if (isVideo) {
-      pushToVideoScreen(callerNumber, status: CallStatus.calling);
+      pushToVideoScreen(callerNumber, status: OmiCallState.calling.rawValue);
     } else {
       pushToDialScreen(
         callerNumber,
-        status: CallStatus.calling,
+        status: OmiCallState.calling.rawValue,
       );
     }
     OmicallClient.instance.startCall(
