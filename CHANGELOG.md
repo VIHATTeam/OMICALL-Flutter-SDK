@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.7.0
+- **BREAKING CHANGE**
+  - Increase android/core core
+  - Support Swift document
+  - Support to return `outgoing`, `ringing`, `connecting`, `calling` status
+  - Fix null point on release mode Android
+  - Improve performance
+  - Update sample
+
 ## 2.6.6
   - Increase android/core core
   - Support to get call quality
