@@ -460,10 +460,10 @@ await Firebase.initializeApp();
  //OmiAction have 2 variables: actionName and data
  ```
     - Action Name value: 
-        - `onCallStateChanged`: Have a incoming call. On Android this event work only foreground
+        - `onCallStateChanged`: Call state changed.
         - `onSwitchboardAnswer`: Switchboard sip is listening. 
-    + onCallStateChanged is event call state tracking. We will return status of state. Please refer `OmiCallState`.
-    + Incoming call state lifecycle: incoming -> early -> connecting -> confirmed -> disconnected
+    + onCallStateChanged is call state tracking event. We will return status of state. Please refer `OmiCallState`.
+    + Incoming call state lifecycle: incoming(receive on foreround state) -> early -> connecting -> confirmed -> disconnected
     + Outgoing call state lifecycle: calling -> early (call created) -> connecting -> confirmed -> disconnected
     + onSwitchboardAnswer have callback when employee answered script call.
 - Other events:
