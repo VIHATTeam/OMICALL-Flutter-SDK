@@ -355,10 +355,12 @@ class _HomeScreenState extends State<HomeScreen> {
     if (phone.isEmpty) {
       return;
     }
+    EasyLoading.show();
     final result = await OmicallClient.instance.startCall(
       phone,
       _isVideoCall,
     );
+    EasyLoading.dismiss();
     if (result) {
       if (_isVideoCall) {
         pushToVideoScreen(phone, status: OmiCallState.calling.rawValue);
