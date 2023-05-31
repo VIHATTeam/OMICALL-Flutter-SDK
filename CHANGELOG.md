@@ -2,9 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.7.1
+  - Increase ios core
+  - Improve startCall function
+  - Update readme
+
 ## 2.7.0
 - **BREAKING CHANGE**
-  - Increase android/core core
+  - Increase android/ios core
   - Support Swift document
   - Support to return `outgoing`, `ringing`, `connecting`, `calling` status
   - Fix null point on release mode Android
@@ -12,7 +17,7 @@ All notable changes to this project will be documented in this file.
   - Update sample
 
 ## 2.6.6
-  - Increase android/core core
+  - Increase android/ios core
   - Support to get call quality
   - Update sample
 

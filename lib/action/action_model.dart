@@ -23,6 +23,7 @@ enum OmiCallState {
   confirmed,
   incoming,
   disconnected,
+  hold,
 }
 
 extension ExtensionCallState on OmiCallState {

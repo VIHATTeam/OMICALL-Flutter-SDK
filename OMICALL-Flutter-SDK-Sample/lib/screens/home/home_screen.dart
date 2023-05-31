@@ -13,6 +13,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../main.dart';
 import '../dial/dial_screen.dart';
+import '../login/login_apikey_screen.dart';
 import '../login/login_user_password_screen.dart';
 
 String statusToDescription(int status) {
@@ -86,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       final data = omiAction.data;
       final status = data["status"] as int;
-      if (status == OmiCallState.incoming.rawValue) {
+      if (status == OmiCallState.incoming.rawValue || status == OmiCallState.hold.rawValue) {
         final transactionId = data["transactionId"];
         debugPrint("transactionId $transactionId");
         final callerNumber = data["callerNumber"];
@@ -258,7 +259,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   EasyLoading.dismiss();
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                      builder: (_) => const LoginUserPasswordScreen(),
+                      builder: (_) => const LoginApiKeyScreen(),
                     ),
                   );
                 },
