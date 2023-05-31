@@ -245,6 +245,13 @@ extension Data {
 
   - For more setting information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/ios-sdk/cau-hinh-push-notification">Config Push for iOS</a>
 
+*** Important release note ***
+```
+We support 2 environments. So you need set correct key in Appdelegate.
+- KEY_OMI_APP_ENVIROMENT_SANDBOX support on debug mode
+- KEY_OMI_APP_ENVIROMENT_PRODUCTION support on release mode
+- Visit on web admin to select correct enviroment.   
+```
 
 ## Implement
 - Set up for Firebase:

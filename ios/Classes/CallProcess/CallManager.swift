@@ -203,28 +203,38 @@ class CallManager {
     
     @objc fileprivate func callStateChanged(_ notification: NSNotification) {
         guard let userInfo = notification.userInfo,
-              let call     = userInfo[OMINotificationUserInfoCallKey] as? OMICall else {
+              let call     = userInfo[OMINotificationUserInfoCallKey] as? OMICall,
+              let callState = userInfo[OMINotificationUserInfoCallStateKey] as? Int else {
             return;
         }
-        switch (call.callState) {
-        case .calling:
-            NSLog("Outgoing call, in CALLING state, with UUID \(call.uuid)")
+        print("callid \(call.uuid)")
+        switch (callState) {
+        case OMICallState.calling.rawValue:
+            NSLog("Outgoing call, in calling state, with OmiId \(call.omiId)")
             var callInfo = baseInfoFromCall(call: call)
             callInfo["status"] = CallState.calling.rawValue
             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             break
-        case .early:
+        case OMICallState.early.rawValue:
+            NSLog("Outgoing call, in early state, with OmiId: \(call.omiId)")
             var callInfo = baseInfoFromCall(call: call)
             callInfo["status"] = CallState.early.rawValue
             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             break
-        case .connecting:
+        case OMICallState.connecting.rawValue:
+            NSLog("Outgoing call, in connecting state, with OmiId \(call.omiId)")
             var callInfo = baseInfoFromCall(call: call)
             callInfo["status"] = CallState.connecting.rawValue
             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             break
-        case .confirmed:
-            NSLog("Outgoing call, in CONFIRMED state, with UUID: \(call)")
+        case OMICallState.hold.rawValue:
+            print("hooolddddd \(call.uuid)")
+            var callInfo = baseInfoFromCall(call: call)
+            callInfo["status"] = CallState.hold.rawValue
+            SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
+            break
+        case OMICallState.confirmed.rawValue:
+            NSLog("Outgoing call, in confirmed state, with OmiId: \(call.omiId)")
             if (videoManager == nil && call.isVideo) {
                 videoManager = OMIVideoViewManager.init()
             }
@@ -235,7 +245,8 @@ class CallManager {
             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             SwiftOmikitPlugin.instance.sendMuteStatus()
             break
-        case .incoming:
+        case OMICallState.incoming.rawValue:
+            NSLog("Outgoing call, in incoming state, with OmiId: \(call.omiId)")
             guestPhone = call.callerNumber ?? ""
             DispatchQueue.main.async {[weak self] in
                 guard let self = self else { return }
@@ -247,7 +258,7 @@ class CallManager {
                 }
             }
             break
-        case .disconnected:
+        case OMICallState.disconnected.rawValue:
             if (!call.connected) {
                 NSLog("Call never connected, in DISCONNECTED state, with UUID: \(call.uuid)")
             } else if (!call.userDidHangUp) {
@@ -292,33 +303,38 @@ class CallManager {
     }
     
     /// Start call
-    func startCall(_ phoneNumber: String, isVideo: Bool) -> Bool {
+    func startCall(_ phoneNumber: String, isVideo: Bool, completion: @escaping (_ : Bool) -> Void) {
         guestPhone = phoneNumber
         //check permission
         let auth = AVAudioSession.sharedInstance().recordPermission
         if (auth == .granted) {
-            if (isVideo) {
-                return OmiClient.startVideoCall(phoneNumber)
+            guestPhone = phoneNumber ?? ""
+            OmiClient.startCall(phoneNumber, isVideo: isVideo) { status in
+                DispatchQueue.main.async {
+                    completion(status == OMIStartCallStatus.startCallSuccess)
+                }
             }
-            return OmiClient.startCall(phoneNumber)
+            return
         }
-        return false
+        completion(false)
     }
     
     /// Start call
-    func startCallWithUuid(_ uuid: String, isVideo: Bool) -> Bool {
+    func startCallWithUuid(_ uuid: String, isVideo: Bool, completion: @escaping (_ : Bool) -> Void) {
         let auth = AVAudioSession.sharedInstance().recordPermission
         if (auth == .granted) {
             let phoneNumber = OmiClient.getPhone(uuid)
             if let phone = phoneNumber {
                 guestPhone = phoneNumber ?? ""
-                if (isVideo) {
-                    return OmiClient.startVideoCall(phone)
+                OmiClient.startCall(phone, isVideo: isVideo) { status in
+                    DispatchQueue.main.async {
+                        completion(status == OMIStartCallStatus.startCallSuccess)
+                    }
                 }
-                return OmiClient.startCall(phone)
+                return
             }
         }
-        return false
+        completion(false)
     }
     
     func endAvailableCall() -> [String: Any] {
@@ -329,8 +345,9 @@ class CallManager {
             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             return [:]
         }
+        print(call.uuid)
         tempCallInfo = getCallInfo(call: call)
-        omiLib.callManager.end(call)
+        omiLib.callManager.endActiveCall()
         return tempCallInfo!
     }
     
@@ -359,14 +376,6 @@ class CallManager {
             return
         }
         try? call.toggleMute()
-    }
-    
-    /// Toogle hold
-    func toggleHold() {
-        guard let call = getAvailableCall() else {
-            return
-        }
-        try? call.toggleHold()
     }
     
     /// Toogle speaker
