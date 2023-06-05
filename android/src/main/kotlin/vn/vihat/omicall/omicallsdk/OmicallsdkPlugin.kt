@@ -42,7 +42,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private var applicationContext: Context? = null
     private val mainScope = CoroutineScope(Dispatchers.Main)
 
-    override fun incomingReceived(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
+    override fun incomingReceived(callerId: Int?, phoneNumber: String?, isVideo: Boolean?) {
         Handler(Looper.getMainLooper()).post {
             channel.invokeMethod(
                 CALL_STATE_CHANGED, mapOf(
@@ -190,7 +190,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val incomingBackgroundColor = dataOmi["incomingBackgroundColor"] as? String
                 val incomingAcceptButtonImage = dataOmi["incomingAcceptButtonImage"] as? String
                 val incomingDeclineButtonImage = dataOmi["incomingDeclineButtonImage"] as? String
-                val missedCallTitle = dataOmi["missedCallTitle"] as? String
                 val prefixMissedCallMessage = dataOmi["prefixMissedCallMessage"] as? String
                 val backImage = dataOmi["backImage"] as? String
                 val userImage = dataOmi["userImage"] as? String
@@ -205,9 +204,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     backImage = backImage ?: "ic_back",
                     userImage = userImage ?: "calling_face",
                     prefixMissedCallMessage = prefixMissedCallMessage ?: "Cuộc gọi nhỡ từ",
-                    missedCallTitle = missedCallTitle ?: "",
                     userNameKey = userNameKey ?: "",
                     channelId = channelId ?: "",
+                    ringtone = null,
                 )
                 result.success(true)
             }

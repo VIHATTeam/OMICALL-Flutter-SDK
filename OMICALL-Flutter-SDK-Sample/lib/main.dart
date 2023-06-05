@@ -50,7 +50,7 @@ class _MyAppState extends State<MyApp> {
       prefixMissedCallMessage: 'Cuộc gọi nhỡ từ',
       missedCallTitle: 'Cuộc gọi nhỡ',
       userNameKey: 'extension',
-      channelId: 'comcung.channelid.notification'
+      channelId: 'comcung.channelid.notification',
     );
 
   }
@@ -61,7 +61,7 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         theme: ThemeData.light(),
         home:
-            loginInfo != null ? const HomeScreen() : const LoginApiKeyScreen(),
+            loginInfo != null ? const HomeScreen() : const LoginUserPasswordScreen(),
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
       ),

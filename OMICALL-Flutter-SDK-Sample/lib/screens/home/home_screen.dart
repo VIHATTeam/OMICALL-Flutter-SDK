@@ -259,7 +259,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   EasyLoading.dismiss();
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(
-                      builder: (_) => const LoginApiKeyScreen(),
+                      builder: (_) => const LoginUserPasswordScreen(),
                     ),
                   );
                 },
