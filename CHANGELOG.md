@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.7.2
+  - Increase  ios/android core
+  - Improve `startCall` performance
+
 ## 2.7.1
   - Increase ios core
   - Improve startCall function
