@@ -115,7 +115,7 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
-  Future<bool> startCall(
+  Future<int> startCall(
     String phoneNumber,
     bool isVideo,
   ) async {
@@ -128,10 +128,10 @@ class OmicallClient {
       });
       return await _controller.action(action);
     }
-    return false;
+    return OmiStartCallStatus.permissionDenied.rawValue;
   }
 
-  Future<bool> startCallWithUUID(
+  Future<int> startCallWithUUID(
       String uuid,
       bool isVideo,
       ) async {
@@ -143,7 +143,7 @@ class OmicallClient {
       });
       return await _controller.action(action);
     }
-    return false;
+    return OmiStartCallStatus.permissionDenied.rawValue;
   }
 
   Future<dynamic> getInitialCall() async {

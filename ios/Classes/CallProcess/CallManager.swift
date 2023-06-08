@@ -303,38 +303,28 @@ class CallManager {
     }
     
     /// Start call
-    func startCall(_ phoneNumber: String, isVideo: Bool, completion: @escaping (_ : Bool) -> Void) {
+    func startCall(_ phoneNumber: String, isVideo: Bool, completion: @escaping (_ : Int) -> Void) {
         guestPhone = phoneNumber
-        //check permission
-        let auth = AVAudioSession.sharedInstance().recordPermission
-        if (auth == .granted) {
+        OmiClient.startCall(phoneNumber, isVideo: isVideo) { status in
+            DispatchQueue.main.async {
+                completion(status.rawValue)
+            }
+        }
+    }
+    
+    /// Start call
+    func startCallWithUuid(_ uuid: String, isVideo: Bool, completion: @escaping (_ : Int) -> Void) {
+        let phoneNumber = OmiClient.getPhone(uuid)
+        if let phone = phoneNumber {
             guestPhone = phoneNumber ?? ""
-            OmiClient.startCall(phoneNumber, isVideo: isVideo) { status in
+            OmiClient.startCall(phone, isVideo: isVideo) { status in
                 DispatchQueue.main.async {
-                    completion(status == OMIStartCallStatus.startCallSuccess)
+                    completion(status.rawValue)
                 }
             }
             return
         }
-        completion(false)
-    }
-    
-    /// Start call
-    func startCallWithUuid(_ uuid: String, isVideo: Bool, completion: @escaping (_ : Bool) -> Void) {
-        let auth = AVAudioSession.sharedInstance().recordPermission
-        if (auth == .granted) {
-            let phoneNumber = OmiClient.getPhone(uuid)
-            if let phone = phoneNumber {
-                guestPhone = phoneNumber ?? ""
-                OmiClient.startCall(phone, isVideo: isVideo) { status in
-                    DispatchQueue.main.async {
-                        completion(status == OMIStartCallStatus.startCallSuccess)
-                    }
-                }
-                return
-            }
-        }
-        completion(false)
+        completion(OMIStartCallStatus.invalidUuid.rawValue)
     }
     
     func endAvailableCall() -> [String: Any] {
