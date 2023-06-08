@@ -362,7 +362,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _isVideoCall,
     );
     EasyLoading.dismiss();
-    if (result) {
+    if (result == OmiStartCallStatus.startCallSuccess.rawValue) {
       if (_isVideoCall) {
         pushToVideoScreen(phone, status: OmiCallState.calling.rawValue);
       } else {
@@ -373,14 +373,9 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
     } else {
-      final isGrantedMicrophone = await Permission.microphone.isGranted;
-      String message = "Start call error!";
-      if (!isGrantedMicrophone) {
-        message = "Please check microphone permission!";
-      }
       EasyDialog(
         title: const Text("Notification"),
-        description: Text(message),
+        description: Text("Error code $result"),
       ).show(context);
     }
     // OmicallClient.instance.startCallWithUUID(

@@ -175,7 +175,7 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           if let isVideoCall = dataOmi["isVideo"] as? Bool {
               isVideo = isVideoCall
           }
-          let callResult = CallManager.shareInstance().startCallWithUuid(uuid, isVideo: isVideo) { callResult in
+          CallManager.shareInstance().startCallWithUuid(uuid, isVideo: isVideo) { callResult in
               self.sendMuteStatus()
               result(callResult)
           }

@@ -31,3 +31,21 @@ extension ExtensionCallState on OmiCallState {
     return index;
   }
 }
+
+enum OmiStartCallStatus {
+  invalidUuid,
+  invalidPhoneNumber,
+  samePhoneNumber,
+  maxRetry,
+  permissionDenied,
+  couldNotFindEndpoint,
+  accountRegisterFailed,
+  startCallFailed,
+  startCallSuccess,
+}
+
+extension ExtensionOmiStartCallStatus on OmiStartCallStatus {
+  int get rawValue {
+    return index;
+  }
+}
