@@ -2,8 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.7.3
+  - Increase ios/android core
+  - We return error code on `startCall`
+  - Update sample and readme
+
 ## 2.7.2
-  - Increase  ios/android core
+  - Increase ios/android core
   - Improve `startCall` performance
 
 ## 2.7.1

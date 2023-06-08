@@ -325,17 +325,28 @@ await Firebase.initializeApp();
 - Other functions:
   -  Call with phone number (mobile phone or internal number):
     ```
-    OmicallClient.instance.startCall(
+    final result = await OmicallClient.instance.startCall(
         phone, //phone number
         _isVideoCall, //call video or audio. If true is video call. 
     );
+    //we will return OmiStartCallStatus with:
+    - invalidUuid: uuid is invalid (we can not find on my page)
+    - invalidPhoneNumber: sip user is invalid.
+    - samePhoneNumber: Can not call same phone number.
+    - maxRetry: We try to refresh call but we can not start your call.
+    - permissionDenied: Check audio permission.
+    - couldNotFindEndpoint: Please login before make your call.
+    - accountRegisterFailed: We can not register your account.
+    - startCallFailed: We can not start you call.
+    - startCallSuccess: Start call successfully.
     ```
   -  Call with UUID (only support with Api key):
     ```
-    OmicallClient.instance.startCallWithUUID(
+    final result = OmicallClient.instance.startCallWithUUID(
         uuid, //your user id
         _isVideoCall, //call video or audio. If true is video call. 
     );
+    // Result is the same with startCall
     ```
   - Accept a call:
     ```
