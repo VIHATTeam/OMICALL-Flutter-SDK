@@ -29,4 +29,5 @@ class OmiActionName {
   static const String GET_CURRENT_USER = "GET_CURRENT_USER";
   static const String GET_GUEST_USER = "GET_GUEST_USER";
   static const String GET_USER_INFO = "GET_USER_INFO";
+  static const String GET_HISTORY_CALL_LOG = "GET_HISTORY_CALL_LOG";
 }

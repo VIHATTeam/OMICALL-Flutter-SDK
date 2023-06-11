@@ -42,6 +42,7 @@ enum OmiStartCallStatus {
   accountRegisterFailed,
   startCallFailed,
   startCallSuccess,
+  haveAnotherCall,
 }
 
 extension ExtensionOmiStartCallStatus on OmiStartCallStatus {

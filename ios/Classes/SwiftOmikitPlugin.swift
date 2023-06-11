@@ -5,11 +5,13 @@ import AVFoundation
 import PushKit
 import UserNotifications
 import OmiKit
+import Intents
 
 public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
 
   @objc public static var instance: SwiftOmikitPlugin!
   private var channel: FlutterMethodChannel!
+  private var historyCallog: String?
 
   public static func register(with registrar: FlutterPluginRegistrar) {
       if (instance == nil) {
@@ -208,6 +210,10 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
               result(data)
           }
           break
+      case GET_HISTORY_CALL_LOG:
+          result(historyCallog)
+          historyCallog = nil
+          break
       default:
           break
       }
@@ -227,6 +233,35 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
             ])
             completionHandler()
         }
+    }
+    
+    @objc public static func processUserActivity(userActivity: NSUserActivity) -> Bool {
+        let intraction = userActivity.interaction
+        if let startAudioCallIntent = intraction?.intent as? INStartAudioCallIntent {
+            let contact = startAudioCallIntent.contacts?[0]
+            let contactHandle = contact?.personHandle
+            if let phoneNumber = contactHandle?.value {
+                instance.historyCallog = phoneNumber
+                instance.sendEvent(HISTORY_CALL_LOG, [
+                    "callerNumber": phoneNumber,
+                    "isVideo": false,
+                ])
+            }
+            return true
+        }
+        if let startAudioCallIntent = intraction?.intent as? INStartVideoCallIntent {
+            let contact = startAudioCallIntent.contacts?[0]
+            let contactHandle = contact?.personHandle
+            if let phoneNumber = contactHandle?.value {
+                instance.historyCallog = phoneNumber
+                instance.sendEvent(HISTORY_CALL_LOG, [
+                    "callerNumber": phoneNumber,
+                    "isVideo": true,
+                ])
+            }
+            return true
+        }
+        return false
     }
 }
 
@@ -255,6 +290,5 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
             }
         }
     }
-
 }
 

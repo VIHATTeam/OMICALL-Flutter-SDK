@@ -10,11 +10,12 @@ class OmicallSDKController {
   /// The method channel used to interact with the native platform.
 
   final _methodChannel = const MethodChannel('omicallsdk');
-  final _videoController = StreamController<Map<String, dynamic>>.broadcast();
-  final _mutedController = StreamController<bool>.broadcast();
-  final _speakerController = StreamController<bool>.broadcast();
-  final _missedCallController = StreamController<Map>.broadcast();
-  final _callQualityController = StreamController<Map>.broadcast();
+  Function(Map)? videoListener;
+  Function(bool)? muteListener;
+  Function(bool)? speakerListener;
+  Function(Map)? missedCallListener;
+  Function(Map)? callQualityListener;
+  Function(Map)? callLogListener;
   final StreamController<OmiAction> _callStateChangeController =
       StreamController<OmiAction>.broadcast();
 
@@ -23,27 +24,43 @@ class OmicallSDKController {
       final method = call.method;
       final data = call.arguments;
       if (method == OmiEventList.onMuted) {
-        _mutedController.sink.add(data);
+        if (muteListener != null) {
+          muteListener!(data);
+        }
         return;
       }
       if (method == OmiEventList.onSpeaker) {
-        _speakerController.sink.add(data);
+        if (speakerListener != null) {
+          speakerListener!(data);
+        }
         return;
       }
-      if (method == OmiEventList.onLocalVideoReady || method == OmiEventList.onRemoteVideoReady) {
+      if (method == OmiEventList.onRemoteVideoReady) {
         final param = {
           "name": method,
           "data": data,
         };
-        _videoController.sink.add(param);
+        if (videoListener != null) {
+          videoListener!(param);
+        }
         return;
       }
       if (method == OmiEventList.onMissedCall) {
-        _missedCallController.sink.add(data);
+        if (missedCallListener != null) {
+          missedCallListener!(data);
+        }
         return;
       }
       if (method == OmiEventList.onCallQuality) {
-        _callQualityController.sink.add(data);
+        if (callQualityListener != null) {
+          callQualityListener!.call(data);
+        }
+        return;
+      }
+      if (method == OmiEventList.onHistoryCallLog) {
+        if (callLogListener != null) {
+          callLogListener!.call(data);
+        }
         return;
       }
       _callStateChangeController.sink.add(
@@ -56,25 +73,11 @@ class OmicallSDKController {
   }
 
   dispose() {
-    _videoController.close();
-    _mutedController.close();
-    _speakerController.close();
     _callStateChangeController.close();
-    _callQualityController.close();
   }
 
   Stream<OmiAction> get callStateChangeEvent =>
       _callStateChangeController.stream;
-
-  Stream<Map<String, dynamic>> get videoEvent => _videoController.stream;
-
-  Stream<bool> get mutedEvent => _mutedController.stream;
-
-  Stream<bool> get micEvent => _speakerController.stream;
-
-  Stream<Map> get missedCallEvent => _missedCallController.stream;
-
-  Stream<Map> get callQualityEvent => _callQualityController.stream;
 
   Future<dynamic> action(OmiAction action) async {
     final response = await _methodChannel.invokeMethod<dynamic>(

@@ -8,4 +8,5 @@ class OmiEventList {
   static const String onMissedCall = "CLICK_MISSED_CALL";
   static const String onSwitchboardAnswer = "SWITCHBOARD_ANSWER";
   static const String onCallQuality = "CALL_QUALITY";
+  static const String onHistoryCallLog = "HISTORY_CALL_LOG";
 }

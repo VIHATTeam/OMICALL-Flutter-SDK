@@ -469,9 +469,8 @@ class CallManager {
     }
     
     func getCurrentUser(completion: @escaping (([String: Any]) -> Void)) {
-        let prefs = UserDefaults.standard
-        if let user = prefs.value(forKey: "User") as? String {
-            getUserInfo(phone: user, completion: completion)
+        if let sipAccount = omiLib.firstAccount()?.accountConfiguration.sipAccount as? String {
+            getUserInfo(phone: sipAccount, completion: completion)
         }
     }
     
