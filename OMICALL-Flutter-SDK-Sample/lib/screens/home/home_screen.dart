@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:io';
+
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/video_call/video_call_screen.dart';
 import 'package:easy_dialog/easy_dialog.dart';
@@ -13,7 +14,6 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../main.dart';
 import '../dial/dial_screen.dart';
-import '../login/login_apikey_screen.dart';
 import '../login/login_user_password_screen.dart';
 
 String statusToDescription(int status) {
@@ -66,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
     end: Alignment.centerRight,
   );
   bool _isVideoCall = false;
-  late StreamSubscription _subscription, _missedCallSubscription;
+  late StreamSubscription _subscription;
   GlobalKey<DialScreenState>? _dialScreenKey;
   GlobalKey<VideoCallState>? _videoScreenKey;
 
@@ -74,8 +74,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     updateToken();
-    _missedCallSubscription =
-        OmicallClient.instance.missedCallEvent.listen((data) {
+    OmicallClient.instance.setMissedCallListener((data) {
       final String callerNumber = data["callerNumber"];
       final bool isVideo = data["isVideo"];
       makeCallWithParams(context, callerNumber, isVideo);
@@ -87,7 +86,8 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       final data = omiAction.data;
       final status = data["status"] as int;
-      if (status == OmiCallState.incoming.rawValue || status == OmiCallState.hold.rawValue) {
+      if (status == OmiCallState.incoming.rawValue ||
+          status == OmiCallState.hold.rawValue) {
         final transactionId = data["transactionId"];
         debugPrint("transactionId $transactionId");
         final callerNumber = data["callerNumber"];
@@ -131,6 +131,15 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     });
     checkSystemAlertPermission();
+    OmicallClient.instance.setCallLogListener((data) {
+      final callerNumber = data["callerNumber"];
+      final isVideo = data["isVideo"];
+      makeCallWithParams(
+        context,
+        callerNumber,
+        isVideo,
+      );
+    });
   }
 
   Future<void> checkSystemAlertPermission() async {
@@ -144,7 +153,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _missedCallSubscription.cancel();
     _subscription.cancel();
     _phoneNumberController.dispose();
     super.dispose();
@@ -385,7 +393,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> makeCallWithParams(
-      BuildContext context, String callerNumber, bool isVideo) async {
+    BuildContext context,
+    String callerNumber,
+    bool isVideo,
+  ) async {
     if (isVideo) {
       pushToVideoScreen(callerNumber, status: OmiCallState.calling.rawValue);
     } else {

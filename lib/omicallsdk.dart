@@ -8,22 +8,64 @@ import 'omicallsdk_controller.dart';
 class OmicallClient {
   OmicallClient._();
 
-  static final instance = OmicallClient._();
+  static OmicallClient? _instance;
+
+  static OmicallClient get instance {
+    _instance ??= OmicallClient._();
+    return _instance!;
+  }
 
   final OmicallSDKController _controller = OmicallSDKController();
 
   ///streaming camera event
   Stream<OmiAction> get callStateChangeEvent => _controller.callStateChangeEvent;
-  ///streaming camera event
-  Stream<Map<String, dynamic>> get videoEvent => _controller.videoEvent;
-  ///streaming mic event
-  Stream<bool> get micEvent => _controller.micEvent;
-  ///streaming mic event
-  Stream<bool> get mutedEvent => _controller.mutedEvent;
-  ///streaming click missed call
-  Stream<Map> get missedCallEvent => _controller.missedCallEvent;
-  ///streaming call quality
-  Stream<Map> get callQualityEvent => _controller.callQualityEvent;
+  void setVideoListener(Function(Map) videoListener) {
+    _controller.videoListener = videoListener;
+  }
+
+  void setMuteListener(Function(bool) muteListener) {
+    _controller.muteListener = muteListener;
+  }
+
+  void setSpeakerListener(Function(bool) speakerListener) {
+    _controller.speakerListener = speakerListener;
+  }
+
+  void setMissedCallListener(Function(Map) missedCallListener) {
+    _controller.missedCallListener = missedCallListener;
+  }
+
+  void setCallQualityListener(Function(Map) callQualityListener) {
+    _controller.callQualityListener = callQualityListener;
+  }
+
+  void setCallLogListener(Function(Map) callLogListener) {
+    _controller.callLogListener = callLogListener;
+  }
+
+  void removeCallLogListener() {
+    _controller.callLogListener = null;
+  }
+
+  void removeVideoListener() {
+    _controller.videoListener = null;
+  }
+
+  void removeMuteListener() {
+    _controller.muteListener = null;
+  }
+
+  void removeSpeakerListener() {
+    _controller.speakerListener = null;
+  }
+
+  void removeMissedCallListener() {
+    _controller.missedCallListener = null;
+  }
+
+  void removeCallQualityListener() {
+    _controller.callQualityListener = null;
+  }
 
   ///destroy event
   void dispose() {
@@ -320,6 +362,18 @@ class OmicallClient {
     final result = await _controller.action(action);
     if (result != null) {
       return result as Map;
+    }
+    return null;
+  }
+
+  Future<String?> getHistoryCallLog() async {
+    final action = OmiAction(
+      actionName: OmiActionName.GET_HISTORY_CALL_LOG,
+      data: {},
+    );
+    final result = await _controller.action(action);
+    if (result != null) {
+      return result as String?;
     }
     return null;
   }

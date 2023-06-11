@@ -27,8 +27,9 @@ class VideoCallState extends State<VideoCallScreen> {
   RemoteCameraController? _remoteController;
   LocalCameraController? _localController;
   late StreamSubscription _subscription;
-  late StreamSubscription _videoSubscription;
   String _callingStatus = '';
+  bool isMuted = false;
+  bool isSpeaker = false;
 
   @override
   void initState() {
@@ -39,7 +40,7 @@ class VideoCallState extends State<VideoCallScreen> {
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
       if (omiAction.actionName == OmiEventList.onCallStateChanged) {
         final data = omiAction.data;
-        final status = data["stauts"] as int;
+        final status = data["status"] as int;
         updateVideoScreen(null, status);
         if (status == OmiCallState.confirmed.rawValue) {
           if (Platform.isAndroid) {
@@ -56,9 +57,7 @@ class VideoCallState extends State<VideoCallScreen> {
         }
       }
     });
-    _videoSubscription = OmicallClient.instance.videoEvent.listen((action) {
-      // final name = action["name"];
-      // final data = action["data"];
+    OmicallClient.instance.setVideoListener((data) {
       refreshRemoteCamera();
       refreshLocalCamera();
     });
@@ -68,7 +67,6 @@ class VideoCallState extends State<VideoCallScreen> {
   void dispose() {
     OmicallClient.instance.removeVideoEvent();
     _subscription.cancel();
-    _videoSubscription.cancel();
     super.dispose();
   }
 
@@ -285,17 +283,11 @@ class VideoCallState extends State<VideoCallScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    StreamBuilder(
-                      initialData: true,
-                      stream: OmicallClient.instance.videoEvent,
-                      builder: (context, snapshot) {
-                        return OptionItem(
-                          icon: "video",
-                          showDefaultIcon: true,
-                          callback: () {
-                            OmicallClient.instance.toggleVideo();
-                          },
-                        );
+                    OptionItem(
+                      icon: "video",
+                      showDefaultIcon: true,
+                      callback: () {
+                        OmicallClient.instance.toggleVideo();
                       },
                     ),
                     OptionItem(
@@ -308,18 +300,11 @@ class VideoCallState extends State<VideoCallScreen> {
                         );
                       },
                     ),
-                    StreamBuilder(
-                      initialData: true,
-                      stream: OmicallClient.instance.micEvent,
-                      builder: (context, snapshot) {
-                        final micStatus = snapshot.data as bool;
-                        return OptionItem(
-                          icon: "mic",
-                          showDefaultIcon: micStatus,
-                          callback: () {
-                            OmicallClient.instance.toggleAudio();
-                          },
-                        );
+                    OptionItem(
+                      icon: "mic",
+                      showDefaultIcon: isMuted,
+                      callback: () {
+                        OmicallClient.instance.toggleAudio();
                       },
                     ),
                     OptionItem(

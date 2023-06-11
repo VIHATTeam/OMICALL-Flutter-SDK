@@ -14,7 +14,7 @@
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [FIRApp configure];
   [GeneratedPluginRegistrant registerWithRegistry:self];
-  [OmiClient setEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX];
+  [OmiClient setEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX prefix:@"" userNameKey:@"full_name" maxCall:1];
   provider = [[CallKitProviderDelegate alloc] initWithCallManager: [OMISIPLib sharedInstance].callManager];
   voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
   pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
@@ -22,6 +22,11 @@
       [UNUserNotificationCenter currentNotificationCenter].delegate = (id<UNUserNotificationCenterDelegate>) self;
   }
   return [super application:application didFinishLaunchingWithOptions:launchOptions];
+}
+
+- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {
+    bool value = [SwiftOmikitPlugin processUserActivityWithUserActivity:userActivity];
+    return value;
 }
 
 @end

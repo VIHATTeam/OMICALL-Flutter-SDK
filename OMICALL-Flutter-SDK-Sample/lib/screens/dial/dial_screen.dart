@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:calling/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:omicall_flutter_plugin/action/action_model.dart';
@@ -31,13 +32,14 @@ class DialScreenState extends State<DialScreen> {
   String? _callTime;
   bool _isShowKeyboard = false;
   String _keyboardMessage = "";
-  late StreamSubscription _subscription, _callQualitySubscription;
+  late StreamSubscription _subscription;
   Map? current;
   Map? guestUser;
-
   Stopwatch watch = Stopwatch();
   Timer? timer;
   String _callQuality = "";
+  bool isMuted = false;
+  bool isSpeaker = false;
 
   @override
   void initState() {
@@ -71,9 +73,8 @@ class DialScreenState extends State<DialScreen> {
     });
     getCurrentUser();
     getGuestUser();
-    _callQualitySubscription =
-        OmicallClient.instance.callQualityEvent.listen((event) {
-      final quality = event["quality"] as int;
+    OmicallClient.instance.setCallQualityListener((data) {
+      final quality = data["quality"] as int;
       setState(() {
         if (quality == 0) {
           _callQuality = "GOOD";
@@ -86,6 +87,26 @@ class DialScreenState extends State<DialScreen> {
         }
       });
     });
+    OmicallClient.instance.setMuteListener((data) {
+      setState(() {
+        isMuted = data;
+      });
+    });
+    OmicallClient.instance.setSpeakerListener((data) {
+      setState(() {
+        isSpeaker = data;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    _stopWatch();
+    OmicallClient.instance.removeCallQualityListener();
+    OmicallClient.instance.removeMuteListener();
+    OmicallClient.instance.removeSpeakerListener();
+    super.dispose();
   }
 
   Future<void> getCurrentUser() async {
@@ -200,36 +221,22 @@ class DialScreenState extends State<DialScreen> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          StreamBuilder(
-                            initialData: false,
-                            stream: OmicallClient.instance.mutedEvent,
-                            builder: (context, snapshot) {
-                              final isMute = snapshot.data as bool;
-                              return DialButton(
-                                iconSrc: !isMute
-                                    ? 'assets/icons/ic_microphone.svg'
-                                    : 'assets/icons/ic_block_microphone.svg',
-                                text: "Microphone",
-                                press: () {
-                                  toggleMute(context);
-                                },
-                              );
+                          DialButton(
+                            iconSrc: !isMuted
+                                ? 'assets/icons/ic_microphone.svg'
+                                : 'assets/icons/ic_block_microphone.svg',
+                            text: "Microphone",
+                            press: () {
+                              toggleMute(context);
                             },
                           ),
-                          StreamBuilder(
-                            initialData: false,
-                            stream: OmicallClient.instance.micEvent,
-                            builder: (context, snapshot) {
-                              final isSpeaker = snapshot.data as bool;
-                              return DialButton(
-                                iconSrc: !isSpeaker
-                                    ? 'assets/icons/ic_no_audio.svg'
-                                    : 'assets/icons/ic_audio.svg',
-                                text: "Audio",
-                                press: () {
-                                  toggleSpeaker(context);
-                                },
-                              );
+                          DialButton(
+                            iconSrc: !isSpeaker
+                                ? 'assets/icons/ic_no_audio.svg'
+                                : 'assets/icons/ic_audio.svg',
+                            text: "Audio",
+                            press: () {
+                              toggleSpeaker(context);
                             },
                           ),
                           DialButton(
@@ -275,7 +282,10 @@ class DialScreenState extends State<DialScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        if ((_callStatus == OmiCallState.early.rawValue || _callStatus == OmiCallState.incoming.rawValue) && widget.isOutGoingCall == false)
+                        if ((_callStatus == OmiCallState.early.rawValue ||
+                                _callStatus ==
+                                    OmiCallState.incoming.rawValue) &&
+                            widget.isOutGoingCall == false)
                           RoundedCircleButton(
                             iconSrc: "assets/icons/call_end.svg",
                             press: () async {
@@ -479,13 +489,5 @@ class DialScreenState extends State<DialScreen> {
       _keyboardMessage = "$_keyboardMessage$value";
     });
     OmicallClient.instance.sendDTMF(value);
-  }
-
-  @override
-  void dispose() {
-    _subscription.cancel();
-    _callQualitySubscription.cancel();
-    _stopWatch();
-    super.dispose();
   }
 }
