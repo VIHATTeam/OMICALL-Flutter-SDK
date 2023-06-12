@@ -1,17 +1,17 @@
 name: omicall_flutter_plugin
 description: OmiKit Flutter is wrapper SDK for OmiCall for Application easy integrate features of Omicall Like Call App2App/App2Phone, Video Call.
-version: 2.8.0
+version: 2.8.1
 homepage: https://github.com/VIHATTeam/OMICALL-Flutter-SDK
 
 environment:
-  sdk: '>=2.14.0 <=3.0.0'
+  sdk: '>=2.14.0 <3.0.0'
   flutter: ">=2.5.0"
 
 dependencies:
   flutter:
     sdk: flutter
   plugin_platform_interface: ^2.1.4
-  permission_handler: ^10.2.0
+  permission_handler: ^10.3.0
 
 dev_dependencies:
   flutter_test:
@@ -23,16 +23,6 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-  # This section identifies this Flutter project as a plugin project.
-  # The 'pluginClass' specifies the class (in Java, Kotlin, Swift, Objective-C, etc.)
-  # which should be registered in the plugin registry. This is required for
-  # using method channels.
-  # The Android 'package' specifies package in which the registered class is.
-  # This is required for using method channels on Android.
-  # The 'ffiPlugin' specifies that native code should be built and bundled.
-  # This is required for using `dart:ffi`.
-  # All these are used by the tooling to maintain consistency when
-  # adding or updating assets for this project.
   plugin:
     platforms:
       android:
