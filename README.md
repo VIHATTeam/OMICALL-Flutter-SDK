@@ -125,6 +125,8 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
 
 #### iOS(Object-C):
 
+- Assets: Add `call_image` into assets folder to update callkit image. We only support png style.
+
 - Add variables in Appdelegate.h:
 
 ```
@@ -201,6 +203,8 @@ if (@available(iOS 10.0, *)) {
   - For more setting information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/ios-sdk/cau-hinh-push-notification">Config Push for iOS</a>
 
 #### iOS(Swift):
+
+- Assets: Add `call_image` into assets folder to update callkit image. We only support png style.
 
 - Add variables in Appdelegate.swift:
 
