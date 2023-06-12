@@ -46,10 +46,6 @@ class CallManager {
     
     func configNotification(data: [String: Any]) {
         let user = UserDefaults.standard
-        if let prefix = data["prefix"] as? String, let userNameKey = data["userNameKey"] as? String {
-            user.set(prefix, forKey: KEY_OMI_PREFIX)
-            user.set(userNameKey, forKey: KEY_OMI_USER_NAME_KEY)
-        }
         if let title = data["missedCallTitle"] as? String, let message = data["prefixMissedCallMessage"] as? String {
             user.set(title, forKey: "omicall/missedCallTitle")
             user.set(message, forKey: "omicall/prefixMissedCallMessage")
