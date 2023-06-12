@@ -282,10 +282,7 @@ class DialScreenState extends State<DialScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        if ((_callStatus == OmiCallState.early.rawValue ||
-                                _callStatus ==
-                                    OmiCallState.incoming.rawValue) &&
-                            widget.isOutGoingCall == false)
+                        if ((_callStatus == OmiCallState.early.rawValue || _callStatus == OmiCallState.incoming.rawValue) && widget.isOutGoingCall == false)
                           RoundedCircleButton(
                             iconSrc: "assets/icons/call_end.svg",
                             press: () async {

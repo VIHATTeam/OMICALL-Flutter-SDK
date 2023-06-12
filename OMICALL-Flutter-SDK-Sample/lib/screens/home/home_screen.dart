@@ -340,7 +340,9 @@ class _HomeScreenState extends State<HomeScreen> {
         key: _videoScreenKey,
         status: status,
       );
-    }));
+    })).then((value) {
+      _videoScreenKey = null;
+    });
   }
 
   void pushToDialScreen(
@@ -356,7 +358,9 @@ class _HomeScreenState extends State<HomeScreen> {
         status: status,
         isOutGoingCall: isOutGoingCall,
       );
-    }));
+    })).then((value) {
+      _dialScreenKey = null;
+    });
   }
 
   Future<void> makeCall(BuildContext context) async {
