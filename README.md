@@ -144,13 +144,23 @@ PKPushRegistry * voipRegistry;
 ```
 #import <OmiKit/OmiKit.h>
 #import <omicall_flutter_plugin/omicall_flutter_plugin-Swift.h>
-
-[OmiClient setEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX];
+```
+- Add these lines into `didFinishLaunchingWithOptions`:
+```
+[OmiClient setEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX prefix:@"" userNameKey:@"extension" maxCall:1];
 provider = [[CallKitProviderDelegate alloc] initWithCallManager: [OMISIPLib sharedInstance].callManager];
 voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
 pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
 if (@available(iOS 10.0, *)) {
     [UNUserNotificationCenter currentNotificationCenter].delegate = (id<UNUserNotificationCenterDelegate>) self;
+}
+
+```
+
+```
+- (BOOL)application:(UIApplication *)application continueUserActivity:(NSUserActivity *)userActivity restorationHandler:(void (^)(NSArray<id<UIUserActivityRestoring>> * _Nullable))restorationHandler {
+    bool value = [SwiftOmikitPlugin processUserActivityWithUserActivity:userActivity];
+    return value;
 }
 ```
 
@@ -207,10 +217,17 @@ var voipRegistry: PKPushRegistry?
 - Add these lines into `didFinishLaunchingWithOptions`:
 
 ```
-OmiClient.setEnviroment(KEY_OMI_APP_ENVIROMENT_SANDBOX)
+OmiClient.setEnviroment(KEY_OMI_APP_ENVIROMENT_SANDBOX, prefix: "", userNameKey: "extension", maxCall: 1)
 provider = CallKitProviderDelegate.init(callManager: OMISIPLib.sharedInstance().callManager)
 voipRegistry = PKPushRegistry.init(queue: .main)
 pushkitManager = PushKitManager.init(voipRegistry: voipRegistry)
+```
+
+```
+func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+    var value = SwiftOmikitPlugin.processUserActivity(userActivity: userActivity)
+    return value
+}
 ```
 
 -  Add these lines into `Info.plist`:
@@ -339,6 +356,7 @@ await Firebase.initializeApp();
     - accountRegisterFailed: We can not register your account.
     - startCallFailed: We can not start you call.
     - startCallSuccess: Start call successfully.
+    - haveAnotherCall: We can not start you call because you are joining another call.
     ```
   -  Call with UUID (only support with Api key):
     ```
@@ -487,25 +505,55 @@ await Firebase.initializeApp();
 - Other events:
   - Call Quality event: Listen call quality event changed
   ```
-  OmicallClient.instance.callQualityEvent()
+  OmicallClient.instance.setCallQualityListener((data) {
+      final quality = data["quality"] as int;
+  });
   //we return `quality` key with: 0 is GOOD, 1 is NORMAL, 2 is BAD
   ```
   - Mic event: Listen on/off mic in a call
   ```
-  OmicallClient.instance.onMicEvent()
+  OmicallClient.instance.setSpeakerListener((data) {
+      setState(() {
+        isSpeaker = data;
+      });
+  });
+  //data is current speaker status.
   ```
   - Mute event: Listen on/off muted in a call
   ```
-  OmicallClient.instance.onMuteEvent()
+  OmicallClient.instance.setMuteListener((data) {
+      setState(() {
+        isMuted = data;
+      });
+  });
+  //data is current muted status.
   ```
   - Remote video ready: Listen remote video ready.
   ```
-  OmicallClient.instance.videoEvent.listen((action){
-    //refresh remote and local video stream.
-  })
+  OmicallClient.instance.setVideoListener((data) {
+      refreshRemoteCamera(); => need refresh camera
+      refreshLocalCamera(); => need refresh camera
+  });
   ```
-  - User tab a missed call:.
+  - User tab a missed call notification:
   ```
-  OmicallClient.instance.missedCallEvent.listen((data){}) //StreamSubscription
-  // data is Map. Data has 3 keys: callerNumber, isVideo, transactionId (only onCallEstablished)
+  OmicallClient.instance.setMissedCallListener((data) {
+      final String callerNumber = data["callerNumber"];
+      final bool isVideo = data["isVideo"];
+      makeCallWithParams(context, callerNumber, isVideo);
+  });
+  // data is Map. Data has 2 keys: callerNumber, isVideo
+  ```
+  - User tab a call log (only `iOS`):
+  ```
+  OmicallClient.instance.setCallLogListener((data) {
+      final callerNumber = data["callerNumber"];
+      final isVideo = data["isVideo"];
+      makeCallWithParams(
+        context,
+        callerNumber,
+        isVideo,
+      );
+  });
+  // data is Map. Data has 2 keys: callerNumber, isVideo
   ```

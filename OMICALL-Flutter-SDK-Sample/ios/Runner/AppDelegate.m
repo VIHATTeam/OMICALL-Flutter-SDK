@@ -14,7 +14,7 @@
     didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
   [FIRApp configure];
   [GeneratedPluginRegistrant registerWithRegistry:self];
-  [OmiClient setEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX prefix:@"" userNameKey:@"full_name" maxCall:1];
+  [OmiClient setEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX prefix:@"" userNameKey:@"extension" maxCall:1];
   provider = [[CallKitProviderDelegate alloc] initWithCallManager: [OMISIPLib sharedInstance].callManager];
   voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
   pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
