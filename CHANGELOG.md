@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.8.1
+  - Increase android core
+  - Update document
+
 ## 2.8.0
 - **BREAKING CHANGE**
   - We only use stream for `callStateChange` event, we replace stream to callback for another events

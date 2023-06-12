@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/home/home_screen.dart';
-import 'package:calling/screens/login/login_apikey_screen.dart';
 import 'package:calling/screens/login/login_user_password_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -49,7 +48,7 @@ class _MyAppState extends State<MyApp> {
       userImage: "calling_face",
       prefixMissedCallMessage: 'Cuộc gọi nhỡ từ',
       missedCallTitle: 'Cuộc gọi nhỡ',
-      userNameKey: 'extension',
+      userNameKey: 'full_name',
       channelId: 'comcung.channelid.notification',
     );
 
