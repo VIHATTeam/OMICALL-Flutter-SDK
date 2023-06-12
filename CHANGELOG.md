@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.8.0
+- **BREAKING CHANGE**
+  - We only use stream for `callStateChange` event, we replace stream to callback for another events
+  - Support click callLog on iOS (`setCallLogListener`)
+  - Increase ios/android core
+  - We add more `haveAnotherCall` on `startCall`
+  - Update sample
+
 ## 2.7.3
   - Increase ios/android core
   - We return error code on `startCall`
