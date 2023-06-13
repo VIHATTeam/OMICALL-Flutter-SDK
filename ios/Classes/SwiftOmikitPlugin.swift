@@ -56,15 +56,15 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       if(call.method != "action") {
           return
       }
-      print("\(call.arguments)")
+//      print("\(call.arguments)")
       guard  let data =  call.arguments as? [String:Any] else  {
           return
       }
-      print("\(data["data"])")
+//      print("\(data["data"])")
       guard let dataOmi = data["data"] as? [String:Any] else {
           return
       }
-      print("\(data["actionName"])")
+//      print("\(data["actionName"])")
       guard let action = data["actionName"] as? String else {
           return
       }

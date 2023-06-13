@@ -47,6 +47,9 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
   @override
   void initState() {
     super.initState();
+    OmicallClient.instance.getCurrentUser().then((value) {
+      debugPrint(value?.toString());
+    });
   }
 
   @override

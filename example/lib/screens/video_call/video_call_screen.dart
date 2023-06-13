@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:calling/screens/home/home_screen.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:omicall_flutter_plugin/action/action_model.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
+
 import '../../components/rounded_button.dart';
 import '../../constants.dart';
 
@@ -13,9 +13,11 @@ class VideoCallScreen extends StatefulWidget {
   const VideoCallScreen({
     Key? key,
     required this.status,
+    required this.isOutGoingCall,
   }) : super(key: key);
 
   final int status;
+  final bool isOutGoingCall;
 
   @override
   State<StatefulWidget> createState() {
@@ -27,13 +29,13 @@ class VideoCallState extends State<VideoCallScreen> {
   RemoteCameraController? _remoteController;
   LocalCameraController? _localController;
   late StreamSubscription _subscription;
-  String _callingStatus = '';
+  int _callStatus = 0;
   bool isMuted = false;
   bool isSpeaker = false;
 
   @override
   void initState() {
-    _callingStatus = statusToDescription(widget.status);
+    _callStatus = widget.status;
     OmicallClient.instance.registerVideoEvent();
     super.initState();
     _subscription =
@@ -41,7 +43,7 @@ class VideoCallState extends State<VideoCallScreen> {
       if (omiAction.actionName == OmiEventList.onCallStateChanged) {
         final data = omiAction.data;
         final status = data["status"] as int;
-        updateVideoScreen(null, status);
+        updateVideoScreen(status);
         if (status == OmiCallState.confirmed.rawValue) {
           if (Platform.isAndroid) {
             refreshRemoteCamera();
@@ -70,9 +72,9 @@ class VideoCallState extends State<VideoCallScreen> {
     super.dispose();
   }
 
-  void updateVideoScreen(Map<String, dynamic>? callInfo, int? status) {
+  void updateVideoScreen(int status) {
     setState(() {
-      _callingStatus = statusToDescription(status ?? 0);
+      _callStatus = status;
     });
   }
 
@@ -209,7 +211,7 @@ class VideoCallState extends State<VideoCallScreen> {
             },
           ),
           actions: [
-            if (_callingStatus == statusToDescription(OmiCallState.confirmed.rawValue)) ...[
+            if (_callStatus == OmiCallState.confirmed.rawValue) ...[
               IconButton(
                 onPressed: () {
                   OmicallClient.instance.switchCamera();
@@ -238,7 +240,7 @@ class VideoCallState extends State<VideoCallScreen> {
                   height: double.infinity,
                   onCameraCreated: (controller) async {
                     _remoteController = controller;
-                    if (_callingStatus == statusToDescription(OmiCallState.confirmed.rawValue) && Platform.isAndroid) {
+                    if (_callStatus == OmiCallState.confirmed.rawValue && Platform.isAndroid) {
                       await Future.delayed(const Duration(milliseconds: 200));
                       controller.refresh();
                     }
@@ -256,7 +258,7 @@ class VideoCallState extends State<VideoCallScreen> {
                 height: double.infinity,
                 onCameraCreated: (controller) async {
                   _localController = controller;
-                  if (_callingStatus == statusToDescription(OmiCallState.confirmed.rawValue) && Platform.isAndroid) {
+                  if (_callStatus == OmiCallState.confirmed.rawValue && Platform.isAndroid) {
                     await Future.delayed(const Duration(milliseconds: 200));
                     controller.refresh();
                   }
@@ -275,7 +277,7 @@ class VideoCallState extends State<VideoCallScreen> {
                 ),
               ),
             ),
-            if (_callingStatus == statusToDescription(OmiCallState.confirmed.rawValue))
+            if (_callStatus == OmiCallState.confirmed.rawValue)
               Positioned(
                 left: 0,
                 right: 0,
@@ -317,17 +319,8 @@ class VideoCallState extends State<VideoCallScreen> {
                   ],
                 ),
               ),
-            if (_callingStatus == statusToDescription(OmiCallState.calling.rawValue) ||
-                _callingStatus == statusToDescription(OmiCallState.early.rawValue))
-              Text(
-                _callingStatus,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                ),
-              ),
-            if (_callingStatus == statusToDescription(OmiCallState.calling.rawValue) ||
-                _callingStatus == statusToDescription(OmiCallState.early.rawValue))
+            if (_callStatus == OmiCallState.calling.rawValue ||
+                _callStatus == OmiCallState.early.rawValue)
               Positioned(
                 left: 0,
                 right: 0,
@@ -335,12 +328,12 @@ class VideoCallState extends State<VideoCallScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    if (_callingStatus == "Ringing")
+                    if ((_callStatus == OmiCallState.early.rawValue || _callStatus == OmiCallState.incoming.rawValue) && widget.isOutGoingCall == false)
                       RoundedCircleButton(
                         iconSrc: "assets/icons/call_end.svg",
                         press: () async {
                           final result =
-                              await OmicallClient.instance.joinCall();
+                          await OmicallClient.instance.joinCall();
                           if (result == false && context.mounted) {
                             Navigator.pop(context);
                           }
