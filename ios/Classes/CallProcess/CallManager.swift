@@ -54,11 +54,11 @@ class CallManager {
     
     private func requestPermission(isVideo: Bool) {
         AVCaptureDevice.requestAccess(for: .audio) { _ in
-            print("request audio")
+//            print("request audio")
         }
         if isVideo {
             AVCaptureDevice.requestAccess(for: .video) { _ in
-                print("request video")
+//                print("request video")
             }
         }
     }
@@ -203,34 +203,36 @@ class CallManager {
               let callState = userInfo[OMINotificationUserInfoCallStateKey] as? Int else {
             return;
         }
-        print("callid \(call.uuid)")
+//        print("callid \(call.uuid)")
         switch (callState) {
         case OMICallState.calling.rawValue:
-            NSLog("Outgoing call, in calling state, with OmiId \(call.omiId)")
+//            NSLog("Outgoing call, in calling state, with OmiId \(call.omiId)")
             var callInfo = baseInfoFromCall(call: call)
             callInfo["status"] = CallState.calling.rawValue
             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             break
         case OMICallState.early.rawValue:
-            NSLog("Outgoing call, in early state, with OmiId: \(call.omiId)")
+//            NSLog("Outgoing call, in early state, with OmiId: \(call.omiId)")
+//            NSLog("Outgoing call, in early state, with OmiId: \(call.isVideo)")
             var callInfo = baseInfoFromCall(call: call)
             callInfo["status"] = CallState.early.rawValue
             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             break
         case OMICallState.connecting.rawValue:
-            NSLog("Outgoing call, in connecting state, with OmiId \(call.omiId)")
+//            NSLog("Outgoing call, in connecting state, with OmiId \(call.omiId)")
             var callInfo = baseInfoFromCall(call: call)
             callInfo["status"] = CallState.connecting.rawValue
             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             break
         case OMICallState.hold.rawValue:
-            print("hooolddddd \(call.uuid)")
+//            print("hooolddddd \(call.uuid)")
             var callInfo = baseInfoFromCall(call: call)
             callInfo["status"] = CallState.hold.rawValue
             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             break
         case OMICallState.confirmed.rawValue:
-            NSLog("Outgoing call, in confirmed state, with OmiId: \(call.omiId)")
+//            NSLog("Outgoing call, in confirmed state, with OmiId: \(call.omiId)")
+//            NSLog("Outgoing call, in confirmed state, with OmiId: \(call.isVideo)")
             if (videoManager == nil && call.isVideo) {
                 videoManager = OMIVideoViewManager.init()
             }
@@ -242,7 +244,8 @@ class CallManager {
             SwiftOmikitPlugin.instance.sendMuteStatus()
             break
         case OMICallState.incoming.rawValue:
-            NSLog("Outgoing call, in incoming state, with OmiId: \(call.omiId)")
+//            NSLog("Outgoing call, in incoming state, with OmiId: \(call.omiId)")
+//            NSLog("Outgoing call, in incoming state, with OmiId: \(call.isVideo)")
             guestPhone = call.callerNumber ?? ""
             DispatchQueue.main.async {[weak self] in
                 guard let self = self else { return }
@@ -255,13 +258,13 @@ class CallManager {
             }
             break
         case OMICallState.disconnected.rawValue:
-            if (!call.connected) {
-                NSLog("Call never connected, in DISCONNECTED state, with UUID: \(call.uuid)")
-            } else if (!call.userDidHangUp) {
-                NSLog("Call remotly ended, in DISCONNECTED state, with UUID: \(call.uuid)")
-            }
+//            if (!call.connected) {
+//                NSLog("Call never connected, in DISCONNECTED state, with UUID: \(call.uuid)")
+//            } else if (!call.userDidHangUp) {
+//                NSLog("Call remotly ended, in DISCONNECTED state, with UUID: \(call.uuid)")
+//            }
             tempCallInfo = getCallInfo(call: call)
-            print("call infooooo \(tempCallInfo)")
+//            print("call infooooo \(tempCallInfo)")
             if (videoManager != nil) {
                 videoManager = nil
             }
@@ -272,7 +275,7 @@ class CallManager {
             tempCallInfo = nil
             break
         default:
-            NSLog("Default call state")
+//            NSLog("Default call state")
             break
         }
     }
@@ -331,7 +334,7 @@ class CallManager {
             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             return [:]
         }
-        print(call.uuid)
+//        print(call.uuid)
         tempCallInfo = getCallInfo(call: call)
         omiLib.callManager.endActiveCall()
         return tempCallInfo!
@@ -402,18 +405,6 @@ class CallManager {
               "id": item.uid,
            ]
         }
-        let hasSpeaker = results.contains{ $0["name"] == "Speaker" }
-        if (!hasSpeaker) {
-            results.append([
-                "name": "Speaker",
-                "id": "Speaker",
-            ])
-        } else {
-            results.append([
-                "name": "Off Speaker",
-                "id": "Off Speaker",
-            ])
-        }
         return results
     }
     
@@ -465,8 +456,10 @@ class CallManager {
     }
     
     func getCurrentUser(completion: @escaping (([String: Any]) -> Void)) {
-        if let sipAccount = omiLib.firstAccount()?.accountConfiguration.sipAccount as? String {
-            getUserInfo(phone: sipAccount, completion: completion)
+        if let sip = OmiClient.getCurrentSip() {
+            getUserInfo(phone: sip, completion: completion)
+        }  else {
+            completion([:])
         }
     }
     
@@ -477,6 +470,8 @@ class CallManager {
     func getUserInfo(phone: String, completion: @escaping (([String: Any]) -> Void)) {
         if let account = OmiClient.getAccountInfo(phone) as? [String: Any] {
             completion(account)
+        } else {
+            completion([:])
         }
     }
     

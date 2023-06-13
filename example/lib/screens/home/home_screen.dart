@@ -74,6 +74,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     updateToken();
+    OmicallClient.instance.getOutputAudios().then((value) {
+      debugPrint("audios ${value.toString()}");
+    });
+    OmicallClient.instance.getCurrentUser().then((value) {
+      debugPrint("user ${value.toString()}");
+    });
     OmicallClient.instance.setMissedCallListener((data) {
       final String callerNumber = data["callerNumber"];
       final bool isVideo = data["isVideo"];
@@ -96,6 +102,7 @@ class _HomeScreenState extends State<HomeScreen> {
           pushToVideoScreen(
             callerNumber,
             status: status,
+            isOutGoingCall: false,
           );
           return;
         }
@@ -116,10 +123,11 @@ class _HomeScreenState extends State<HomeScreen> {
         final data = omiAction.data;
         final callerNumber = data["callerNumber"];
         final bool isVideo = data["isVideo"];
-        if (isVideo && _videoScreenKey?.currentState == null) {
+        if (isVideo) {
           pushToVideoScreen(
             callerNumber,
             status: status,
+            isOutGoingCall: false,
           );
           return;
         }
@@ -333,12 +341,14 @@ class _HomeScreenState extends State<HomeScreen> {
   void pushToVideoScreen(
     String phoneNumber, {
     required int status,
+    required bool isOutGoingCall,
   }) {
     _videoScreenKey = GlobalKey();
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
       return VideoCallScreen(
         key: _videoScreenKey,
         status: status,
+        isOutGoingCall: isOutGoingCall,
       );
     })).then((value) {
       _videoScreenKey = null;
@@ -376,7 +386,11 @@ class _HomeScreenState extends State<HomeScreen> {
     EasyLoading.dismiss();
     if (result == OmiStartCallStatus.startCallSuccess.rawValue) {
       if (_isVideoCall) {
-        pushToVideoScreen(phone, status: OmiCallState.calling.rawValue);
+        pushToVideoScreen(
+          phone,
+          status: OmiCallState.calling.rawValue,
+          isOutGoingCall: true,
+        );
       } else {
         pushToDialScreen(
           phone,
@@ -402,7 +416,11 @@ class _HomeScreenState extends State<HomeScreen> {
     bool isVideo,
   ) async {
     if (isVideo) {
-      pushToVideoScreen(callerNumber, status: OmiCallState.calling.rawValue);
+      pushToVideoScreen(
+        callerNumber,
+        status: OmiCallState.calling.rawValue,
+        isOutGoingCall: true,
+      );
     } else {
       pushToDialScreen(
         callerNumber,
