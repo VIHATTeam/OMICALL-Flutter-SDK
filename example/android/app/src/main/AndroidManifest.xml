@@ -47,6 +47,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity
+            android:exported="false"
+            android:theme="@style/TranslucentTheme"
+            android:name="vn.vihat.omicall.omisdk.TransparentActivity"/>
         <receiver
             android:name="vn.vihat.omicall.omisdk.receiver.FirebaseMessageReceiver"
             android:exported="true"
