@@ -168,7 +168,7 @@ class DialScreenState extends State<DialScreen> {
     _stopWatch();
     OmicallClient.instance.removeCallQualityListener();
     OmicallClient.instance.removeMuteListener();
-    OmicallClient.instance.removeSpeakerListener();
+    OmicallClient.instance.removeAudioChangedListener();
     super.dispose();
   }
 
