@@ -18,10 +18,9 @@ class OmiActionName {
   static const String SWITCH_CAMERA = "SWITCH_CAMERA";
   static const String CAMERA_STATUS = "CAMERA_STATUS";
   static const String TOGGLE_VIDEO = "TOGGLE_VIDEO";
-  static const String OUTPUTS = "OUTPUTS";
-  static const String INPUTS = "INPUTS";
-  static const String SET_INPUT = "SET_INPUT";
-  static const String SET_OUTPUT = "SET_OUTPUT";
+  static const String GET_AUDIO = "GET_AUDIO";
+  static const String SET_AUDIO = "SET_AUDIO";
+  static const String GET_CURRENT_AUDIO = "GET_CURRENT_AUDIO";
   static const String START_CALL_WITH_UUID = "START_CALL_WITH_UUID";
   static const String LOG_OUT = "LOG_OUT";
   static const String REMOVE_VIDEO_EVENT = "REMOVE_VIDEO_EVENT";

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:calling/constants.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:omicall_flutter_plugin/action/action_model.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
@@ -39,7 +40,7 @@ class DialScreenState extends State<DialScreen> {
   Timer? timer;
   String _callQuality = "";
   bool isMuted = false;
-  bool isSpeaker = false;
+  Map? _currentAudio;
 
   @override
   void initState() {
@@ -64,15 +65,21 @@ class DialScreenState extends State<DialScreen> {
         }
       }
       if (omiAction.actionName == OmiEventList.onSwitchboardAnswer) {
-        // final data = omiAction.data;
-        // final sip = data["sip"];
-        //switchboard sip => use get profile
-        // OmicallClient.instance.getUserInfo(phone: sip);
         getGuestUser();
       }
     });
     getCurrentUser();
     getGuestUser();
+    OmicallClient.instance.setAudioChangedListener((newAudio) {
+      setState(() {
+        _currentAudio = newAudio.first;
+      });
+    });
+    OmicallClient.instance.getCurrentAudio().then((value) {
+      setState(() {
+        _currentAudio = value.first;
+      });
+    });
     OmicallClient.instance.setCallQualityListener((data) {
       final quality = data["quality"] as int;
       setState(() {
@@ -92,11 +99,67 @@ class DialScreenState extends State<DialScreen> {
         isMuted = data;
       });
     });
-    OmicallClient.instance.setSpeakerListener((data) {
-      setState(() {
-        isSpeaker = data;
-      });
-    });
+  }
+
+  String get _audioImage {
+    final name = _currentAudio!["name"] as String;
+    if (name == "Receiver") {
+      return "ic_iphone";
+    }
+    if (name == "Speaker") {
+      return "ic_speaker";
+    }
+    return "ic_airpod";
+  }
+
+  String get _audioTitle {
+    final name = _currentAudio!["name"] as String;
+    if (name == "Receiver") {
+      return "iPhone";
+    }
+    return name;
+  }
+
+  Future<void> toggleAndCheckDevice() async {
+    final audioList = await OmicallClient.instance.getOutputAudios();
+    if (!mounted) {
+      return;
+    }
+    if (audioList.length > 2) {
+      //show selection
+      showCupertinoModalPopup(
+        context: context,
+        builder: (_) => CupertinoActionSheet(
+          actions: audioList.map((e) {
+            String name = e["name"];
+            if (name == "Receiver") {
+              name = "iPhone";
+            }
+            return CupertinoActionSheetAction(
+              onPressed: () {
+                OmicallClient.instance.setOutputAudio(portType: e["type"]);
+                Navigator.pop(context);
+              },
+              child: Text(name),
+            );
+          }).toList(),
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Close'),
+          ),
+        ),
+      );
+    } else {
+      if (_currentAudio!["name"] == "Receiver") {
+        final speaker = audioList.firstWhere((element) => element["name"] == "Speaker");
+        OmicallClient.instance.setOutputAudio(portType: speaker["type"]);
+      } else {
+        final speaker = audioList.firstWhere((element) => element["name"] == "Receiver");
+        OmicallClient.instance.setOutputAudio(portType: speaker["type"]);
+      }
+    }
   }
 
   @override
@@ -230,13 +293,11 @@ class DialScreenState extends State<DialScreen> {
                               toggleMute(context);
                             },
                           ),
-                          DialButton(
-                            iconSrc: !isSpeaker
-                                ? 'assets/icons/ic_no_audio.svg'
-                                : 'assets/icons/ic_audio.svg',
-                            text: "Audio",
+                          if (_currentAudio != null) DialButton(
+                            iconSrc: 'assets/images/$_audioImage.png',
+                            text: _audioTitle,
                             press: () {
-                              toggleSpeaker(context);
+                              toggleAndCheckDevice();
                             },
                           ),
                           DialButton(

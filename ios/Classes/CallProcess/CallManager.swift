@@ -114,7 +114,7 @@ class CallManager {
         }
     }
     
-    func registerNotificationCenter() {
+    func registerNotificationCenter(showMissedCall: Bool) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             NotificationCenter.default.removeObserver(CallManager.instance!)
@@ -134,18 +134,11 @@ class CallManager {
                                                    object: nil
             )
             NotificationCenter.default.addObserver(CallManager.instance!, selector: #selector(self.updateNetworkHealth(_:)), name: NSNotification.Name.OMICallNetworkQuality, object: nil)
-            self.showMissedCall()
+            NotificationCenter.default.addObserver(CallManager.instance!, selector: #selector(self.audioChanged(_:)), name: NSNotification.Name.OMICallAudioRouteChange, object: nil)
+            if (showMissedCall) {
+                self.showMissedCall()
+            }
         }
-    }
-    
-    
-    @objc func updateNetworkHealth(_ notification: NSNotification) {
-        guard let userInfo = notification.userInfo,
-              let state     = userInfo[OMINotificationNetworkStatusKey] as? Int else {
-            return;
-        }
-        SwiftOmikitPlugin.instance?.sendEvent(CALL_QUALITY, ["quality": state])
-        
     }
     
     func registerVideoEvent() {
@@ -156,6 +149,33 @@ class CallManager {
                                                    object: nil
             )
         }
+    }
+    
+    func removeVideoEvent() {
+        DispatchQueue.main.async {
+            NotificationCenter.default.removeObserver(CallManager.instance!, name: NSNotification.Name.OMICallVideoInfo, object: nil)
+        }
+    }
+    
+    @objc func audioChanged(_ notification: NSNotification) {
+        guard let userInfo = notification.userInfo,
+              let audioInfo     = userInfo[OMINotificationCurrentAudioRouteKey] as? [[String: String]] else {
+            return;
+        }
+        SwiftOmikitPlugin.instance?.sendEvent(AUDIO_CHANGE, [
+            "data": audioInfo,
+        ])
+        
+    }
+    
+    
+    @objc func updateNetworkHealth(_ notification: NSNotification) {
+        guard let userInfo = notification.userInfo,
+              let state     = userInfo[OMINotificationNetworkStatusKey] as? Int else {
+            return;
+        }
+        SwiftOmikitPlugin.instance?.sendEvent(CALL_QUALITY, ["quality": state])
+        
     }
     
     @objc func videoUpdate(_ notification: NSNotification) {
@@ -172,12 +192,6 @@ class CallManager {
             break
         default:
             break
-        }
-    }
-    
-    func removeVideoEvent() {
-        DispatchQueue.main.async {
-            NotificationCenter.default.removeObserver(CallManager.instance!, name: NSNotification.Name.OMICallVideoInfo, object: nil)
         }
     }
     
@@ -203,36 +217,28 @@ class CallManager {
               let callState = userInfo[OMINotificationUserInfoCallStateKey] as? Int else {
             return;
         }
-//        print("callid \(call.uuid)")
         switch (callState) {
         case OMICallState.calling.rawValue:
-//            NSLog("Outgoing call, in calling state, with OmiId \(call.omiId)")
             var callInfo = baseInfoFromCall(call: call)
             callInfo["status"] = CallState.calling.rawValue
             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             break
         case OMICallState.early.rawValue:
-//            NSLog("Outgoing call, in early state, with OmiId: \(call.omiId)")
-//            NSLog("Outgoing call, in early state, with OmiId: \(call.isVideo)")
             var callInfo = baseInfoFromCall(call: call)
             callInfo["status"] = CallState.early.rawValue
             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             break
         case OMICallState.connecting.rawValue:
-//            NSLog("Outgoing call, in connecting state, with OmiId \(call.omiId)")
             var callInfo = baseInfoFromCall(call: call)
             callInfo["status"] = CallState.connecting.rawValue
             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             break
         case OMICallState.hold.rawValue:
-//            print("hooolddddd \(call.uuid)")
             var callInfo = baseInfoFromCall(call: call)
             callInfo["status"] = CallState.hold.rawValue
             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             break
         case OMICallState.confirmed.rawValue:
-//            NSLog("Outgoing call, in confirmed state, with OmiId: \(call.omiId)")
-//            NSLog("Outgoing call, in confirmed state, with OmiId: \(call.isVideo)")
             if (videoManager == nil && call.isVideo) {
                 videoManager = OMIVideoViewManager.init()
             }
@@ -244,8 +250,6 @@ class CallManager {
             SwiftOmikitPlugin.instance.sendMuteStatus()
             break
         case OMICallState.incoming.rawValue:
-//            NSLog("Outgoing call, in incoming state, with OmiId: \(call.omiId)")
-//            NSLog("Outgoing call, in incoming state, with OmiId: \(call.isVideo)")
             guestPhone = call.callerNumber ?? ""
             DispatchQueue.main.async {[weak self] in
                 guard let self = self else { return }
@@ -258,13 +262,7 @@ class CallManager {
             }
             break
         case OMICallState.disconnected.rawValue:
-//            if (!call.connected) {
-//                NSLog("Call never connected, in DISCONNECTED state, with UUID: \(call.uuid)")
-//            } else if (!call.userDidHangUp) {
-//                NSLog("Call remotly ended, in DISCONNECTED state, with UUID: \(call.uuid)")
-//            }
             tempCallInfo = getCallInfo(call: call)
-//            print("call infooooo \(tempCallInfo)")
             if (videoManager != nil) {
                 videoManager = nil
             }
@@ -275,7 +273,6 @@ class CallManager {
             tempCallInfo = nil
             break
         default:
-//            NSLog("Default call state")
             break
         }
     }
@@ -378,49 +375,16 @@ class CallManager {
         SwiftOmikitPlugin.instance.sendSpeakerStatus()
     }
     
-    
-    func inputs() -> [[String: String]] {
-          let inputs = AVAudioSession.sharedInstance().availableInputs ?? []
-          let results = inputs.map { item in
-              return [
-                  "name": item.portName,
-                  "id": item.uid,
-              ]
-          }
-          return results
-    }
-      
-    func setInput(id: String) {
-        let inputs = AVAudioSession.sharedInstance().availableInputs ?? []
-        if let newOutput = inputs.first(where: {$0.uid == id}) {
-            try? AVAudioSession.sharedInstance().setPreferredInput(newOutput)
-        }
+    func getAudioOutputs() -> [[String: String]] {
+        return OmiClient.getAudioInDevices()
     }
     
-    func outputs() -> [[String: String]] {
-        let outputs = AVAudioSession.sharedInstance().currentRoute.outputs
-        var results = outputs.map { item in
-           return [
-              "name": item.portName,
-              "id": item.uid,
-           ]
-        }
-        return results
+    func setAudioOutputs(portType: String) {
+        return OmiClient.setAudioOutputs(portType)
     }
     
-    func setOutput(id: String) {
-        if (id == "Speaker") {
-            try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
-            return
-        }
-        if (id == "Off Speaker") {
-            try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.none)
-            return
-        }
-        let outputs = AVAudioSession.sharedInstance().currentRoute.outputs
-        if let newOutput = outputs.first(where: {$0.uid == id}) {
-            try? AVAudioSession.sharedInstance().setPreferredInput(newOutput)
-        }
+    func getCurrentAudio() -> [[String: String]] {
+        return OmiClient.getCurrentAudio()
     }
     
     //video call
