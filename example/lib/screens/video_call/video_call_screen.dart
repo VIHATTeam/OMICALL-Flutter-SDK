@@ -31,7 +31,8 @@ class VideoCallState extends State<VideoCallScreen> {
   late StreamSubscription _subscription;
   int _callStatus = 0;
   bool isMuted = false;
-  bool isSpeaker = false;
+  Map? _currentAudio;
+  String _callQuality = "";
 
   @override
   void initState() {
@@ -47,6 +48,7 @@ class VideoCallState extends State<VideoCallScreen> {
         if (status == OmiCallState.confirmed.rawValue) {
           if (Platform.isAndroid) {
             refreshRemoteCamera();
+            refreshLocalCamera();
           }
         }
         if (status == OmiCallState.disconnected.rawValue) {
@@ -63,11 +65,42 @@ class VideoCallState extends State<VideoCallScreen> {
       refreshRemoteCamera();
       refreshLocalCamera();
     });
+    OmicallClient.instance.setMuteListener((p0) {
+      setState(() {
+        isMuted = p0;
+      });
+    });
+    OmicallClient.instance.setAudioChangedListener((newAudio) {
+      setState(() {
+        _currentAudio = newAudio.first;
+      });
+    });
+    OmicallClient.instance.getCurrentAudio().then((value) {
+      setState(() {
+        _currentAudio = value.first;
+      });
+    });
+    OmicallClient.instance.setCallQualityListener((data) {
+      final quality = data["quality"] as int;
+      setState(() {
+        if (quality == 0) {
+          _callQuality = "GOOD";
+        }
+        if (quality == 1) {
+          _callQuality = "NORMAL";
+        }
+        if (quality == 2) {
+          _callQuality = "BAD";
+        }
+      });
+    });
   }
 
   @override
   void dispose() {
     OmicallClient.instance.removeVideoEvent();
+    OmicallClient.instance.removeMuteListener();
+    OmicallClient.instance.removeAudioChangedListener();
     _subscription.cancel();
     super.dispose();
   }
@@ -95,48 +128,67 @@ class VideoCallState extends State<VideoCallScreen> {
     Navigator.pop(context);
   }
 
-  Future<void> outputOptions(BuildContext context) async {
-  }
-
-  Future<void> inputOptions(BuildContext context) async {
-  }
-
-  Future<void> moreOption(BuildContext context) async {
-    showCupertinoModalPopup(
-      context: context,
-      builder: (_) => CupertinoActionSheet(
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              outputOptions(context);
-            },
-            child: const Text("Outputs"),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              inputOptions(context);
-            },
-            child: const Text("Inputs"),
-          )
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('Close'),
-        ),
-      ),
-    );
-  }
-
   void refreshRemoteCamera() {
     _remoteController?.refresh();
   }
 
   void refreshLocalCamera() {
     _localController?.refresh();
+  }
+
+  String get _audioImage {
+    final name = _currentAudio!["name"] as String;
+    if (name == "Receiver") {
+      return "ic_iphone";
+    }
+    if (name == "Speaker") {
+      return "ic_speaker";
+    }
+    return "ic_airpod";
+  }
+
+  Future<void> toggleAndCheckDevice() async {
+    final audioList = await OmicallClient.instance.getOutputAudios();
+    if (!mounted) {
+      return;
+    }
+    if (audioList.length > 2) {
+      //show selection
+      showCupertinoModalPopup(
+        context: context,
+        builder: (_) => CupertinoActionSheet(
+          actions: audioList.map((e) {
+            String name = e["name"];
+            if (name == "Receiver") {
+              name = "iPhone";
+            }
+            return CupertinoActionSheetAction(
+              onPressed: () {
+                OmicallClient.instance.setOutputAudio(portType: e["type"]);
+                Navigator.pop(context);
+              },
+              child: Text(name),
+            );
+          }).toList(),
+          cancelButton: CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Text('Close'),
+          ),
+        ),
+      );
+    } else {
+      if (_currentAudio!["name"] == "Receiver") {
+        final speaker =
+            audioList.firstWhere((element) => element["name"] == "Speaker");
+        OmicallClient.instance.setOutputAudio(portType: speaker["type"]);
+      } else {
+        final receiver =
+            audioList.firstWhere((element) => element["name"] == "Receiver");
+        OmicallClient.instance.setOutputAudio(portType: receiver["type"]);
+      }
+    }
   }
 
   @override
@@ -192,7 +244,8 @@ class VideoCallState extends State<VideoCallScreen> {
                   height: double.infinity,
                   onCameraCreated: (controller) async {
                     _remoteController = controller;
-                    if (_callStatus == OmiCallState.confirmed.rawValue && Platform.isAndroid) {
+                    if (_callStatus == OmiCallState.confirmed.rawValue &&
+                        Platform.isAndroid) {
                       await Future.delayed(const Duration(milliseconds: 200));
                       controller.refresh();
                     }
@@ -210,7 +263,8 @@ class VideoCallState extends State<VideoCallScreen> {
                 height: double.infinity,
                 onCameraCreated: (controller) async {
                   _localController = controller;
-                  if (_callStatus == OmiCallState.confirmed.rawValue && Platform.isAndroid) {
+                  if (_callStatus == OmiCallState.confirmed.rawValue &&
+                      Platform.isAndroid) {
                     await Future.delayed(const Duration(milliseconds: 200));
                     controller.refresh();
                   }
@@ -261,13 +315,15 @@ class VideoCallState extends State<VideoCallScreen> {
                         OmicallClient.instance.toggleAudio();
                       },
                     ),
-                    OptionItem(
-                      icon: "more",
-                      showDefaultIcon: true,
-                      callback: () {
-                        moreOption(context);
-                      },
-                    ),
+                    if (_currentAudio != null)
+                      OptionItem(
+                        icon: _audioImage,
+                        showDefaultIcon: true,
+                        color: Colors.white,
+                        callback: () {
+                          toggleAndCheckDevice();
+                        },
+                      ),
                   ],
                 ),
               ),
@@ -280,12 +336,14 @@ class VideoCallState extends State<VideoCallScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    if ((_callStatus == OmiCallState.early.rawValue || _callStatus == OmiCallState.incoming.rawValue) && widget.isOutGoingCall == false)
+                    if ((_callStatus == OmiCallState.early.rawValue ||
+                            _callStatus == OmiCallState.incoming.rawValue) &&
+                        widget.isOutGoingCall == false)
                       RoundedCircleButton(
                         iconSrc: "assets/icons/call_end.svg",
                         press: () async {
                           final result =
-                          await OmicallClient.instance.joinCall();
+                              await OmicallClient.instance.joinCall();
                           if (result == false && context.mounted) {
                             Navigator.pop(context);
                           }
@@ -307,6 +365,20 @@ class VideoCallState extends State<VideoCallScreen> {
                   ],
                 ),
               ),
+            Positioned(
+              top: MediaQuery.of(context).viewPadding.top + 16,
+              left: 12,
+              right: 12,
+              child: Text(
+                _callQuality,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
           ],
         ),
       ),
@@ -319,12 +391,14 @@ class OptionItem extends StatelessWidget {
   final String icon;
   final bool showDefaultIcon;
   final VoidCallback callback;
+  final Color? color;
 
   const OptionItem({
     Key? key,
     required this.icon,
     this.showDefaultIcon = true,
     required this.callback,
+    this.color,
   }) : super(key: key);
 
   @override
@@ -343,6 +417,7 @@ class OptionItem extends StatelessWidget {
             "assets/images/${showDefaultIcon ? icon : "$icon-off"}.png",
             width: 30,
             height: 30,
+            color: color,
           ),
         ),
       ),
