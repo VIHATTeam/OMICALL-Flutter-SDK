@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.8.3
+  - Increase android core
+  - Update sample
+
 ## 2.8.2
   - Increase ios core
   - Improve `getCurrentUser` function
