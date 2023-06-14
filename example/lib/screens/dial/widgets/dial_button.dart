@@ -27,9 +27,14 @@ class DialButton extends StatelessWidget {
         onPressed: press,
         child: Column(
           children: [
-            SvgPicture.asset(
+            iconSrc.contains("svg") ? SvgPicture.asset(
               iconSrc,
               height: 36,
+              color: Colors.white,
+            ) : Image.asset(
+              iconSrc,
+              height: 36,
+              width: 36,
               color: Colors.white,
             ),
             const SizedBox(

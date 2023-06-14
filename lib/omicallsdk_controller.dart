@@ -16,6 +16,7 @@ class OmicallSDKController {
   Function(Map)? missedCallListener;
   Function(Map)? callQualityListener;
   Function(Map)? callLogListener;
+  Function(List<dynamic>)? audioChangedListener;
   final StreamController<OmiAction> _callStateChangeController =
       StreamController<OmiAction>.broadcast();
 
@@ -60,6 +61,12 @@ class OmicallSDKController {
       if (method == OmiEventList.onHistoryCallLog) {
         if (callLogListener != null) {
           callLogListener!.call(data);
+        }
+        return;
+      }
+      if (method == OmiEventList.onAudioChanged) {
+        if (audioChangedListener != null) {
+          audioChangedListener!.call(data["data"]);
         }
         return;
       }

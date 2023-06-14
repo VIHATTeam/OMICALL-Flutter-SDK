@@ -18,7 +18,9 @@ class OmicallClient {
   final OmicallSDKController _controller = OmicallSDKController();
 
   ///streaming camera event
-  Stream<OmiAction> get callStateChangeEvent => _controller.callStateChangeEvent;
+  Stream<OmiAction> get callStateChangeEvent =>
+      _controller.callStateChangeEvent;
+
   void setVideoListener(Function(Map) videoListener) {
     _controller.videoListener = videoListener;
   }
@@ -41,6 +43,10 @@ class OmicallClient {
 
   void setCallLogListener(Function(Map) callLogListener) {
     _controller.callLogListener = callLogListener;
+  }
+
+  void setAudioChangedListener(Function(List<dynamic>) audioChangedListener) {
+    _controller.audioChangedListener = audioChangedListener;
   }
 
   void removeCallLogListener() {
@@ -67,15 +73,23 @@ class OmicallClient {
     _controller.callQualityListener = null;
   }
 
+  void removeAudioChangedListener() {
+    _controller.audioChangedListener = null;
+  }
+
   ///destroy event
   void dispose() {
     _controller.dispose();
   }
 
-  Future<void> startServices() async {
+  Future<void> startServices({
+    bool showMissedCall = true,
+  }) async {
     final action = OmiAction(
       actionName: OmiActionName.START_SERVICES,
-      data: {},
+      data: {
+        "showMissedCall": showMissedCall,
+      },
     );
     return await _controller.action(action);
   }
@@ -122,7 +136,7 @@ class OmicallClient {
         'missedCallTitle': missedCallTitle,
         'prefixMissedCallMessage': prefixMissedCallMessage,
         'userNameKey': userNameKey,
-        'channelId' : channelId,
+        'channelId': channelId,
       },
     );
     return await _controller.action(action);
@@ -174,12 +188,13 @@ class OmicallClient {
   }
 
   Future<int> startCallWithUUID(
-      String uuid,
-      bool isVideo,
-      ) async {
+    String uuid,
+    bool isVideo,
+  ) async {
     final microphoneRequest = await Permission.microphone.request();
     if (microphoneRequest.isGranted) {
-      final action = OmiAction(actionName: OmiActionName.START_CALL_WITH_UUID, data: {
+      final action =
+          OmiAction(actionName: OmiActionName.START_CALL_WITH_UUID, data: {
         'usrUuid': uuid,
         'isVideo': isVideo,
       });
@@ -268,37 +283,19 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
-  Future<dynamic> getOutputAudios() async {
+  Future<List<dynamic>> getOutputAudios() async {
     final action = OmiAction(
-      actionName: OmiActionName.OUTPUTS,
+      actionName: OmiActionName.GET_AUDIO,
       data: {},
     );
     return await _controller.action(action);
   }
 
-  Future<void> setOutputAudio({required dynamic id}) async {
+  Future<void> setOutputAudio({required dynamic portType}) async {
     final action = OmiAction(
-      actionName: OmiActionName.SET_OUTPUT,
+      actionName: OmiActionName.SET_AUDIO,
       data: {
-        "id": id,
-      },
-    );
-    return await _controller.action(action);
-  }
-
-  Future<dynamic> getInputAudios() async {
-    final action = OmiAction(
-      actionName: OmiActionName.INPUTS,
-      data: {},
-    );
-    return await _controller.action(action);
-  }
-
-  Future<void> setInputAudio({required dynamic id}) async {
-    final action = OmiAction(
-      actionName: OmiActionName.SET_INPUT,
-      data: {
-        "id": id,
+        "portType": portType,
       },
     );
     return await _controller.action(action);
@@ -376,5 +373,14 @@ class OmicallClient {
       return result as String?;
     }
     return null;
+  }
+
+  Future<List<dynamic>> getCurrentAudio() async {
+    final action = OmiAction(
+      actionName: OmiActionName.GET_CURRENT_AUDIO,
+      data: {},
+    );
+    final result = await _controller.action(action);
+    return result;
   }
 }

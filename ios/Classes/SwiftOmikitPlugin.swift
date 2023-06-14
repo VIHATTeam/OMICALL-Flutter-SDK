@@ -41,9 +41,8 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
     
   func sendMuteStatus() {
       if let call = CallManager.shareInstance().getAvailableCall() {
-          if let isMuted = call.muted as? Bool {
-              channel.invokeMethod(MUTED, arguments: isMuted)
-          }
+          let isMuted = call.muted
+          channel.invokeMethod(MUTED, arguments: isMuted)
       }
   }
     
@@ -56,22 +55,20 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       if(call.method != "action") {
           return
       }
-//      print("\(call.arguments)")
       guard  let data =  call.arguments as? [String:Any] else  {
           return
       }
-//      print("\(data["data"])")
       guard let dataOmi = data["data"] as? [String:Any] else {
           return
       }
-//      print("\(data["actionName"])")
       guard let action = data["actionName"] as? String else {
           return
       }
 
       switch(action) {
       case START_SERVICES:
-          CallManager.shareInstance().registerNotificationCenter()
+          let showMissedCall = dataOmi["showMissedCall"] as! Bool
+          CallManager.shareInstance().registerNotificationCenter(showMissedCall: showMissedCall)
           result(true)
           break
       case CONFIG_NOTIFICATION:
@@ -150,22 +147,13 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           sendCameraEvent()
           result(true)
           break
-      case INPUTS:
-          let inputs = CallManager.shareInstance().inputs()
-          result(inputs)
-          break
-      case OUTPUTS:
-          let outputs = CallManager.shareInstance().outputs()
+      case GET_AUDIO:
+          let outputs = CallManager.shareInstance().getAudioOutputs()
           result(outputs)
           break
-      case SET_OUTPUT:
-          let id = dataOmi["id"] as! String
-          CallManager.shareInstance().setOutput(id: id)
-          result(true)
-          break
-      case SET_INPUT:
-          let id = dataOmi["id"] as! String
-          CallManager.shareInstance().setInput(id: id)
+      case SET_AUDIO:
+          let portType = dataOmi["portType"] as! String
+          CallManager.shareInstance().setAudioOutputs(portType: portType)
           result(true)
           break
       case JOIN_CALL:
@@ -213,6 +201,10 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       case GET_HISTORY_CALL_LOG:
           result(historyCallog)
           historyCallog = nil
+          break
+      case GET_CURRENT_AUDIO:
+          let audio = CallManager.shareInstance().getCurrentAudio()
+          result(audio)
           break
       default:
           break

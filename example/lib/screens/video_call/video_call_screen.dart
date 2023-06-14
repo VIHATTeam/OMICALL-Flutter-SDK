@@ -96,57 +96,9 @@ class VideoCallState extends State<VideoCallScreen> {
   }
 
   Future<void> outputOptions(BuildContext context) async {
-    final data = await OmicallClient.instance.getOutputAudios() as List;
-    if (!mounted) {
-      return;
-    }
-    showCupertinoModalPopup(
-      context: context,
-      builder: (_) => CupertinoActionSheet(
-        actions: data.map((e) {
-          return CupertinoActionSheetAction(
-            onPressed: () {
-              OmicallClient.instance.setOutputAudio(id: "${e["id"]}");
-              Navigator.pop(context);
-            },
-            child: Text(e["name"]),
-          );
-        }).toList(),
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('Close'),
-        ),
-      ),
-    );
   }
 
   Future<void> inputOptions(BuildContext context) async {
-    final data = await OmicallClient.instance.getInputAudios() as List;
-    if (!mounted) {
-      return;
-    }
-    showCupertinoModalPopup(
-      context: context,
-      builder: (_) => CupertinoActionSheet(
-        actions: data.map((e) {
-          return CupertinoActionSheetAction(
-            onPressed: () {
-              OmicallClient.instance.setInputAudio(id: "${e["id"]}");
-              Navigator.pop(context);
-            },
-            child: Text(e["name"]),
-          );
-        }).toList(),
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text('Close'),
-        ),
-      ),
-    );
   }
 
   Future<void> moreOption(BuildContext context) async {
