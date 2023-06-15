@@ -78,7 +78,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         startTime: Long,
         transactionId: String?,
     ) {
-        Handler().postDelayed({
+        Handler(Looper.getMainLooper()).postDelayed({
             Log.d("aaaa", transactionId ?: "")
             channel.invokeMethod(
                 CALL_STATE_CHANGED, mapOf(
