@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:calling/constants.dart';
 import 'package:flutter/cupertino.dart';
@@ -115,7 +116,7 @@ class DialScreenState extends State<DialScreen> {
   String get _audioTitle {
     final name = _currentAudio!["name"] as String;
     if (name == "Receiver") {
-      return "iPhone";
+      return Platform.isAndroid ? "Android" : "iPhone";
     }
     return name;
   }
@@ -133,7 +134,11 @@ class DialScreenState extends State<DialScreen> {
           actions: audioList.map((e) {
             String name = e["name"];
             if (name == "Receiver") {
-              name = "iPhone";
+              if (Platform.isIOS) {
+                name = "iPhone";
+              } else {
+                name = "Android";
+              }
             }
             return CupertinoActionSheetAction(
               onPressed: () {

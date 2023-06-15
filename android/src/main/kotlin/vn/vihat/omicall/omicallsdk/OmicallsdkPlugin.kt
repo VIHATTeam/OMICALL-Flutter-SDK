@@ -60,6 +60,12 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         ))
     }
 
+    override fun onAudioChanged(audioInfo: Map<String, Any>) {
+        channel.invokeMethod(AUDIO_CHANGE, mapOf(
+            "data" to audioInfo,
+        ))
+    }
+
     override fun onCallEnd(callInfo: MutableMap<String, Any?>, statusCode: Int) {
         callInfo["status"] = CallState.disconnected.value
         channel.invokeMethod(CALL_STATE_CHANGED, callInfo)
@@ -325,32 +331,19 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             TOGGLE_VIDEO -> {
                 OmiClient.instance.toggleCamera()
             }
-            INPUTS -> {
-                val inputs = OmiClient.instance.getAudioInputs()
-                val allAudios = inputs.map {
-                    mapOf(
-                        "name" to it.first,
-                        "id" to it.second,
-                    )
-                }.toTypedArray()
-                result.success(allAudios)
-            }
-            OUTPUTS -> {
+            GET_AUDIO -> {
                 val inputs = OmiClient.instance.getAudioOutputs()
-                val allAudios = inputs.map {
-                    mapOf(
-                        "name" to it.first,
-                        "id" to it.second,
-                    )
-                }.toTypedArray()
-                result.success(allAudios)
+                result.success(inputs)
             }
-            SET_INPUT -> {
-
+            SET_AUDIO -> {
+                val portType = dataOmi["portType"] as Int
+                OmiClient.instance.setAudio(portType)
+                result.success(true)
             }
 
-            SET_OUTPUT -> {
-
+            GET_CURRENT_AUDIO -> {
+                val audio = OmiClient.instance.getCurrentAudio()
+                result.success(listOf(audio))
             }
             START_CALL_WITH_UUID -> {
                 mainScope.launch {
