@@ -66,7 +66,11 @@ class OmicallSDKController {
       }
       if (method == OmiEventList.onAudioChanged) {
         if (audioChangedListener != null) {
-          audioChangedListener!.call(data["data"]);
+          var correctData = data["data"];
+          if ((correctData is List) == false) {
+            correctData = [correctData];
+          }
+          audioChangedListener!.call(correctData);
         }
         return;
       }
