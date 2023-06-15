@@ -73,6 +73,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    if (Platform.isAndroid) {
+      checkAndPushToCall();
+    }
     updateToken();
     OmicallClient.instance.getOutputAudios().then((value) {
       debugPrint("audios ${value.toString()}");
@@ -148,6 +151,27 @@ class _HomeScreenState extends State<HomeScreen> {
         isVideo,
       );
     });
+  }
+
+  Future<void> checkAndPushToCall() async {
+    final call = await OmicallClient.instance.getInitialCall();
+    if (call is Map) {
+      final isVideo = call["isVideo"] as bool;
+      final callerNumber = call["callerNumber"];
+      if (isVideo) {
+        pushToVideoScreen(
+          callerNumber,
+          status: OmiCallState.confirmed.rawValue,
+          isOutGoingCall: false,
+        );
+      } else {
+        pushToDialScreen(
+          callerNumber,
+          status: OmiCallState.confirmed.rawValue,
+          isOutGoingCall: false,
+        );
+      }
+    }
   }
 
   Future<void> checkSystemAlertPermission() async {
