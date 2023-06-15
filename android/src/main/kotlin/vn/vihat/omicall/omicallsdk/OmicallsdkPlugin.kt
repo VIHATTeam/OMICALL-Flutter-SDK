@@ -188,6 +188,10 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 OmiClient.instance.addAccountListener(accountListener)
                 result.success(true)
             }
+            GET_INITIAL_CALL -> {
+                val callInfo = OmiClient.instance.getCurrentCallInfo()
+                result.success(callInfo)
+            }
             CONFIG_NOTIFICATION -> {
                 val notificationIcon = dataOmi["notificationIcon"] as? String
                 val prefix = dataOmi["prefix"] as? String
