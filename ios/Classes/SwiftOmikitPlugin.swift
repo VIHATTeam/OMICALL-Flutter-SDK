@@ -93,7 +93,6 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
                   "callerNumber" : call.callerNumber,
                   "status": call.lastStatus,
                   "muted": call.muted,
-                  "speaker": call.speaker,
                   "isVideo": call.isVideo
               ]
               result(data)
@@ -147,15 +146,6 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           sendCameraEvent()
           result(true)
           break
-      case GET_AUDIO:
-          let outputs = CallManager.shareInstance().getAudioOutputs()
-          result(outputs)
-          break
-      case SET_AUDIO:
-          let portType = dataOmi["portType"] as! String
-          CallManager.shareInstance().setAudioOutputs(portType: portType)
-          result(true)
-          break
       case JOIN_CALL:
           CallManager.shareInstance().joinCall()
           result(true)
@@ -197,6 +187,15 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           CallManager.shareInstance().getUserInfo(phone: phone) { data in
               result(data)
           }
+          break
+      case GET_AUDIO:
+          let outputs = CallManager.shareInstance().getAudioOutputs()
+          result(outputs)
+          break
+      case SET_AUDIO:
+          let portType = dataOmi["portType"] as! String
+          CallManager.shareInstance().setAudioOutputs(portType: portType)
+          result(true)
           break
       case GET_HISTORY_CALL_LOG:
           result(historyCallog)
