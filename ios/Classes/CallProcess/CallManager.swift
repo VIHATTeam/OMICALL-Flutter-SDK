@@ -65,17 +65,19 @@ class CallManager {
     
     func initWithApiKeyEndpoint(params: [String: Any]) -> Bool {
         //request permission
-        var result = true
+        var result = false
         if let usrUuid = params["usrUuid"] as? String, let fullName = params["fullName"] as? String, let apiKey = params["apiKey"] as? String {
             result = OmiClient.initWithUUID(usrUuid, fullName: fullName, apiKey: apiKey)
         }
-        let isVideo = (params["isVideo"] as? Bool) ?? true
-        requestPermission(isVideo: isVideo)
+        if (result) {
+            let isVideo = (params["isVideo"] as? Bool) ?? true
+            requestPermission(isVideo: isVideo)
+        }
         return result
     }
     
     func initWithUserPasswordEndpoint(params: [String: Any]) -> Bool {
-        if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String, let host = params["host"] as? String {
+        if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String {
             OmiClient.initWithUsername(userName, password: password, realm: realm)
         }
         let isVideo = (params["isVideo"] as? Bool) ?? true
@@ -102,13 +104,11 @@ class CallManager {
                             "isVideo": call.isVideo,
                         ]
                         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-                        //getting the notification request
                         let id = Int.random(in: 0..<10000000)
                         let request = UNNotificationRequest(identifier: "\(id)", content: content, trigger: trigger)
-                        //adding the notification to notification center
                         UNUserNotificationCenter.current().add(request, withCompletionHandler: nil)
                     default:
-                        break // Do nothing
+                        break
                 }
             }
         }
@@ -184,9 +184,6 @@ class CallManager {
             return;
         }
         switch (state) {
-        case 0:
-            SwiftOmikitPlugin.instance?.sendEvent(LOCAL_VIDEO_READY, [:])
-            break
         case 1:
             SwiftOmikitPlugin.instance?.sendEvent(REMOTE_VIDEO_READY, [:])
             break
@@ -282,8 +279,7 @@ class CallManager {
         if (guestPhone.count < 10) {
             direction = "inbound"
         }
-        let prefs = UserDefaults.standard
-        let user = prefs.value(forKey: "User") as? String
+        let user = OmiClient.getCurrentSip()
         let status = call.callState == .confirmed ? "answered" : "no_answered"
         let timeEnd = Int(Date().timeIntervalSince1970)
         return [
@@ -293,7 +289,7 @@ class CallManager {
             "destination_number" : guestPhone,
             "time_start_to_answer" : call.createDate,
             "time_end" : timeEnd,
-            "sip_user": user,
+            "sip_user": OmiClient.getCurrentSip(),
             "disposition" : lastStatusCall == nil ? "no_answered" : "answered",
         ]
     }
