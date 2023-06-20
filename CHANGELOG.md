@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.8.3+2
+  - Increase android core
+  - Fix endTime for android
+  - Update sample
+
 ## 2.8.3+1
   - Increase android core
   - Fix sendDTMF code for android
