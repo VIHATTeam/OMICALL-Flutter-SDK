@@ -72,7 +72,7 @@ android {
 }
 
 dependencies {
-    api 'vn.vihat.omicall:omi-sdk:1.4.23'
+    api 'vn.vihat.omicall:omi-sdk:1.4.28'
 //    implementation fileTree(include: ['*.jar'], dir: 'libs')
 //    implementation files('OmiSDK.aar')
     implementation 'androidx.appcompat:appcompat:1.5.0'

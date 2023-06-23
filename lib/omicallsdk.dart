@@ -98,6 +98,7 @@ class OmicallClient {
     String? usrName,
     String? usrUuid,
     String? apiKey,
+    String? phone,
     bool isVideo = true,
   }) async {
     final action =
@@ -105,6 +106,7 @@ class OmicallClient {
       'fullName': usrName,
       'usrUuid': usrUuid,
       'apiKey': apiKey,
+      'phone': phone,
       'isVideo': isVideo,
     });
     return await _controller.action(action);

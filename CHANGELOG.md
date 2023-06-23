@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.9.0
+  - Increase android/iOS core
+  - Support to listen audio change, get current audio
+  - Optimize call function
+  - Update sample
+
 ## 2.8.3
   - Increase android core
   - Update sample
