@@ -210,11 +210,12 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     incomingAcceptButtonImage = incomingAcceptButtonImage ?: "join_call",
                     incomingDeclineButtonImage = incomingDeclineButtonImage ?: "hangup",
                     backImage = backImage ?: "ic_back",
-                    userImage = userImage ?: "calling_face",
+                    userImage = userImage ?: "",
                     prefixMissedCallMessage = prefixMissedCallMessage ?: "Cuộc gọi nhỡ từ",
                     userNameKey = userNameKey ?: "",
                     channelId = channelId ?: "",
                     ringtone = null,
+                    fullScreenUserImage = userImage ?: "",
                 )
                 result.success(true)
             }
@@ -243,13 +244,15 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val usrUuid = dataOmi["usrUuid"] as? String
                     val apiKey = dataOmi["apiKey"] as? String
                     val isVideo = dataOmi["isVideo"] as? Boolean
+                    val phone = dataOmi["phone"] as? String
                     withContext(Dispatchers.Default) {
                         try {
-                            if (usrName != null && usrUuid != null && apiKey != null) {
+                            if (usrName != null && usrUuid != null && apiKey != null && phone != null) {
                                 loginResult = OmiClient.registerWithApiKey(
                                     apiKey = apiKey,
                                     userName = usrName,
                                     uuid = usrUuid,
+                                    phone = phone,
                                     isVideo ?: true,
                                 )
                             }
@@ -351,7 +354,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
             START_CALL_WITH_UUID -> {
                 mainScope.launch {
-                    var callResult : OmiStartCallStatus? = null
+                    var callResult: OmiStartCallStatus? = null
                     withContext(Dispatchers.Default) {
                         try {
                             val uuid = dataOmi["usrUuid"] as String

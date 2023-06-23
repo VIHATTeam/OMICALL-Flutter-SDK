@@ -66,8 +66,8 @@ class CallManager {
     func initWithApiKeyEndpoint(params: [String: Any]) -> Bool {
         //request permission
         var result = false
-        if let usrUuid = params["usrUuid"] as? String, let fullName = params["fullName"] as? String, let apiKey = params["apiKey"] as? String {
-            result = OmiClient.initWithUUID(usrUuid, fullName: fullName, apiKey: apiKey)
+        if let usrUuid = params["usrUuid"] as? String, let fullName = params["fullName"] as? String, let apiKey = params["apiKey"] as? String, let phone = params["phone"] as? String {
+            result = OmiClient.initWithUUIDAndPhone(usrUuid, fullName: fullName, apiKey: apiKey, phone: phone)
         }
         if (result) {
             let isVideo = (params["isVideo"] as? Bool) ?? true

@@ -24,8 +24,8 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
     ..text = Platform.isAndroid ? 'chau4' : 'chau2';
   late final TextEditingController _usrUuidController = TextEditingController()
     ..text = Platform.isAndroid
-        ? '124aaa'
-        : '123aaa';
+        ? '0961045000'
+        : '0961045000';
   late final TextEditingController _apiKeyController = TextEditingController()
     ..text = '';
   bool _supportVideoCall = true;
@@ -216,6 +216,7 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
       usrName: _userNameController.text,
       usrUuid: _usrUuidController.text,
       isVideo: _supportVideoCall,
+      phone: _usrUuidController.text,
       apiKey: _apiKeyController.text,
     );
     EasyLoading.dismiss();
