@@ -2,10 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+
 ## 2.9.0
   - Increase android/iOS core
   - Support to listen audio change, get current audio
   - Optimize call function
+
+## 2.8.3+2
+  - Increase android core
+  - Fix endTime for android
+  - Update sample
+
+## 2.8.3+1
+  - Increase android core
+  - Fix sendDTMF code for android
   - Update sample
 
 ## 2.8.3
