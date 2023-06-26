@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.9.1
+  - Support kotlin 1.6.10
+
 ## 2.9.0
   - Increase android/iOS core
   - Support to listen audio change, get current audio
