@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.9.2
+  - Increase iOS core
+
 ## 2.9.1
   - Support kotlin 1.6.10
 
