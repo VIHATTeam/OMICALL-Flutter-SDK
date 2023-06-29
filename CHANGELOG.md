@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.9.3
+  - Increase Android core
+
 ## 2.9.2
   - Increase iOS core
 

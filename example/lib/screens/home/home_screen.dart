@@ -140,6 +140,9 @@ class _HomeScreenState extends State<HomeScreen> {
           isOutGoingCall: false,
         );
       }
+     if (status == OmiCallState.disconnected.rawValue) {
+       debugPrint(data.toString());
+      }
     });
     checkSystemAlertPermission();
     OmicallClient.instance.setCallLogListener((data) {

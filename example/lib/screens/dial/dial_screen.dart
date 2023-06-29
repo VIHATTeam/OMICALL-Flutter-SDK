@@ -497,8 +497,6 @@ class DialScreenState extends State<DialScreen> {
   }) async {
     if (needRequest) {
       OmicallClient.instance.endCall().then((value) {
-        debugPrint("End calllllll");
-        debugPrint(value.toString());
       });
     }
     if (needShowStatus) {
