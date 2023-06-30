@@ -21,9 +21,9 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
   // NSString * PASS_WORD2 = @"Kunkun12345";
   //video
   late final TextEditingController _userNameController = TextEditingController()
-    ..text = Platform.isIOS ? '153' : '154';
+    ..text = Platform.isIOS ? '154' : '153';
   late final TextEditingController _passwordController = TextEditingController()
-    ..text = Platform.isIOS ? '4grlujhozW' : 'OdJBU8kFlE';
+    ..text = Platform.isIOS ? 'OdJBU8kFlE' : '4grlujhozW';
   late final TextEditingController _serviceUrlController =
       TextEditingController()..text = '';
   late final TextEditingController _hostUrlController = TextEditingController()
