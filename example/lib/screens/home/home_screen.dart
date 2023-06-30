@@ -48,7 +48,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final TextEditingController _phoneNumberController =
-      TextEditingController()..text = Platform.isAndroid ? '102' : '103';
+      TextEditingController()..text = Platform.isAndroid ? '154' : '153';
 
   // late final TextEditingController _phoneNumberController =
   // TextEditingController()..text = Platform.isAndroid ? '123aaa' : '122aaa';
