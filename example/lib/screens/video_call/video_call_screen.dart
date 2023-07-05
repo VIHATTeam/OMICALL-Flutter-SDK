@@ -328,6 +328,7 @@ class VideoCallState extends State<VideoCallScreen> {
                 ),
               ),
             if (_callStatus == OmiCallState.calling.rawValue ||
+                _callStatus == OmiCallState.incoming.rawValue ||
                 _callStatus == OmiCallState.early.rawValue)
               Positioned(
                 left: 0,
