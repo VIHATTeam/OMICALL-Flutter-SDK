@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.9.5
+  - Increase 1.5.63 version for iOS core
+
 ## 2.9.4
   - Increase iOS core
 
