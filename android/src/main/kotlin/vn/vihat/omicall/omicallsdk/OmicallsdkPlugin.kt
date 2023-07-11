@@ -203,6 +203,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val userImage = dataOmi["userImage"] as? String
                 val userNameKey = dataOmi["userNameKey"] as? String
                 val channelId = dataOmi["channelId"] as? String
+                val audioNotificationDescription = dataOmi["audioNotificationDescription"] as? String
+                val videoNotificationDescription = dataOmi["videoNotificationDescription"] as? String
                 OmiClient.instance.configPushNotification(
                     notificationIcon = notificationIcon ?: "",
                     prefix = prefix ?: "Cuộc gọi tới từ: ",
@@ -216,6 +218,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     channelId = channelId ?: "",
                     ringtone = null,
                     fullScreenUserImage = userImage ?: "",
+                    showUserInfoInFullScreen = false,
+                    audioNotificationDescription = audioNotificationDescription,
+                    videoNotificationDescription = videoNotificationDescription
                 )
                 result.success(true)
             }

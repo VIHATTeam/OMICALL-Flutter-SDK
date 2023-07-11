@@ -149,13 +149,16 @@ PKPushRegistry * voipRegistry;
 ```
 - Add these lines into `didFinishLaunchingWithOptions`:
 ```
-[OmiClient setEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX userNameKey:@"extension" maxCall:1];
+[OmiClient setEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX userNameKey:@"extension" maxCall:1 callKitImage: @"callkit_image"];
 provider = [[CallKitProviderDelegate alloc] initWithCallManager: [OMISIPLib sharedInstance].callManager];
 voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
 pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
 if (@available(iOS 10.0, *)) {
     [UNUserNotificationCenter currentNotificationCenter].delegate = (id<UNUserNotificationCenterDelegate>) self;
 }
+
+Notes:
+- To custom callkit image, you need add image into assets and paste image name into setEnviroment function.
 
 ```
 
@@ -221,10 +224,13 @@ var voipRegistry: PKPushRegistry?
 - Add these lines into `didFinishLaunchingWithOptions`:
 
 ```
-OmiClient.setEnviroment(KEY_OMI_APP_ENVIROMENT_SANDBOX, prefix: "", userNameKey: "extension", maxCall: 1)
+OmiClient.setEnviroment(KEY_OMI_APP_ENVIROMENT_SANDBOX, prefix: "", userNameKey: "extension", maxCall: 1, callKitImage: "callkit_image")
 provider = CallKitProviderDelegate.init(callManager: OMISIPLib.sharedInstance().callManager)
 voipRegistry = PKPushRegistry.init(queue: .main)
 pushkitManager = PushKitManager.init(voipRegistry: voipRegistry)
+
+Notes:
+- To custom callkit image, you need add image into assets and paste image name into setEnviroment function.
 ```
 
 ```
@@ -325,7 +331,9 @@ await Firebase.initializeApp();
       prefixMissedCallMessage: 'Cuộc gọi nhỡ từ' //config prefix message for the missed call
       missedCallTitle: 'Cuộc gọi nhỡ', //config title for the missed call
       userNameKey: 'uuid', //we have 3 values: uuid, full_name, extension
-      channelId: 'channelid.callnotification' // need to use call notification
+      channelId: 'channelid.callnotification' // need to use call notification,
+      audioNotificationDescription: "" //audio description
+      videoNotificationDescription: "" //video descriptipn
     );
     //incomingAcceptButtonImage, incomingDeclineButtonImage, backImage, userImage: Add these into `android/app/src/main/res/drawble`
     ```

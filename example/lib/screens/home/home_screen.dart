@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/video_call/video_call_screen.dart';
 import 'package:easy_dialog/easy_dialog.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/action/action_model.dart';
@@ -14,6 +15,7 @@ import 'package:permission_handler/permission_handler.dart';
 
 import '../../main.dart';
 import '../dial/dial_screen.dart';
+import '../login/login_apikey_screen.dart';
 import '../login/login_user_password_screen.dart';
 
 String statusToDescription(int status) {
@@ -69,6 +71,20 @@ class _HomeScreenState extends State<HomeScreen> {
   late StreamSubscription _subscription;
   GlobalKey<DialScreenState>? _dialScreenKey;
   GlobalKey<VideoCallState>? _videoScreenKey;
+
+  Future<void> requestFCM() async {
+    await FirebaseMessaging.instance.requestPermission(
+      alert: false,
+      badge: false,
+      sound: false,
+    );
+    final token = await FirebaseMessaging.instance.getToken();
+    String? apnToken;
+    await OmicallClient.instance.updateToken(
+      fcmToken: token,
+      apnsToken: apnToken,
+    );
+  }
 
   @override
   void initState() {
@@ -370,6 +386,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required int status,
     required bool isOutGoingCall,
   }) {
+    if (_videoScreenKey != null) { return; }
     _videoScreenKey = GlobalKey();
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
       return VideoCallScreen(
@@ -387,6 +404,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required int status,
     required bool isOutGoingCall,
   }) {
+    if (_dialScreenKey != null) { return; }
     _dialScreenKey = GlobalKey();
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
       return DialScreen(
