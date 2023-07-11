@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.9.6
+  - Increase core
+  - Allow to custom call description
+  - Allow to custom callkit icon
+  - Update sample
+
 ## 2.9.5
   - Increase 1.5.63 version for iOS core
 
