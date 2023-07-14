@@ -25,7 +25,7 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
   late final TextEditingController _passwordController = TextEditingController()
     ..text = Platform.isIOS ? 'OdJBU8kFlE' : '4grlujhozW';
   late final TextEditingController _serviceUrlController =
-      TextEditingController()..text = '';
+      TextEditingController()..text = 'devtestcallbot';
   late final TextEditingController _hostUrlController = TextEditingController()
     ..text = 'vh.omicrm.com';
 
