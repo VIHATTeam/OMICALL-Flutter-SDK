@@ -28,10 +28,13 @@ omicall_flutter_plugin: ^latest_version
 ```
 jcenter() 
 maven {
-    url("https://vihatgroup.jfrog.io/artifactory/omi-voice/")
-    credentials {
-        username = "downloader"
-        password = "Omi@2022"
+    url "https://gitlab.com/api/v4/projects/47675059/packages/maven"
+    credentials(HttpHeaderCredentials) {
+        name = "Private-Token"
+        value = "glpat-AzyyrvKz9_pjsgGW4xfp"
+    }
+    authentication {
+        header(HttpHeaderAuthentication)
     }
 }
 ```
@@ -48,11 +51,14 @@ allprojects {
         google()
         mavenCentral()
         jcenter() // Warning: this repository is going to shut down soon
-        maven {
-            url("https://vihatgroup.jfrog.io/artifactory/omi-voice/")
-            credentials {
-                username = "downloader"
-                password = "Omi@2022"
+         maven {
+            url "https://gitlab.com/api/v4/projects/47675059/packages/maven"
+            credentials(HttpHeaderCredentials) {
+                name = "Private-Token"
+                value = "glpat-AzyyrvKz9_pjsgGW4xfp"
+            }
+            authentication {
+                header(HttpHeaderAuthentication)
             }
         }
     }
