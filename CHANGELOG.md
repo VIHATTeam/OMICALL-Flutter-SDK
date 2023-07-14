@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.9.7
+  - Increase android core
+  - Update sample
+
 ## 2.9.6
   - Increase core
   - Allow to custom call description
