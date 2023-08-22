@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'action/action_model.dart';
@@ -157,12 +158,12 @@ class OmicallClient {
   }) async {
     final action =
         OmiAction(actionName: OmiActionName.INIT_CALL_USER_PASSWORD, data: {
-      'userName': userName,
-      'password': password,
-      'realm': realm,
-      'isVideo': isVideo,
-      'host': host,
-    });
+          'userName': userName,
+          'password': password,
+          'realm': realm,
+          'isVideo': isVideo,
+          'host': host,
+        });
     return await _controller.action(action);
   }
 
@@ -177,20 +178,26 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
-  Future<int> startCall(
+  Future<dynamic> startCall(
     String phoneNumber,
     bool isVideo,
   ) async {
     //check permission
-    final microphoneRequest = await Permission.microphone.request();
-    if (microphoneRequest.isGranted) {
-      final action = OmiAction(actionName: OmiActionName.START_CALL, data: {
+    // final microphoneRequest = await Permission.microphone.request();
+    // if (microphoneRequest.isGranted) {
+    //   final action = OmiAction(actionName: OmiActionName.START_CALL, data: {
+    //     'phoneNumber': phoneNumber,
+    //     'isVideo': isVideo,
+    //   });
+    //   return await _controller.action(action);
+    // }
+    // // return OmiStartCallStatus.permissionDenied.rawValue;
+    // return {"status":1, "callInfo": Null, "message": "FAIL"};
+    final action = OmiAction(actionName: OmiActionName.START_CALL, data: {
         'phoneNumber': phoneNumber,
         'isVideo': isVideo,
       });
       return await _controller.action(action);
-    }
-    return OmiStartCallStatus.permissionDenied.rawValue;
   }
 
   Future<int> startCallWithUUID(
