@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 2.9.9
+- Increase ios core
+- Add call info when start call, callStateChanged 
 ## 2.9.8
   - Increase ios core
 
