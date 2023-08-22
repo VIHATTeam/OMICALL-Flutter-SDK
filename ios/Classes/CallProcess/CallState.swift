@@ -6,6 +6,19 @@
 //
 
 import Foundation
+
+enum CallStateStatus: Int {
+    case null = 0
+    case calling = 1
+    case incoming = 2
+    case early = 3
+    case connecting = 4
+    case confirmed = 5
+    case disconnected = 6
+    case hold = 7
+    case disconnecting = 12
+}
+
 enum CallState: Int {
     case calling = 0
     case early

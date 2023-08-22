@@ -78,7 +78,7 @@ class CallManager {
     
     func initWithUserPasswordEndpoint(params: [String: Any]) -> Bool {
         if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String {
-            OmiClient.initWithUsername(userName, password: password, realm: realm)
+            OmiClient.initWithUsername(userName, password: password, realm: realm, proxy:"")
         }
         let isVideo = (params["isVideo"] as? Bool) ?? true
         requestPermission(isVideo: isVideo)
@@ -97,7 +97,7 @@ class CallManager {
                         let message = user.string(forKey: "omicall/prefixMissedCallMessage") ?? ""
                         let content      = UNMutableNotificationContent()
                         content.title    = title
-                        content.body = "\(message) \(call.callerNumber!)"
+                        content.body = "\(message) \(call.callerNumber ?? "")"
                         content.sound    = .default
                         content.userInfo = [
                             "callerNumber": call.callerNumber,
@@ -140,7 +140,46 @@ class CallManager {
             }
         }
     }
-    
+
+
+     func convertDictionaryToJson(dictionary: [String: Any]) -> String? {
+         do {
+             let jsonData = try JSONSerialization.data(withJSONObject: dictionary, options: [])
+             if let jsonString = String(data: jsonData, encoding: .utf8) {
+                 return jsonString
+             }
+         } catch {
+             print("Error converting dictionary to JSON: \(error.localizedDescription)")
+         }
+         return nil
+     }
+
+        private func messageCall(type: Int) -> String {
+            switch(type){
+                case 0:
+                    return "INVALID_UUID"
+                case 1:
+                     return "INVALID_PHONE_NUMBER"
+                case 2:
+                     return "SAME_PHONE_NUMBER_WITH_PHONE_REGISTER"
+                case 3:
+                    return "MAX_RETRY"
+                case 4:
+                    return "PERMISSION_DENIED"
+                case 5:
+                    return "COULD_NOT_FIND_END_POINT"
+                case 6:
+                    return "REGISTER_ACCOUNT_FAIL"
+                case 7:
+                    return "START_CALL_FAIL"
+                case 9:
+                    return "HAVE_ANOTHER_CALL"
+                default:
+                    return "START_CALL_SUCCESS"
+            }
+        }
+
+
     func registerVideoEvent() {
         DispatchQueue.main.async {
             NotificationCenter.default.addObserver(CallManager.instance!,
@@ -214,49 +253,30 @@ class CallManager {
               let callState = userInfo[OMINotificationUserInfoCallStateKey] as? Int else {
             return;
         }
+       
+        var dataToSend: [String: Any] = [
+            "status": callState,
+            "callInfo": "",
+        ]
+        
+        if(call != nil){
+            dataToSend["callInfo"] = String(describing: OmiCallModel(omiCall: call))
+        }
+        
+        SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, dataToSend)
+
+       
         switch (callState) {
-        case OMICallState.calling.rawValue:
-            var callInfo = baseInfoFromCall(call: call)
-            callInfo["status"] = CallState.calling.rawValue
-            SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
-            break
-        case OMICallState.early.rawValue:
-            var callInfo = baseInfoFromCall(call: call)
-            callInfo["status"] = CallState.early.rawValue
-            SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
-            break
-        case OMICallState.connecting.rawValue:
-            var callInfo = baseInfoFromCall(call: call)
-            callInfo["status"] = CallState.connecting.rawValue
-            SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
-            break
-        case OMICallState.hold.rawValue:
-            var callInfo = baseInfoFromCall(call: call)
-            callInfo["status"] = CallState.hold.rawValue
-            SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
-            break
         case OMICallState.confirmed.rawValue:
             if (videoManager == nil && call.isVideo) {
                 videoManager = OMIVideoViewManager.init()
             }
             isSpeaker = call.isVideo
             lastStatusCall = "answered"
-            var callInfo = baseInfoFromCall(call: call)
-            callInfo["status"] = CallState.confirmed.rawValue
-            SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
             SwiftOmikitPlugin.instance.sendMuteStatus()
             break
         case OMICallState.incoming.rawValue:
             guestPhone = call.callerNumber ?? ""
-            DispatchQueue.main.async {[weak self] in
-                guard let self = self else { return }
-                let state: UIApplication.State = UIApplication.shared.applicationState
-                if (state == .active) {
-                    var callInfo = self.baseInfoFromCall(call: call)
-                    callInfo["status"] = CallState.incoming.rawValue
-                    SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, callInfo)
-                }
-            }
             break
         case OMICallState.disconnected.rawValue:
             tempCallInfo = getCallInfo(call: call)
@@ -266,7 +286,6 @@ class CallManager {
             lastStatusCall = nil
             guestPhone = ""
             tempCallInfo!["status"] = CallState.disconnected.rawValue
-            SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, tempCallInfo!)
             tempCallInfo = nil
             break
         default:
@@ -295,28 +314,49 @@ class CallManager {
     }
     
     /// Start call
-    func startCall(_ phoneNumber: String, isVideo: Bool, completion: @escaping (_ : Int) -> Void) {
+    func startCall(_ phoneNumber: String, isVideo: Bool, completion: @escaping (_ : String) -> Void) {
         guestPhone = phoneNumber
-        OmiClient.startCall(phoneNumber, isVideo: isVideo) { status in
-            DispatchQueue.main.async {
-                completion(status.rawValue)
+        DispatchQueue.main.async {
+            OmiClient.startCall(phoneNumber, isVideo: isVideo) { statusCall in
+                let callCurrent = self.omiLib.getCurrentCall()
+                let dataToSend: [String: Any] = [
+                    "status": statusCall.rawValue,
+                    "callInfo": String(describing: OmiCallModel(omiCall: callCurrent!)),
+                    "message": self.messageCall(type: statusCall.rawValue)
+                ]
+                if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
+                    completion(jsonString)
+                } else {
+                    completion("Conversion to JSON failed")
+                }
+            
             }
         }
     }
     
     /// Start call
-    func startCallWithUuid(_ uuid: String, isVideo: Bool, completion: @escaping (_ : Int) -> Void) {
+    func startCallWithUuid(_ uuid: String, isVideo: Bool, completion: @escaping (_ : String) -> Void) {
         let phoneNumber = OmiClient.getPhone(uuid)
         if let phone = phoneNumber {
             guestPhone = phoneNumber ?? ""
-            OmiClient.startCall(phone, isVideo: isVideo) { status in
-                DispatchQueue.main.async {
-                    completion(status.rawValue)
+            DispatchQueue.main.async {
+                OmiClient.startCall(phone, isVideo: isVideo) { statusCall in
+                    let callCurrent = self.omiLib.getCurrentCall()
+                    let dataToSend: [String: Any] = [
+                        "status": statusCall.rawValue,
+                        "callInfo": String(describing: OmiCallModel(omiCall: callCurrent!)),
+                        "message": self.messageCall(type: statusCall.rawValue)
+                    ]
+                    if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
+                        completion(jsonString)
+                    } else {
+                        completion("Conversion to JSON failed")
+                    }
                 }
             }
-            return
+            
         }
-        completion(OMIStartCallStatus.invalidUuid.rawValue)
+      
     }
     
     func endAvailableCall() -> [String: Any] {
