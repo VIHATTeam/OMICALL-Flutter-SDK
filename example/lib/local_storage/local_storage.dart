@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalStorage {
@@ -7,7 +7,7 @@ class LocalStorage {
   static final instance = LocalStorage._();
 
   Future<Map?> loginInfo() async {
-    final prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     final loginInfoString = prefs.getString("login_info");
     if  (loginInfoString != null) {
       return json.decode(loginInfoString);
@@ -16,7 +16,7 @@ class LocalStorage {
   }
 
   Future<void> setLoginInfo(Map<String, dynamic> loginInfo) async {
-    final prefs = await SharedPreferences.getInstance();
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
     final loginInfoString = json.encode(loginInfo);
     await prefs.setString("login_info", loginInfoString);
   }

@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/video_call/video_call_screen.dart';
@@ -50,7 +51,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final TextEditingController _phoneNumberController =
-      TextEditingController()..text = Platform.isAndroid ? '154' : '153';
+      TextEditingController()..text = Platform.isAndroid ? '100' : '100';
 
   // late final TextEditingController _phoneNumberController =
   // TextEditingController()..text = Platform.isAndroid ? '123aaa' : '122aaa';
@@ -106,11 +107,13 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
+          debugPrint("omiAction  OmicallClient ::: $omiAction");
       if (omiAction.actionName != OmiEventList.onCallStateChanged) {
         return;
       }
       final data = omiAction.data;
       final status = data["status"] as int;
+          debugPrint("status  OmicallClient ::: $status");
       if (status == OmiCallState.incoming.rawValue ||
           status == OmiCallState.hold.rawValue) {
         final transactionId = data["transactionId"];
