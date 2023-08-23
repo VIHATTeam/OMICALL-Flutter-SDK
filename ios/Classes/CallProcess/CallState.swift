@@ -16,7 +16,7 @@ enum CallStateStatus: Int {
     case confirmed = 5
     case disconnected = 6
     case hold = 7
-    case disconnecting = 12
+    // case disconnecting = 12 // not use
 }
 
 enum CallState: Int {

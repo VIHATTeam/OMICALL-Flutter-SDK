@@ -78,9 +78,10 @@ android {
 }
 
 dependencies {
-    api 'vn.vihat.omicall:omi-sdk:1.4.49'
+    api 'vn.vihat.omicall:omi-sdk:1.4.65'
 //    implementation fileTree(include: ['*.jar'], dir: 'libs')
 //    implementation files('OmiSDK.aar')
+    implementation "com.google.android.flexbox:flexbox:3.0.0"
     implementation 'androidx.appcompat:appcompat:1.5.0'
     implementation 'com.google.android.material:material:1.6.1'
     implementation 'com.google.firebase:firebase-messaging-ktx:23.1.2'

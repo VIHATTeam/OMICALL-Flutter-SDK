@@ -46,15 +46,18 @@ class DialScreenState extends State<DialScreen> {
   @override
   void initState() {
     _callStatus = widget.status;
+    debugPrint("status _callStatus omiAction::: $_callStatus");
     if (widget.status == OmiCallState.confirmed.rawValue) {
       _startWatch();
     }
     super.initState();
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
+          debugPrint("status OmicallClient omiAction::: $omiAction");
       if (omiAction.actionName == OmiEventList.onCallStateChanged) {
         final data = omiAction.data;
         final status = data["status"] as int;
+        debugPrint("status OmicallClient ::: $status");
         updateDialScreen(status);
         if (status == OmiCallState.disconnected.rawValue) {
           endCall(
