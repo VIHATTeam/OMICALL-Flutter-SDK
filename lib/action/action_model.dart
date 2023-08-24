@@ -131,11 +131,12 @@ class OmiCallModel {
 }
 
 class CallResponse {
-  final String status;
+  late final String status;
   final dynamic callInfo;
-  final String message;
+  late final String message;
 
   CallResponse({required this.status, this.callInfo, required this.message});
+  // CallResponse({required this.status, required this.message});
 
   factory CallResponse.fromJson(Map<String, dynamic> json) {
     return CallResponse(

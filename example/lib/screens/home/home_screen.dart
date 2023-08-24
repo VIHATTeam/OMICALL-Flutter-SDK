@@ -13,7 +13,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/action/action_model.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 import 'package:permission_handler/permission_handler.dart';
-
+import 'dart:io' show Platform;
 import '../../main.dart';
 import '../dial/dial_screen.dart';
 import '../login/login_apikey_screen.dart';
@@ -431,23 +431,36 @@ class _HomeScreenState extends State<HomeScreen> {
       phone,
       _isVideoCall,
     );
-    debugPrint("result makeCall 0::: --- $result");
+
     EasyLoading.dismiss();
     Map<String, dynamic> jsonMap = {};
+    bool callStatus = false;
+    String messageError = "";
+    if(Platform.isAndroid) {
+      result.split(', ').forEach((item) {
+        final keyValue = item.split(': ');
+        jsonMap[keyValue[0]] = keyValue[1] == 'null' ? null : keyValue[1];
+      });
+      CallResponse callResponse = CallResponse.fromJson(jsonMap);
+      if (int.parse(callResponse.status) == OmiStartCallStatus.startCallSuccess.rawValue){
+        callStatus = true;
+      }
+      messageError = callResponse.message;
 
-    result.split(', ').forEach((item) {
-      final keyValue = item.split(': ');
-      jsonMap[keyValue[0]] = keyValue[1] == 'null' ? null : keyValue[1];
-    });
+    }
 
-    CallResponse callResponse = CallResponse.fromJson(jsonMap);
+    if(Platform.isIOS) {
+      jsonMap = json.decode(result);
+      messageError = jsonMap['message'];
+      String callInfo = jsonMap['callInfo']; // Đây là chuỗi JSON, bạn có thể xử lý nó sau
+      int status = jsonMap['status'];
+      if(status == OmiStartCallStatus.startCallSuccess.rawValue){
+        callStatus = true;
+      }
+    }
 
-    print('status: ${callResponse.status}');
-    print('callInfo: ${callResponse.callInfo}');
-    print('message: ${callResponse.message}');
 
-    debugPrint("result jsonMap::: --- ${callResponse} --- ${callResponse.status}");
-    if (int.parse(callResponse.status) == OmiStartCallStatus.startCallSuccess.rawValue ) {
+    if (callStatus) {
       if (_isVideoCall) {
         pushToVideoScreen(
           phone,
@@ -464,7 +477,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       EasyDialog(
         title: const Text("Notification"),
-        description: Text("Error code ${callResponse.message}"),
+        description: Text("Error code ${messageError}"),
       ).show(context);
     }
     // OmicallClient.instance.startCallWithUUID(
