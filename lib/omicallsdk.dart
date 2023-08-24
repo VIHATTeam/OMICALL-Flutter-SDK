@@ -182,21 +182,11 @@ class OmicallClient {
     String phoneNumber,
     bool isVideo,
   ) async {
-    //check permission
-    // final microphoneRequest = await Permission.microphone.request();
-    // if (microphoneRequest.isGranted) {
-    //   final action = OmiAction(actionName: OmiActionName.START_CALL, data: {
-    //     'phoneNumber': phoneNumber,
-    //     'isVideo': isVideo,
-    //   });
-    //   return await _controller.action(action);
-    // }
-    // // return OmiStartCallStatus.permissionDenied.rawValue;
-    // return {"status":1, "callInfo": Null, "message": "FAIL"};
-    final action = OmiAction(actionName: OmiActionName.START_CALL, data: {
+    final action = await OmiAction(actionName: OmiActionName.START_CALL, data: {
         'phoneNumber': phoneNumber,
         'isVideo': isVideo,
       });
+    print("action call zzz:    ${action}");
       return await _controller.action(action);
   }
 

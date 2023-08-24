@@ -163,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
        debugPrint(data.toString());
       }
     });
-    checkSystemAlertPermission();
+    // checkSystemAlertPermission();
     OmicallClient.instance.setCallLogListener((data) {
       final callerNumber = data["callerNumber"];
       final isVideo = data["isVideo"];
@@ -431,8 +431,23 @@ class _HomeScreenState extends State<HomeScreen> {
       phone,
       _isVideoCall,
     );
+    debugPrint("result makeCall 0::: --- $result");
     EasyLoading.dismiss();
-    if (result == OmiStartCallStatus.startCallSuccess.rawValue) {
+    Map<String, dynamic> jsonMap = {};
+
+    result.split(', ').forEach((item) {
+      final keyValue = item.split(': ');
+      jsonMap[keyValue[0]] = keyValue[1] == 'null' ? null : keyValue[1];
+    });
+
+    CallResponse callResponse = CallResponse.fromJson(jsonMap);
+
+    print('status: ${callResponse.status}');
+    print('callInfo: ${callResponse.callInfo}');
+    print('message: ${callResponse.message}');
+
+    debugPrint("result jsonMap::: --- ${callResponse} --- ${callResponse.status}");
+    if (int.parse(callResponse.status) == OmiStartCallStatus.startCallSuccess.rawValue ) {
       if (_isVideoCall) {
         pushToVideoScreen(
           phone,
@@ -449,7 +464,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       EasyDialog(
         title: const Text("Notification"),
-        description: Text("Error code $result"),
+        description: Text("Error code ${callResponse.message}"),
       ).show(context);
     }
     // OmicallClient.instance.startCallWithUUID(

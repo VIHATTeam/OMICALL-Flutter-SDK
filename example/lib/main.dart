@@ -14,9 +14,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides();
   await Firebase.initializeApp();
-  final loginInfo = await LocalStorage.instance.loginInfo();
+  // final Loc = await LocalStorage.instance.loginInfo();
   runApp(MyApp(
-    loginInfo: loginInfo,
+    loginInfo: null,
   ));
 }
 
