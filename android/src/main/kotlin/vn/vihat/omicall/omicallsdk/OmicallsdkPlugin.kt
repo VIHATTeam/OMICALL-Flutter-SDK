@@ -42,33 +42,14 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private val mainScope = CoroutineScope(Dispatchers.Main)
 
     override fun incomingReceived(callerId: Int?, phoneNumber: String?, isVideo: Boolean?) {
-        Handler(Looper.getMainLooper()).post {
-            channel.invokeMethod(
-                CALL_STATE_CHANGED, mapOf(
-                    "isVideo" to isVideo,
-                    "status" to CallState.incoming.value,
-                    "callerNumber" to phoneNumber,
-                )
+        Log.d("SDK", "incomingReceived -> callerId=$callerId, phoneNumber=$phoneNumber")
+        channel.invokeMethod(
+            CALL_STATE_CHANGED, mapOf(
+                "isVideo" to isVideo,
+                "status" to CallState.incoming.value,
+                "callerNumber" to phoneNumber,
             )
-        }
-    }
-
-    override fun networkHealth(stat: Map<String, *>, quality: Int) {
-        channel.invokeMethod(CALL_QUALITY, mapOf(
-            "quality" to quality,
-            "stat" to stat,
-        ))
-    }
-
-    override fun onAudioChanged(audioInfo: Map<String, Any>) {
-        channel.invokeMethod(AUDIO_CHANGE, mapOf(
-            "data" to audioInfo,
-        ))
-    }
-
-    override fun onCallEnd(callInfo: MutableMap<String, Any?>, statusCode: Int) {
-        callInfo["status"] = CallState.disconnected.value
-        channel.invokeMethod(CALL_STATE_CHANGED, callInfo)
+        )
     }
 
     override fun onCallEstablished(
@@ -78,6 +59,17 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         startTime: Long,
         transactionId: String?,
     ) {
+        Log.d("SDK", "onCallEstablished -> callerId=$callerId, phoneNumber=$phoneNumber")
+//        Handler(Looper.getMainLooper()).post {
+//        channel.invokeMethod(
+//            CALL_STATE_CHANGED, mapOf(
+//                "callerNumber" to phoneNumber,
+//                "status" to CallState.confirmed.value,
+//                "isVideo" to isVideo,
+//                "transactionId" to transactionId,
+//            )
+//        )
+//        });
         Handler(Looper.getMainLooper()).postDelayed({
             Log.d("aaaa", transactionId ?: "")
             channel.invokeMethod(
@@ -92,33 +84,17 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         Log.d("omikit", "onCallEstablished: ")
     }
 
+    override fun onCallEnd(callInfo: MutableMap<String, Any?>, statusCode: Int) {
+        Log.d("SDK", "onCallEnd -> callInfo=$callInfo, statusCode=$statusCode")
+        callInfo["status"] = CallState.disconnected.value
+        channel.invokeMethod(CALL_STATE_CHANGED, callInfo)
+    }
+
     override fun onConnecting() {
         channel.invokeMethod(
             CALL_STATE_CHANGED, mapOf(
                 "status" to CallState.connecting.value,
                 "isVideo" to NotificationService.isVideo,
-                "callerNumber" to "",
-            )
-        )
-    }
-
-    override fun onHold(isHold: Boolean) {
-    }
-
-    override fun onMuted(isMuted: Boolean) {
-        channel.invokeMethod(
-            MUTED, mapOf(
-                "isMuted" to isMuted,
-            )
-        )
-        Log.d("omikit", "onMuted: $isMuted")
-    }
-
-    override fun onOutgoingStarted(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
-        channel.invokeMethod(
-            CALL_STATE_CHANGED, mapOf(
-                "status" to CallState.calling.value,
-                "isVideo" to isVideo,
                 "callerNumber" to "",
             )
         )
@@ -134,6 +110,41 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         )
     }
 
+    override fun onOutgoingStarted(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
+        channel.invokeMethod(
+            CALL_STATE_CHANGED, mapOf(
+                "status" to CallState.calling.value,
+                "isVideo" to isVideo,
+                "callerNumber" to "",
+            )
+        )
+    }
+
+    override fun networkHealth(stat: Map<String, *>, quality: Int) {
+        channel.invokeMethod(CALL_QUALITY, mapOf(
+            "quality" to quality,
+            "stat" to stat,
+        ))
+    }
+
+    override fun onAudioChanged(audioInfo: Map<String, Any>) {
+        channel.invokeMethod(AUDIO_CHANGE, mapOf(
+            "data" to audioInfo,
+        ))
+    }
+
+    override fun onHold(isHold: Boolean) {
+    }
+
+    override fun onMuted(isMuted: Boolean) {
+        channel.invokeMethod(
+            MUTED, mapOf(
+                "isMuted" to isMuted,
+            )
+        )
+        Log.d("omikit", "onMuted: $isMuted")
+    }
+
     override fun onSwitchBoardAnswer(sip: String) {
         channel.invokeMethod(
             SWITCHBOARD_ANSWER, mapOf(
@@ -142,9 +153,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         )
     }
 
-    override fun onVideoSize(width: Int, height: Int) {
-
-    }
+    override fun onVideoSize(width: Int, height: Int) {  }
 
     private val accountListener = object : OmiAccountListener {
         override fun onAccountStatus(online: Boolean) {
@@ -152,25 +161,31 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
     }
 
-
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        applicationContext = flutterPluginBinding.applicationContext
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "omicallsdk")
-        channel.setMethodCallHandler(this)
-        flutterPluginBinding
-            .platformViewRegistry
-            .registerViewFactory(
-                "omicallsdk/local_camera_view",
-                FLLocalCameraFactory(flutterPluginBinding.binaryMessenger)
-            )
-        flutterPluginBinding
-            .platformViewRegistry
-            .registerViewFactory(
-                "omicallsdk/remote_camera_view",
-                FLRemoteCameraFactory(flutterPluginBinding.binaryMessenger)
-            )
-        OmiClient(applicationContext!!)
-        OmiClient.instance.addCallStateListener(this)
+        try {
+            applicationContext = flutterPluginBinding.applicationContext
+            channel = MethodChannel(flutterPluginBinding.binaryMessenger, "omicallsdk")
+            channel.setMethodCallHandler(this)
+            flutterPluginBinding
+                .platformViewRegistry
+                .registerViewFactory(
+                    "omicallsdk/local_camera_view",
+                    FLLocalCameraFactory(flutterPluginBinding.binaryMessenger)
+                )
+            flutterPluginBinding
+                .platformViewRegistry
+                .registerViewFactory(
+                    "omicallsdk/remote_camera_view",
+                    FLRemoteCameraFactory(flutterPluginBinding.binaryMessenger)
+                )
+
+            Log.d("SDK", "onAttachedToEngine!")
+
+            OmiClient(applicationContext!!)
+            OmiClient.instance.addCallStateListener(this)
+        } catch(e: Throwable) {
+            e.printStackTrace()
+        }
     }
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
@@ -178,6 +193,23 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             handleAction(call, result)
         }
     }
+
+    private fun messageCall(type: Int): String {
+        return when (type) {
+            0 -> "INVALID_UUID"
+            1 -> "INVALID_PHONE_NUMBER"
+            2 -> "SAME_PHONE_NUMBER_WITH_PHONE_REGISTER"
+            3 -> "MAX_RETRY"
+            4 -> "PERMISSION_DENIED"
+            5 -> "COULD_NOT_FIND_END_POINT"
+            6 -> "REGISTER_ACCOUNT_FAIL"
+            7 -> "START_CALL_FAIL"
+            8 -> "START_CALL_SUCCESS"
+            9 -> "HAVE_ANOTHER_CALL"
+            else -> "START_CALL_SUCCESS"
+        }
+    }
+
 
     @Suppress("UNCHECKED_CAST")
     private fun handleAction(call: MethodCall, result: Result) {
@@ -194,6 +226,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
             CONFIG_NOTIFICATION -> {
                 val notificationIcon = dataOmi["notificationIcon"] as? String
+                Log.d("dataOmi", "notificationIcon $dataOmi")
                 val prefix = dataOmi["prefix"] as? String
                 val incomingBackgroundColor = dataOmi["incomingBackgroundColor"] as? String
                 val incomingAcceptButtonImage = dataOmi["incomingAcceptButtonImage"] as? String
@@ -203,24 +236,40 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val userImage = dataOmi["userImage"] as? String
                 val userNameKey = dataOmi["userNameKey"] as? String
                 val channelId = dataOmi["channelId"] as? String
+                val missedCallTitle = dataOmi["missedCallTitle"] as? String
                 val audioNotificationDescription = dataOmi["audioNotificationDescription"] as? String
                 val videoNotificationDescription = dataOmi["videoNotificationDescription"] as? String
+//                OmiClient.instance.configPushNotification(
+//                    notificationIcon = notificationIcon ?: "",
+//                    prefix = prefix ?: "Cuộc gọi tới từ: ",
+//                    incomingBackgroundColor = incomingBackgroundColor ?: "#FFFFFFFF",
+//                    incomingAcceptButtonImage = incomingAcceptButtonImage ?: "join_call",
+//                    incomingDeclineButtonImage = incomingDeclineButtonImage ?: "hangup",
+//                    backImage = backImage ?: "ic_back",
+//                    userImage = userImage ?: "",
+//                    prefixMissedCallMessage = prefixMissedCallMessage ?: "Cuộc gọi nhỡ từ",
+//                    userNameKey = userNameKey ?: "",
+//                    channelId = channelId ?: "",
+//                    ringtone = null,
+//                    fullScreenUserImage = userImage ?: "",
+//                    showUserInfoInFullScreen = false,
+//                    audioNotificationDescription = audioNotificationDescription,
+//                    videoNotificationDescription = videoNotificationDescription
+//                )
                 OmiClient.instance.configPushNotification(
-                    notificationIcon = notificationIcon ?: "",
-                    prefix = prefix ?: "Cuộc gọi tới từ: ",
-                    incomingBackgroundColor = incomingBackgroundColor ?: "#FFFFFFFF",
-                    incomingAcceptButtonImage = incomingAcceptButtonImage ?: "join_call",
-                    incomingDeclineButtonImage = incomingDeclineButtonImage ?: "hangup",
-                    backImage = backImage ?: "ic_back",
-                    userImage = userImage ?: "",
-                    prefixMissedCallMessage = prefixMissedCallMessage ?: "Cuộc gọi nhỡ từ",
-                    userNameKey = userNameKey ?: "",
                     channelId = channelId ?: "",
-                    ringtone = null,
-                    fullScreenUserImage = userImage ?: "",
-                    showUserInfoInFullScreen = false,
+                    notificationIcon = notificationIcon ?: "",
+                    notificationAvatar = userImage ?: "",
+                    fullScreenAvatar = userImage ?: "",
+                    deniedCallTitle = "Cuộc gọi đã từ chối từ ",
+                    showMissedCall = false,
+                    fullScreenUserImageSize = 96,
                     audioNotificationDescription = audioNotificationDescription,
-                    videoNotificationDescription = videoNotificationDescription
+                    videoNotificationDescription = videoNotificationDescription,
+                    notificationDescriptionFontSize = 8F,
+                    videoCallText = "Gọi Video",
+                    internalCallText = "Gọi nội bộ",
+                    inboundCallText = prefix,
                 )
                 result.success(true)
             }
@@ -265,7 +314,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
                         }
                     }
-                    requestPermission(isVideo ?: true)
+//                    requestPermission(isVideo ?: true)
                     result.success(loginResult)
                 }
             }
@@ -292,7 +341,15 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val phoneNumber = dataOmi["phoneNumber"] as String
                 val isVideo = dataOmi["isVideo"] as Boolean
                 val startCallResult = OmiClient.instance.startCall(phoneNumber, isVideo)
-                result.success(startCallResult.value)
+                val dataSend = mapOf(
+                    "status" to startCallResult.value ,
+                    "callInfo" to "null",
+                    "message" to messageCall(startCallResult.value),
+                )
+                val dataSendResult = dataSend.entries.joinToString(", ") { (key, value) ->
+                    "$key: ${value ?: "null"}"
+                }
+                result.success(dataSendResult)
             }
             JOIN_CALL -> {
                 OmiClient.instance.pickUp()
@@ -433,25 +490,30 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+        Log.d("SDK", "onDetachedFromEngine!")
         channel.setMethodCallHandler(null)
         OmiClient.instance.removeCallStateListener(this)
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        Log.d("SDK", "onAttachedToActivity!")
         binding.addOnNewIntentListener(this)
         activity = binding.activity as FlutterActivity
     }
 
     override fun onDetachedFromActivity() {
+        Log.d("SDK", "onDetachedFromActivity!")
         activity = null
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        Log.d("SDK", "onReattachedToActivityForConfigChanges!")
         binding.addOnNewIntentListener(this)
         activity = binding.activity as FlutterActivity
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
+        Log.d("SDK", "onDetachedFromActivityForConfigChanges!")
         activity = null
     }
 
@@ -483,11 +545,15 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permissions = permissions.plus(Manifest.permission.POST_NOTIFICATIONS)
         }
-        requestPermissions(
-            activity!!,
-            permissions,
-            0,
-        )
+        if(activity!=null){
+            requestPermissions(
+                activity!!,
+                permissions,
+                0,
+            )
+        } else {
+            Log.d("OMISDK", "requestPermission -> activity empty!")
+        }
     }
 
     override fun onNewIntent(intent: Intent): Boolean {
@@ -503,4 +569,5 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
         return false
     }
+
 }
