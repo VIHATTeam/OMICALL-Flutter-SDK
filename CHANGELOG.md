@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+
+## 3.0.1
+  - Add more info call when end call in ios  
+
 ## 3.0.0
   - Increase android core
   - Hot fix flow android / ios 
