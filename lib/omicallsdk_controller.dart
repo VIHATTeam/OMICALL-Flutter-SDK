@@ -25,6 +25,7 @@ class OmicallSDKController {
     _methodChannel.setMethodCallHandler((call) async {
       final method = call.method;
       final data = call.arguments;
+      debugPrint("method OmicallSDKController:: ${method}");
       if (method == OmiEventList.onMuted) {
         if (muteListener != null) {
           muteListener!(data);

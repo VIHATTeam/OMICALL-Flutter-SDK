@@ -129,3 +129,19 @@ class OmiCallModel {
     );
   }
 }
+
+class CallResponse {
+  final String status;
+  final dynamic callInfo;
+  final String message;
+
+  CallResponse({required this.status, this.callInfo, required this.message});
+
+  factory CallResponse.fromJson(Map<String, dynamic> json) {
+    return CallResponse(
+      status: json['status'],
+      callInfo: json['callInfo'],
+      message: json['message'],
+    );
+  }
+}

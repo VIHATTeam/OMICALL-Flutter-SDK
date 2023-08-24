@@ -42,6 +42,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private val mainScope = CoroutineScope(Dispatchers.Main)
 
     override fun incomingReceived(callerId: Int?, phoneNumber: String?, isVideo: Boolean?) {
+        Log.d("SDK", "incomingReceived -> callerId=$callerId, phoneNumber=$phoneNumber")
         channel.invokeMethod(
             CALL_STATE_CHANGED, mapOf(
                 "isVideo" to isVideo,
@@ -58,17 +59,33 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         startTime: Long,
         transactionId: String?,
     ) {
-        channel.invokeMethod(
-            CALL_STATE_CHANGED, mapOf(
-                "callerNumber" to phoneNumber,
-                "status" to CallState.confirmed.value,
-                "isVideo" to isVideo,
-                "transactionId" to transactionId,
+        Log.d("SDK", "onCallEstablished -> callerId=$callerId, phoneNumber=$phoneNumber")
+//        Handler(Looper.getMainLooper()).post {
+//        channel.invokeMethod(
+//            CALL_STATE_CHANGED, mapOf(
+//                "callerNumber" to phoneNumber,
+//                "status" to CallState.confirmed.value,
+//                "isVideo" to isVideo,
+//                "transactionId" to transactionId,
+//            )
+//        )
+//        });
+        Handler(Looper.getMainLooper()).postDelayed({
+            Log.d("aaaa", transactionId ?: "")
+            channel.invokeMethod(
+                CALL_STATE_CHANGED, mapOf(
+                    "callerNumber" to phoneNumber,
+                    "status" to CallState.confirmed.value,
+                    "isVideo" to isVideo,
+                    "transactionId" to transactionId,
+                )
             )
-        )
+        }, 500)
+        Log.d("omikit", "onCallEstablished: ")
     }
 
     override fun onCallEnd(callInfo: MutableMap<String, Any?>, statusCode: Int) {
+        Log.d("SDK", "onCallEnd -> callInfo=$callInfo, statusCode=$statusCode")
         callInfo["status"] = CallState.disconnected.value
         channel.invokeMethod(CALL_STATE_CHANGED, callInfo)
     }
@@ -145,23 +162,30 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-        applicationContext = flutterPluginBinding.applicationContext
-        channel = MethodChannel(flutterPluginBinding.binaryMessenger, "omicallsdk")
-        channel.setMethodCallHandler(this)
-        flutterPluginBinding
-            .platformViewRegistry
-            .registerViewFactory(
-                "omicallsdk/local_camera_view",
-                FLLocalCameraFactory(flutterPluginBinding.binaryMessenger)
-            )
-        flutterPluginBinding
-            .platformViewRegistry
-            .registerViewFactory(
-                "omicallsdk/remote_camera_view",
-                FLRemoteCameraFactory(flutterPluginBinding.binaryMessenger)
-            )
-        OmiClient(applicationContext!!)
-        OmiClient.instance.addCallStateListener(this)
+        try {
+            applicationContext = flutterPluginBinding.applicationContext
+            channel = MethodChannel(flutterPluginBinding.binaryMessenger, "omicallsdk")
+            channel.setMethodCallHandler(this)
+            flutterPluginBinding
+                .platformViewRegistry
+                .registerViewFactory(
+                    "omicallsdk/local_camera_view",
+                    FLLocalCameraFactory(flutterPluginBinding.binaryMessenger)
+                )
+            flutterPluginBinding
+                .platformViewRegistry
+                .registerViewFactory(
+                    "omicallsdk/remote_camera_view",
+                    FLRemoteCameraFactory(flutterPluginBinding.binaryMessenger)
+                )
+
+            Log.d("SDK", "onAttachedToEngine!")
+
+            OmiClient(applicationContext!!)
+            OmiClient.instance.addCallStateListener(this)
+        } catch(e: Throwable) {
+            e.printStackTrace()
+        }
     }
 
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
@@ -169,6 +193,23 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             handleAction(call, result)
         }
     }
+
+    private fun messageCall(type: Int): String {
+        return when (type) {
+            0 -> "INVALID_UUID"
+            1 -> "INVALID_PHONE_NUMBER"
+            2 -> "SAME_PHONE_NUMBER_WITH_PHONE_REGISTER"
+            3 -> "MAX_RETRY"
+            4 -> "PERMISSION_DENIED"
+            5 -> "COULD_NOT_FIND_END_POINT"
+            6 -> "REGISTER_ACCOUNT_FAIL"
+            7 -> "START_CALL_FAIL"
+            8 -> "START_CALL_SUCCESS"
+            9 -> "HAVE_ANOTHER_CALL"
+            else -> "START_CALL_SUCCESS"
+        }
+    }
+
 
     @Suppress("UNCHECKED_CAST")
     private fun handleAction(call: MethodCall, result: Result) {
@@ -300,7 +341,15 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val phoneNumber = dataOmi["phoneNumber"] as String
                 val isVideo = dataOmi["isVideo"] as Boolean
                 val startCallResult = OmiClient.instance.startCall(phoneNumber, isVideo)
-                result.success(startCallResult.value)
+                val dataSend = mapOf(
+                    "status" to startCallResult.value ,
+                    "callInfo" to "null",
+                    "message" to messageCall(startCallResult.value),
+                )
+                val dataSendResult = dataSend.entries.joinToString(", ") { (key, value) ->
+                    "$key: ${value ?: "null"}"
+                }
+                result.success(dataSendResult)
             }
             JOIN_CALL -> {
                 OmiClient.instance.pickUp()
@@ -441,25 +490,30 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
+        Log.d("SDK", "onDetachedFromEngine!")
         channel.setMethodCallHandler(null)
         OmiClient.instance.removeCallStateListener(this)
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        Log.d("SDK", "onAttachedToActivity!")
         binding.addOnNewIntentListener(this)
         activity = binding.activity as FlutterActivity
     }
 
     override fun onDetachedFromActivity() {
+        Log.d("SDK", "onDetachedFromActivity!")
         activity = null
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        Log.d("SDK", "onReattachedToActivityForConfigChanges!")
         binding.addOnNewIntentListener(this)
         activity = binding.activity as FlutterActivity
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
+        Log.d("SDK", "onDetachedFromActivityForConfigChanges!")
         activity = null
     }
 
@@ -515,4 +569,5 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         }
         return false
     }
+
 }
