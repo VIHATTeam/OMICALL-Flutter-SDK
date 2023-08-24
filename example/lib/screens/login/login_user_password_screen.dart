@@ -21,11 +21,11 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
   // NSString * PASS_WORD2 = @"Kunkun12345";
   //video
   late final TextEditingController _userNameController = TextEditingController()
-    ..text = Platform.isIOS ? '154' : '153';
+    ..text = Platform.isIOS ? '101' : '101';
   late final TextEditingController _passwordController = TextEditingController()
-    ..text = Platform.isIOS ? 'OdJBU8kFlE' : '4grlujhozW';
+    ..text = Platform.isIOS ? 'M1zx7YyK30' : 'M1zx7YyK30';
   late final TextEditingController _serviceUrlController =
-      TextEditingController()..text = 'devtestcallbot';
+      TextEditingController()..text = 'hungth12';
   late final TextEditingController _hostUrlController = TextEditingController()
     ..text = 'vh.omicrm.com';
 
@@ -239,12 +239,12 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
       isVideo: _supportVideoCall,
     );
 
-    await LocalStorage.instance.setLoginInfo({
-      "userName": _userNameController.text,
-      "password": _passwordController.text,
-      "realm": _serviceUrlController.text,
-      "isVideo": _supportVideoCall,
-    });
+    // await LocalStorage.instance.setLoginInfo({
+    //   "userName": _userNameController.text,
+    //   "password": _passwordController.text,
+    //   "realm": _serviceUrlController.text,
+    //   "isVideo": _supportVideoCall,
+    // });
     EasyLoading.dismiss();
     if (!mounted) {
       return;

@@ -224,12 +224,12 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
     if (result == false) {
       return;
     }
-    await LocalStorage.instance.setLoginInfo({
-      "usrName": _userNameController.text,
-      "usrUuid": _usrUuidController.text,
-      "isVideo": _supportVideoCall,
-      "apiKey": _apiKeyController.text,
-    });
+    // await LocalStorage.instance.setLoginInfo({
+    //   "usrName": _userNameController.text,
+    //   "usrUuid": _usrUuidController.text,
+    //   "isVideo": _supportVideoCall,
+    //   "apiKey": _apiKeyController.text,
+    // });
 
     if (!mounted) {
       return;

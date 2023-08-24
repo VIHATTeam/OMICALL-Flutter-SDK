@@ -46,15 +46,19 @@ class DialScreenState extends State<DialScreen> {
   @override
   void initState() {
     _callStatus = widget.status;
+    debugPrint("status _callStatus omiAction::: $_callStatus");
+    debugPrint("status _callStatus omiAction::: ${widget.status}");
     if (widget.status == OmiCallState.confirmed.rawValue) {
       _startWatch();
     }
     super.initState();
-    _subscription =
-        OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
+    debugPrint("status zoo  ::: ");
+    _subscription = OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
+          debugPrint("status callStateChangeEvent omiAction::: ${omiAction.actionName}");
       if (omiAction.actionName == OmiEventList.onCallStateChanged) {
         final data = omiAction.data;
         final status = data["status"] as int;
+        debugPrint("status OmicallClient ::: $status");
         updateDialScreen(status);
         if (status == OmiCallState.disconnected.rawValue) {
           endCall(
@@ -361,7 +365,7 @@ class DialScreenState extends State<DialScreen> {
                             color: kGreenColor,
                             iconColor: Colors.white,
                           ),
-                        if (_callStatus > OmiCallState.calling.rawValue)
+                        if (_callStatus > OmiCallState.unknown.rawValue)
                           RoundedCircleButton(
                             iconSrc: "assets/icons/call_end.svg",
                             press: () {

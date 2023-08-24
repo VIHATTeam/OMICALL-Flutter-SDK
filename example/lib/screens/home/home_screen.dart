@@ -2,6 +2,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/video_call/video_call_screen.dart';
@@ -12,7 +13,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/action/action_model.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 import 'package:permission_handler/permission_handler.dart';
-
+import 'dart:io' show Platform;
 import '../../main.dart';
 import '../dial/dial_screen.dart';
 import '../login/login_apikey_screen.dart';
@@ -50,7 +51,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final TextEditingController _phoneNumberController =
-      TextEditingController()..text = Platform.isAndroid ? '154' : '153';
+      TextEditingController()..text = Platform.isAndroid ? '100' : '100';
 
   // late final TextEditingController _phoneNumberController =
   // TextEditingController()..text = Platform.isAndroid ? '123aaa' : '122aaa';
@@ -106,11 +107,13 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
+          debugPrint("omiAction  OmicallClient ::: $omiAction");
       if (omiAction.actionName != OmiEventList.onCallStateChanged) {
         return;
       }
       final data = omiAction.data;
       final status = data["status"] as int;
+          debugPrint("status  OmicallClient ::: $status");
       if (status == OmiCallState.incoming.rawValue ||
           status == OmiCallState.hold.rawValue) {
         final transactionId = data["transactionId"];
@@ -160,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
        debugPrint(data.toString());
       }
     });
-    checkSystemAlertPermission();
+    // checkSystemAlertPermission();
     OmicallClient.instance.setCallLogListener((data) {
       final callerNumber = data["callerNumber"];
       final isVideo = data["isVideo"];
@@ -428,8 +431,36 @@ class _HomeScreenState extends State<HomeScreen> {
       phone,
       _isVideoCall,
     );
+
     EasyLoading.dismiss();
-    if (result == OmiStartCallStatus.startCallSuccess.rawValue) {
+    Map<String, dynamic> jsonMap = {};
+    bool callStatus = false;
+    String messageError = "";
+    if(Platform.isAndroid) {
+      result.split(', ').forEach((item) {
+        final keyValue = item.split(': ');
+        jsonMap[keyValue[0]] = keyValue[1] == 'null' ? null : keyValue[1];
+      });
+      CallResponse callResponse = CallResponse.fromJson(jsonMap);
+      if (int.parse(callResponse.status) == OmiStartCallStatus.startCallSuccess.rawValue){
+        callStatus = true;
+      }
+      messageError = callResponse.message;
+
+    }
+
+    if(Platform.isIOS) {
+      jsonMap = json.decode(result);
+      messageError = jsonMap['message'];
+      String callInfo = jsonMap['callInfo']; // Đây là chuỗi JSON, bạn có thể xử lý nó sau
+      int status = jsonMap['status'];
+      if(status == OmiStartCallStatus.startCallSuccess.rawValue){
+        callStatus = true;
+      }
+    }
+
+
+    if (callStatus) {
       if (_isVideoCall) {
         pushToVideoScreen(
           phone,
@@ -446,7 +477,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       EasyDialog(
         title: const Text("Notification"),
-        description: Text("Error code $result"),
+        description: Text("Error code ${messageError}"),
       ).show(context);
     }
     // OmicallClient.instance.startCallWithUUID(
