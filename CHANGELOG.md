@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.0.0
+  - Increase android core
+  - Hot fix flow android / ios 
+
+
+
 ## 2.9.9
 - Increase ios core
 - Add call info when start call, callStateChanged 
