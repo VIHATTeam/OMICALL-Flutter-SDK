@@ -7,7 +7,6 @@ All notable changes to this project will be documented in this file.
   - Hot fix flow android / ios 
 
 
-
 ## 2.9.9
 - Increase ios core
 - Add call info when start call, callStateChanged 
