@@ -241,9 +241,38 @@ class CallManager {
     }
     
     @objc func callDealloc(_ notification: NSNotification) {
-        if (tempCallInfo != nil) {
-            tempCallInfo!["status"] = CallState.disconnected.rawValue
-            SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, tempCallInfo!)
+        DispatchQueue.main.async {
+            guard let userInfo = notification.userInfo as? [String: Any], let endCause = userInfo[OMINotificationEndCauseKey] as? Int else {
+                return
+            }
+            
+            var dataToSend: [String: Any] = [
+                "status": OMICallState.disconnected.rawValue,
+                "callInfo": "",
+                "message":"",
+                "codeEndCall": endCause
+            ]
+            
+            switch endCause {
+                case 487:
+                    dataToSend["message"] = "REQUEST_TERMINATED"
+                case 486:
+                    dataToSend["message"] = "BUSY"
+                case 600, 503:
+                    dataToSend["message"] = "BUSY_EVERYWHERE"
+                case 480:
+                    dataToSend["message"] = "BUSY"
+                case 408:
+                    dataToSend["message"] = "REQUEST_TIME_OUT"
+                case 403:
+                    dataToSend["message"] = "YOUR_SERVICE_PLAN_ONLY_ALLOW_CALLS_TO_DIALED_NUMBER"
+                case 603:
+                    dataToSend["message"] = "THE_CALL_WAS_REJECTED"
+                default:
+                    dataToSend["message"] = "UNKNOW"
+            }
+            
+            SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, dataToSend)
         }
     }
     
