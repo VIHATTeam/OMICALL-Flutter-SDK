@@ -289,7 +289,10 @@ class CallManager {
         ]
         
         if(call != nil){
-            dataToSend["callInfo"] = String(describing: OmiCallModel(omiCall: call))
+            dataToSend["callInfo"] = String(describing: OmiCallModel(omiCall: call));
+            if(call.isIncoming && callState == OMICallState.early.rawValue){
+                dataToSend["status"] = OMICallState.incoming.rawValue
+            }
         }
 
         if (callState != OMICallState.disconnected.rawValue) {
