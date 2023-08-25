@@ -20,7 +20,7 @@ class CallManager {
     var isSpeaker = false
     private var guestPhone : String = ""
     private var lastStatusCall : String?
-    private var tempCallInfo : [String: Any]?
+    private var tempCallInfo : [String: Any] = [:]
     
     /// Get instance
     static func shareInstance() -> CallManager {
@@ -291,9 +291,10 @@ class CallManager {
         if(call != nil){
             dataToSend["callInfo"] = String(describing: OmiCallModel(omiCall: call))
         }
-        
-        SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, dataToSend)
 
+        if (callState != OMICallState.disconnected.rawValue) {
+            SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, dataToSend)
+        }
        
         switch (callState) {
         case OMICallState.confirmed.rawValue:
@@ -308,14 +309,18 @@ class CallManager {
             guestPhone = call.callerNumber ?? ""
             break
         case OMICallState.disconnected.rawValue:
-            tempCallInfo = getCallInfo(call: call)
+            tempCallInfo = getCallInfo(call: call) ?? [:]
             if (videoManager != nil) {
                 videoManager = nil
             }
             lastStatusCall = nil
             guestPhone = ""
-            tempCallInfo!["status"] = CallState.disconnected.rawValue
-            tempCallInfo = nil
+            var combinedDictionary: [String: Any] = dataToSend
+            if (tempCallInfo.count > 0) {
+                combinedDictionary.merge(tempCallInfo, uniquingKeysWith: { (_, new) in new })
+            }
+             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, dataToSend )
+            tempCallInfo = [:]
             break
         default:
             break
@@ -338,7 +343,7 @@ class CallManager {
             "time_start_to_answer" : call.createDate,
             "time_end" : timeEnd,
             "sip_user": OmiClient.getCurrentSip(),
-            "disposition" : lastStatusCall == nil ? "no_answered" : "answered",
+            "disposition" : lastStatusCall == nil ? "no_answered" : "answered"
         ]
     }
     
@@ -399,7 +404,7 @@ class CallManager {
 //        print(call.uuid)
         tempCallInfo = getCallInfo(call: call)
         omiLib.callManager.endActiveCall()
-        return tempCallInfo!
+        return tempCallInfo
     }
     
     
