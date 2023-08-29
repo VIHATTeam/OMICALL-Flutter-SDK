@@ -3,6 +3,9 @@
 All notable changes to this project will be documented in this file.
 
 
+## 3.0.2
+- Increase ios core
+- Add more field for android/ios 
 
 ## 3.0.1
   - Add more info call when end call in ios  

@@ -286,6 +286,7 @@ class CallManager {
         var dataToSend: [String: Any] = [
             "status": callState,
             "callInfo": "",
+            "incoming": false
         ]
         
         if(call != nil){
@@ -293,6 +294,7 @@ class CallManager {
             if(call.isIncoming && callState == OMICallState.early.rawValue){
                 dataToSend["status"] = OMICallState.incoming.rawValue
             }
+            dataToSend["incoming"] = call.isIncoming
         }
 
         if (callState != OMICallState.disconnected.rawValue) {
