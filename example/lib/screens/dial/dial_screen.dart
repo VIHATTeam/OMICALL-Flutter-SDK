@@ -52,9 +52,9 @@ class DialScreenState extends State<DialScreen> {
       _startWatch();
     }
     super.initState();
-    debugPrint("status zoo  ::: ");
     _subscription = OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
           debugPrint("status callStateChangeEvent omiAction::: ${omiAction.actionName}");
+          debugPrint("status callStateChangeEvent omiAction::: ${omiAction.data}");
       if (omiAction.actionName == OmiEventList.onCallStateChanged) {
         final data = omiAction.data;
         final status = data["status"] as int;
@@ -82,7 +82,7 @@ class DialScreenState extends State<DialScreen> {
     });
     OmicallClient.instance.getCurrentAudio().then((value) {
       setState(() {
-        _currentAudio = value.first;
+        _currentAudio = value?.first;
       });
     });
     OmicallClient.instance.setCallQualityListener((data) {
