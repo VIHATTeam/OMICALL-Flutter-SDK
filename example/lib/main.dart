@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:calling/local_storage/local_storage.dart';
+import 'package:calling/screens/HomeLoginScreen.dart';
 import 'package:calling/screens/home/home_screen.dart';
 import 'package:calling/screens/login/login_apikey_screen.dart';
 import 'package:calling/screens/login/login_user_password_screen.dart';
@@ -62,7 +63,7 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         theme: ThemeData.light(),
         home:
-            loginInfo != null ? const HomeScreen() : const LoginUserPasswordScreen(),
+            loginInfo != null ? const HomeScreen() : const HomeLoginScreen(),
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
       ),
