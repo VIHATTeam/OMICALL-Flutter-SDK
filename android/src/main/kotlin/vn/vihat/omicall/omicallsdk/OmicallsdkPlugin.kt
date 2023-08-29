@@ -31,6 +31,7 @@ import vn.vihat.omicall.omisdk.utils.OmiSDKUtils
 import vn.vihat.omicall.omisdk.utils.OmiStartCallStatus
 import vn.vihat.omicall.omisdk.utils.SipServiceConstants
 import java.util.*
+import com.google.gson.Gson
 
 /** OmicallsdkPlugin */
 class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
@@ -40,14 +41,18 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private var activity: FlutterActivity? = null
     private var applicationContext: Context? = null
     private val mainScope = CoroutineScope(Dispatchers.Main)
+    private var isIncomming: Boolean = false
 
     override fun incomingReceived(callerId: Int?, phoneNumber: String?, isVideo: Boolean?) {
         Log.d("SDK", "incomingReceived -> callerId=$callerId, phoneNumber=$phoneNumber")
+        isIncomming = true;
         channel.invokeMethod(
             CALL_STATE_CHANGED, mapOf(
                 "isVideo" to isVideo,
                 "status" to CallState.incoming.value,
                 "callerNumber" to phoneNumber,
+                "callInfo" to OmiClient.instance.getCurrentCallInfo(),
+                "incoming" to isIncomming
             )
         )
     }
@@ -78,6 +83,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     "status" to CallState.confirmed.value,
                     "isVideo" to isVideo,
                     "transactionId" to transactionId,
+                    "incoming" to isIncomming
                 )
             )
         }, 500)
@@ -88,6 +94,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         Log.d("SDK", "onCallEnd -> callInfo=$callInfo, statusCode=$statusCode")
         callInfo["status"] = CallState.disconnected.value
         channel.invokeMethod(CALL_STATE_CHANGED, callInfo)
+        isIncomming = false;
     }
 
     override fun onConnecting() {
@@ -96,6 +103,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 "status" to CallState.connecting.value,
                 "isVideo" to NotificationService.isVideo,
                 "callerNumber" to "",
+                "incoming" to isIncomming
             )
         )
     }
@@ -106,16 +114,19 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 "status" to CallState.early.value,
                 "isVideo" to NotificationService.isVideo,
                 "callerNumber" to "",
+                "incoming" to isIncomming
             )
         )
     }
 
     override fun onOutgoingStarted(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
+        isIncomming = false;
         channel.invokeMethod(
             CALL_STATE_CHANGED, mapOf(
                 "status" to CallState.calling.value,
                 "isVideo" to isVideo,
                 "callerNumber" to "",
+                "incoming" to isIncomming
             )
         )
     }
@@ -346,10 +357,13 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     "callInfo" to "null",
                     "message" to messageCall(startCallResult.value),
                 )
-                val dataSendResult = dataSend.entries.joinToString(", ") { (key, value) ->
-                    "$key: ${value ?: "null"}"
-                }
-                result.success(dataSendResult)
+                val gson = Gson()
+//                val dataSendResult = dataSend.entries.joinToString(", ") { (key, value) ->
+//                    "$key: ${value ?: "null"}"
+//                }
+
+                val jsonData = gson.toJson(dataSend)
+                result.success(jsonData)
             }
             JOIN_CALL -> {
                 OmiClient.instance.pickUp()

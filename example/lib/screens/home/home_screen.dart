@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/video_call/video_call_screen.dart';
@@ -18,6 +19,8 @@ import '../../main.dart';
 import '../dial/dial_screen.dart';
 import '../login/login_apikey_screen.dart';
 import '../login/login_user_password_screen.dart';
+import 'package:flutter/material.dart';
+
 
 String statusToDescription(int status) {
   if (status == OmiCallState.calling.rawValue) {
@@ -51,7 +54,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final TextEditingController _phoneNumberController =
-      TextEditingController()..text = Platform.isAndroid ? '100' : '100';
+      TextEditingController()..text = Platform.isAndroid ? '167631' : '167631';
 
   // late final TextEditingController _phoneNumberController =
   // TextEditingController()..text = Platform.isAndroid ? '123aaa' : '122aaa';
@@ -107,19 +110,35 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
+          postData(jsonEncode(omiAction));
           debugPrint("omiAction  OmicallClient ::: $omiAction");
       if (omiAction.actionName != OmiEventList.onCallStateChanged) {
         return;
       }
       final data = omiAction.data;
+          debugPrint("data  OmicallClient  zzz ::: $data");
       final status = data["status"] as int;
-          debugPrint("status  OmicallClient ::: $status");
+          debugPrint("status  OmicallClient  zzz ::: $status");
       if (status == OmiCallState.incoming.rawValue ||
-          status == OmiCallState.hold.rawValue) {
-        final transactionId = data["transactionId"];
-        debugPrint("transactionId $transactionId");
-        final callerNumber = data["callerNumber"];
-        final bool isVideo = data["isVideo"];
+          status == OmiCallState.confirmed.rawValue) {
+        debugPrint("data  OmicallClient  zzz ::: $data");
+        // final jsonObject = jsonDecode(data as String);
+        final callInfoExists = data.containsKey('callInfo');
+
+        bool isVideo = false;
+        var callerNumber = "";
+        // debugPrint("status  data  zzz ::: $data");
+        // debugPrint("status  callInfo  zzz ::: $callInfo");
+        if (callInfoExists && Platform.isIOS) {
+          final callInfo = data['callInfo'] as String;
+          if (callInfo != null) {
+            RegExp regExp = RegExp(r"isVideo:\s*([^\s,]+)");
+            Match? match = regExp.firstMatch(callInfo);
+            String? isVideoString = match?.group(1)!;
+            isVideo = isVideoString == "true";
+          }
+        }
+
         if (isVideo) {
           pushToVideoScreen(
             callerNumber,
@@ -409,6 +428,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }) {
     if (_dialScreenKey != null) { return; }
     _dialScreenKey = GlobalKey();
+    print("Pussh to screen");
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
       return DialScreen(
         key: _dialScreenKey,
@@ -419,6 +439,30 @@ class _HomeScreenState extends State<HomeScreen> {
     })).then((value) {
       _dialScreenKey = null;
     });
+  }
+
+  void postData(String param) async {
+    try {
+      final response = await http.post(
+        Uri.parse('https://enx490iha5mem.x.pipedream.net'),
+        headers: {"Content-Type": "application/json"},
+        body: param, // Your JSON data here
+      );
+
+      // if (response.statusCode == 200) {
+      //   setState(() {
+      //     responseText = "POST request successful: ${response.body}";
+      //   });
+      // } else {
+      //   setState(() {
+      //     responseText = "POST request failed with status: ${response.statusCode}";
+      //   });
+      // }
+    } catch (e) {
+      // setState(() {
+      //   responseText = "An error occurred: $e";
+      // });
+    }
   }
 
   Future<void> makeCall(BuildContext context) async {
@@ -436,27 +480,14 @@ class _HomeScreenState extends State<HomeScreen> {
     Map<String, dynamic> jsonMap = {};
     bool callStatus = false;
     String messageError = "";
-    if(Platform.isAndroid) {
-      result.split(', ').forEach((item) {
-        final keyValue = item.split(': ');
-        jsonMap[keyValue[0]] = keyValue[1] == 'null' ? null : keyValue[1];
-      });
-      CallResponse callResponse = CallResponse.fromJson(jsonMap);
-      if (int.parse(callResponse.status) == OmiStartCallStatus.startCallSuccess.rawValue){
-        callStatus = true;
-      }
-      messageError = callResponse.message;
+    debugPrint("result  OmicallClient  zzz ::: $result");
 
-    }
-
-    if(Platform.isIOS) {
-      jsonMap = json.decode(result);
-      messageError = jsonMap['message'];
-      String callInfo = jsonMap['callInfo']; // Đây là chuỗi JSON, bạn có thể xử lý nó sau
-      int status = jsonMap['status'];
-      if(status == OmiStartCallStatus.startCallSuccess.rawValue){
-        callStatus = true;
-      }
+    jsonMap = json.decode(result);
+    messageError = jsonMap['message'];
+    String callInfo = jsonMap['callInfo'];
+    int status = jsonMap['status'];
+    if(status == OmiStartCallStatus.startCallSuccess.rawValue){
+      callStatus = true;
     }
 
 
