@@ -324,7 +324,7 @@ class CallManager {
             if (tempCallInfo.count > 0) {
                 combinedDictionary.merge(tempCallInfo, uniquingKeysWith: { (_, new) in new })
             }
-             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, dataToSend )
+             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, combinedDictionary )
             tempCallInfo = [:]
             break
         default:
