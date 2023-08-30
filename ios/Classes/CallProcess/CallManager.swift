@@ -248,7 +248,7 @@ class CallManager {
             
             var dataToSend: [String: Any] = [
                 "status": OMICallState.disconnected.rawValue,
-                "callInfo": "",
+                "_id": "",
                 "message":"",
                 "codeEndCall": endCause
             ]
@@ -286,15 +286,24 @@ class CallManager {
         var dataToSend: [String: Any] = [
             "status": callState,
             "callInfo": "",
-            "incoming": false
+            "incoming": false,
+            "callerNumber": "",
+            "isVideo": false,
+            "transactionId": "",
+            "_id": ""
         ]
-        
+
         if(call != nil){
-            dataToSend["callInfo"] = String(describing: OmiCallModel(omiCall: call));
             if(call.isIncoming && callState == OMICallState.early.rawValue){
                 dataToSend["status"] = OMICallState.incoming.rawValue
             }
+//            let callTemp =OmiCallModel(omiCall: call)
+
+            dataToSend["_id"] = String(describing: OmiCallModel(omiCall: call).uuid)
             dataToSend["incoming"] = call.isIncoming
+            dataToSend["callerNumber"] = String(describing: call.callerNumber )
+            dataToSend["isVideo"] = call.isVideo
+            dataToSend["transactionId"] =  String(describing: call.omiId )
         }
 
         if (callState != OMICallState.disconnected.rawValue) {
@@ -358,9 +367,9 @@ class CallManager {
         DispatchQueue.main.async {
             OmiClient.startCall(phoneNumber, isVideo: isVideo) { statusCall in
                 let callCurrent = self.omiLib.getCurrentCall()
-                let dataToSend: [String: Any] = [
+                var dataToSend: [String: Any] = [
                     "status": statusCall.rawValue,
-                    "callInfo": String(describing: OmiCallModel(omiCall: callCurrent!)),
+                    "_id":  String(describing: OmiCallModel(omiCall: callCurrent!).uuid),
                     "message": self.messageCall(type: statusCall.rawValue)
                 ]
                 if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
@@ -381,11 +390,12 @@ class CallManager {
             DispatchQueue.main.async {
                 OmiClient.startCall(phone, isVideo: isVideo) { statusCall in
                     let callCurrent = self.omiLib.getCurrentCall()
-                    let dataToSend: [String: Any] = [
+                    var dataToSend: [String: Any] = [
                         "status": statusCall.rawValue,
-                        "callInfo": String(describing: OmiCallModel(omiCall: callCurrent!)),
+                        "_id": String(describing: OmiCallModel(omiCall: callCurrent!).uuid),
                         "message": self.messageCall(type: statusCall.rawValue)
                     ]
+ 
                     if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
                         completion(jsonString)
                     } else {

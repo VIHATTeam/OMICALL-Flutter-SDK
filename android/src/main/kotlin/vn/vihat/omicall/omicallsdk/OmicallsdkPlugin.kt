@@ -51,7 +51,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 "isVideo" to isVideo,
                 "status" to CallState.incoming.value,
                 "callerNumber" to phoneNumber,
-                "callInfo" to OmiClient.instance.getCurrentCallInfo(),
+                "_id" to "",
                 "incoming" to isIncomming
             )
         )
@@ -103,7 +103,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 "status" to CallState.connecting.value,
                 "isVideo" to NotificationService.isVideo,
                 "callerNumber" to "",
-                "incoming" to isIncomming
+                "incoming" to isIncomming,
+                "_id" to ""
             )
         )
     }
@@ -114,7 +115,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 "status" to CallState.early.value,
                 "isVideo" to NotificationService.isVideo,
                 "callerNumber" to "",
-                "incoming" to isIncomming
+                "incoming" to isIncomming,
+                "_id" to ""
             )
         )
     }
@@ -126,7 +128,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 "status" to CallState.calling.value,
                 "isVideo" to isVideo,
                 "callerNumber" to "",
-                "incoming" to isIncomming
+                "incoming" to isIncomming,
+                "_id" to ""
             )
         )
     }
@@ -354,7 +357,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val startCallResult = OmiClient.instance.startCall(phoneNumber, isVideo)
                 val dataSend = mapOf(
                     "status" to startCallResult.value ,
-                    "callInfo" to "null",
+                    "_id" to "",
                     "message" to messageCall(startCallResult.value),
                 )
                 val gson = Gson()
