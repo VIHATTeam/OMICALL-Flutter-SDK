@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.0.3
+- Add information when end call in ios
+
 
 ## 3.0.2
 - Increase ios core
