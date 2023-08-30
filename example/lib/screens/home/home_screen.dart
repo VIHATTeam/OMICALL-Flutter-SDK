@@ -122,22 +122,11 @@ class _HomeScreenState extends State<HomeScreen> {
       if (status == OmiCallState.incoming.rawValue ||
           status == OmiCallState.confirmed.rawValue) {
         debugPrint("data  OmicallClient  zzz ::: $data");
-        // final jsonObject = jsonDecode(data as String);
-        final callInfoExists = data.containsKey('callInfo');
 
-        bool isVideo = false;
+        bool isVideo = data['isVideo'] as bool;
         var callerNumber = "";
-        // debugPrint("status  data  zzz ::: $data");
-        // debugPrint("status  callInfo  zzz ::: $callInfo");
-        if (callInfoExists && Platform.isIOS) {
-          final callInfo = data['callInfo'] as String;
-          if (callInfo != null) {
-            RegExp regExp = RegExp(r"isVideo:\s*([^\s,]+)");
-            Match? match = regExp.firstMatch(callInfo);
-            String? isVideoString = match?.group(1)!;
-            isVideo = isVideoString == "true";
-          }
-        }
+        // bool isVideo =false;
+
 
         if (isVideo) {
           pushToVideoScreen(
@@ -484,7 +473,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     jsonMap = json.decode(result);
     messageError = jsonMap['message'];
-    String callInfo = jsonMap['callInfo'];
     int status = jsonMap['status'];
     if(status == OmiStartCallStatus.startCallSuccess.rawValue){
       callStatus = true;
