@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.0.5
+- Fix issues call 503 in ios 
+
+
 ## 3.0.4
 - Format data android/ios
 
