@@ -12,6 +12,7 @@ import SwiftUI
 import AVFoundation
 import OmiKit
 
+
 class CallManager {
     
     static private var instance: CallManager? = nil // Instance
@@ -21,7 +22,9 @@ class CallManager {
     private var guestPhone : String = ""
     private var lastStatusCall : String?
     private var tempCallInfo : [String: Any] = [:]
-    
+    private var lastTimeCall : Date = Date()
+    private var firstCall : Bool = true
+
     /// Get instance
     static func shareInstance() -> CallManager {
         if (instance == nil) {
@@ -333,7 +336,8 @@ class CallManager {
             if (tempCallInfo.count > 0) {
                 combinedDictionary.merge(tempCallInfo, uniquingKeysWith: { (_, new) in new })
             }
-             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, combinedDictionary )
+            SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, combinedDictionary )
+            lastTimeCall = Date()
             tempCallInfo = [:]
             break
         default:
@@ -363,23 +367,45 @@ class CallManager {
     
     /// Start call
     func startCall(_ phoneNumber: String, isVideo: Bool, completion: @escaping (_ : String) -> Void) {
-        guestPhone = phoneNumber
-        DispatchQueue.main.async {
-            OmiClient.startCall(phoneNumber, isVideo: isVideo) { statusCall in
-                let callCurrent = self.omiLib.getCurrentCall()
-                var dataToSend: [String: Any] = [
-                    "status": statusCall.rawValue,
-                    "_id":  String(describing: OmiCallModel(omiCall: callCurrent!).uuid),
-                    "message": self.messageCall(type: statusCall.rawValue)
-                ]
-                if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
-                    completion(jsonString)
-                } else {
-                    completion("Conversion to JSON failed")
+        guestPhone = phoneNumber;
+        let secondsSinceCurrentTime = lastTimeCall.timeIntervalSinceNow
+
+        if (Int(secondsSinceCurrentTime) < 10 && !firstCall) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + (10 + secondsSinceCurrentTime)) {
+               OmiClient.startCall(phoneNumber, isVideo: isVideo) { statusCall in
+                                   let callCurrent = self.omiLib.getCurrentCall()
+                                   var dataToSend: [String: Any] = [
+                                       "status": statusCall.rawValue,
+                                       "_id":  String(describing: OmiCallModel(omiCall: callCurrent!).uuid),
+                                       "message": self.messageCall(type: statusCall.rawValue)
+                                   ]
+                                   if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
+                                       completion(jsonString)
+                                   } else {
+                                       completion("Conversion to JSON failed")
+                                   }
+
+                 }
+            }
+        } else {
+            DispatchQueue.main.async {
+                OmiClient.startCall(phoneNumber, isVideo: isVideo) { statusCall in
+                    let callCurrent = self.omiLib.getCurrentCall()
+                    var dataToSend: [String: Any] = [
+                        "status": statusCall.rawValue,
+                        "_id":  String(describing: OmiCallModel(omiCall: callCurrent!).uuid),
+                        "message": self.messageCall(type: statusCall.rawValue)
+                    ]
+                    if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
+                        completion(jsonString)
+                    } else {
+                        completion("Conversion to JSON failed")
+                    }
+
                 }
-            
             }
         }
+                        firstCall = false
     }
     
     /// Start call
@@ -387,19 +413,39 @@ class CallManager {
         let phoneNumber = OmiClient.getPhone(uuid)
         if let phone = phoneNumber {
             guestPhone = phoneNumber ?? ""
-            DispatchQueue.main.async {
-                OmiClient.startCall(phone, isVideo: isVideo) { statusCall in
-                    let callCurrent = self.omiLib.getCurrentCall()
-                    var dataToSend: [String: Any] = [
-                        "status": statusCall.rawValue,
-                        "_id": String(describing: OmiCallModel(omiCall: callCurrent!).uuid),
-                        "message": self.messageCall(type: statusCall.rawValue)
-                    ]
- 
-                    if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
-                        completion(jsonString)
-                    } else {
-                        completion("Conversion to JSON failed")
+            let secondsSinceCurrentTime = lastTimeCall.timeIntervalSinceNow
+            if (Int(secondsSinceCurrentTime) < 10 && !firstCall) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + (10 + secondsSinceCurrentTime)) {
+                         OmiClient.startCall(phone, isVideo: isVideo) { statusCall in
+                                            let callCurrent = self.omiLib.getCurrentCall()
+                                            var dataToSend: [String: Any] = [
+                                                "status": statusCall.rawValue,
+                                                "_id": String(describing: OmiCallModel(omiCall: callCurrent!).uuid),
+                                                "message": self.messageCall(type: statusCall.rawValue)
+                                            ]
+
+                                            if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
+                                                completion(jsonString)
+                                            } else {
+                                                completion("Conversion to JSON failed")
+                                            }
+                                        }
+                        }
+            } else {
+                DispatchQueue.main.async {
+                    OmiClient.startCall(phone, isVideo: isVideo) { statusCall in
+                        let callCurrent = self.omiLib.getCurrentCall()
+                        var dataToSend: [String: Any] = [
+                            "status": statusCall.rawValue,
+                            "_id": String(describing: OmiCallModel(omiCall: callCurrent!).uuid),
+                            "message": self.messageCall(type: statusCall.rawValue)
+                        ]
+
+                        if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
+                            completion(jsonString)
+                        } else {
+                            completion("Conversion to JSON failed")
+                        }
                     }
                 }
             }

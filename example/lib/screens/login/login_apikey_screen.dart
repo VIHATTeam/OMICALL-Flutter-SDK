@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:calling/local_storage/local_storage.dart';
@@ -5,6 +6,10 @@ import 'package:calling/screens/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
+
+import '../dial/Dial_Screen_2.dart';
+import '../dial/dial_screen.dart';
+import '../video_call/video_call_screen.dart';
 
 class LoginApiKeyScreen extends StatefulWidget {
   const LoginApiKeyScreen({Key? key}) : super(key: key);
@@ -28,6 +33,10 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
     ..text = 'E7AF81703203FC31F5658FAF3B875149CD57368ED07DB4AF414D93D3D2EBC76E';
 
   bool _supportVideoCall = true;
+  bool _isVideoCall = false;
+  late StreamSubscription _subscription;
+  GlobalKey<DialScreenState>? _dialScreenKey;
+  GlobalKey<VideoCallState>? _videoScreenKey;
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,
     fontSize: 16,
@@ -234,8 +243,14 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
       return;
     }
     Navigator.push(context, MaterialPageRoute(builder: (_) {
-      return const HomeScreen(
-        needRequestNotification: true,
+      // return const HomeScreen(
+      //   needRequestNotification: true,
+      // );
+      return DialScreen2(
+        key: _dialScreenKey,
+        phoneNumber: "167631",
+        status: 8,
+        isOutGoingCall: true,
       );
     }));
   }
