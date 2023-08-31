@@ -370,8 +370,8 @@ class CallManager {
         guestPhone = phoneNumber;
         let secondsSinceCurrentTime = lastTimeCall.timeIntervalSinceNow
 
-        if (Int(secondsSinceCurrentTime) < 10 && !firstCall) {
-            DispatchQueue.main.asyncAfter(deadline: .now() + (10 + secondsSinceCurrentTime)) {
+        if (Int(secondsSinceCurrentTime) < 3 && !firstCall) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + (3 + secondsSinceCurrentTime)) {
                OmiClient.startCall(phoneNumber, isVideo: isVideo) { statusCall in
                                    let callCurrent = self.omiLib.getCurrentCall()
                                    var dataToSend: [String: Any] = [
@@ -414,8 +414,8 @@ class CallManager {
         if let phone = phoneNumber {
             guestPhone = phoneNumber ?? ""
             let secondsSinceCurrentTime = lastTimeCall.timeIntervalSinceNow
-            if (Int(secondsSinceCurrentTime) < 10 && !firstCall) {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + (10 + secondsSinceCurrentTime)) {
+            if (Int(secondsSinceCurrentTime) < 3 && !firstCall) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + (3 + secondsSinceCurrentTime)) {
                          OmiClient.startCall(phone, isVideo: isVideo) { statusCall in
                                             let callCurrent = self.omiLib.getCurrentCall()
                                             var dataToSend: [String: Any] = [
@@ -449,7 +449,7 @@ class CallManager {
                     }
                 }
             }
-            
+            firstCall = false
         }
       
     }

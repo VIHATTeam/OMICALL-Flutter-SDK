@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.0.6
+- Optimal make call in ios  
+
+
 ## 3.0.5
 - Fix issues call 503 in ios 
 
