@@ -65,16 +65,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         transactionId: String?,
     ) {
         Log.d("SDK", "onCallEstablished -> callerId=$callerId, phoneNumber=$phoneNumber")
-//        Handler(Looper.getMainLooper()).post {
-//        channel.invokeMethod(
-//            CALL_STATE_CHANGED, mapOf(
-//                "callerNumber" to phoneNumber,
-//                "status" to CallState.confirmed.value,
-//                "isVideo" to isVideo,
-//                "transactionId" to transactionId,
-//            )
-//        )
-//        });
         Handler(Looper.getMainLooper()).postDelayed({
             Log.d("aaaa", transactionId ?: "")
             channel.invokeMethod(

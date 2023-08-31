@@ -300,13 +300,11 @@ class CallManager {
             if(call.isIncoming && callState == OMICallState.early.rawValue){
                 dataToSend["status"] = OMICallState.incoming.rawValue
             }
-//            let callTemp =OmiCallModel(omiCall: call)
-
             dataToSend["_id"] = String(describing: OmiCallModel(omiCall: call).uuid)
             dataToSend["incoming"] = call.isIncoming
-            dataToSend["callerNumber"] = String(describing: call.callerNumber )
+            dataToSend["callerNumber"] = call.callerNumber
             dataToSend["isVideo"] = call.isVideo
-            dataToSend["transactionId"] =  String(describing: call.omiId )
+            dataToSend["transactionId"] =   call.omiId
         }
 
         if (callState != OMICallState.disconnected.rawValue) {
@@ -354,7 +352,6 @@ class CallManager {
         let status = call.callState == .confirmed ? "answered" : "no_answered"
         let timeEnd = Int(Date().timeIntervalSince1970)
         return [
-            "transaction_id" : call.omiId,
             "direction" : direction,
             "source_number" : user,
             "destination_number" : guestPhone,

@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.0.7
+-  Increase android core
+
 ## 3.0.6
 - Optimal make call in ios  
 
