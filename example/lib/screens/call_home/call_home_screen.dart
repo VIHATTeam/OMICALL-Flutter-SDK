@@ -98,8 +98,10 @@ class CallHomeScreenState extends State<CallHomeScreen> {
 
     // Đặt trình nghe cuộc gọi nhỡ nếu có thì start call luôn
     OmicallClient.instance.setMissedCallListener((data) async {
+      await getGuestUser();
       final String callerNumber = data["callerNumber"];
       isVideo = data["isVideo"];
+
       await makeCallWithParams(context, callerNumber, isVideo);
     });
     debugPrint("status _callStatus omiAction::: $_callStatus");
@@ -122,6 +124,7 @@ class CallHomeScreenState extends State<CallHomeScreen> {
 
       if (status == OmiCallState.incoming.rawValue ||
           status == OmiCallState.confirmed.rawValue) {
+        await getGuestUser();
         isVideo = data['isVideo'] as bool;
         callerNumber = data["callerNumber"];
         _callStatus = status;
@@ -142,7 +145,6 @@ class CallHomeScreenState extends State<CallHomeScreen> {
       }
     });
     await getCurrentUser();
-    await getGuestUser();
     OmicallClient.instance.setAudioChangedListener((newAudio) {
       setState(() {
         _currentAudio = newAudio.first;
@@ -557,7 +559,7 @@ class CallHomeScreenState extends State<CallHomeScreen> {
                           ),
                         ),
                         SizedBox(
-                          height:  MediaQuery.of(context).size.height *0.05,
+                          height: MediaQuery.of(context).size.height * 0.05,
                         ),
                         if (_callStatus == OmiCallState.confirmed.rawValue) ...[
                           Row(
@@ -619,11 +621,14 @@ class CallHomeScreenState extends State<CallHomeScreen> {
                             ],
                           ),
                         ],
-                        if (_callStatus != OmiCallState.confirmed.rawValue) SizedBox(
-                          height: MediaQuery.of(context).size.height *0.43,
-                        ) else SizedBox(
-                          height: MediaQuery.of(context).size.height *0.19,
-                        ),
+                        if (_callStatus != OmiCallState.confirmed.rawValue)
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.43,
+                          )
+                        else
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.19,
+                          ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
@@ -631,8 +636,7 @@ class CallHomeScreenState extends State<CallHomeScreen> {
                               RoundedCircleButton(
                                 iconSrc: "assets/icons/call_end.svg",
                                 press: () async {
-                                  if (_phoneNumberController
-                                      .text.isNotEmpty) {
+                                  if (_phoneNumberController.text.isNotEmpty) {
                                     makeCall();
                                   }
                                 },
@@ -674,88 +678,10 @@ class CallHomeScreenState extends State<CallHomeScreen> {
                       ],
                     ),
                   ),
-                  if (_isShowKeyboard)
-                    Container(
-                      width: double.infinity,
-                      height: 350,
-                      color: Colors.white,
-                      child: Column(
-                        children: [
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Row(
-                            children: [
-                              const SizedBox(
-                                width: 54,
-                              ),
-                              Expanded(
-                                child: Text(
-                                  _keyboardMessage,
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                    color: Colors.red,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 12,
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _isShowKeyboard = !_isShowKeyboard;
-                                    _keyboardMessage = "";
-                                  });
-                                },
-                                child: const Icon(
-                                  Icons.cancel,
-                                  color: Colors.grey,
-                                  size: 30,
-                                ),
-                              ),
-                              const SizedBox(
-                                width: 24,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          Expanded(
-                            child: NumericKeyboard(
-                              onKeyboardTap: _onKeyboardTap,
-                              textColor: Colors.red,
-                              rightButtonFn: () {
-                                setState(() {
-                                  _isShowKeyboard = !_isShowKeyboard;
-                                });
-                              },
-                              rightIcon: const Text(
-                                "*",
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 24,
-                                ),
-                              ),
-                              leftButtonFn: () {
-                                _onKeyboardTap("*");
-                              },
-                              leftIcon: const Text(
-                                "#",
-                                style: TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 24,
-                                ),
-                              ),
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+
+
+
+
                   // Positioned(
                   //   top: 10,
                   //   left: 12,
@@ -778,7 +704,12 @@ class CallHomeScreenState extends State<CallHomeScreen> {
               child: Row(
                 children: [
                   GestureDetector(
-                    onTap: () {
+                    onTap: () async {
+                      await endCall(
+                        context,
+                        needShowStatus: true,
+                        needRequest: false,
+                      );
                       Navigator.of(context).pop();
                     },
                     child: Material(
@@ -824,6 +755,91 @@ class CallHomeScreenState extends State<CallHomeScreen> {
                 ],
               ),
             ),
+            if (_isShowKeyboard)
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: Container(
+                  width: double.infinity,
+                  height: 350,
+                  color: Colors.white,
+                  child: Column(
+                    children: [
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Row(
+                        children: [
+                          const SizedBox(
+                            width: 54,
+                          ),
+                          Expanded(
+                            child: Text(
+                              _keyboardMessage,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                color: Colors.red,
+                                fontWeight: FontWeight.w700,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 12,
+                          ),
+                          GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _isShowKeyboard = !_isShowKeyboard;
+                                _keyboardMessage = "";
+                              });
+                            },
+                            child: const Icon(
+                              Icons.cancel,
+                              color: Colors.grey,
+                              size: 30,
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 24,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Expanded(
+                        child: NumericKeyboard(
+                          onKeyboardTap: _onKeyboardTap,
+                          textColor: Colors.red,
+                          rightButtonFn: () {
+                            setState(() {
+                              _isShowKeyboard = !_isShowKeyboard;
+                            });
+                          },
+                          rightIcon: const Text(
+                            "*",
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 24,
+                            ),
+                          ),
+                          leftButtonFn: () {
+                            _onKeyboardTap("*");
+                          },
+                          leftIcon: const Text(
+                            "#",
+                            style: TextStyle(
+                              color: Colors.red,
+                              fontSize: 24,
+                            ),
+                          ),
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ),
       ),
@@ -1240,6 +1256,9 @@ class CallHomeScreenState extends State<CallHomeScreen> {
     _phoneNumberController.clear();
     setState(() {
       _callStatus = OmiCallState.unknown.rawValue;
+      guestUser = {};
+      _callTime = '';
+
     });
     print(_callStatus);
     //Navigator.pop(context);
