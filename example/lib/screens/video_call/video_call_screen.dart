@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:omicall_flutter_plugin/action/action_model.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
+import '../../components/dial_user_pic.dart';
 import '../../components/rounded_button.dart';
 import '../../constants.dart';
 
@@ -33,12 +34,28 @@ class VideoCallState extends State<VideoCallScreen> {
   bool isMuted = false;
   Map? _currentAudio;
   String _callQuality = "";
+  TextEditingController _phoneNumberController = TextEditingController();
+  Map? guestUser;
+
+  Future<void> getGuestUser() async {
+    final user = await OmicallClient.instance.getGuestUser();
+    if (user != null) {
+      setState(() {
+        guestUser = user;
+      });
+    }
+  }
 
   @override
   void initState() {
     _callStatus = widget.status;
-    OmicallClient.instance.registerVideoEvent();
+    initializeControllers();
     super.initState();
+  }
+
+  Future<void> initializeControllers() async {
+    OmicallClient.instance.registerVideoEvent();
+    await getGuestUser();
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
       if (omiAction.actionName == OmiEventList.onCallStateChanged) {
@@ -193,65 +210,241 @@ class VideoCallState extends State<VideoCallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    InputDecoration inputDecoration(
+      String text,
+      IconData? icon,
+    ) {
+      return InputDecoration(
+        labelText: text,
+        labelStyle: const TextStyle(
+          color: Colors.grey,
+        ),
+        hintText: text,
+        hintStyle: const TextStyle(
+          color: Colors.grey,
+        ),
+        prefixIcon: Icon(
+          icon,
+          size: MediaQuery.of(context).size.width * 0.06,
+          color: Colors.grey,
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(MediaQuery.of(context).size.width * 0.01),
+          ),
+          borderSide: const BorderSide(
+            color: Colors.red,
+          ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(MediaQuery.of(context).size.width * 0.1),
+          ),
+          borderSide: BorderSide(
+            color: Colors.red,
+            width: MediaQuery.of(context).size.width * 0.01,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(MediaQuery.of(context).size.width * 0.1),
+          ),
+          borderSide: const BorderSide(
+            color: Colors.white,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(MediaQuery.of(context).size.width * 0.1),
+          ),
+          borderSide: BorderSide(
+            color: const Color.fromARGB(255, 225, 121, 243),
+            width: MediaQuery.of(context).size.width * 0.008,
+          ),
+        ),
+      );
+    }
+
     final width = MediaQuery.of(context).size.width;
+    // var correctWidth = (width - 20) / 4;
+    // if (correctWidth > 100) {
+    //   correctWidth = 100;
+    // }
     return WillPopScope(
       child: Scaffold(
         extendBodyBehindAppBar: true,
         backgroundColor: Colors.deepPurple,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          leading: IconButton(
-            color: Colors.black,
-            icon: const Icon(
-              Icons.arrow_back_rounded,
-              size: 24,
-              color: Colors.white,
-            ),
-            onPressed: () {
-              endCall(
-                context,
-                needShowStatus: false,
-              );
-            },
-          ),
-          actions: [
-            if (_callStatus == OmiCallState.confirmed.rawValue) ...[
-              IconButton(
-                onPressed: () {
-                  OmicallClient.instance.switchCamera();
-                },
-                color: Colors.black,
-                icon: const Icon(
-                  Icons.cameraswitch_rounded,
-                  size: 24,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(
-                width: 16,
-              ),
-            ],
-          ],
-        ),
+        // appBar: AppBar(
+        //   backgroundColor: Colors.transparent,
+        //   elevation: 0,
+        //   leading: IconButton(
+        //     color: Colors.black,
+        //     icon: const Icon(
+        //       Icons.arrow_back_rounded,
+        //       size: 24,
+        //       color: Colors.white,
+        //     ),
+        //     onPressed: () {
+        //       endCall(
+        //         context,
+        //         needShowStatus: false,
+        //       );
+        //     },
+        //   ),
+        //   actions: [
+        //     if (_callStatus == OmiCallState.confirmed.rawValue) ...[
+        //       IconButton(
+        //         onPressed: () {
+        //           OmicallClient.instance.switchCamera();
+        //         },
+        //         color: Colors.black,
+        //         icon: const Icon(
+        //           Icons.cameraswitch_rounded,
+        //           size: 24,
+        //           color: Colors.white,
+        //         ),
+        //       ),
+        //       const SizedBox(
+        //         width: 16,
+        //       ),
+        //     ],
+        //   ],
+        // ),
         body: Stack(
-          alignment: Alignment.center,
+          //alignment: Alignment.center,
           children: [
             SizedBox.expand(
               child: Container(
                 color: Colors.grey,
-                child: RemoteCameraView(
-                  width: double.infinity,
-                  height: double.infinity,
-                  onCameraCreated: (controller) async {
-                    _remoteController = controller;
-                    if (_callStatus == OmiCallState.confirmed.rawValue &&
-                        Platform.isAndroid) {
-                      await Future.delayed(const Duration(milliseconds: 200));
-                      controller.refresh();
-                    }
-                  },
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    RemoteCameraView(
+                      width: double.infinity,
+                      height: double.infinity,
+                      onCameraCreated: (controller) async {
+                        _remoteController = controller;
+                        if (_callStatus == OmiCallState.confirmed.rawValue &&
+                            Platform.isAndroid) {
+                          await Future.delayed(
+                              const Duration(milliseconds: 200));
+                          controller.refresh();
+                        }
+                      },
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(
+                          top: MediaQuery.of(context).size.height * 0.35),
+                      child: Column(
+                        children: [
+                          Text(
+                            _phoneNumberController.text.isEmpty
+                                ? "..."
+                                : "${guestUser?["extension"] ?? "..."}",
+                            style: Theme.of(context)
+                                .textTheme
+                                .headlineMedium!
+                                .copyWith(color: Colors.grey, fontSize: 24),
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          DialUserPic(
+                            size: 200,
+                            image: guestUser?["avatar_url"] != "" &&
+                                    guestUser?["avatar_url"] != null
+                                ? guestUser!["avatar_url"]
+                                : "assets/images/calling_face.png",
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 50),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: () async {
+                      await endCall(
+                        context,
+                        needShowStatus: true,
+                        needRequest: false,
+                      );
+                       Navigator.of(context).pop();
+                    },
+                    child: Material(
+                      elevation: 4,
+                      borderRadius: BorderRadius.all(
+                        Radius.circular(
+                            MediaQuery.of(context).size.width * 0.1),
+                      ),
+                      child: Container(
+                        width: 52,
+                        height: 52,
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back,
+                          size: 25,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Material(
+                      elevation: 4,
+                      borderRadius: BorderRadius.circular(
+                          MediaQuery.of(context).size.width * 0.1),
+                      child: TextFormField(
+                        controller: _phoneNumberController,
+                        keyboardType: TextInputType.phone,
+                        decoration:
+                            inputDecoration('Phone Number', Icons.phone),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'This field cannot be empty';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                  ),
+                  if (_callStatus == OmiCallState.confirmed.rawValue)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 10),
+                      child: GestureDetector(
+                        onTap: () async {
+                          OmicallClient.instance.switchCamera();
+                        },
+                        child: Material(
+                          elevation: 4,
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(
+                                MediaQuery.of(context).size.width * 0.1),
+                          ),
+                          child: Container(
+                            width: 52,
+                            height: 52,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
+                            child: const Icon(
+                              Icons.cameraswitch_rounded,
+                              size: 25,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
             ),
             Positioned(

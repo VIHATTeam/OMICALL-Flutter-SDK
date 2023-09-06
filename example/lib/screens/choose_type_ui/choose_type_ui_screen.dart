@@ -280,6 +280,15 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
         );
       }));
     }else{
+      // Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+      //   return VideoCallScreen(
+      //     key: _videoScreenKey,
+      //     status: status,
+      //     isOutGoingCall: isOutGoingCall,
+      //   );
+      // })).then((value) {
+      //   _videoScreenKey = null;
+      // });
       await Navigator.push(context, MaterialPageRoute(builder: (_) {
         return const VideoCallScreen(
           status: 0,
