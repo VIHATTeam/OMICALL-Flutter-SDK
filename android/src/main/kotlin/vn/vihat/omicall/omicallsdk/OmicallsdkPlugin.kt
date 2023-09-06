@@ -183,7 +183,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     FLRemoteCameraFactory(flutterPluginBinding.binaryMessenger)
                 )
 
-            Log.d("SDK", "onAttachedToEngine!")
+            Log.d("SDK", "onAttachedToEngine! ---- $applicationContext")
 
             OmiClient(applicationContext!!)
             OmiClient.instance.addCallStateListener(this)
@@ -243,38 +243,29 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val missedCallTitle = dataOmi["missedCallTitle"] as? String
                 val audioNotificationDescription = dataOmi["audioNotificationDescription"] as? String
                 val videoNotificationDescription = dataOmi["videoNotificationDescription"] as? String
-//                OmiClient.instance.configPushNotification(
-//                    notificationIcon = notificationIcon ?: "",
-//                    prefix = prefix ?: "Cuộc gọi tới từ: ",
-//                    incomingBackgroundColor = incomingBackgroundColor ?: "#FFFFFFFF",
-//                    incomingAcceptButtonImage = incomingAcceptButtonImage ?: "join_call",
-//                    incomingDeclineButtonImage = incomingDeclineButtonImage ?: "hangup",
-//                    backImage = backImage ?: "ic_back",
-//                    userImage = userImage ?: "",
-//                    prefixMissedCallMessage = prefixMissedCallMessage ?: "Cuộc gọi nhỡ từ",
-//                    userNameKey = userNameKey ?: "",
-//                    channelId = channelId ?: "",
-//                    ringtone = null,
-//                    fullScreenUserImage = userImage ?: "",
-//                    showUserInfoInFullScreen = false,
-//                    audioNotificationDescription = audioNotificationDescription,
-//                    videoNotificationDescription = videoNotificationDescription
-//                )
+                val displayNameType = dataOmi["displayNameType"] as? String
+
                 OmiClient.instance.configPushNotification(
-                    channelId = channelId ?: "",
-                    notificationIcon = notificationIcon ?: "",
-                    notificationAvatar = userImage ?: "",
-                    fullScreenAvatar = userImage ?: "",
-                    deniedCallTitle = "Cuộc gọi đã từ chối từ ",
-                    showMissedCall = false,
-                    fullScreenUserImageSize = 96,
+                    showMissedCall = true,
+                    prefixMissedCallMessage = prefixMissedCallMessage ?: "Cuộc gọi nhỡ từ",
+                    notificationPrefix = "Cuộc gọi đến từ ",
+                    notificationIcon = notificationIcon ?: "ic_notification",
+                    notificationAvatar = userImage ?: "ic_inbound_avatar_notification",
+                    fullScreenAvatar = userImage ?: "ic_inbound_avatar_fullscreen",
+                    internalCallText = "Gọi nội bộ",
+                    videoCallText = "Gọi Video",
+                    inboundCallText = prefix,
+                    unknownContactText = "Cuộc gọi không xác định",
+                    showUUID = false,
+                    inboundChannelId =  "${channelId}-inbound",
+                    inboundChannelName = "Cuộc gọi đến",
+                    missedChannelId =  "${channelId}-missed",
+                    missedChannelName = "Cuộc gọi nhỡ",
+                    displayNameType = userNameKey ?: "full_name",
                     audioNotificationDescription = audioNotificationDescription,
                     videoNotificationDescription = videoNotificationDescription,
-                    notificationDescriptionFontSize = 8F,
-                    videoCallText = "Gọi Video",
-                    internalCallText = "Gọi nội bộ",
-                    inboundCallText = prefix,
                 )
+
                 result.success(true)
             }
             INIT_CALL_USER_PASSWORD -> {
@@ -284,13 +275,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val host = dataOmi["host"] as? String
                 val isVideo = dataOmi["isVideo"] as? Boolean
                 if (userName != null && password != null && realm != null && host != null) {
-                    OmiClient.register(
-                        userName,
-                        password,
-                        realm,
-                        isVideo ?: true,
-                        host,
-                    )
+                    Log.d("dataOmi", "INIT_CALL_USER_PASSWORD $userName -- $password --$realm --$isVideo -- $host ")
+                    OmiClient.register(userName, password, realm ,  isVideo ?: true,  host)
+
                 }
                 requestPermission(isVideo ?: true)
                 result.success(true)

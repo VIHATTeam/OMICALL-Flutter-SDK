@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.0.9
+- Increase android core
+- Remove request permission when innit user in ios 
+
+## 3.0.8
+- Increase android core
+
 ## 3.0.7
 -  Increase android core
 
