@@ -72,10 +72,6 @@ class CallManager {
         if let usrUuid = params["usrUuid"] as? String, let fullName = params["fullName"] as? String, let apiKey = params["apiKey"] as? String, let phone = params["phone"] as? String {
             result = OmiClient.initWithUUIDAndPhone(usrUuid, fullName: fullName, apiKey: apiKey, phone: phone)
         }
-        if (result) {
-            let isVideo = (params["isVideo"] as? Bool) ?? true
-            requestPermission(isVideo: isVideo)
-        }
         return result
     }
     
@@ -83,8 +79,6 @@ class CallManager {
         if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String {
             OmiClient.initWithUsername(userName, password: password, realm: realm, proxy:"")
         }
-        let isVideo = (params["isVideo"] as? Bool) ?? true
-        requestPermission(isVideo: isVideo)
         return true
     }
     

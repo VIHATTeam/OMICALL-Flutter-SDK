@@ -13,6 +13,15 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
   private var channel: FlutterMethodChannel!
   private var historyCallog: String?
 
+    /// Get instance
+    public static func getInstance() -> SwiftOmikitPlugin {
+        if (instance == nil) {
+            instance = SwiftOmikitPlugin()
+        }
+        return instance!
+    }
+    
+    
   public static func register(with registrar: FlutterPluginRegistrar) {
       if (instance == nil) {
           instance = SwiftOmikitPlugin()
@@ -30,7 +39,9 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
   func sendEvent(_ event: String, _ body: [String : Any]) {
       DispatchQueue.main.async {[weak self] in
           guard let self = self else { return }
-          self.channel.invokeMethod(event, arguments: body)
+          if let channelTemp = self.channel {
+              channelTemp.invokeMethod(event, arguments: body)
+          }
       }
   }
     
@@ -227,33 +238,33 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
     }
     
     @objc public static func processUserActivity(userActivity: NSUserActivity) -> Bool {
-        let intraction = userActivity.interaction
-        if let startAudioCallIntent = intraction?.intent as? INStartAudioCallIntent {
-            let contact = startAudioCallIntent.contacts?[0]
-            let contactHandle = contact?.personHandle
-            if let phoneNumber = contactHandle?.value {
-                instance.historyCallog = phoneNumber
-                instance.sendEvent(HISTORY_CALL_LOG, [
-                    "callerNumber": phoneNumber,
-                    "isVideo": false,
-                ])
+            let intraction = userActivity.interaction
+            if let startAudioCallIntent = intraction?.intent as? INStartAudioCallIntent {
+                let contact = startAudioCallIntent.contacts?[0]
+                let contactHandle = contact?.personHandle
+                if let phoneNumber = contactHandle?.value {
+                    instance.historyCallog = phoneNumber
+                    instance.sendEvent(HISTORY_CALL_LOG, [
+                        "callerNumber": phoneNumber,
+                        "isVideo": false,
+                    ])
+                }
+                return true
             }
-            return true
-        }
-        if let startAudioCallIntent = intraction?.intent as? INStartVideoCallIntent {
-            let contact = startAudioCallIntent.contacts?[0]
-            let contactHandle = contact?.personHandle
-            if let phoneNumber = contactHandle?.value {
-                instance.historyCallog = phoneNumber
-                instance.sendEvent(HISTORY_CALL_LOG, [
-                    "callerNumber": phoneNumber,
-                    "isVideo": true,
-                ])
+            if let startAudioCallIntent = intraction?.intent as? INStartVideoCallIntent {
+                let contact = startAudioCallIntent.contacts?[0]
+                let contactHandle = contact?.personHandle
+                if let phoneNumber = contactHandle?.value {
+                    instance.historyCallog = phoneNumber
+                    instance.sendEvent(HISTORY_CALL_LOG, [
+                        "callerNumber": phoneNumber,
+                        "isVideo": true,
+                    ])
+                }
+                return true
             }
-            return true
+            return false
         }
-        return false
-    }
 }
 
 @objc public extension FlutterAppDelegate {
