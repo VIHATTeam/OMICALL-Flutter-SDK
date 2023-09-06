@@ -11,6 +11,7 @@ class ChooseTypeUIScreen extends StatefulWidget {
   final String password;
   final String realm;
   final String host;
+  final bool isVideo;
 
   // usrName: _userNameController.text,
   final String usrUuid;
@@ -23,6 +24,7 @@ class ChooseTypeUIScreen extends StatefulWidget {
     required this.host,
     required this.usrUuid,
     required this.apiKey,
+    required this.isVideo,
   }) : super(key: key);
 
   @override
@@ -31,6 +33,11 @@ class ChooseTypeUIScreen extends StatefulWidget {
 
 class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
   bool _supportVideoCall = false;
+  @override
+  void initState() {
+    _supportVideoCall = widget.isVideo;
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -271,7 +278,7 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
     if (result == false || !mounted) {
       return;
     }
-    if(!_supportVideoCall){
+    if (!_supportVideoCall) {
       await Navigator.push(context, MaterialPageRoute(builder: (_) {
         return CallHomeScreen(
           isVideo: _supportVideoCall,
@@ -279,7 +286,7 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
           isOutGoingCall: true,
         );
       }));
-    }else{
+    } else {
       // Navigator.of(context).push(MaterialPageRoute(builder: (_) {
       //   return VideoCallScreen(
       //     key: _videoScreenKey,
@@ -296,6 +303,5 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
         );
       }));
     }
-
   }
 }
