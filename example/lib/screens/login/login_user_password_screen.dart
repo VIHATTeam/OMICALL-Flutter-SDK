@@ -462,6 +462,7 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
         host: _hostUrlController.text,
         usrUuid: '',
         apiKey: '',
+        isVideo: _supportVideoCall,
       );
     }));
   }

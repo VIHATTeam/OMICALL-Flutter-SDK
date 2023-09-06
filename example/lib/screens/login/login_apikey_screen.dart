@@ -460,6 +460,7 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
         host: _usrUuidController.text,
         usrUuid: _usrUuidController.text,
         apiKey: _apiKeyController.text,
+        isVideo: _supportVideoCall,
       );
     }));
   }
