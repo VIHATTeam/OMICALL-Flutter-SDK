@@ -18,10 +18,12 @@ class VideoCallScreen extends StatefulWidget {
     Key? key,
     required this.status,
     required this.isOutGoingCall,
+    required this.isTypeDirectCall,
   }) : super(key: key);
 
   final int status;
   final bool isOutGoingCall;
+  final bool isTypeDirectCall;
 
   @override
   State<StatefulWidget> createState() {
@@ -75,7 +77,7 @@ class VideoCallState extends State<VideoCallScreen> {
 
     if (!callStatus) {
       EasyDialog(
-        title: const Text("Notification"),
+        title: Text("Notification"),
         description: Text("Error code ${messageError}"),
       ).show(context);
     }
@@ -177,6 +179,7 @@ class VideoCallState extends State<VideoCallScreen> {
     OmicallClient.instance.removeMuteListener();
     OmicallClient.instance.removeAudioChangedListener();
     _subscription.cancel();
+    _phoneNumberController.dispose();
     super.dispose();
   }
 
@@ -205,6 +208,9 @@ class VideoCallState extends State<VideoCallScreen> {
       _callStatus = OmiCallState.unknown.rawValue;
       guestUser = {};
     });
+    if(!widget.isTypeDirectCall){
+      Navigator.pop(context);
+    }
   }
 
   void refreshRemoteCamera() {
@@ -502,90 +508,92 @@ class VideoCallState extends State<VideoCallScreen> {
                 ],
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 50),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      await endCall(
-                        context,
-                        needShowStatus: false,
-                      ).then(
-                        (value) => Navigator.of(context).pop(),
-                      );
-                    },
-                    child: Material(
-                      elevation: 4,
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(
+            if (widget.isTypeDirectCall)
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 50),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        await endCall(
+                          context,
+                          needShowStatus: false,
+                        ).then(
+                          (value) => Navigator.of(context).pop(),
+                        );
+                      },
+                      child: Material(
+                        elevation: 4,
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(
+                              MediaQuery.of(context).size.width * 0.1),
+                        ),
+                        child: Container(
+                          width: 52,
+                          height: 52,
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back,
+                            size: 25,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Material(
+                        elevation: 4,
+                        borderRadius: BorderRadius.circular(
                             MediaQuery.of(context).size.width * 0.1),
-                      ),
-                      child: Container(
-                        width: 52,
-                        height: 52,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back,
-                          size: 25,
+                        child: TextFormField(
+                          controller: _phoneNumberController,
+                          keyboardType: TextInputType.phone,
+                          decoration:
+                              inputDecoration('Phone Number', Icons.phone),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'This field cannot be empty';
+                            }
+                            return null;
+                          },
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Material(
-                      elevation: 4,
-                      borderRadius: BorderRadius.circular(
-                          MediaQuery.of(context).size.width * 0.1),
-                      child: TextFormField(
-                        controller: _phoneNumberController,
-                        keyboardType: TextInputType.phone,
-                        decoration:
-                            inputDecoration('Phone Number', Icons.phone),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'This field cannot be empty';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ),
-                  if (_callStatus == OmiCallState.confirmed.rawValue)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 10),
-                      child: GestureDetector(
-                        onTap: () async {
-                          OmicallClient.instance.switchCamera();
-                        },
-                        child: Material(
-                          elevation: 4,
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(
-                                MediaQuery.of(context).size.width * 0.1),
-                          ),
-                          child: Container(
-                            width: 52,
-                            height: 52,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white,
+                    if (_callStatus == OmiCallState.confirmed.rawValue)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 10),
+                        child: GestureDetector(
+                          onTap: () async {
+                            OmicallClient.instance.switchCamera();
+                          },
+                          child: Material(
+                            elevation: 4,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(
+                                  MediaQuery.of(context).size.width * 0.1),
                             ),
-                            child: const Icon(
-                              Icons.cameraswitch_rounded,
-                              size: 25,
+                            child: Container(
+                              width: 52,
+                              height: 52,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                              ),
+                              child: const Icon(
+                                Icons.cameraswitch_rounded,
+                                size: 25,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
             if (_callStatus == OmiCallState.confirmed.rawValue)
               Positioned(
                 top: MediaQuery.of(context).padding.top + kToolbarHeight + 30,

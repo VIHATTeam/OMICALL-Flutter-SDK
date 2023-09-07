@@ -66,6 +66,7 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
     _userNameController.dispose();
     _passwordController.dispose();
     _serviceUrlController.dispose();
+    _hostUrlController.dispose();
     super.dispose();
   }
 

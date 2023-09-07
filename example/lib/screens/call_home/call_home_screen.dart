@@ -469,7 +469,8 @@ class CallHomeScreenState extends State<CallHomeScreen> {
     }
 
     return WillPopScope(
-      child: Scaffold(
+      child:
+      Scaffold(
         body: Stack(
           children: [
             Align(
