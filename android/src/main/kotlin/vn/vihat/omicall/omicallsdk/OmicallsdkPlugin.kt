@@ -42,10 +42,12 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private var applicationContext: Context? = null
     private val mainScope = CoroutineScope(Dispatchers.Main)
     private var isIncomming: Boolean = false
+    private var callerNumberTemp: String = ""
 
     override fun incomingReceived(callerId: Int?, phoneNumber: String?, isVideo: Boolean?) {
         Log.d("SDK", "incomingReceived -> callerId=$callerId, phoneNumber=$phoneNumber")
         isIncomming = true;
+        callerNumberTemp = phoneNumber ?: "";
         channel.invokeMethod(
             CALL_STATE_CHANGED, mapOf(
                 "isVideo" to isVideo,
@@ -100,11 +102,16 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onRinging(callerId: Int, transactionId: String?) {
+        Log.d("SDK", "onRinging -> callerId=$callerId, transactionId=$transactionId")
+        if(!isIncomming) {
+            isIncomming = true
+        }
+
         channel.invokeMethod(
             CALL_STATE_CHANGED, mapOf(
                 "status" to CallState.incoming.value,
                 "isVideo" to NotificationService.isVideo,
-                "callerNumber" to "",
+                "callerNumber" to callerNumberTemp,
                 "incoming" to isIncomming,
                 "_id" to ""
             )
