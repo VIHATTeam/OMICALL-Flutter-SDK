@@ -49,7 +49,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         channel.invokeMethod(
             CALL_STATE_CHANGED, mapOf(
                 "isVideo" to isVideo,
-                "status" to CallState.incoming.value,
+                "status" to CallState.early.value,
                 "callerNumber" to phoneNumber,
                 "_id" to "",
                 "incoming" to isIncomming
@@ -102,7 +102,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     override fun onRinging(callerId: Int, transactionId: String?) {
         channel.invokeMethod(
             CALL_STATE_CHANGED, mapOf(
-                "status" to CallState.early.value,
+                "status" to CallState.incoming.value,
                 "isVideo" to NotificationService.isVideo,
                 "callerNumber" to "",
                 "incoming" to isIncomming,
