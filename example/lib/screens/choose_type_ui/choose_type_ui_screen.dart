@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicallsdk.dart';
 
+import '../../local_storage/local_storage.dart';
 import '../call_home/call_home_screen.dart';
 import '../home/home_screen.dart';
 import '../video_call/video_call_screen.dart';
@@ -79,7 +80,7 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
                   child: GestureDetector(
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) {
-                        return const HomeScreen();
+                        return HomeScreen(isVideo: _supportVideoCall,);
                       }));
                     },
                     child: Material(
@@ -223,7 +224,11 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
             child: Align(
               alignment: Alignment.topLeft,
               child: GestureDetector(
-                onTap: () {
+                onTap: () async{
+                  EasyLoading.show();
+                  await OmicallClient.instance.logout();
+                  await LocalStorage.instance.logout();
+                  EasyLoading.dismiss();
                   Navigator.of(context).pop();
                 },
                 child: Material(
@@ -287,19 +292,12 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
         );
       }));
     } else {
-      // Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-      //   return VideoCallScreen(
-      //     key: _videoScreenKey,
-      //     status: status,
-      //     isOutGoingCall: isOutGoingCall,
-      //   );
-      // })).then((value) {
-      //   _videoScreenKey = null;
-      // });
+
       await Navigator.push(context, MaterialPageRoute(builder: (_) {
         return const VideoCallScreen(
           status: 0,
           isOutGoingCall: true,
+          isTypeDirectCall: true,
         );
       }));
     }

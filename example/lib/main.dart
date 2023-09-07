@@ -67,8 +67,7 @@ class _MyAppState extends State<MyApp> {
     return GestureDetector(
       child: MaterialApp(
         theme: ThemeData.light(),
-        home:
-            loginInfo != null ? const HomeScreen() : const HomeLoginScreen(),
+        home: const HomeLoginScreen(),
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
       ),

@@ -66,6 +66,7 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
   void dispose() {
     _userNameController.dispose();
     _usrUuidController.dispose();
+    _apiKeyController.dispose();
     super.dispose();
   }
 
