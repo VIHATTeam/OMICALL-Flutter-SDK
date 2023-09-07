@@ -37,6 +37,7 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
     ..text = 'vh.omicrm.com';
 
   bool _supportVideoCall = true;
+
   bool _isVideoCall = false;
   late StreamSubscription _subscription;
   GlobalKey<DialScreenState>? _dialScreenKey;
@@ -46,14 +47,10 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
     fontSize: 16,
   );
 
-  Gradient gradient4 = LinearGradient(
-    colors: [
-      Colors.black.withOpacity(0.8),
-      Colors.grey[500]!.withOpacity(0.8),
-    ],
-    begin: Alignment.centerLeft,
-    end: Alignment.centerRight,
-  );
+
+
+  // Initially password is obscure
+  bool _obscureText = true;
 
   @override
   void initState() {
@@ -73,162 +70,376 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Login'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            TextField(
-              controller: _userNameController,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.person),
-                labelText: "User Name",
-                enabledBorder: myInputBorder(),
-                focusedBorder: myFocusBorder(),
-              ),
-            ),
-            const SizedBox(
-              height: 16,
-            ),
-            TextField(
-              controller: _passwordController,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.password),
-                labelText: "Password",
-                enabledBorder: myInputBorder(),
-                focusedBorder: myFocusBorder(),
-              ),
-            ),
-            const SizedBox(
-              height: 16,
-            ),
-            TextField(
-              controller: _serviceUrlController,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.cleaning_services),
-                labelText: "Service",
-                enabledBorder: myInputBorder(),
-                focusedBorder: myFocusBorder(),
-              ),
-            ),
-            const SizedBox(
-              height: 16,
-            ),
-            TextField(
-              controller: _hostUrlController,
-              decoration: InputDecoration(
-                prefixIcon: const Icon(Icons.cleaning_services),
-                labelText: "Host",
-                enabledBorder: myInputBorder(),
-                focusedBorder: myFocusBorder(),
-              ),
-            ),
-            Container(
-              margin: const EdgeInsets.only(
-                top: 16,
-              ),
-              child: GestureDetector(
-                onTap: () {
+    InputDecoration inputDecoration(
+      String text,
+      IconData? icon, {
+      bool isPass = false,
+    }) {
+      return InputDecoration(
+        suffixIcon: isPass
+            ? IconButton(
+                icon: Icon(
+                    _obscureText ? Icons.visibility_off : Icons.visibility),
+                onPressed: () {
                   setState(() {
-                    _supportVideoCall = !_supportVideoCall;
+                    _obscureText = !_obscureText;
                   });
                 },
-                child: Row(
-                  children: [
-                    Icon(
-                      _supportVideoCall
-                          ? Icons.check_circle
-                          : Icons.circle_outlined,
-                      size: 24,
-                      color: _supportVideoCall ? Colors.blue : Colors.grey,
-                    ),
-                    const SizedBox(
-                      width: 8,
-                    ),
-                    Text(
-                      "Video call",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: _supportVideoCall ? Colors.blue : Colors.grey,
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(
-              height: 16,
-            ),
-            GestureDetector(
-              onTap: () {
-                FocusScope.of(context).unfocus();
-                _login();
-              },
-              child: Container(
-                height: 60,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.teal,
-                      Colors.teal[200]!,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: const [
-                    BoxShadow(
-                      color: Colors.black12,
-                      offset: Offset(5, 5),
-                      blurRadius: 10,
-                    )
-                  ],
-                ),
-                child: const Center(
-                  child: Text(
-                    'Login',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
+              )
+            : const SizedBox.shrink(),
+        labelText: text,
+        labelStyle: const TextStyle(
+          color: Colors.grey,
         ),
-      ),
-    );
-  }
+        hintText: text,
+        hintStyle: const TextStyle(
+          color: Colors.grey,
+        ),
+        prefixIcon: Icon(
+          icon,
+          size: MediaQuery.of(context).size.width * 0.06,
+          color: Colors.grey,
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(MediaQuery.of(context).size.width * 0.01),
+          ),
+          borderSide: const BorderSide(
+            color: Colors.red,
+          ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(MediaQuery.of(context).size.width * 0.1),
+          ),
+          borderSide: BorderSide(
+            color: Colors.red,
+            width: MediaQuery.of(context).size.width * 0.01,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(MediaQuery.of(context).size.width * 0.1),
+          ),
+          borderSide: const BorderSide(
+            color: Colors.white,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(MediaQuery.of(context).size.width * 0.1),
+          ),
+          borderSide: BorderSide(
+            color: const Color.fromARGB(255, 225, 121, 243),
+            width: MediaQuery.of(context).size.width * 0.008,
+          ),
+        ),
+      );
+    }
 
-  OutlineInputBorder myInputBorder() {
-    //return type is OutlineInputBorder
-    return const OutlineInputBorder(
-      //Outline border type for TextFeild
-      borderRadius: BorderRadius.all(Radius.circular(20)),
-      borderSide: BorderSide(
-        color: Colors.redAccent,
-        width: 3,
-      ),
-    );
-  }
-
-  OutlineInputBorder myFocusBorder() {
-    return const OutlineInputBorder(
-      borderRadius: BorderRadius.all(
-        Radius.circular(20),
-      ),
-      borderSide: BorderSide(
-        color: Colors.greenAccent,
-        width: 3,
+    return Scaffold(
+      body: Stack(
+        children: [
+          Align(
+            alignment: Alignment.topLeft,
+            child: Image.asset(
+              "assets/images/signIn01.png",
+              width: MediaQuery.of(context).size.width * 0.9,
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: Image.asset(
+              "assets/images/signIn02.png",
+              height: MediaQuery.of(context).size.height * 0.28,
+            ),
+          ),
+          SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.15,
+                ),
+                const Text(
+                  "OMICALL",
+                  style: TextStyle(fontSize: 60, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.015,
+                ),
+                const Text(
+                  "Sign in to your account",
+                  style: TextStyle(
+                    fontSize: 18,
+                  ),
+                ),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height * 0.07,
+                ),
+                Form(
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 30, right: 30),
+                        child: Material(
+                          elevation: 4,
+                          borderRadius: BorderRadius.circular(
+                              MediaQuery.of(context).size.width * 0.1),
+                          child: TextFormField(
+                            controller: _userNameController,
+                            keyboardType: TextInputType.number,
+                            decoration:
+                                inputDecoration('User Name', Icons.person),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'This field cannot be empty';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.035,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 30, right: 30),
+                        child: Material(
+                          elevation: 4,
+                          borderRadius: BorderRadius.circular(
+                              MediaQuery.of(context).size.width * 0.1),
+                          child: TextFormField(
+                            controller: _passwordController,
+                            obscureText: _obscureText,
+                            enableSuggestions: false,
+                            autocorrect: false,
+                            decoration: inputDecoration('Password', Icons.lock,
+                                isPass: true),
+                            keyboardType: TextInputType.visiblePassword,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'This field cannot be empty';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.035,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 30, right: 30),
+                        child: Material(
+                          elevation: 4,
+                          borderRadius: BorderRadius.circular(
+                              MediaQuery.of(context).size.width * 0.1),
+                          child: TextFormField(
+                            controller: _serviceUrlController,
+                            decoration: inputDecoration(
+                                'Service', Icons.cleaning_services),
+                            keyboardType: TextInputType.text,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'This field cannot be empty';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.035,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 30, right: 30),
+                        child: Material(
+                          elevation: 4,
+                          borderRadius: BorderRadius.circular(
+                              MediaQuery.of(context).size.width * 0.1),
+                          child: TextFormField(
+                            controller: _hostUrlController,
+                            decoration:
+                                inputDecoration("Host", Icons.location_city),
+                            keyboardType: TextInputType.text,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'This field cannot be empty';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.03,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _supportVideoCall = !_supportVideoCall;
+                                });
+                              },
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    _supportVideoCall
+                                        ? Icons.check_circle
+                                        : Icons.circle_outlined,
+                                    size: 24,
+                                    color: _supportVideoCall
+                                        ? const Color.fromARGB(
+                                            255, 225, 121, 243)
+                                        : Colors.grey,
+                                  ),
+                                  const SizedBox(
+                                    width: 8,
+                                  ),
+                                  Text(
+                                    "Video call",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: _supportVideoCall
+                                          ? const Color.fromARGB(
+                                              255, 225, 121, 243)
+                                          : Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Text(
+                              "Forget you password",
+                              style: TextStyle(
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.05,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(right: 32),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            const Text(
+                              "Sign in",
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(
+                              width: MediaQuery.of(context).size.width * 0.03,
+                            ),
+                            Material(
+                              elevation: 4,
+                              borderRadius: BorderRadius.circular(
+                                MediaQuery.of(context).size.height * 0.1,
+                              ),
+                              child: GestureDetector(
+                                onTap: () {
+                                  FocusScope.of(context).unfocus();
+                                  _login();
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      colors: [
+                                        Color.fromARGB(255, 255, 230, 85),
+                                        Color.fromARGB(255, 176, 74, 166),
+                                      ], // Define your gradient colors
+                                      begin: Alignment
+                                          .bottomRight, // Define the starting point of the gradient
+                                      end: Alignment
+                                          .topLeft, // Define the ending point of the gradient
+                                    ),
+                                    borderRadius: BorderRadius.circular(
+                                      MediaQuery.of(context).size.height * 0.1,
+                                    ),
+                                  ),
+                                  width:
+                                      MediaQuery.of(context).size.width * 0.18,
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.05,
+                                  child:
+                                      const Icon(Icons.navigate_next_rounded),
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        height: MediaQuery.of(context).size.height * 0.05,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Text(
+                            "Don't have an account? ",
+                            style: TextStyle(fontSize: 14),
+                          ),
+                          GestureDetector(
+                            onTap: () {},
+                            child: const Text(
+                              "Create",
+                              style: TextStyle(
+                                decoration: TextDecoration.underline,
+                                decorationThickness: 2.0,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 68),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.of(context).pop();
+                },
+                child: Material(
+                  elevation: 4,
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(MediaQuery.of(context).size.width * 0.1),
+                  ),
+                  child: Container(
+                    width: 52,
+                    height: 52,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back,
+                      size: 25,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -261,10 +472,6 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
       return;
     }
     Navigator.push(context, MaterialPageRoute(builder: (_) {
-      // return const HomeScreen(
-      //   needRequestNotification: true,
-      // );
-
       return CallHomeScreen(
         isVideo: _supportVideoCall,
         status: 0,
