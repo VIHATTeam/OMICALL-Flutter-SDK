@@ -364,17 +364,18 @@ await Firebase.initializeApp();
         phone, //phone number
         _isVideoCall, //call video or audio. If true is video call. 
     );
+    Note: You need await for result == 8, this mean startCallSuccess after you navigate or make another action  
     //we will return OmiStartCallStatus with:
-    - invalidUuid: uuid is invalid (we can not find on my page)
-    - invalidPhoneNumber: sip user is invalid.
-    - samePhoneNumber: Can not call same phone number.
-    - maxRetry: We try to refresh call but we can not start your call.
-    - permissionDenied: Check audio permission.
-    - couldNotFindEndpoint: Please login before make your call.
-    - accountRegisterFailed: We can not register your account.
-    - startCallFailed: We can not start you call.
-    - startCallSuccess: Start call successfully.
-    - haveAnotherCall: We can not start you call because you are joining another call.
+    - invalidUuid(0): uuid is invalid (we can not find on my page)
+    - invalidPhoneNumber(1): sip user is invalid.
+    - samePhoneNumber(2): Can not call same phone number.
+    - maxRetry(3): We try to refresh call but we can not start your call.
+    - permissionDenied(4): Check audio permission.
+    - couldNotFindEndpoint(5): Please login before make your call.
+    - accountRegisterFailed(6): We can not register your account.
+    - startCallFailed(7): We can not start you call.
+    - startCallSuccess(8): Start call successfully.
+    - haveAnotherCall(9): We can not start you call because you are joining another call.
     ```
   -  Call with UUID (only support with Api key):
     ```
@@ -516,9 +517,23 @@ await Firebase.initializeApp();
     - Action Name value: 
         - `onCallStateChanged`: Call state changed.
         - `onSwitchboardAnswer`: Switchboard sip is listening. 
+        - List status call: 
+          + unknown(0),
+          + calling(1),
+          + incoming(2),
+          + early(3),
+          + connecting(4),
+          + confirmed(5),
+          + disconnected(6);
     + onCallStateChanged is call state tracking event. We will return status of state. Please refer `OmiCallState`.
-    + Incoming call state lifecycle: incoming(receive on foreround state) -> early -> connecting -> confirmed -> disconnected
-    + Outgoing call state lifecycle: calling -> early (call created) -> connecting -> confirmed -> disconnected
+          `onCallStateChanged value:`
+              + isVideo: value boolean (true is call Video)
+              + status: number (value matching with List status call )
+              + callerNumber: phone number 
+              + incoming: boolean - status call incoming or outgoing
+              + _id: option (id of every call)
+    + Incoming call state lifecycle: incoming -> connecting -> confirmed -> disconnected
+    + Outgoing call state lifecycle: calling -> early -> connecting -> confirmed -> disconnected
     + onSwitchboardAnswer have callback when employee answered script call.
 - Other events:
   - Call Quality event: Listen call quality event changed
