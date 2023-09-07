@@ -1,6 +1,13 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+
+## 3.0.12
+- Fix status call in android 
+- Increase android core
+- Update Readme 
+
 ## 3.0.11
 - Fix status call in android 
 ## 3.0.10
