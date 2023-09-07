@@ -11,6 +11,8 @@ import '../dial/Dial_Screen_2.dart';
 import '../dial/dial_screen.dart';
 import '../video_call/video_call_screen.dart';
 
+import '../call_home/call_home_screen.dart';
+
 class LoginUserPasswordScreen extends StatefulWidget {
   const LoginUserPasswordScreen({Key? key}) : super(key: key);
 
@@ -262,10 +264,10 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
       // return const HomeScreen(
       //   needRequestNotification: true,
       // );
-      return DialScreen2(
-        key: _dialScreenKey,
-        phoneNumber: "100",
-        status: 8,
+
+      return CallHomeScreen(
+        isVideo: _supportVideoCall,
+        status: 0,
         isOutGoingCall: true,
       );
     }));
