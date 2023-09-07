@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.0.10
+- Increase android core
+- Fix status call 
+
 ## 3.0.9
 - Increase android core
 - Remove request permission when innit user in ios 
