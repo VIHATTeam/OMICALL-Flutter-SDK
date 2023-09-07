@@ -7,9 +7,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
+
 import '../dial/Dial_Screen_2.dart';
 import '../dial/dial_screen.dart';
 import '../video_call/video_call_screen.dart';
+
+import '../choose_type_ui/choose_type_ui_screen.dart';
 
 class LoginApiKeyScreen extends StatefulWidget {
   const LoginApiKeyScreen({Key? key}) : super(key: key);
@@ -425,19 +428,19 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
         _apiKeyController.text.isEmpty) {
       return;
     }
-    EasyLoading.show();
-    final result = await OmicallClient.instance.initCallWithApiKey(
-      usrName: _userNameController.text,
-      usrUuid: _usrUuidController.text,
-      isVideo: _supportVideoCall,
-      phone: _usrUuidController.text,
-      apiKey: _apiKeyController.text,
-    );
-    EasyLoading.dismiss();
-    debugPrint(result.toString());
-    if (result == false) {
-      return;
-    }
+    // EasyLoading.show();
+    // final result = await OmicallClient.instance.initCallWithApiKey(
+    //   usrName: _userNameController.text,
+    //   usrUuid: _usrUuidController.text,
+    //   isVideo: _supportVideoCall,
+    //   phone: _usrUuidController.text,
+    //   apiKey: _apiKeyController.text,
+    // );
+    // EasyLoading.dismiss();
+    // debugPrint(result.toString());
+    // if (result == false) {
+    //   return;
+    // }
     // await LocalStorage.instance.setLoginInfo({
     //   "usrName": _userNameController.text,
     //   "usrUuid": _usrUuidController.text,
@@ -448,15 +451,15 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
     if (!mounted) {
       return;
     }
+
     Navigator.push(context, MaterialPageRoute(builder: (_) {
-      // return const HomeScreen(
-      //   needRequestNotification: true,
-      // );
-      return DialScreen2(
-        key: _dialScreenKey,
-        phoneNumber: "167631",
-        status: 8,
-        isOutGoingCall: true,
+      return ChooseTypeUIScreen(
+        userName: _userNameController.text,
+        password: _usrUuidController.text,
+        realm: '',
+        host: _usrUuidController.text,
+        usrUuid: _usrUuidController.text,
+        apiKey: _apiKeyController.text,
       );
     }));
   }

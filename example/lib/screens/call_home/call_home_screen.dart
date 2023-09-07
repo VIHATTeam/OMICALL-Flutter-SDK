@@ -58,10 +58,10 @@ class CallHomeScreen extends StatefulWidget {
 }
 
 class CallHomeScreenState extends State<CallHomeScreen> {
-  bool isVideo = false;
+  bool _isVideo = false;
   String callerNumber = '';
 
-  bool isOutGoingCall = false;
+  bool _isOutGoingCall = false;
   int _callStatus = 0;
   String? _callTime;
   bool _isShowKeyboard = false;
@@ -79,8 +79,9 @@ class CallHomeScreenState extends State<CallHomeScreen> {
   @override
   void initState() {
     super.initState();
-    isVideo = widget.isVideo;
+    _isVideo = widget.isVideo;
     _callStatus = widget.status;
+    _isOutGoingCall = widget.isOutGoingCall;
     initializeControllers();
   }
 
@@ -100,9 +101,9 @@ class CallHomeScreenState extends State<CallHomeScreen> {
     OmicallClient.instance.setMissedCallListener((data) async {
       await getGuestUser();
       final String callerNumber = data["callerNumber"];
-      isVideo = data["isVideo"];
+      _isVideo = data["isVideo"];
 
-      await makeCallWithParams(context, callerNumber, isVideo);
+      await makeCallWithParams(context, callerNumber, _isVideo);
     });
     debugPrint("status _callStatus omiAction::: $_callStatus");
     debugPrint("status _callStatus omiAction::: ${widget.status}");
@@ -117,18 +118,18 @@ class CallHomeScreenState extends State<CallHomeScreen> {
       }
       final data = omiAction.data;
       final status = data["status"] as int;
-      debugPrint(
-          "status callStateChangeEvent omiAction::: ${omiAction.actionName}");
-      debugPrint("status callStateChangeEvent omiAction::: $data");
+      // debugPrint(
+      //     "status callStateChangeEvent omiAction::: ${omiAction.actionName}");
+      // debugPrint("status callStateChangeEvent omiAction::: $data");
       debugPrint("status OmicallClient ::: $status");
 
       if (status == OmiCallState.incoming.rawValue ||
           status == OmiCallState.confirmed.rawValue) {
         await getGuestUser();
-        isVideo = data['isVideo'] as bool;
+        _isVideo = data['isVideo'] as bool;
         callerNumber = data["callerNumber"];
         _callStatus = status;
-        isOutGoingCall = false;
+        _isOutGoingCall = false;
       }
       updateDialScreen(_callStatus);
       if (status == OmiCallState.disconnected.rawValue) {
@@ -176,11 +177,11 @@ class CallHomeScreenState extends State<CallHomeScreen> {
     });
     OmicallClient.instance.setCallLogListener((data) {
       final callerNumber = data["callerNumber"];
-      final isVideo = data["isVideo"];
+       _isVideo = data["isVideo"];
       makeCallWithParams(
         context,
         callerNumber,
-        isVideo,
+        _isVideo,
       );
     });
   }
@@ -218,7 +219,7 @@ class CallHomeScreenState extends State<CallHomeScreen> {
 
     final result = await OmicallClient.instance.startCall(
       phone,
-      isVideo,
+      _isVideo,
     );
     await getGuestUser();
     EasyLoading.dismiss();
@@ -237,7 +238,7 @@ class CallHomeScreenState extends State<CallHomeScreen> {
     if (callStatus) {
       setState(() {
         _callStatus = OmiCallState.calling.rawValue;
-        isOutGoingCall = true;
+        _isOutGoingCall = true;
       });
     } else {
       EasyDialog(
@@ -255,10 +256,10 @@ class CallHomeScreenState extends State<CallHomeScreen> {
     final call = await OmicallClient.instance.getInitialCall();
     if (call is Map) {
       setState(() {
-        isVideo = call["isVideo"] as bool;
+        _isVideo = call["isVideo"] as bool;
         callerNumber = call["callerNumber"];
         _callStatus = OmiCallState.confirmed.rawValue;
-        isOutGoingCall = false;
+        _isOutGoingCall = false;
       });
     }
   }
@@ -269,7 +270,7 @@ class CallHomeScreenState extends State<CallHomeScreen> {
     bool isVideo,
   ) async {
     _callStatus = OmiCallState.calling.rawValue;
-    isOutGoingCall = true;
+    _isOutGoingCall = true;
 
     OmicallClient.instance.startCall(
       callerNumber,
@@ -648,7 +649,7 @@ class CallHomeScreenState extends State<CallHomeScreen> {
                             if ((_callStatus == OmiCallState.early.rawValue ||
                                     _callStatus ==
                                         OmiCallState.incoming.rawValue) &&
-                                isOutGoingCall == false)
+                                _isOutGoingCall == false)
                               RoundedCircleButton(
                                 iconSrc: "assets/icons/call_end.svg",
                                 press: () async {
@@ -1258,9 +1259,7 @@ class CallHomeScreenState extends State<CallHomeScreen> {
       _callStatus = OmiCallState.unknown.rawValue;
       guestUser = {};
       _callTime = '';
-
     });
-    print(_callStatus);
     //Navigator.pop(context);
   }
 

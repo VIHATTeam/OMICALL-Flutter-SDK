@@ -12,6 +12,7 @@ import '../dial/dial_screen.dart';
 import '../video_call/video_call_screen.dart';
 
 import '../call_home/call_home_screen.dart';
+import '../choose_type_ui/choose_type_ui_screen.dart';
 
 class LoginUserPasswordScreen extends StatefulWidget {
   const LoginUserPasswordScreen({Key? key}) : super(key: key);
@@ -452,30 +453,15 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
         _hostUrlController.text.isEmpty) {
       return;
     }
-    EasyLoading.show();
-    await OmicallClient.instance.initCallWithUserPassword(
-      userName: _userNameController.text,
-      password: _passwordController.text,
-      realm: _serviceUrlController.text,
-      host: _hostUrlController.text,
-      isVideo: _supportVideoCall,
-    );
 
-    // await LocalStorage.instance.setLoginInfo({
-    //   "userName": _userNameController.text,
-    //   "password": _passwordController.text,
-    //   "realm": _serviceUrlController.text,
-    //   "isVideo": _supportVideoCall,
-    // });
-    EasyLoading.dismiss();
-    if (!mounted) {
-      return;
-    }
     Navigator.push(context, MaterialPageRoute(builder: (_) {
-      return CallHomeScreen(
-        isVideo: _supportVideoCall,
-        status: 0,
-        isOutGoingCall: true,
+      return ChooseTypeUIScreen(
+        userName: _userNameController.text,
+        password: _passwordController.text,
+        realm: _serviceUrlController.text,
+        host: _hostUrlController.text,
+        usrUuid: '',
+        apiKey: '',
       );
     }));
   }

@@ -197,6 +197,7 @@ class VideoCallState extends State<VideoCallScreen> {
     return WillPopScope(
       child: Scaffold(
         extendBodyBehindAppBar: true,
+        backgroundColor: Colors.deepPurple,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
