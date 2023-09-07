@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.0.13
+
+- Increase android core
+
 
 ## 3.0.12
 - Fix status call in android 
