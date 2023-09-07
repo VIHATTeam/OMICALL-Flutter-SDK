@@ -76,19 +76,19 @@ class _HomeScreenState extends State<HomeScreen> {
   GlobalKey<DialScreenState>? _dialScreenKey;
   GlobalKey<VideoCallState>? _videoScreenKey;
 
-  Future<void> requestFCM() async {
-    await FirebaseMessaging.instance.requestPermission(
-      alert: false,
-      badge: false,
-      sound: false,
-    );
-    final token = await FirebaseMessaging.instance.getToken();
-    String? apnToken;
-    await OmicallClient.instance.updateToken(
-      fcmToken: token,
-      apnsToken: apnToken,
-    );
-  }
+  // Future<void> requestFCM() async {
+  //   await FirebaseMessaging.instance.requestPermission(
+  //     alert: false,
+  //     badge: false,
+  //     sound: false,
+  //   );
+  //   final token = await FirebaseMessaging.instance.getToken();
+  //   String? apnToken;
+  //   await OmicallClient.instance.updateToken(
+  //     fcmToken: token,
+  //     apnsToken: apnToken,
+  //   );
+  // }
 
   @override
   void initState() {
