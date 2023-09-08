@@ -243,15 +243,15 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
       return;
     }
     Navigator.push(context, MaterialPageRoute(builder: (_) {
-      // return const HomeScreen(
-      //   needRequestNotification: true,
-      // );
-      return DialScreen2(
-        key: _dialScreenKey,
-        phoneNumber: "167631",
-        status: 8,
-        isOutGoingCall: true,
+      return const HomeScreen(
+        needRequestNotification: true,
       );
+      // return DialScreen2(
+      //   key: _dialScreenKey,
+      //   phoneNumber: "167631",
+      //   status: 8,
+      //   isOutGoingCall: true,
+      // );
     }));
   }
 }
