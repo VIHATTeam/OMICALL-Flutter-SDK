@@ -42,10 +42,11 @@ String statusToDescription(int status) {
 }
 
 class HomeScreen extends StatefulWidget {
-  final bool isVideo;
+  // final bool isVideo;
   const HomeScreen({
     Key? key,
-    this.needRequestNotification = false, required this.isVideo,
+    this.needRequestNotification = false,
+    //required this.isVideo,
   }) : super(key: key);
   final bool needRequestNotification;
 
@@ -69,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _isVideoCall = widget.isVideo;
+    // _isVideoCall = widget.isVideo;
     if (Platform.isAndroid) {
       checkAndPushToCall();
     }
@@ -100,11 +101,11 @@ class _HomeScreenState extends State<HomeScreen> {
           status == OmiCallState.confirmed.rawValue) {
         debugPrint("data  OmicallClient  zzz ::: $data");
 
-        bool isVideo = data['isVideo'] as bool;
+        _isVideoCall = data['isVideo'] as bool;
         var callerNumber = "";
         // bool isVideo =false;
 
-        if (isVideo) {
+        if (_isVideoCall) {
           pushToVideoScreen(
             callerNumber,
             status: status,
@@ -128,8 +129,8 @@ class _HomeScreenState extends State<HomeScreen> {
         }
         final data = omiAction.data;
         final callerNumber = data["callerNumber"];
-        final bool isVideo = data["isVideo"];
-        if (isVideo) {
+        _isVideoCall = data["isVideo"];
+        if (_isVideoCall) {
           pushToVideoScreen(
             callerNumber,
             status: status,
@@ -150,11 +151,11 @@ class _HomeScreenState extends State<HomeScreen> {
     // checkSystemAlertPermission();
     OmicallClient.instance.setCallLogListener((data) {
       final callerNumber = data["callerNumber"];
-      final isVideo = data["isVideo"];
+      _isVideoCall = data["isVideo"];
       makeCallWithParams(
         context,
         callerNumber,
-        isVideo,
+        _isVideoCall,
       );
     });
   }
