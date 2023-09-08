@@ -80,7 +80,7 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
                   child: GestureDetector(
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) {
-                        return HomeScreen(isVideo: _supportVideoCall,);
+                        return const HomeScreen();
                       }));
                     },
                     child: Material(

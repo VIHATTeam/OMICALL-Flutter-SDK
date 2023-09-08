@@ -56,27 +56,32 @@ class DialScreenState extends State<DialScreen> {
     if (widget.status == OmiCallState.confirmed.rawValue) {
       _startWatch();
     }
+    /// Todo: check pop page more time
+     int i = 0;
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
       debugPrint(
           "status callStateChangeEvent omiAction::: ${omiAction.actionName}");
       debugPrint("status callStateChangeEvent omiAction::: ${omiAction.data}");
-      if (omiAction.actionName == OmiEventList.onCallStateChanged) {
-        final data = omiAction.data;
-        final status = data["status"] as int;
-        debugPrint("status OmicallClient ::: $status");
-        updateDialScreen(status);
-        if (status == OmiCallState.disconnected.rawValue) {
-          endCall(
-            context,
-            needShowStatus: true,
-            needRequest: false,
-          );
-          return;
-        }
-      }
       if (omiAction.actionName == OmiEventList.onSwitchboardAnswer) {
         getGuestUser();
+      }
+      if (omiAction.actionName != OmiEventList.onCallStateChanged) return;
+
+      final data = omiAction.data;
+      final status = data["status"] as int;
+      debugPrint("status OmicallClient ::: $status");
+      updateDialScreen(status);
+
+      if (status == OmiCallState.disconnected.rawValue) {
+        i++;
+        if (i >= 2) return;
+        endCall(
+          needShowStatus: true,
+          needRequest: false,
+        );
+
+        // return;
       }
     });
     await getCurrentUser();
@@ -286,7 +291,7 @@ class DialScreenState extends State<DialScreen> {
                                       .textTheme
                                       .headlineMedium!
                                       .copyWith(
-                                          color: Colors.white, fontSize: 24),
+                                          color: Colors.grey, fontSize: 24),
                                 ),
                                 const SizedBox(
                                   height: 16,
@@ -407,7 +412,6 @@ class DialScreenState extends State<DialScreen> {
                                 iconSrc: "assets/icons/call_end.svg",
                                 press: () {
                                   endCall(
-                                    context,
                                     needShowStatus: false,
                                   );
                                 },
@@ -804,8 +808,7 @@ class DialScreenState extends State<DialScreen> {
     OmicallClient.instance.toggleSpeaker();
   }
 
-  Future<void> endCall(
-    BuildContext context, {
+  Future<void> endCall({
     bool needRequest = true,
     bool needShowStatus = true,
   }) async {

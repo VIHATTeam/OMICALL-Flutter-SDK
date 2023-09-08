@@ -20,6 +20,8 @@ import '../dial/widgets/dial_button.dart';
 import '../home/home_screen.dart';
 import 'package:http/http.dart' as http;
 
+import '../video_call/video_call_screen.dart';
+
 String statusToDescription(int status) {
   if (status == OmiCallState.calling.rawValue) {
     return "Đang kết nối tới cuộc gọi";
@@ -117,22 +119,26 @@ class CallHomeScreenState extends State<CallHomeScreen> {
         return;
       }
       final data = omiAction.data;
-      final status = data["status"] as int;
+      _callStatus = data["status"] as int;
+
       // debugPrint(
       //     "status callStateChangeEvent omiAction::: ${omiAction.actionName}");
       // debugPrint("status callStateChangeEvent omiAction::: $data");
-      debugPrint("status OmicallClient ::: $status");
+      debugPrint("status OmicallClient ::: $_callStatus");
+      if(data.keys.contains("isVideo")){
+        _isVideo = data["isVideo"] ?? false;
+      }
 
-      if (status == OmiCallState.incoming.rawValue ||
-          status == OmiCallState.confirmed.rawValue) {
+      if (_callStatus == OmiCallState.incoming.rawValue ||
+          _callStatus == OmiCallState.confirmed.rawValue) {
         await getGuestUser();
         _isVideo = data['isVideo'] as bool;
         callerNumber = data["callerNumber"];
-        _callStatus = status;
+
         _isOutGoingCall = false;
       }
       updateDialScreen(_callStatus);
-      if (status == OmiCallState.disconnected.rawValue) {
+      if (_callStatus == OmiCallState.disconnected.rawValue) {
         await endCall(
           context,
           needShowStatus: true,
@@ -177,7 +183,7 @@ class CallHomeScreenState extends State<CallHomeScreen> {
     });
     OmicallClient.instance.setCallLogListener((data) {
       final callerNumber = data["callerNumber"];
-       _isVideo = data["isVideo"];
+      _isVideo = data["isVideo"];
       makeCallWithParams(
         context,
         callerNumber,
@@ -261,6 +267,15 @@ class CallHomeScreenState extends State<CallHomeScreen> {
         _callStatus = OmiCallState.confirmed.rawValue;
         _isOutGoingCall = false;
       });
+      if (_isVideo) {
+        await Navigator.push(context, MaterialPageRoute(builder: (_) {
+          return VideoCallScreen(
+            status: _callStatus,
+            isOutGoingCall: _isOutGoingCall,
+            isTypeDirectCall: true,
+          );
+        }));
+      }
     }
   }
 
@@ -468,767 +483,790 @@ class CallHomeScreenState extends State<CallHomeScreen> {
       );
     }
 
-    return WillPopScope(
-      child:
-      Scaffold(
-        body: Stack(
-          children: [
-            Align(
-              alignment: Alignment.topLeft,
-              child: Image.asset(
-                "assets/images/signIn01.png",
-                width: MediaQuery.of(context).size.width * 0.9,
-              ),
-            ),
-            Align(
-              alignment: Alignment.bottomLeft,
-              child: Image.asset(
-                "assets/images/signIn02.png",
-                height: MediaQuery.of(context).size.height * 0.28,
-              ),
-            ),
-            SingleChildScrollView(
-              child: Column(
+    return _isVideo
+        ? VideoCallScreen(
+            status: _callStatus,
+            isOutGoingCall: false,
+            isTypeDirectCall: true,
+          )
+        : WillPopScope(
+            child: Scaffold(
+              body: Stack(
                 children: [
-                  Padding(
-                    padding:
-                        const EdgeInsets.only(left: 20, right: 20, top: 150),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Image.asset(
+                      "assets/images/signIn01.png",
+                      width: MediaQuery.of(context).size.width * 0.9,
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Image.asset(
+                      "assets/images/signIn02.png",
+                      height: MediaQuery.of(context).size.height * 0.28,
+                    ),
+                  ),
+                  SingleChildScrollView(
                     child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              children: [
-                                Text(
-                                  "${current?["extension"] ?? "..."}",
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineMedium!
-                                      .copyWith(
-                                          color: Colors.grey, fontSize: 24),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              left: 20, right: 20, top: 150),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    children: [
+                                      Text(
+                                        "${current?["extension"] ?? "..."}",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineMedium!
+                                            .copyWith(
+                                                color: Colors.grey,
+                                                fontSize: 24),
+                                      ),
+                                      const SizedBox(
+                                        height: 16,
+                                      ),
+                                      DialUserPic(
+                                        size: correctWidth,
+                                        image: current?["avatar_url"] != "" &&
+                                                current?["avatar_url"] != null
+                                            ? current!["avatar_url"]
+                                            : "assets/images/calling_face.png",
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    width: 16,
+                                  ),
+                                  Column(
+                                    children: [
+                                      Text(
+                                        _phoneNumberController.text.isEmpty
+                                            ? "..."
+                                            : "${guestUser?["extension"] ?? "..."}",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .headlineMedium!
+                                            .copyWith(
+                                                color: Colors.grey,
+                                                fontSize: 24),
+                                      ),
+                                      const SizedBox(
+                                        height: 16,
+                                      ),
+                                      DialUserPic(
+                                        size: correctWidth,
+                                        image: guestUser?["avatar_url"] != "" &&
+                                                guestUser?["avatar_url"] != null
+                                            ? guestUser!["avatar_url"]
+                                            : "assets/images/calling_face.png",
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              Container(
+                                margin: const EdgeInsets.only(top: 16),
+                                child: Text(
+                                  _callTime ?? statusToDescription(_callStatus),
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height:
+                                    MediaQuery.of(context).size.height * 0.05,
+                              ),
+                              if (_callStatus ==
+                                  OmiCallState.confirmed.rawValue) ...[
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    DialButton(
+                                      iconSrc: !isMuted
+                                          ? 'assets/icons/ic_microphone.svg'
+                                          : 'assets/icons/ic_block_microphone.svg',
+                                      text: "Microphone",
+                                      press: () {
+                                        toggleMute(context);
+                                      },
+                                    ),
+                                    if (_currentAudio != null)
+                                      DialButton(
+                                        iconSrc:
+                                            'assets/images/$_audioImage.png',
+                                        text: _audioTitle,
+                                        press: () {
+                                          toggleAndCheckDevice();
+                                        },
+                                      ),
+                                    DialButton(
+                                      iconSrc: "assets/icons/ic_video.svg",
+                                      text: "Video",
+                                      press: () {},
+                                      color: Colors.grey,
+                                    ),
+                                  ],
                                 ),
                                 const SizedBox(
                                   height: 16,
                                 ),
-                                DialUserPic(
-                                  size: correctWidth,
-                                  image: current?["avatar_url"] != "" &&
-                                          current?["avatar_url"] != null
-                                      ? current!["avatar_url"]
-                                      : "assets/images/calling_face.png",
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    DialButton(
+                                      iconSrc: "assets/icons/ic_message.svg",
+                                      text: "Message",
+                                      press: () {
+                                        setState(() {
+                                          _isShowKeyboard = !_isShowKeyboard;
+                                        });
+                                      },
+                                      color: Colors.grey,
+                                    ),
+                                    DialButton(
+                                      iconSrc: "assets/icons/ic_user.svg",
+                                      text: "Add contact",
+                                      press: () {},
+                                      color: Colors.grey,
+                                    ),
+                                    DialButton(
+                                      iconSrc: "assets/icons/ic_voicemail.svg",
+                                      text: "Voice mail",
+                                      press: () {},
+                                      color: Colors.grey,
+                                    ),
+                                  ],
                                 ),
                               ],
-                            ),
-                            const SizedBox(
-                              width: 16,
-                            ),
-                            Column(
-                              children: [
-                                Text(
-                                  _phoneNumberController.text.isEmpty
-                                      ? "..."
-                                      : "${guestUser?["extension"] ?? "..."}",
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .headlineMedium!
-                                      .copyWith(
-                                          color: Colors.grey, fontSize: 24),
+                              if (_callStatus !=
+                                  OmiCallState.confirmed.rawValue)
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.43,
+                                )
+                              else
+                                SizedBox(
+                                  height:
+                                      MediaQuery.of(context).size.height * 0.19,
                                 ),
-                                const SizedBox(
-                                  height: 16,
-                                ),
-                                DialUserPic(
-                                  size: correctWidth,
-                                  image: guestUser?["avatar_url"] != "" &&
-                                          guestUser?["avatar_url"] != null
-                                      ? guestUser!["avatar_url"]
-                                      : "assets/images/calling_face.png",
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(top: 16),
-                          child: Text(
-                            _callTime ?? statusToDescription(_callStatus),
-                            style: const TextStyle(
-                              color: Colors.grey,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: MediaQuery.of(context).size.height * 0.05,
-                        ),
-                        if (_callStatus == OmiCallState.confirmed.rawValue) ...[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              DialButton(
-                                iconSrc: !isMuted
-                                    ? 'assets/icons/ic_microphone.svg'
-                                    : 'assets/icons/ic_block_microphone.svg',
-                                text: "Microphone",
-                                press: () {
-                                  toggleMute(context);
-                                },
-                              ),
-                              if (_currentAudio != null)
-                                DialButton(
-                                  iconSrc: 'assets/images/$_audioImage.png',
-                                  text: _audioTitle,
-                                  press: () {
-                                    toggleAndCheckDevice();
-                                  },
-                                ),
-                              DialButton(
-                                iconSrc: "assets/icons/ic_video.svg",
-                                text: "Video",
-                                press: () {},
-                                color: Colors.grey,
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  if (_callStatus ==
+                                      OmiCallState.unknown.rawValue)
+                                    RoundedCircleButton(
+                                      iconSrc: "assets/icons/call_end.svg",
+                                      press: () async {
+                                        if (_phoneNumberController
+                                            .text.isNotEmpty) {
+                                          makeCall();
+                                        }
+                                      },
+                                      color:
+                                          _phoneNumberController.text.isNotEmpty
+                                              ? kGreenColor
+                                              : kSecondaryColor,
+                                      iconColor: Colors.white,
+                                    ),
+                                  if ((_callStatus ==
+                                              OmiCallState.early.rawValue ||
+                                          _callStatus ==
+                                              OmiCallState.incoming.rawValue) &&
+                                      _isOutGoingCall == false)
+                                    RoundedCircleButton(
+                                      iconSrc: "assets/icons/call_end.svg",
+                                      press: () async {
+                                        final result = await OmicallClient
+                                            .instance
+                                            .joinCall();
+                                        if (result == false &&
+                                            context.mounted) {
+                                          Navigator.pop(context);
+                                        }
+                                      },
+                                      color: kGreenColor,
+                                      iconColor: Colors.white,
+                                    ),
+                                  if (_callStatus >
+                                      OmiCallState.unknown.rawValue)
+                                    RoundedCircleButton(
+                                      iconSrc: "assets/icons/call_end.svg",
+                                      press: () {
+                                        endCall(
+                                          context,
+                                          needShowStatus: false,
+                                        );
+                                      },
+                                      color: kRedColor,
+                                      iconColor: Colors.white,
+                                    ),
+                                ],
                               ),
                             ],
                           ),
-                          const SizedBox(
-                            height: 16,
+                        ),
+
+                        // Positioned(
+                        //   top: 10,
+                        //   left: 12,
+                        //   right: 12,
+                        //   child: Text(
+                        //     _callQuality,
+                        //     textAlign: TextAlign.center,
+                        //     style: const TextStyle(
+                        //       color: Colors.white,
+                        //       fontSize: 16,
+                        //       fontWeight: FontWeight.w600,
+                        //     ),
+                        //   ),
+                        // )
+                      ],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 24, vertical: 68),
+                    child: Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () async {
+                            await endCall(
+                              context,
+                              needShowStatus: true,
+                              needRequest: false,
+                            );
+                            Navigator.of(context).pop();
+                          },
+                          child: Material(
+                            elevation: 4,
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(
+                                  MediaQuery.of(context).size.width * 0.1),
+                            ),
+                            child: Container(
+                              width: 52,
+                              height: 52,
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.white,
+                              ),
+                              child: const Icon(
+                                Icons.arrow_back,
+                                size: 25,
+                              ),
+                            ),
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              DialButton(
-                                iconSrc: "assets/icons/ic_message.svg",
-                                text: "Message",
-                                press: () {
-                                  setState(() {
-                                    _isShowKeyboard = !_isShowKeyboard;
-                                  });
-                                },
-                                color: Colors.grey,
-                              ),
-                              DialButton(
-                                iconSrc: "assets/icons/ic_user.svg",
-                                text: "Add contact",
-                                press: () {},
-                                color: Colors.grey,
-                              ),
-                              DialButton(
-                                iconSrc: "assets/icons/ic_voicemail.svg",
-                                text: "Voice mail",
-                                press: () {},
-                                color: Colors.grey,
-                              ),
-                            ],
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Material(
+                            elevation: 4,
+                            borderRadius: BorderRadius.circular(
+                                MediaQuery.of(context).size.width * 0.1),
+                            child: TextFormField(
+                              controller: _phoneNumberController,
+                              keyboardType: TextInputType.phone,
+                              decoration:
+                                  inputDecoration('Phone Number', Icons.phone),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'This field cannot be empty';
+                                }
+                                return null;
+                              },
+                            ),
                           ),
-                        ],
-                        if (_callStatus != OmiCallState.confirmed.rawValue)
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.43,
-                          )
-                        else
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.19,
-                          ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            if (_callStatus == OmiCallState.unknown.rawValue)
-                              RoundedCircleButton(
-                                iconSrc: "assets/icons/call_end.svg",
-                                press: () async {
-                                  if (_phoneNumberController.text.isNotEmpty) {
-                                    makeCall();
-                                  }
-                                },
-                                color: _phoneNumberController.text.isNotEmpty
-                                    ? kGreenColor
-                                    : kSecondaryColor,
-                                iconColor: Colors.white,
-                              ),
-                            if ((_callStatus == OmiCallState.early.rawValue ||
-                                    _callStatus ==
-                                        OmiCallState.incoming.rawValue) &&
-                                _isOutGoingCall == false)
-                              RoundedCircleButton(
-                                iconSrc: "assets/icons/call_end.svg",
-                                press: () async {
-                                  final result =
-                                      await OmicallClient.instance.joinCall();
-                                  if (result == false && context.mounted) {
-                                    Navigator.pop(context);
-                                  }
-                                },
-                                color: kGreenColor,
-                                iconColor: Colors.white,
-                              ),
-                            if (_callStatus > OmiCallState.unknown.rawValue)
-                              RoundedCircleButton(
-                                iconSrc: "assets/icons/call_end.svg",
-                                press: () {
-                                  endCall(
-                                    context,
-                                    needShowStatus: false,
-                                  );
-                                },
-                                color: kRedColor,
-                                iconColor: Colors.white,
-                              ),
-                          ],
                         ),
                       ],
                     ),
                   ),
-
-
-
-
-                  // Positioned(
-                  //   top: 10,
-                  //   left: 12,
-                  //   right: 12,
-                  //   child: Text(
-                  //     _callQuality,
-                  //     textAlign: TextAlign.center,
-                  //     style: const TextStyle(
-                  //       color: Colors.white,
-                  //       fontSize: 16,
-                  //       fontWeight: FontWeight.w600,
-                  //     ),
-                  //   ),
-                  // )
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 68),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      await endCall(
-                        context,
-                        needShowStatus: true,
-                        needRequest: false,
-                      );
-                      Navigator.of(context).pop();
-                    },
-                    child: Material(
-                      elevation: 4,
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(
-                            MediaQuery.of(context).size.width * 0.1),
-                      ),
+                  if (_isShowKeyboard)
+                    Align(
+                      alignment: Alignment.bottomCenter,
                       child: Container(
-                        width: 52,
-                        height: 52,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                        ),
-                        child: const Icon(
-                          Icons.arrow_back,
-                          size: 25,
+                        width: double.infinity,
+                        height: 350,
+                        color: Colors.white,
+                        child: Column(
+                          children: [
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Row(
+                              children: [
+                                const SizedBox(
+                                  width: 54,
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    _keyboardMessage,
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 12,
+                                ),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _isShowKeyboard = !_isShowKeyboard;
+                                      _keyboardMessage = "";
+                                    });
+                                  },
+                                  child: const Icon(
+                                    Icons.cancel,
+                                    color: Colors.grey,
+                                    size: 30,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 24,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            Expanded(
+                              child: NumericKeyboard(
+                                onKeyboardTap: _onKeyboardTap,
+                                textColor: Colors.red,
+                                rightButtonFn: () {
+                                  setState(() {
+                                    _isShowKeyboard = !_isShowKeyboard;
+                                  });
+                                },
+                                rightIcon: const Text(
+                                  "*",
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 24,
+                                  ),
+                                ),
+                                leftButtonFn: () {
+                                  _onKeyboardTap("*");
+                                },
+                                leftIcon: const Text(
+                                  "#",
+                                  style: TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 24,
+                                  ),
+                                ),
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Material(
-                      elevation: 4,
-                      borderRadius: BorderRadius.circular(
-                          MediaQuery.of(context).size.width * 0.1),
-                      child: TextFormField(
-                        controller: _phoneNumberController,
-                        keyboardType: TextInputType.phone,
-                        decoration:
-                            inputDecoration('Phone Number', Icons.phone),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'This field cannot be empty';
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                  ),
                 ],
               ),
             ),
-            if (_isShowKeyboard)
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  width: double.infinity,
-                  height: 350,
-                  color: Colors.white,
-                  child: Column(
-                    children: [
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Row(
-                        children: [
-                          const SizedBox(
-                            width: 54,
-                          ),
-                          Expanded(
-                            child: Text(
-                              _keyboardMessage,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                color: Colors.red,
-                                fontWeight: FontWeight.w700,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 12,
-                          ),
-                          GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _isShowKeyboard = !_isShowKeyboard;
-                                _keyboardMessage = "";
-                              });
-                            },
-                            child: const Icon(
-                              Icons.cancel,
-                              color: Colors.grey,
-                              size: 30,
-                            ),
-                          ),
-                          const SizedBox(
-                            width: 24,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      Expanded(
-                        child: NumericKeyboard(
-                          onKeyboardTap: _onKeyboardTap,
-                          textColor: Colors.red,
-                          rightButtonFn: () {
-                            setState(() {
-                              _isShowKeyboard = !_isShowKeyboard;
-                            });
-                          },
-                          rightIcon: const Text(
-                            "*",
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontSize: 24,
-                            ),
-                          ),
-                          leftButtonFn: () {
-                            _onKeyboardTap("*");
-                          },
-                          leftIcon: const Text(
-                            "#",
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontSize: 24,
-                            ),
-                          ),
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-          ],
-        ),
-      ),
 
-      // Scaffold(
-      //   backgroundColor: kBackgoundColor,
-      //   appBar: AppBar(
-      //     backgroundColor: kBackgoundColor,
-      //     automaticallyImplyLeading: false,
-      //     actions: [
-      //       IconButton(
-      //         onPressed: () async{
-      //           await OmicallClient.instance.endCall();
-      //           Navigator.pop(context);
-      //         },
-      //         icon: const Icon(Icons.logout),
-      //       ),
-      //     ],
-      //     title: Container(
-      //       alignment: Alignment.centerLeft,
-      //       decoration: BoxDecoration(
-      //         color: Colors.white,
-      //         borderRadius: BorderRadius.circular(0),
-      //       ),
-      //       child: TextField(
-      //         controller: _phoneNumberController,
-      //         keyboardType: TextInputType.number,
-      //         decoration: const InputDecoration(
-      //           prefixIcon: Icon(Icons.phone),
-      //           labelText: "Phone Number",
-      //           // enabledBorder: myInputBorder(),
-      //           // focusedBorder: myFocusBorder(),
-      //         ),
-      //         onSubmitted: (val) async {
-      //           await getGuestUser();
-      //         },
-      //       ),
-      //     ),
-      //   ),
-      //   body: SafeArea(
-      //     child: SingleChildScrollView(
-      //       child: Column(
-      //         children: [
-      //           Container(
-      //             width: double.infinity,
-      //             height: MediaQuery.of(context).size.height * 0.85,
-      //             child: Stack(
-      //               alignment: Alignment.bottomCenter,
-      //               children: [
-      //                 const SizedBox.expand(),
-      //                 Padding(
-      //                   padding: const EdgeInsets.all(20.0),
-      //                   child: Column(
-      //                     children: [
-      //                       Row(
-      //                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      //                         crossAxisAlignment: CrossAxisAlignment.center,
-      //                         children: [
-      //                           Column(
-      //                             children: [
-      //                               Text(
-      //                                 "${current?["extension"] ?? "..."}",
-      //                                 style: Theme.of(context)
-      //                                     .textTheme
-      //                                     .headlineMedium!
-      //                                     .copyWith(
-      //                                         color: Colors.white,
-      //                                         fontSize: 24),
-      //                               ),
-      //                               const SizedBox(
-      //                                 height: 16,
-      //                               ),
-      //                               DialUserPic(
-      //                                 size: correctWidth,
-      //                                 image: current?["avatar_url"] != "" &&
-      //                                         current?["avatar_url"] != null
-      //                                     ? current!["avatar_url"]
-      //                                     : "assets/images/calling_face.png",
-      //                               ),
-      //                             ],
-      //                           ),
-      //                           const SizedBox(
-      //                             width: 16,
-      //                           ),
-      //                           Column(
-      //                             children: [
-      //                               Text(
-      //                                 _phoneNumberController.text.isEmpty
-      //                                     ? "..."
-      //                                     : "${guestUser?["extension"] ?? "..."}",
-      //                                 style: Theme.of(context)
-      //                                     .textTheme
-      //                                     .headlineMedium!
-      //                                     .copyWith(
-      //                                         color: Colors.white,
-      //                                         fontSize: 24),
-      //                               ),
-      //                               const SizedBox(
-      //                                 height: 16,
-      //                               ),
-      //                               DialUserPic(
-      //                                 size: correctWidth,
-      //                                 image: guestUser?["avatar_url"] != "" &&
-      //                                         guestUser?["avatar_url"] != null
-      //                                     ? guestUser!["avatar_url"]
-      //                                     : "assets/images/calling_face.png",
-      //                               ),
-      //                             ],
-      //                           ),
-      //                         ],
-      //                       ),
-      //                       Container(
-      //                         margin: const EdgeInsets.only(top: 16),
-      //                         child: Text(
-      //                           _callTime ?? statusToDescription(_callStatus),
-      //                           style: const TextStyle(
-      //                             color: Colors.white60,
-      //                             fontSize: 18,
-      //                           ),
-      //                         ),
-      //                       ),
-      //                       const Spacer(),
-      //                       if (_callStatus ==
-      //                           OmiCallState.confirmed.rawValue) ...[
-      //                         Row(
-      //                           mainAxisAlignment:
-      //                               MainAxisAlignment.spaceBetween,
-      //                           children: [
-      //                             DialButton(
-      //                               iconSrc: !isMuted
-      //                                   ? 'assets/icons/ic_microphone.svg'
-      //                                   : 'assets/icons/ic_block_microphone.svg',
-      //                               text: "Microphone",
-      //                               press: () {
-      //                                 toggleMute(context);
-      //                               },
-      //                             ),
-      //                             if (_currentAudio != null)
-      //                               DialButton(
-      //                                 iconSrc: 'assets/images/$_audioImage.png',
-      //                                 text: _audioTitle,
-      //                                 press: () {
-      //                                   toggleAndCheckDevice();
-      //                                 },
-      //                               ),
-      //                             DialButton(
-      //                               iconSrc: "assets/icons/ic_video.svg",
-      //                               text: "Video",
-      //                               press: () {},
-      //                               color: Colors.grey,
-      //                             ),
-      //                           ],
-      //                         ),
-      //                         const SizedBox(
-      //                           height: 16,
-      //                         ),
-      //                         Row(
-      //                           mainAxisAlignment:
-      //                               MainAxisAlignment.spaceBetween,
-      //                           children: [
-      //                             DialButton(
-      //                               iconSrc: "assets/icons/ic_message.svg",
-      //                               text: "Message",
-      //                               press: () {
-      //                                 setState(() {
-      //                                   _isShowKeyboard = !_isShowKeyboard;
-      //                                 });
-      //                               },
-      //                               color: Colors.white,
-      //                             ),
-      //                             DialButton(
-      //                               iconSrc: "assets/icons/ic_user.svg",
-      //                               text: "Add contact",
-      //                               press: () {},
-      //                               color: Colors.grey,
-      //                             ),
-      //                             DialButton(
-      //                               iconSrc: "assets/icons/ic_voicemail.svg",
-      //                               text: "Voice mail",
-      //                               press: () {},
-      //                               color: Colors.grey,
-      //                             ),
-      //                           ],
-      //                         ),
-      //                       ],
-      //                       const Spacer(),
-      //                       Row(
-      //                         mainAxisAlignment: MainAxisAlignment.spaceAround,
-      //                         children: [
-      //                           if (_callStatus ==
-      //                               OmiCallState.unknown.rawValue)
-      //                             RoundedCircleButton(
-      //                               iconSrc: "assets/icons/call_end.svg",
-      //                               press: () async {
-      //                                 if (_phoneNumberController
-      //                                     .text.isNotEmpty) {
-      //                                   makeCall();
-      //                                 }
-      //                               },
-      //                               color:
-      //                                   _phoneNumberController.text.isNotEmpty
-      //                                       ? kGreenColor
-      //                                       : kSecondaryColor,
-      //                               iconColor: Colors.white,
-      //                             ),
-      //                           if ((_callStatus ==
-      //                                       OmiCallState.early.rawValue ||
-      //                                   _callStatus ==
-      //                                       OmiCallState.incoming.rawValue) &&
-      //                               isOutGoingCall == false)
-      //                             RoundedCircleButton(
-      //                               iconSrc: "assets/icons/call_end.svg",
-      //                               press: () async {
-      //                                 final result = await OmicallClient
-      //                                     .instance
-      //                                     .joinCall();
-      //                                 if (result == false && context.mounted) {
-      //                                   Navigator.pop(context);
-      //                                 }
-      //                               },
-      //                               color: kGreenColor,
-      //                               iconColor: Colors.white,
-      //                             ),
-      //                           if (_callStatus > OmiCallState.unknown.rawValue)
-      //                             RoundedCircleButton(
-      //                               iconSrc: "assets/icons/call_end.svg",
-      //                               press: () {
-      //                                 endCall(
-      //                                   context,
-      //                                   needShowStatus: false,
-      //                                 );
-      //                               },
-      //                               color: kRedColor,
-      //                               iconColor: Colors.white,
-      //                             ),
-      //                         ],
-      //                       )
-      //                     ],
-      //                   ),
-      //                 ),
-      //                 if (_isShowKeyboard)
-      //                   Container(
-      //                     width: double.infinity,
-      //                     height: 350,
-      //                     color: Colors.white,
-      //                     child: Column(
-      //                       children: [
-      //                         const SizedBox(
-      //                           height: 10,
-      //                         ),
-      //                         Row(
-      //                           children: [
-      //                             const SizedBox(
-      //                               width: 54,
-      //                             ),
-      //                             Expanded(
-      //                               child: Text(
-      //                                 _keyboardMessage,
-      //                                 style: const TextStyle(
-      //                                   fontSize: 24,
-      //                                   color: Colors.red,
-      //                                   fontWeight: FontWeight.w700,
-      //                                 ),
-      //                                 textAlign: TextAlign.center,
-      //                               ),
-      //                             ),
-      //                             const SizedBox(
-      //                               width: 12,
-      //                             ),
-      //                             GestureDetector(
-      //                               onTap: () {
-      //                                 setState(() {
-      //                                   _isShowKeyboard = !_isShowKeyboard;
-      //                                   _keyboardMessage = "";
-      //                                 });
-      //                               },
-      //                               child: const Icon(
-      //                                 Icons.cancel,
-      //                                 color: Colors.grey,
-      //                                 size: 30,
-      //                               ),
-      //                             ),
-      //                             const SizedBox(
-      //                               width: 24,
-      //                             ),
-      //                           ],
-      //                         ),
-      //                         const SizedBox(
-      //                           height: 10,
-      //                         ),
-      //                         Expanded(
-      //                           child: NumericKeyboard(
-      //                             onKeyboardTap: _onKeyboardTap,
-      //                             textColor: Colors.red,
-      //                             rightButtonFn: () {
-      //                               setState(() {
-      //                                 _isShowKeyboard = !_isShowKeyboard;
-      //                               });
-      //                             },
-      //                             rightIcon: const Text(
-      //                               "*",
-      //                               style: TextStyle(
-      //                                 color: Colors.red,
-      //                                 fontSize: 24,
-      //                               ),
-      //                             ),
-      //                             leftButtonFn: () {
-      //                               _onKeyboardTap("*");
-      //                             },
-      //                             leftIcon: const Text(
-      //                               "#",
-      //                               style: TextStyle(
-      //                                 color: Colors.red,
-      //                                 fontSize: 24,
-      //                               ),
-      //                             ),
-      //                             mainAxisAlignment:
-      //                                 MainAxisAlignment.spaceEvenly,
-      //                           ),
-      //                         ),
-      //                       ],
-      //                     ),
-      //                   ),
-      //                 Positioned(
-      //                   top: 10,
-      //                   left: 12,
-      //                   right: 12,
-      //                   child: Text(
-      //                     _callQuality,
-      //                     textAlign: TextAlign.center,
-      //                     style: const TextStyle(
-      //                       color: Colors.white,
-      //                       fontSize: 16,
-      //                       fontWeight: FontWeight.w600,
-      //                     ),
-      //                   ),
-      //                 )
-      //               ],
-      //             ),
-      //           ),
-      //         ],
-      //       ),
-      //
-      //       // Column(
-      //       //   children: [
-      //       //     // Container(
-      //       //     //   width: double.infinity,
-      //       //     //   height: 75,
-      //       //     //   color: Colors.white,
-      //       //     //   padding: const EdgeInsets.symmetric(horizontal: 16),
-      //       //     //   child: Row(
-      //       //     //     children: [
-      //       //     //       GestureDetector(
-      //       //     //         onTap: () {
-      //       //     //           Navigator.pop(context);
-      //       //     //         },
-      //       //     //         child: const Icon(Icons.arrow_back),
-      //       //     //       ),
-      //       //     //       const SizedBox(
-      //       //     //         width: 12,
-      //       //     //       ),
-      //       //     //       Expanded(
-      //       //     //         child: TextField(
-      //       //     //           controller: _phoneNumberController,
-      //       //     //           keyboardType: TextInputType.number,
-      //       //     //           decoration: InputDecoration(
-      //       //     //             prefixIcon: const Icon(Icons.phone),
-      //       //     //             labelText: "Phone Number",
-      //       //     //             enabledBorder: myInputBorder(),
-      //       //     //             focusedBorder: myFocusBorder(),
-      //       //     //           ),
-      //       //     //           onSubmitted: (val)async{
-      //       //     //             await getGuestUser();
-      //       //     //           },
-      //       //     //         ),
-      //       //     //       ),
-      //       //     //     ],
-      //       //     //   ),
-      //       //     // ),
-      //       //
-      //       //   ],
-      //       // ),
-      //     ),
-      //   ),
-      // ),
-      onWillPop: () async => false,
-    );
+            // Scaffold(
+            //   backgroundColor: kBackgoundColor,
+            //   appBar: AppBar(
+            //     backgroundColor: kBackgoundColor,
+            //     automaticallyImplyLeading: false,
+            //     actions: [
+            //       IconButton(
+            //         onPressed: () async{
+            //           await OmicallClient.instance.endCall();
+            //           Navigator.pop(context);
+            //         },
+            //         icon: const Icon(Icons.logout),
+            //       ),
+            //     ],
+            //     title: Container(
+            //       alignment: Alignment.centerLeft,
+            //       decoration: BoxDecoration(
+            //         color: Colors.white,
+            //         borderRadius: BorderRadius.circular(0),
+            //       ),
+            //       child: TextField(
+            //         controller: _phoneNumberController,
+            //         keyboardType: TextInputType.number,
+            //         decoration: const InputDecoration(
+            //           prefixIcon: Icon(Icons.phone),
+            //           labelText: "Phone Number",
+            //           // enabledBorder: myInputBorder(),
+            //           // focusedBorder: myFocusBorder(),
+            //         ),
+            //         onSubmitted: (val) async {
+            //           await getGuestUser();
+            //         },
+            //       ),
+            //     ),
+            //   ),
+            //   body: SafeArea(
+            //     child: SingleChildScrollView(
+            //       child: Column(
+            //         children: [
+            //           Container(
+            //             width: double.infinity,
+            //             height: MediaQuery.of(context).size.height * 0.85,
+            //             child: Stack(
+            //               alignment: Alignment.bottomCenter,
+            //               children: [
+            //                 const SizedBox.expand(),
+            //                 Padding(
+            //                   padding: const EdgeInsets.all(20.0),
+            //                   child: Column(
+            //                     children: [
+            //                       Row(
+            //                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //                         crossAxisAlignment: CrossAxisAlignment.center,
+            //                         children: [
+            //                           Column(
+            //                             children: [
+            //                               Text(
+            //                                 "${current?["extension"] ?? "..."}",
+            //                                 style: Theme.of(context)
+            //                                     .textTheme
+            //                                     .headlineMedium!
+            //                                     .copyWith(
+            //                                         color: Colors.white,
+            //                                         fontSize: 24),
+            //                               ),
+            //                               const SizedBox(
+            //                                 height: 16,
+            //                               ),
+            //                               DialUserPic(
+            //                                 size: correctWidth,
+            //                                 image: current?["avatar_url"] != "" &&
+            //                                         current?["avatar_url"] != null
+            //                                     ? current!["avatar_url"]
+            //                                     : "assets/images/calling_face.png",
+            //                               ),
+            //                             ],
+            //                           ),
+            //                           const SizedBox(
+            //                             width: 16,
+            //                           ),
+            //                           Column(
+            //                             children: [
+            //                               Text(
+            //                                 _phoneNumberController.text.isEmpty
+            //                                     ? "..."
+            //                                     : "${guestUser?["extension"] ?? "..."}",
+            //                                 style: Theme.of(context)
+            //                                     .textTheme
+            //                                     .headlineMedium!
+            //                                     .copyWith(
+            //                                         color: Colors.white,
+            //                                         fontSize: 24),
+            //                               ),
+            //                               const SizedBox(
+            //                                 height: 16,
+            //                               ),
+            //                               DialUserPic(
+            //                                 size: correctWidth,
+            //                                 image: guestUser?["avatar_url"] != "" &&
+            //                                         guestUser?["avatar_url"] != null
+            //                                     ? guestUser!["avatar_url"]
+            //                                     : "assets/images/calling_face.png",
+            //                               ),
+            //                             ],
+            //                           ),
+            //                         ],
+            //                       ),
+            //                       Container(
+            //                         margin: const EdgeInsets.only(top: 16),
+            //                         child: Text(
+            //                           _callTime ?? statusToDescription(_callStatus),
+            //                           style: const TextStyle(
+            //                             color: Colors.white60,
+            //                             fontSize: 18,
+            //                           ),
+            //                         ),
+            //                       ),
+            //                       const Spacer(),
+            //                       if (_callStatus ==
+            //                           OmiCallState.confirmed.rawValue) ...[
+            //                         Row(
+            //                           mainAxisAlignment:
+            //                               MainAxisAlignment.spaceBetween,
+            //                           children: [
+            //                             DialButton(
+            //                               iconSrc: !isMuted
+            //                                   ? 'assets/icons/ic_microphone.svg'
+            //                                   : 'assets/icons/ic_block_microphone.svg',
+            //                               text: "Microphone",
+            //                               press: () {
+            //                                 toggleMute(context);
+            //                               },
+            //                             ),
+            //                             if (_currentAudio != null)
+            //                               DialButton(
+            //                                 iconSrc: 'assets/images/$_audioImage.png',
+            //                                 text: _audioTitle,
+            //                                 press: () {
+            //                                   toggleAndCheckDevice();
+            //                                 },
+            //                               ),
+            //                             DialButton(
+            //                               iconSrc: "assets/icons/ic_video.svg",
+            //                               text: "Video",
+            //                               press: () {},
+            //                               color: Colors.grey,
+            //                             ),
+            //                           ],
+            //                         ),
+            //                         const SizedBox(
+            //                           height: 16,
+            //                         ),
+            //                         Row(
+            //                           mainAxisAlignment:
+            //                               MainAxisAlignment.spaceBetween,
+            //                           children: [
+            //                             DialButton(
+            //                               iconSrc: "assets/icons/ic_message.svg",
+            //                               text: "Message",
+            //                               press: () {
+            //                                 setState(() {
+            //                                   _isShowKeyboard = !_isShowKeyboard;
+            //                                 });
+            //                               },
+            //                               color: Colors.white,
+            //                             ),
+            //                             DialButton(
+            //                               iconSrc: "assets/icons/ic_user.svg",
+            //                               text: "Add contact",
+            //                               press: () {},
+            //                               color: Colors.grey,
+            //                             ),
+            //                             DialButton(
+            //                               iconSrc: "assets/icons/ic_voicemail.svg",
+            //                               text: "Voice mail",
+            //                               press: () {},
+            //                               color: Colors.grey,
+            //                             ),
+            //                           ],
+            //                         ),
+            //                       ],
+            //                       const Spacer(),
+            //                       Row(
+            //                         mainAxisAlignment: MainAxisAlignment.spaceAround,
+            //                         children: [
+            //                           if (_callStatus ==
+            //                               OmiCallState.unknown.rawValue)
+            //                             RoundedCircleButton(
+            //                               iconSrc: "assets/icons/call_end.svg",
+            //                               press: () async {
+            //                                 if (_phoneNumberController
+            //                                     .text.isNotEmpty) {
+            //                                   makeCall();
+            //                                 }
+            //                               },
+            //                               color:
+            //                                   _phoneNumberController.text.isNotEmpty
+            //                                       ? kGreenColor
+            //                                       : kSecondaryColor,
+            //                               iconColor: Colors.white,
+            //                             ),
+            //                           if ((_callStatus ==
+            //                                       OmiCallState.early.rawValue ||
+            //                                   _callStatus ==
+            //                                       OmiCallState.incoming.rawValue) &&
+            //                               isOutGoingCall == false)
+            //                             RoundedCircleButton(
+            //                               iconSrc: "assets/icons/call_end.svg",
+            //                               press: () async {
+            //                                 final result = await OmicallClient
+            //                                     .instance
+            //                                     .joinCall();
+            //                                 if (result == false && context.mounted) {
+            //                                   Navigator.pop(context);
+            //                                 }
+            //                               },
+            //                               color: kGreenColor,
+            //                               iconColor: Colors.white,
+            //                             ),
+            //                           if (_callStatus > OmiCallState.unknown.rawValue)
+            //                             RoundedCircleButton(
+            //                               iconSrc: "assets/icons/call_end.svg",
+            //                               press: () {
+            //                                 endCall(
+            //                                   context,
+            //                                   needShowStatus: false,
+            //                                 );
+            //                               },
+            //                               color: kRedColor,
+            //                               iconColor: Colors.white,
+            //                             ),
+            //                         ],
+            //                       )
+            //                     ],
+            //                   ),
+            //                 ),
+            //                 if (_isShowKeyboard)
+            //                   Container(
+            //                     width: double.infinity,
+            //                     height: 350,
+            //                     color: Colors.white,
+            //                     child: Column(
+            //                       children: [
+            //                         const SizedBox(
+            //                           height: 10,
+            //                         ),
+            //                         Row(
+            //                           children: [
+            //                             const SizedBox(
+            //                               width: 54,
+            //                             ),
+            //                             Expanded(
+            //                               child: Text(
+            //                                 _keyboardMessage,
+            //                                 style: const TextStyle(
+            //                                   fontSize: 24,
+            //                                   color: Colors.red,
+            //                                   fontWeight: FontWeight.w700,
+            //                                 ),
+            //                                 textAlign: TextAlign.center,
+            //                               ),
+            //                             ),
+            //                             const SizedBox(
+            //                               width: 12,
+            //                             ),
+            //                             GestureDetector(
+            //                               onTap: () {
+            //                                 setState(() {
+            //                                   _isShowKeyboard = !_isShowKeyboard;
+            //                                   _keyboardMessage = "";
+            //                                 });
+            //                               },
+            //                               child: const Icon(
+            //                                 Icons.cancel,
+            //                                 color: Colors.grey,
+            //                                 size: 30,
+            //                               ),
+            //                             ),
+            //                             const SizedBox(
+            //                               width: 24,
+            //                             ),
+            //                           ],
+            //                         ),
+            //                         const SizedBox(
+            //                           height: 10,
+            //                         ),
+            //                         Expanded(
+            //                           child: NumericKeyboard(
+            //                             onKeyboardTap: _onKeyboardTap,
+            //                             textColor: Colors.red,
+            //                             rightButtonFn: () {
+            //                               setState(() {
+            //                                 _isShowKeyboard = !_isShowKeyboard;
+            //                               });
+            //                             },
+            //                             rightIcon: const Text(
+            //                               "*",
+            //                               style: TextStyle(
+            //                                 color: Colors.red,
+            //                                 fontSize: 24,
+            //                               ),
+            //                             ),
+            //                             leftButtonFn: () {
+            //                               _onKeyboardTap("*");
+            //                             },
+            //                             leftIcon: const Text(
+            //                               "#",
+            //                               style: TextStyle(
+            //                                 color: Colors.red,
+            //                                 fontSize: 24,
+            //                               ),
+            //                             ),
+            //                             mainAxisAlignment:
+            //                                 MainAxisAlignment.spaceEvenly,
+            //                           ),
+            //                         ),
+            //                       ],
+            //                     ),
+            //                   ),
+            //                 Positioned(
+            //                   top: 10,
+            //                   left: 12,
+            //                   right: 12,
+            //                   child: Text(
+            //                     _callQuality,
+            //                     textAlign: TextAlign.center,
+            //                     style: const TextStyle(
+            //                       color: Colors.white,
+            //                       fontSize: 16,
+            //                       fontWeight: FontWeight.w600,
+            //                     ),
+            //                   ),
+            //                 )
+            //               ],
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //
+            //       // Column(
+            //       //   children: [
+            //       //     // Container(
+            //       //     //   width: double.infinity,
+            //       //     //   height: 75,
+            //       //     //   color: Colors.white,
+            //       //     //   padding: const EdgeInsets.symmetric(horizontal: 16),
+            //       //     //   child: Row(
+            //       //     //     children: [
+            //       //     //       GestureDetector(
+            //       //     //         onTap: () {
+            //       //     //           Navigator.pop(context);
+            //       //     //         },
+            //       //     //         child: const Icon(Icons.arrow_back),
+            //       //     //       ),
+            //       //     //       const SizedBox(
+            //       //     //         width: 12,
+            //       //     //       ),
+            //       //     //       Expanded(
+            //       //     //         child: TextField(
+            //       //     //           controller: _phoneNumberController,
+            //       //     //           keyboardType: TextInputType.number,
+            //       //     //           decoration: InputDecoration(
+            //       //     //             prefixIcon: const Icon(Icons.phone),
+            //       //     //             labelText: "Phone Number",
+            //       //     //             enabledBorder: myInputBorder(),
+            //       //     //             focusedBorder: myFocusBorder(),
+            //       //     //           ),
+            //       //     //           onSubmitted: (val)async{
+            //       //     //             await getGuestUser();
+            //       //     //           },
+            //       //     //         ),
+            //       //     //       ),
+            //       //     //     ],
+            //       //     //   ),
+            //       //     // ),
+            //       //
+            //       //   ],
+            //       // ),
+            //     ),
+            //   ),
+            // ),
+            onWillPop: () async => false,
+          );
   }
 
   Future<void> toggleMute(BuildContext context) async {
