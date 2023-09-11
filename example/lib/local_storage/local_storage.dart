@@ -9,10 +9,8 @@ class LocalStorage {
   Future<Map?> loginInfo() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final loginInfoString = prefs.getString("login_info");
-    if  (loginInfoString != null) {
-      return json.decode(loginInfoString);
-    }
-    return null;
+    if (loginInfoString == null || loginInfoString.isEmpty) return null;
+    return json.decode(loginInfoString);
   }
 
   Future<void> setLoginInfo(Map<String, dynamic> loginInfo) async {

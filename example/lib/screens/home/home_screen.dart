@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:calling/local_storage/local_storage.dart';
@@ -326,6 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   EasyLoading.show();
                   await OmicallClient.instance.logout();
                   await LocalStorage.instance.logout();
+                  ///await FirebaseMessaging.instance.deleteToken();
                   EasyLoading.dismiss();
                   Navigator.of(context).pushReplacement(
                     MaterialPageRoute(

@@ -16,28 +16,33 @@ void main() async {
   HttpOverrides.global = MyHttpOverrides();
   await Firebase.initializeApp();
   // final Loc = await LocalStorage.instance.loginInfo();
+  Map? loginInfo = await LocalStorage.instance.loginInfo();
   runApp(MyApp(
-    loginInfo: null,
+   loginInfo: loginInfo,
   ));
 }
 
 class MyApp extends StatefulWidget {
   const MyApp({
-    Key? key,
-    this.loginInfo,
+    Key? key, this.loginInfo,
+
   }) : super(key: key);
-  final Map? loginInfo;
+ final Map? loginInfo;
 
   @override
   State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> {
-  late final loginInfo = widget.loginInfo;
-
+  Map? loginInfo;
+  Future<void> getInfoLogin () async{
+  loginInfo = await LocalStorage.instance.loginInfo();
+  print(loginInfo);
+  }
   @override
   void initState() {
     super.initState();
+
     EasyLoading.instance.userInteractions = false;
     OmicallClient.instance.startServices();
     OmicallClient.instance.configPushNotification(
@@ -63,7 +68,7 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         theme: ThemeData.light(),
         home:
-            loginInfo != null ? const HomeScreen() : const HomeLoginScreen(),
+            widget.loginInfo != null ? const HomeScreen() : const HomeLoginScreen(),
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
       ),

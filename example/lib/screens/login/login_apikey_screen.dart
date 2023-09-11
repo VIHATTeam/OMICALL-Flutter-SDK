@@ -232,20 +232,20 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
     if (result == false) {
       return;
     }
-    // await LocalStorage.instance.setLoginInfo({
-    //   "usrName": _userNameController.text,
-    //   "usrUuid": _usrUuidController.text,
-    //   "isVideo": _supportVideoCall,
-    //   "apiKey": _apiKeyController.text,
-    // });
+    await LocalStorage.instance.setLoginInfo({
+      "usrName": _userNameController.text,
+      "usrUuid": _usrUuidController.text,
+      "isVideo": _supportVideoCall,
+      "apiKey": _apiKeyController.text,
+    });
 
     if (!mounted) {
       return;
     }
     Navigator.push(context, MaterialPageRoute(builder: (_) {
-      // return const HomeScreen(
-      //   needRequestNotification: true,
-      // );
+      return const HomeScreen(
+        needRequestNotification: true,
+      );
       return DialScreen2(
         key: _dialScreenKey,
         phoneNumber: "167631",
