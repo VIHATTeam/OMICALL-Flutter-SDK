@@ -1,4 +1,3 @@
-
 import 'dart:async';
 import 'dart:io';
 
@@ -8,14 +7,14 @@ import 'package:omicall_flutter_plugin/constant/events.dart';
 import 'package:omicall_flutter_plugin/omicallsdk.dart';
 
 import '../../main.dart';
+import 'dial/dial_direct_view.dart';
+import 'video/video_direct_view.dart';
 
-part 'indirect_call_vm_mixin.dart';
-
-class IndirectCallScreen extends StatefulWidget {
+class DirectCallScreen extends StatelessWidget {
   final bool isVideo;
   final int status;
   final bool isOutGoingCall;
-  const IndirectCallScreen({
+  const DirectCallScreen({
     Key? key,
     required this.isVideo,
     required this.status,
@@ -23,13 +22,15 @@ class IndirectCallScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<IndirectCallScreen> createState() => _IndirectCallScreenState();
-}
-
-class _IndirectCallScreenState extends State<IndirectCallScreen> with IndirectCallViewModel{
-
-  @override
   Widget build(BuildContext context) {
-    return Container();
+    return isVideo
+        ? VideoDirectView(
+            status: status,
+            isOutGoingCall: isOutGoingCall,
+          )
+        : DialDirectView(
+            status: status,
+            isOutGoingCall: isOutGoingCall,
+          );
   }
 }
