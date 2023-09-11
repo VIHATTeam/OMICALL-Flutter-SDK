@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.0.15
+
+- Increase ios core
+- Increase android core
+- Fix open app from Notification
+
 
 ## 3.0.14
 
