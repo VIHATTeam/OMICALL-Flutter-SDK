@@ -42,10 +42,12 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private var applicationContext: Context? = null
     private val mainScope = CoroutineScope(Dispatchers.Main)
     private var isIncomming: Boolean = false
+    private var callerNumberTemp: String = ""
 
     override fun incomingReceived(callerId: Int?, phoneNumber: String?, isVideo: Boolean?) {
         Log.d("SDK", "incomingReceived -> callerId=$callerId, phoneNumber=$phoneNumber")
         isIncomming = true;
+        callerNumberTemp = phoneNumber ?: "";
         channel.invokeMethod(
             CALL_STATE_CHANGED, mapOf(
                 "isVideo" to isVideo,
@@ -100,15 +102,29 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onRinging(callerId: Int, transactionId: String?) {
-        channel.invokeMethod(
-            CALL_STATE_CHANGED, mapOf(
-                "status" to CallState.early.value,
-                "isVideo" to NotificationService.isVideo,
-                "callerNumber" to "",
-                "incoming" to isIncomming,
-                "_id" to ""
+        var callDirection  = OmiClient.callDirection
+        Log.d("SDK", "onRinging -> callerId=$callerId, transactionId=$transactionId , callDirection=$callDirection")
+        if(callDirection == "inbound") {
+            channel.invokeMethod(
+                CALL_STATE_CHANGED, mapOf(
+                    "status" to CallState.incoming.value,
+                    "isVideo" to NotificationService.isVideo,
+                    "callerNumber" to OmiClient.prePhoneNumber,
+                    "incoming" to true,
+                    "_id" to ""
+                )
             )
-        )
+        } else {
+            channel.invokeMethod(
+                CALL_STATE_CHANGED, mapOf(
+                    "status" to CallState.early.value,
+                    "isVideo" to NotificationService.isVideo,
+                    "callerNumber" to OmiClient.prePhoneNumber,
+                    "incoming" to false,
+                    "_id" to ""
+                )
+            )
+        }
     }
 
     override fun onOutgoingStarted(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {

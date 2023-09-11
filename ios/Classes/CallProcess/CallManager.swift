@@ -367,9 +367,12 @@ class CallManager {
                                    let callCurrent = self.omiLib.getCurrentCall()
                                    var dataToSend: [String: Any] = [
                                        "status": statusCall.rawValue,
-                                       "_id":  String(describing: OmiCallModel(omiCall: callCurrent!).uuid),
+                                       "_id": "",
                                        "message": self.messageCall(type: statusCall.rawValue)
                                    ]
+                                    if(callCurrent != nil){
+                                        dataToSend["_id"] = String(describing: OmiCallModel(omiCall: callCurrent!).uuid)
+                                    }
                                    if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
                                        completion(jsonString)
                                    } else {
@@ -384,9 +387,12 @@ class CallManager {
                     let callCurrent = self.omiLib.getCurrentCall()
                     var dataToSend: [String: Any] = [
                         "status": statusCall.rawValue,
-                        "_id":  String(describing: OmiCallModel(omiCall: callCurrent!).uuid),
+                        "_id":  "",
                         "message": self.messageCall(type: statusCall.rawValue)
                     ]
+                    if(callCurrent != nil){
+                        dataToSend["_id"] = String(describing: OmiCallModel(omiCall: callCurrent!).uuid) ?? ""
+                    }
                     if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
                         completion(jsonString)
                     } else {
@@ -408,12 +414,14 @@ class CallManager {
             if (Int(secondsSinceCurrentTime) < 3 && !firstCall) {
                         DispatchQueue.main.asyncAfter(deadline: .now() + (3 + secondsSinceCurrentTime)) {
                          OmiClient.startCall(phone, isVideo: isVideo) { statusCall in
-                                            let callCurrent = self.omiLib.getCurrentCall()
+                             let callCurrent = self.omiLib.getCurrentCall()
                                             var dataToSend: [String: Any] = [
-                                                "status": statusCall.rawValue,
-                                                "_id": String(describing: OmiCallModel(omiCall: callCurrent!).uuid),
-                                                "message": self.messageCall(type: statusCall.rawValue)
-                                            ]
+                                                   "status": statusCall.rawValue,
+                                                   "_id": "",
+                                                   "message": self.messageCall(type: statusCall.rawValue)]
+                                            if(callCurrent != nil){
+                                                   dataToSend["_id"] = String(describing: OmiCallModel(omiCall: callCurrent!).uuid)
+                                            }
 
                                             if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
                                                 completion(jsonString)
@@ -428,9 +436,12 @@ class CallManager {
                         let callCurrent = self.omiLib.getCurrentCall()
                         var dataToSend: [String: Any] = [
                             "status": statusCall.rawValue,
-                            "_id": String(describing: OmiCallModel(omiCall: callCurrent!).uuid),
+                            "_id": "",
                             "message": self.messageCall(type: statusCall.rawValue)
                         ]
+                        if(callCurrent != nil){
+                            dataToSend["_id"] = String(describing: OmiCallModel(omiCall: callCurrent!).uuid)
+                        }
 
                         if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
                             completion(jsonString)
