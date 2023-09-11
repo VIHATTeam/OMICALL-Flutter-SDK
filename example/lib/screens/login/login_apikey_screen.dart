@@ -8,6 +8,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
 
+import '../../components/textfield_custom_widget.dart';
 import '../dial/Dial_Screen_2.dart';
 import '../dial/dial_screen.dart';
 import '../video_call/video_call_screen.dart';
@@ -72,73 +73,6 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    InputDecoration inputDecoration(
-      String text,
-      IconData? icon, {
-      bool isPass = false,
-    }) {
-      return InputDecoration(
-        suffixIcon: isPass
-            ? IconButton(
-                icon: Icon(
-                    _obscureText ? Icons.visibility_off : Icons.visibility),
-                onPressed: () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
-                },
-              )
-            : const SizedBox.shrink(),
-        labelText: text,
-        labelStyle: const TextStyle(
-          color: Colors.grey,
-        ),
-        hintText: text,
-        hintStyle: const TextStyle(
-          color: Colors.grey,
-        ),
-        prefixIcon: Icon(
-          icon,
-          size: MediaQuery.of(context).size.width * 0.06,
-          color: Colors.grey,
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(MediaQuery.of(context).size.width * 0.01),
-          ),
-          borderSide: const BorderSide(
-            color: Colors.red,
-          ),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(MediaQuery.of(context).size.width * 0.1),
-          ),
-          borderSide: BorderSide(
-            color: Colors.red,
-            width: MediaQuery.of(context).size.width * 0.01,
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(MediaQuery.of(context).size.width * 0.1),
-          ),
-          borderSide: const BorderSide(
-            color: Colors.white,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(MediaQuery.of(context).size.width * 0.1),
-          ),
-          borderSide: BorderSide(
-            color: const Color.fromARGB(255, 225, 121, 243),
-            width: MediaQuery.of(context).size.width * 0.008,
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
       body: Stack(
         children: [
@@ -189,17 +123,11 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
                           elevation: 4,
                           borderRadius: BorderRadius.circular(
                               MediaQuery.of(context).size.width * 0.1),
-                          child: TextFormField(
+                          child: TextFieldCustomWidget(
                             controller: _userNameController,
+                            hintLabel: 'User Name',
+                            icon: Icons.person,
                             keyboardType: TextInputType.number,
-                            decoration:
-                                inputDecoration('User Name', Icons.person),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'This field cannot be empty';
-                              }
-                              return null;
-                            },
                           ),
                         ),
                       ),
@@ -212,20 +140,12 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
                           elevation: 4,
                           borderRadius: BorderRadius.circular(
                               MediaQuery.of(context).size.width * 0.1),
-                          child: TextFormField(
+                          child: TextFieldCustomWidget(
                             controller: _usrUuidController,
-                            obscureText: _obscureText,
-                            enableSuggestions: false,
-                            autocorrect: false,
-                            decoration: inputDecoration('Password', Icons.lock,
-                                isPass: true),
                             keyboardType: TextInputType.visiblePassword,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'This field cannot be empty';
-                              }
-                              return null;
-                            },
+                            hintLabel: 'Password',
+                            icon: Icons.lock,
+                            isPassword: true,
                           ),
                         ),
                       ),
@@ -238,17 +158,11 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
                           elevation: 4,
                           borderRadius: BorderRadius.circular(
                               MediaQuery.of(context).size.width * 0.1),
-                          child: TextFormField(
+                          child:  TextFieldCustomWidget(
                             controller: _apiKeyController,
-                            decoration:
-                                inputDecoration("Host", Icons.location_city),
+                            hintLabel: 'Host',
+                            icon: Icons.location_city,
                             keyboardType: TextInputType.text,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'This field cannot be empty';
-                              }
-                              return null;
-                            },
                           ),
                         ),
                       ),
