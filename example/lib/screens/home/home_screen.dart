@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
+import 'package:calling/screens/choose_type_ui/choose_type_ui_screen.dart';
 import 'package:http/http.dart' as http;
 
 import 'package:calling/local_storage/local_storage.dart';
@@ -20,7 +21,6 @@ import '../dial/dial_screen.dart';
 import '../login/login_apikey_screen.dart';
 import '../login/login_user_password_screen.dart';
 import 'package:flutter/material.dart';
-
 
 String statusToDescription(int status) {
   if (status == OmiCallState.calling.rawValue) {
@@ -42,9 +42,11 @@ String statusToDescription(int status) {
 }
 
 class HomeScreen extends StatefulWidget {
+  // final bool isVideo;
   const HomeScreen({
     Key? key,
     this.needRequestNotification = false,
+    //required this.isVideo,
   }) : super(key: key);
   final bool needRequestNotification;
 
@@ -56,43 +58,19 @@ class _HomeScreenState extends State<HomeScreen> {
   late final TextEditingController _phoneNumberController =
       TextEditingController()..text = Platform.isAndroid ? '1000071' : '100';
 
-  // late final TextEditingController _phoneNumberController =
-  // TextEditingController()..text = Platform.isAndroid ? '123aaa' : '122aaa';
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,
     fontSize: 16,
-  );
-
-  Gradient gradient4 = LinearGradient(
-    colors: [
-      Colors.black.withOpacity(0.8),
-      Colors.grey[500]!.withOpacity(0.8),
-    ],
-    begin: Alignment.centerLeft,
-    end: Alignment.centerRight,
   );
   bool _isVideoCall = false;
   late StreamSubscription _subscription;
   GlobalKey<DialScreenState>? _dialScreenKey;
   GlobalKey<VideoCallState>? _videoScreenKey;
 
-  Future<void> requestFCM() async {
-    await FirebaseMessaging.instance.requestPermission(
-      alert: false,
-      badge: false,
-      sound: false,
-    );
-    final token = await FirebaseMessaging.instance.getToken();
-    String? apnToken;
-    await OmicallClient.instance.updateToken(
-      fcmToken: token,
-      apnsToken: apnToken,
-    );
-  }
-
   @override
   void initState() {
     super.initState();
+    // _isVideoCall = widget.isVideo;
     if (Platform.isAndroid) {
       checkAndPushToCall();
     }
@@ -110,25 +88,24 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
-          postData(jsonEncode(omiAction));
-          debugPrint("omiAction  OmicallClient ::: $omiAction");
+      postData(jsonEncode(omiAction));
+      debugPrint("omiAction  OmicallClient ::: $omiAction");
       if (omiAction.actionName != OmiEventList.onCallStateChanged) {
         return;
       }
       final data = omiAction.data;
-          debugPrint("data  OmicallClient  zzz ::: $data");
+      debugPrint("data  OmicallClient  zzz ::: $data");
       final status = data["status"] as int;
-          debugPrint("status  OmicallClient  zzz ::: $status");
+      debugPrint("status  OmicallClient  zzz ::: $status");
       if (status == OmiCallState.incoming.rawValue ||
           status == OmiCallState.confirmed.rawValue) {
         debugPrint("data  OmicallClient  zzz ::: $data");
 
-        bool isVideo = data['isVideo'] as bool;
+        _isVideoCall = data['isVideo'] as bool;
         var callerNumber = "";
         // bool isVideo =false;
 
-
-        if (isVideo) {
+        if (_isVideoCall) {
           pushToVideoScreen(
             callerNumber,
             status: status,
@@ -152,8 +129,8 @@ class _HomeScreenState extends State<HomeScreen> {
         }
         final data = omiAction.data;
         final callerNumber = data["callerNumber"];
-        final bool isVideo = data["isVideo"];
-        if (isVideo) {
+        _isVideoCall = data["isVideo"];
+        if (_isVideoCall) {
           pushToVideoScreen(
             callerNumber,
             status: status,
@@ -167,18 +144,18 @@ class _HomeScreenState extends State<HomeScreen> {
           isOutGoingCall: false,
         );
       }
-     if (status == OmiCallState.disconnected.rawValue) {
-       debugPrint(data.toString());
+      if (status == OmiCallState.disconnected.rawValue) {
+        debugPrint(data.toString());
       }
     });
     // checkSystemAlertPermission();
     OmicallClient.instance.setCallLogListener((data) {
       final callerNumber = data["callerNumber"];
-      final isVideo = data["isVideo"];
+      _isVideoCall = data["isVideo"];
       makeCallWithParams(
         context,
         callerNumber,
-        isVideo,
+        _isVideoCall,
       );
     });
   }
@@ -222,144 +199,263 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    InputDecoration inputDecoration(
+      String text,
+      IconData? icon, {
+      bool isPass = false,
+    }) {
+      return InputDecoration(
+        labelText: text,
+        labelStyle: const TextStyle(
+          color: Colors.grey,
+        ),
+        hintText: text,
+        hintStyle: const TextStyle(
+          color: Colors.grey,
+        ),
+        prefixIcon: Icon(
+          icon,
+          size: MediaQuery.of(context).size.width * 0.06,
+          color: Colors.grey,
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(MediaQuery.of(context).size.width * 0.01),
+          ),
+          borderSide: const BorderSide(
+            color: Colors.red,
+          ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(MediaQuery.of(context).size.width * 0.1),
+          ),
+          borderSide: BorderSide(
+            color: Colors.red,
+            width: MediaQuery.of(context).size.width * 0.01,
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(MediaQuery.of(context).size.width * 0.1),
+          ),
+          borderSide: const BorderSide(
+            color: Colors.white,
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(MediaQuery.of(context).size.width * 0.1),
+          ),
+          borderSide: BorderSide(
+            color: const Color.fromARGB(255, 225, 121, 243),
+            width: MediaQuery.of(context).size.width * 0.008,
+          ),
+        ),
+      );
+    }
+
     return WillPopScope(
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Home'),
-          leading: const SizedBox(),
-          leadingWidth: 0,
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: <Widget>[
-              TextField(
-                controller: _phoneNumberController,
-                keyboardType: TextInputType.number,
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.phone),
-                  labelText: "Phone Number",
-                  enabledBorder: myInputBorder(),
-                  focusedBorder: myFocusBorder(),
-                ),
+        body: Stack(
+          children: [
+            Align(
+              alignment: Alignment.topLeft,
+              child: Image.asset(
+                "assets/images/signIn01.png",
+                width: MediaQuery.of(context).size.width * 0.9,
               ),
-              Container(
-                margin: const EdgeInsets.only(
-                  top: 16,
-                ),
-                child: GestureDetector(
-                  onTap: () {
-                    setState(() {
-                      _isVideoCall = !_isVideoCall;
-                    });
-                  },
-                  child: Row(
-                    children: [
-                      Icon(
-                        _isVideoCall
-                            ? Icons.check_circle
-                            : Icons.circle_outlined,
-                        size: 24,
-                        color: _isVideoCall ? Colors.blue : Colors.grey,
-                      ),
-                      const SizedBox(
-                        width: 8,
-                      ),
-                      Text(
-                        "Video call",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: _isVideoCall ? Colors.blue : Colors.grey,
+            ),
+            Align(
+              alignment: Alignment.bottomLeft,
+              child: Image.asset(
+                "assets/images/signIn02.png",
+                height: MediaQuery.of(context).size.height * 0.28,
+              ),
+            ),
+            SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.15,
+                  ),
+                  const Text(
+                    "OMICALL",
+                    style: TextStyle(fontSize: 60, fontWeight: FontWeight.bold),
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.015,
+                  ),
+                  const Text(
+                    "Please, enter phone number",
+                    style: TextStyle(
+                      fontSize: 18,
+                    ),
+                  ),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.height * 0.07,
+                  ),
+                  Form(
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 30, right: 30),
+                          child: Material(
+                            elevation: 4,
+                            borderRadius: BorderRadius.circular(
+                                MediaQuery.of(context).size.width * 0.1),
+                            child: TextFormField(
+                              controller: _phoneNumberController,
+                              keyboardType: TextInputType.phone,
+                              decoration:
+                                  inputDecoration('Phone Number', Icons.phone),
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'This field cannot be empty';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
                         ),
-                      )
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              GestureDetector(
-                onTap: () {
-                  makeCall(context);
-                },
-                child: Container(
-                  height: 60,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [
-                        Colors.teal,
-                        Colors.teal[200]!,
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.03,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _isVideoCall = !_isVideoCall;
+                              });
+                            },
+                            child: Row(
+                              children: [
+                                Icon(
+                                  _isVideoCall
+                                      ? Icons.check_circle
+                                      : Icons.circle_outlined,
+                                  size: 24,
+                                  color: _isVideoCall
+                                      ? const Color.fromARGB(255, 225, 121, 243)
+                                      : Colors.grey,
+                                ),
+                                const SizedBox(
+                                  width: 8,
+                                ),
+                                Text(
+                                  "Video call",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: _isVideoCall
+                                        ? const Color.fromARGB(
+                                            255, 225, 121, 243)
+                                        : Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.05,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 32),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              const Text(
+                                "Let's call",
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.03,
+                              ),
+                              Material(
+                                elevation: 4,
+                                borderRadius: BorderRadius.circular(
+                                  MediaQuery.of(context).size.height * 0.1,
+                                ),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    FocusScope.of(context).unfocus();
+                                    makeCall(context);
+                                  },
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color.fromARGB(255, 255, 230, 85),
+                                          Color.fromARGB(255, 176, 74, 166),
+                                        ], // Define your gradient colors
+                                        begin: Alignment
+                                            .bottomRight, // Define the starting point of the gradient
+                                        end: Alignment
+                                            .topLeft, // Define the ending point of the gradient
+                                      ),
+                                      borderRadius: BorderRadius.circular(
+                                        MediaQuery.of(context).size.height *
+                                            0.1,
+                                      ),
+                                    ),
+                                    width: MediaQuery.of(context).size.width *
+                                        0.18,
+                                    height: MediaQuery.of(context).size.height *
+                                        0.05,
+                                    child:
+                                        const Icon(Icons.navigate_next_rounded),
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.05,
+                        ),
                       ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black12,
-                        offset: Offset(5, 5),
-                        blurRadius: 10,
-                      )
-                    ],
                   ),
-                  child: const Center(
-                    child: Text(
-                      'Call',
-                      style: TextStyle(
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 68),
+              child: Align(
+                alignment: Alignment.topLeft,
+                child: GestureDetector(
+                  onTap: () async {
+
+                    Navigator.of(context).pop();
+                  },
+                  child: Material(
+                    elevation: 4,
+                    borderRadius: BorderRadius.all(
+                      Radius.circular(MediaQuery.of(context).size.width * 0.1),
+                    ),
+                    child: Container(
+                      width: 52,
+                      height: 52,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
                         color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
+                      ),
+                      child: const Icon(
+                        Icons.arrow_back,
+                        size: 25,
                       ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(
-                height: 24,
-              ),
-              GestureDetector(
-                onTap: () async {
-                  EasyLoading.show();
-                  await OmicallClient.instance.logout();
-                  await LocalStorage.instance.logout();
-                  EasyLoading.dismiss();
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(
-                      builder: (_) => const LoginUserPasswordScreen(),
-                    ),
-                  );
-                },
-                child: Container(
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: Colors.grey,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: const [
-                      BoxShadow(
-                        color: Colors.black12,
-                        offset: Offset(5, 5),
-                        blurRadius: 10,
-                      )
-                    ],
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Logout',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
       onWillPop: () async {
@@ -368,42 +464,21 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  OutlineInputBorder myInputBorder() {
-    //return type is OutlineInputBorder
-    return const OutlineInputBorder(
-      //Outline border type for TextFeild
-      borderRadius: BorderRadius.all(Radius.circular(20)),
-      borderSide: BorderSide(
-        color: Colors.redAccent,
-        width: 3,
-      ),
-    );
-  }
-
-  OutlineInputBorder myFocusBorder() {
-    return const OutlineInputBorder(
-      borderRadius: BorderRadius.all(
-        Radius.circular(20),
-      ),
-      borderSide: BorderSide(
-        color: Colors.greenAccent,
-        width: 3,
-      ),
-    );
-  }
-
   void pushToVideoScreen(
     String phoneNumber, {
     required int status,
     required bool isOutGoingCall,
   }) {
-    if (_videoScreenKey != null) { return; }
+    if (_videoScreenKey != null) {
+      return;
+    }
     _videoScreenKey = GlobalKey();
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
       return VideoCallScreen(
         key: _videoScreenKey,
         status: status,
         isOutGoingCall: isOutGoingCall,
+        isTypeDirectCall: false,
       );
     })).then((value) {
       _videoScreenKey = null;
@@ -415,7 +490,9 @@ class _HomeScreenState extends State<HomeScreen> {
     required int status,
     required bool isOutGoingCall,
   }) {
-    if (_dialScreenKey != null) { return; }
+    if (_dialScreenKey != null) {
+      return;
+    }
     _dialScreenKey = GlobalKey();
     print("Pussh to screen");
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
@@ -474,10 +551,9 @@ class _HomeScreenState extends State<HomeScreen> {
     jsonMap = json.decode(result);
     messageError = jsonMap['message'];
     int status = jsonMap['status'];
-    if(status == OmiStartCallStatus.startCallSuccess.rawValue){
+    if (status == OmiStartCallStatus.startCallSuccess.rawValue) {
       callStatus = true;
     }
-
 
     if (callStatus) {
       if (_isVideoCall) {
