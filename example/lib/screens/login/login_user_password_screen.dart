@@ -29,9 +29,9 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
   // NSString * PASS_WORD2 = @"Kunkun12345";
   //video
   late final TextEditingController _userNameController = TextEditingController()
-    ..text = Platform.isIOS ? '101' : '101';
+    ..text = Platform.isIOS ? '101' : '100';
   late final TextEditingController _passwordController = TextEditingController()
-    ..text = Platform.isIOS ? 'M1zx7YyK30' : 'M1zx7YyK30';
+    ..text = Platform.isIOS ? 'M1zx7YyK30' : 'Jx2hM9aYrT';
   late final TextEditingController _serviceUrlController =
       TextEditingController()..text = 'hungth12';
   late final TextEditingController _hostUrlController = TextEditingController()
@@ -455,6 +455,16 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
       return;
     }
 
+
+    EasyLoading.show();
+    await OmicallClient.instance.initCallWithUserPassword(
+      userName: _userNameController.text,
+      password: _passwordController.text,
+      realm: _serviceUrlController.text,
+      host: _hostUrlController.text,
+      isVideo: _supportVideoCall,
+    );
+
     Navigator.push(context, MaterialPageRoute(builder: (_) {
       return ChooseTypeUIScreen(
         userName: _userNameController.text,
@@ -465,6 +475,15 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
         apiKey: '',
         isVideo: _supportVideoCall,
       );
+//       return const HomeScreen(
+//         needRequestNotification: true,
+//       );
+      // return DialScreen2(
+      //   key: _dialScreenKey,
+      //   phoneNumber: "100",
+      //   status: 8,
+      //   isOutGoingCall: true,
+      // );
     }));
   }
 }

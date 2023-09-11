@@ -60,7 +60,7 @@ class DialScreen2State extends State<DialScreen2> {
     super.initState();
     _subscription = OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
       debugPrint("status callStateChangeEvent omiAction::: ${omiAction.actionName}");
-      debugPrint("status callStateChangeEvent omiAction::: ${omiAction.data}");
+      debugPrint("status callStateChangeEvent omiAction data::: ${omiAction.data}");
       if (omiAction.actionName == OmiEventList.onCallStateChanged) {
         final data = omiAction.data;
         final status = data["status"] as int;
@@ -433,7 +433,6 @@ class DialScreen2State extends State<DialScreen2> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-
                           RoundedCircleButton(
                             iconSrc: "assets/icons/ic_back.svg",
                             press: () async {
@@ -442,7 +441,6 @@ class DialScreen2State extends State<DialScreen2> {
                             color: kSecondaryColor,
                             iconColor: Colors.white,
                           ),
-
                       ],
 
                     ),

@@ -454,6 +454,7 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
     }
 
     Navigator.push(context, MaterialPageRoute(builder: (_) {
+
       return ChooseTypeUIScreen(
         userName: _userNameController.text,
         password: _usrUuidController.text,
@@ -462,7 +463,16 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
         usrUuid: _usrUuidController.text,
         apiKey: _apiKeyController.text,
         isVideo: _supportVideoCall,
-      );
+        );
+//       return const HomeScreen(
+//         needRequestNotification: true,
+//       );
+      // return DialScreen2(
+      //   key: _dialScreenKey,
+      //   phoneNumber: "167631",
+      //   status: 8,
+      //   isOutGoingCall: true,
+      // );
     }));
   }
 }
