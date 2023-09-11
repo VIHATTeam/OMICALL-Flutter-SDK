@@ -30,12 +30,12 @@ class DialButton extends StatelessWidget {
             iconSrc.contains("svg") ? SvgPicture.asset(
               iconSrc,
               height: 36,
-              color: Colors.white,
+              color: Colors.grey,
             ) : Image.asset(
               iconSrc,
               height: 36,
               width: 36,
-              color: Colors.white,
+              color: Colors.grey,
             ),
             const SizedBox(
               height: 5,
@@ -43,7 +43,7 @@ class DialButton extends StatelessWidget {
             Text(
               text,
               style: TextStyle(
-                color: color ?? Colors.white,
+                color: color ?? Colors.grey,
                 fontSize: 13,
               ),
             ),

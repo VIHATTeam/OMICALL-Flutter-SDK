@@ -1,47 +1,44 @@
-import 'dart:io';
-
-import 'package:calling/local_storage/local_storage.dart';
-import 'package:calling/screens/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:omicall_flutter_plugin/omicall.dart';
+import 'package:omicall_flutter_plugin/omicallsdk.dart';
 
-import 'login/login_apikey_screen.dart';
-import 'login/login_user_password_screen.dart';
+import '../../local_storage/local_storage.dart';
+import '../call_home/call_home_screen.dart';
+import '../home/home_screen.dart';
+import '../video_call/video_call_screen.dart';
 
-class HomeLoginScreen extends StatefulWidget {
-  const HomeLoginScreen({Key? key}) : super(key: key);
+class ChooseTypeUIScreen extends StatefulWidget {
+  final String userName;
+  final String password;
+  final String realm;
+  final String host;
+  final bool isVideo;
 
-  // var phoneNumber = "";
+  // usrName: _userNameController.text,
+  final String usrUuid;
+  final String apiKey;
+  const ChooseTypeUIScreen({
+    Key? key,
+    required this.userName,
+    required this.password,
+    required this.realm,
+    required this.host,
+    required this.usrUuid,
+    required this.apiKey,
+    required this.isVideo,
+  }) : super(key: key);
+
   @override
-  State<HomeLoginScreen> createState() => _HomeLoginState();
+  State<ChooseTypeUIScreen> createState() => _ChooseTypeUIScreenState();
 }
 
-class _HomeLoginState extends State<HomeLoginScreen> {
-  TextStyle basicStyle = const TextStyle(
-    color: Colors.white,
-    fontSize: 16,
-  );
-
-  Gradient gradient4 = LinearGradient(
-    colors: [
-      Colors.black.withOpacity(0.8),
-      Colors.grey[500]!.withOpacity(0.8),
-    ],
-    begin: Alignment.centerLeft,
-    end: Alignment.centerRight,
-  );
-
+class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
+  bool _supportVideoCall = false;
   @override
   void initState() {
+    _supportVideoCall = widget.isVideo;
     super.initState();
   }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,14 +60,14 @@ class _HomeLoginState extends State<HomeLoginScreen> {
                   height: MediaQuery.of(context).size.height * 0.15,
                 ),
                 const Text(
-                  "Hello",
+                  "OMICALL",
                   style: TextStyle(fontSize: 60, fontWeight: FontWeight.bold),
                 ),
                 SizedBox(
                   height: MediaQuery.of(context).size.height * 0.015,
                 ),
                 const Text(
-                  "Welcome to OMICALL",
+                  "Please, choose type call",
                   style: TextStyle(
                     fontSize: 18,
                   ),
@@ -83,7 +80,7 @@ class _HomeLoginState extends State<HomeLoginScreen> {
                   child: GestureDetector(
                     onTap: () {
                       Navigator.push(context, MaterialPageRoute(builder: (_) {
-                        return const LoginUserPasswordScreen();
+                        return const HomeScreen();
                       }));
                     },
                     child: Material(
@@ -113,7 +110,7 @@ class _HomeLoginState extends State<HomeLoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             Text(
-                              'Login with User name',
+                              'Indirect Call',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
@@ -132,10 +129,9 @@ class _HomeLoginState extends State<HomeLoginScreen> {
                 Padding(
                   padding: const EdgeInsets.only(left: 30, right: 30),
                   child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) {
-                        return const LoginApiKeyScreen();
-                      }));
+                    onTap: () async {
+                      ///------------------
+                      await onChooseDirectCall(context);
                     },
                     child: Material(
                       elevation: 4,
@@ -164,7 +160,7 @@ class _HomeLoginState extends State<HomeLoginScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
                             Text(
-                              'Login with Api Key',
+                              'Direct Call',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
@@ -174,6 +170,42 @@ class _HomeLoginState extends State<HomeLoginScreen> {
                           ],
                         ),
                       ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 30),
+                Padding(
+                  padding: const EdgeInsets.only(left: 30, right: 30),
+                  child: GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _supportVideoCall = !_supportVideoCall;
+                      });
+                    },
+                    child: Row(
+                      children: [
+                        Icon(
+                          _supportVideoCall
+                              ? Icons.check_circle
+                              : Icons.circle_outlined,
+                          size: 24,
+                          color: _supportVideoCall
+                              ? const Color.fromARGB(255, 225, 121, 243)
+                              : Colors.grey,
+                        ),
+                        const SizedBox(
+                          width: 8,
+                        ),
+                        Text(
+                          "Video call",
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: _supportVideoCall
+                                ? const Color.fromARGB(255, 225, 121, 243)
+                                : Colors.grey,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -187,127 +219,87 @@ class _HomeLoginState extends State<HomeLoginScreen> {
               height: MediaQuery.of(context).size.height * 0.28,
             ),
           ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 68),
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: GestureDetector(
+                onTap: () async{
+                  EasyLoading.show();
+                  await OmicallClient.instance.logout();
+                  await LocalStorage.instance.logout();
+                  EasyLoading.dismiss();
+                  Navigator.of(context).pop();
+                },
+                child: Material(
+                  elevation: 4,
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(MediaQuery.of(context).size.width * 0.1),
+                  ),
+                  child: Container(
+                    width: 52,
+                    height: 52,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.white,
+                    ),
+                    child: const Icon(
+                      Icons.arrow_back,
+                      size: 25,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
-    // return Scaffold(
-    //   appBar: AppBar(
-    //     title: const Text('Home Login'),
-    //   ),
-    //   body: Padding(
-    //     padding: const EdgeInsets.all(16.0),
-    //     child: Column(
-    //         // mainAxisSize: MainAxisSize.max,
-    //         mainAxisAlignment: MainAxisAlignment.center,
-    //         // crossAxisAlignment: CrossAxisAlignment.stretch,
-    //         children: <Widget>[
-    //
-    //           GestureDetector(
-    //             onTap: () {
-    //               Navigator.push(context, MaterialPageRoute(builder: (_) {
-    //                 return const LoginUserPasswordScreen();
-    //               }));
-    //             },
-    //             child: Container(
-    //               height: 60,
-    //               decoration: BoxDecoration(
-    //                 gradient: LinearGradient(
-    //                   colors: [
-    //                     Colors.teal,
-    //                     Colors.teal[200]!,
-    //                   ],
-    //                   begin: Alignment.topLeft,
-    //                   end: Alignment.bottomRight,
-    //                 ),
-    //                 borderRadius: BorderRadius.circular(20),
-    //                 boxShadow: const [
-    //                   BoxShadow(
-    //                     color: Colors.black12,
-    //                     offset: Offset(5, 5),
-    //                     blurRadius: 10,
-    //                   )
-    //                 ],
-    //               ),
-    //               child: const Center(
-    //                 child: Text(
-    //                   'Login with User Name',
-    //                   style: TextStyle(
-    //                     color: Colors.white,
-    //                     fontSize: 20,
-    //                     fontWeight: FontWeight.w500,
-    //                   ),
-    //                 ),
-    //               ),
-    //             ),
-    //           ),
-    //           const SizedBox(
-    //             height: 16,
-    //           ),
-    //           GestureDetector(
-    //             onTap: () {
-    //               Navigator.push(context, MaterialPageRoute(builder: (_) {
-    //                 return const LoginApiKeyScreen();
-    //               }));
-    //             },
-    //             child: Container(
-    //               height: 60,
-    //               decoration: BoxDecoration(
-    //                 gradient: LinearGradient(
-    //                   colors: [
-    //                     Colors.teal,
-    //                     Colors.teal[200]!,
-    //                   ],
-    //                   begin: Alignment.topLeft,
-    //                   end: Alignment.bottomRight,
-    //                 ),
-    //                 borderRadius: BorderRadius.circular(20),
-    //                 boxShadow: const [
-    //                   BoxShadow(
-    //                     color: Colors.black12,
-    //                     offset: Offset(5, 5),
-    //                     blurRadius: 10,
-    //                   )
-    //                 ],
-    //               ),
-    //               child: const Center(
-    //                 child: Text(
-    //                   'Login with Api Key',
-    //                   style: TextStyle(
-    //                     color: Colors.white,
-    //                     fontSize: 20,
-    //                     fontWeight: FontWeight.w500,
-    //                   ),
-    //                 ),
-    //               ),
-    //             ),
-    //           ),
-    //         ],
-    //       ),
-    //   ),
-    //   );
   }
 
-  OutlineInputBorder myInputBorder() {
-    //return type is OutlineInputBorder
-    return const OutlineInputBorder(
-      //Outline border type for TextFeild
-      borderRadius: BorderRadius.all(Radius.circular(20)),
-      borderSide: BorderSide(
-        color: Colors.redAccent,
-        width: 3,
-      ),
-    );
-  }
+  Future<void> onChooseDirectCall(BuildContext context) async {
+    bool result = false;
+    EasyLoading.show();
+    if (widget.apiKey.isEmpty) {
+      result = await OmicallClient.instance.initCallWithUserPassword(
+        userName: widget.userName,
+        password: widget.password,
+        realm: widget.realm,
+        host: widget.host,
+        isVideo: _supportVideoCall,
+      );
+      debugPrint(result.toString());
+    } else {
+      result = await OmicallClient.instance.initCallWithApiKey(
+        usrName: widget.userName,
+        usrUuid: widget.usrUuid,
+        isVideo: _supportVideoCall,
+        phone: widget.usrUuid,
+        apiKey: widget.apiKey,
+      );
+      debugPrint(result.toString());
+    }
+    EasyLoading.dismiss();
+    if (result == false || !mounted) {
+      return;
+    }
+    if (!_supportVideoCall) {
+      await Navigator.push(context, MaterialPageRoute(builder: (_) {
+        return CallHomeScreen(
+          isVideo: _supportVideoCall,
+          status: 0,
+          isOutGoingCall: true,
+        );
+      }));
+    } else {
 
-  OutlineInputBorder myFocusBorder() {
-    return const OutlineInputBorder(
-      borderRadius: BorderRadius.all(
-        Radius.circular(20),
-      ),
-      borderSide: BorderSide(
-        color: Colors.greenAccent,
-        width: 3,
-      ),
-    );
+      await Navigator.push(context, MaterialPageRoute(builder: (_) {
+        return const VideoCallScreen(
+          status: 0,
+          isOutGoingCall: true,
+          isTypeDirectCall: true,
+        );
+      }));
+    }
   }
 }
