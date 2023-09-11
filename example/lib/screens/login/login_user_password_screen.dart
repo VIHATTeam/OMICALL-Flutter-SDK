@@ -456,14 +456,14 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
     }
 
 
-    EasyLoading.show();
-    await OmicallClient.instance.initCallWithUserPassword(
-      userName: _userNameController.text,
-      password: _passwordController.text,
-      realm: _serviceUrlController.text,
-      host: _hostUrlController.text,
-      isVideo: _supportVideoCall,
-    );
+    // EasyLoading.show();
+    // await OmicallClient.instance.initCallWithUserPassword(
+    //   userName: _userNameController.text,
+    //   password: _passwordController.text,
+    //   realm: _serviceUrlController.text,
+    //   host: _hostUrlController.text,
+    //   isVideo: _supportVideoCall,
+    // );
 
     Navigator.push(context, MaterialPageRoute(builder: (_) {
       return ChooseTypeUIScreen(

@@ -263,8 +263,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
                 OmiClient.instance.configPushNotification(
                     showMissedCall = true,
-                    prefixMissedCallMessage = prefixMissedCallMessage ?: "Cuộc gọi nhỡ từ",
-                    notificationPrefix = "Cuộc gọi đến từ ",
                     notificationIcon = notificationIcon ?: "ic_notification",
                     notificationAvatar = userImage ?: "ic_inbound_avatar_notification",
                     fullScreenAvatar = userImage ?: "ic_inbound_avatar_fullscreen",
@@ -278,10 +276,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     missedChannelId =  "${channelId}-missed",
                     missedChannelName = "Cuộc gọi nhỡ",
                     displayNameType = userNameKey ?: "full_name",
-                    audioNotificationDescription = audioNotificationDescription,
-                    videoNotificationDescription = videoNotificationDescription,
+                    notificationMissedCallPrefix = prefixMissedCallMessage ?: "Cuộc gọi nhỡ từ"
                 )
-
                 result.success(true)
             }
             INIT_CALL_USER_PASSWORD -> {
