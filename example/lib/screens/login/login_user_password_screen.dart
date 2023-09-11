@@ -212,22 +212,6 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
                             icon: Icons.lock,
                             isPassword: true,
                           ),
-
-                          // TextFormField(
-                          //   controller: _passwordController,
-                          //   obscureText: _obscureText,
-                          //   enableSuggestions: false,
-                          //   autocorrect: false,
-                          //   decoration: inputDecoration('Password', Icons.lock,
-                          //       isPass: true),
-                          //   keyboardType: TextInputType.visiblePassword,
-                          //   validator: (value) {
-                          //     if (value == null || value.isEmpty) {
-                          //       return 'This field cannot be empty';
-                          //     }
-                          //     return null;
-                          //   },
-                          // ),
                         ),
                       ),
                       SizedBox(
@@ -256,17 +240,11 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
                           elevation: 4,
                           borderRadius: BorderRadius.circular(
                               MediaQuery.of(context).size.width * 0.1),
-                          child: TextFormField(
+                          child: TextFieldCustomWidget(
                             controller: _hostUrlController,
-                            decoration:
-                                inputDecoration("Host", Icons.location_city),
+                            hintLabel: 'Host',
+                            icon:  Icons.location_city,
                             keyboardType: TextInputType.text,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'This field cannot be empty';
-                              }
-                              return null;
-                            },
                           ),
                         ),
                       ),

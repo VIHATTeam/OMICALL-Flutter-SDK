@@ -296,6 +296,7 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
       await Navigator.push(context, MaterialPageRoute(builder: (_) {
         return const VideoCallScreen(
           status: 0,
+          /// User gọi ra ngoài
           isOutGoingCall: true,
           isTypeDirectCall: true,
         );
