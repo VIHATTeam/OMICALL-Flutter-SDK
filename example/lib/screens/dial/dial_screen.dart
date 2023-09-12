@@ -70,7 +70,7 @@ class DialScreenState extends State<DialScreen> {
 
       final data = omiAction.data;
       final status = data["status"] as int;
-      debugPrint("status OmicallClient ::: $status");
+      debugPrint("status OmicallClient 00 ::: $status");
       updateDialScreen(status);
 
       if (status == OmiCallState.disconnected.rawValue) {
@@ -320,7 +320,7 @@ class DialScreenState extends State<DialScreen> {
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 0.05,
                         ),
-                        if (_callStatus == OmiCallState.confirmed.rawValue) ...[
+                        if (_callStatus == OmiCallState.connecting.rawValue) ...[
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [

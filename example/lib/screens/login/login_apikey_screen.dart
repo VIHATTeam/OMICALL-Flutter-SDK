@@ -344,24 +344,24 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
       return;
     }
     // EasyLoading.show();
-    // final result = await OmicallClient.instance.initCallWithApiKey(
-    //   usrName: _userNameController.text,
-    //   usrUuid: _usrUuidController.text,
-    //   isVideo: _supportVideoCall,
-    //   phone: _usrUuidController.text,
-    //   apiKey: _apiKeyController.text,
-    // );
+    final result = await OmicallClient.instance.initCallWithApiKey(
+      usrName: _userNameController.text,
+      usrUuid: _usrUuidController.text,
+      isVideo: _supportVideoCall,
+      phone: _usrUuidController.text,
+      apiKey: _apiKeyController.text,
+    );
     // EasyLoading.dismiss();
     // debugPrint(result.toString());
-    // if (result == false) {
-    //   return;
-    // }
-    // await LocalStorage.instance.setLoginInfo({
-    //   "usrName": _userNameController.text,
-    //   "usrUuid": _usrUuidController.text,
-    //   "isVideo": _supportVideoCall,
-    //   "apiKey": _apiKeyController.text,
-    // });
+    if (result == false) {
+      return;
+    }
+    await LocalStorage.instance.setLoginInfo({
+      "usrName": _userNameController.text,
+      "usrUuid": _usrUuidController.text,
+      "isVideo": _supportVideoCall,
+      "apiKey": _apiKeyController.text,
+    });
 
     if (!mounted) {
       return;
