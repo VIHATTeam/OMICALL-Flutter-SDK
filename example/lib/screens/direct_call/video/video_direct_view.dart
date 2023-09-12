@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -94,7 +96,9 @@ class _VideoDirectViewState extends State<VideoDirectView>
                               ),
                             if (_callStatus !=
                                     OmiCallState.confirmed.rawValue ||
-                                _callStatus == OmiCallState.unknown.rawValue ||_callStatus == OmiCallState.disconnected.rawValue)
+                                _callStatus == OmiCallState.unknown.rawValue ||
+                                _callStatus ==
+                                    OmiCallState.disconnected.rawValue)
                               Column(
                                 children: [
                                   Text(
@@ -186,7 +190,8 @@ class _VideoDirectViewState extends State<VideoDirectView>
                               ),
                             if (_callStatus == OmiCallState.calling.rawValue ||
                                 _callStatus == OmiCallState.incoming.rawValue ||
-                                _callStatus == OmiCallState.early.rawValue)
+                                _callStatus == OmiCallState.early.rawValue ||
+                                _callStatus == OmiCallState.connecting.rawValue)
                               Padding(
                                 padding: EdgeInsets.only(
                                     top: MediaQuery.of(context).size.height *
@@ -207,8 +212,7 @@ class _VideoDirectViewState extends State<VideoDirectView>
                                           final result = await OmicallClient
                                               .instance
                                               .joinCall();
-                                          if (result == false &&
-                                              context.mounted) {
+                                          if (result == false && mounted) {
                                             Navigator.pop(context);
                                           }
                                         },

@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -167,7 +169,10 @@ class _DialDirectViewState extends State<DialDirectView>
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 0.05,
                         ),
-                        if (callStatus == OmiCallState.confirmed.rawValue) ...[
+                        if (callStatus == OmiCallState.confirmed.rawValue ||
+                            callStatus == OmiCallState.early.rawValue ||
+                            callStatus == OmiCallState.incoming.rawValue ||
+                            callStatus == OmiCallState.connecting.rawValue) ...[
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -227,9 +232,14 @@ class _DialDirectViewState extends State<DialDirectView>
                             ],
                           ),
                         ],
-                        if (callStatus != OmiCallState.confirmed.rawValue)
+                        if (callStatus == OmiCallState.unknown.rawValue)
                           SizedBox(
                             height: MediaQuery.of(context).size.height * 0.43,
+                          )
+                        else if (callStatus == OmiCallState.early.rawValue ||
+                            callStatus == OmiCallState.incoming.rawValue)
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.2,
                           )
                         else
                           SizedBox(
@@ -260,7 +270,7 @@ class _DialDirectViewState extends State<DialDirectView>
                                 press: () async {
                                   final result =
                                       await OmicallClient.instance.joinCall();
-                                  if (result == false && context.mounted) {
+                                  if (result == false && mounted) {
                                     Navigator.pop(context);
                                   }
                                 },

@@ -4,29 +4,19 @@ import 'package:omicall_flutter_plugin/action/action_model.dart';
 import 'package:omicall_flutter_plugin/omicallsdk.dart';
 
 import '../../local_storage/local_storage.dart';
+import '../HomeLoginScreen.dart';
 import '../call_home/call_home_screen.dart';
 import '../direct_call/direct_call_screen.dart';
 import '../home/home_screen.dart';
 import '../video_call/video_call_screen.dart';
 
 class ChooseTypeUIScreen extends StatefulWidget {
-  final String userName;
-  final String password;
-  final String realm;
-  final String host;
   final bool isVideo;
 
   // usrName: _userNameController.text,
-  final String usrUuid;
-  final String apiKey;
+
   const ChooseTypeUIScreen({
     Key? key,
-    required this.userName,
-    required this.password,
-    required this.realm,
-    required this.host,
-    required this.usrUuid,
-    required this.apiKey,
     required this.isVideo,
   }) : super(key: key);
 
@@ -109,9 +99,9 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
                         ),
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height * 0.07,
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
+                          children: const [
                             Text(
                               'Indirect Call',
                               style: TextStyle(
@@ -159,9 +149,9 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
                         ),
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height * 0.07,
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
+                          children: const [
                             Text(
                               'Direct Call',
                               style: TextStyle(
@@ -229,10 +219,19 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
               child: GestureDetector(
                 onTap: () async {
                   EasyLoading.show();
+                  Navigator.of(context).pop();
+                  //((route) {
+                  //   MaterialPageRoute(
+                  //     builder: (_) {
+                  //       return const HomeLoginScreen();
+                  //     },
+                  //   );
+                  //   return false;
+                  // });
                   await OmicallClient.instance.logout();
                   await LocalStorage.instance.logout();
+
                   EasyLoading.dismiss();
-                  Navigator.of(context).pop();
                 },
                 child: Material(
                   elevation: 4,
@@ -294,6 +293,7 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
           return DirectCallScreen(
             isVideo: _supportVideoCall,
             status: OmiCallState.unknown.rawValue,
+
             /// User gọi ra ngoài
             isOutGoingCall: true,
           );

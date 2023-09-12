@@ -12,6 +12,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
+import 'screens/choose_type_ui/choose_type_ui_screen.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   HttpOverrides.global = MyHttpOverrides();
@@ -20,9 +22,9 @@ void main() async {
     DeviceOrientation.portraitDown,
   ]);
   await Firebase.initializeApp();
-  // final Loc = await LocalStorage.instance.loginInfo();
+  final userInfo = await LocalStorage.instance.loginInfo();
   runApp(MyApp(
-    loginInfo: null,
+    loginInfo: userInfo,
   ));
 }
 
@@ -59,7 +61,6 @@ class _MyAppState extends State<MyApp> {
       channelId: 'comcung.channelid.notification',
       audioNotificationDescription: "Có cuộc gọi audio",
     );
-
   }
 
   @override
@@ -67,7 +68,11 @@ class _MyAppState extends State<MyApp> {
     return GestureDetector(
       child: MaterialApp(
         theme: ThemeData.light(),
-        home: const HomeLoginScreen(),
+        home: loginInfo == null
+            ? HomeLoginScreen()
+            : ChooseTypeUIScreen(
+                isVideo: loginInfo?['isVideo'],
+              ),
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
       ),

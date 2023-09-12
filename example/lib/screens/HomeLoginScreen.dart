@@ -109,9 +109,9 @@ class _HomeLoginState extends State<HomeLoginScreen> {
                         ),
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height * 0.07,
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
+                          children: const [
                             Text(
                               'Login with User name',
                               style: TextStyle(
@@ -160,9 +160,9 @@ class _HomeLoginState extends State<HomeLoginScreen> {
                         ),
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height * 0.07,
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
+                          children: const [
                             Text(
                               'Login with Api Key',
                               style: TextStyle(
