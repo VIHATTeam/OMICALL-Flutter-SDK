@@ -16,7 +16,8 @@ mixin DialDirectViewModel implements State<DialDirectView> {
   bool isMuted = false;
   Map? currentAudio;
   TextEditingController phoneNumberController = TextEditingController();
-
+  /// Todo: check pop page more time
+  int i = 0;
   Future<void> initializeControllers() async {
     if (Platform.isAndroid) {
       /// Todo:(NOTE) Check có cuộc gọi, nếu có sẽ auto show màn hình cuộc gọi
@@ -43,31 +44,35 @@ mixin DialDirectViewModel implements State<DialDirectView> {
     /// Todo:(NOTE) Lắng nghe các sự kiện trạng thái thay đổi
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) async {
-          await getGuestUser();
+      await getGuestUser();
       debugPrint("omiAction  OmicallClient ::: $omiAction");
       if (omiAction.actionName == OmiEventList.onSwitchboardAnswer) {
         await getGuestUser();
       }
       if (omiAction.actionName == OmiEventList.onCallStateChanged) {
         final data = omiAction.data;
-        callStatus = data["status"] as int;
+        final status = data["status"] as int;
 
         debugPrint("status OmicallClient ::: $callStatus");
+        debugPrint("isOutGoingCall OmicallClient ::: $isOutGoingCall");
 
         // if(data.keys.contains("isVideo")){
         final isVideo = data["isVideo"] ?? false;
-        if (isVideo &&  callStatus == OmiCallState.early.rawValue) {
+        if (isVideo && callStatus == OmiCallState.early.rawValue) {
           await checkAndPushToCallVideo();
         }
         if (callStatus == OmiCallState.incoming.rawValue ||
             callStatus == OmiCallState.confirmed.rawValue) {
-
           //isVideo = data['isVideo'] as bool;
-          guestNumber = data["callerNumber"];
-          isOutGoingCall = false;
+          // guestNumber = data["callerNumber"];
+          //isOutGoingCall = false;
+          debugPrint("==============================");
+          debugPrint("isOutGoingCall OmicallClient ::: $isOutGoingCall");
         }
-        updateScreen(callStatus);
+        updateScreen(status);
         if (callStatus == OmiCallState.disconnected.rawValue) {
+          i++;
+          if(i > 1) return;
           await endCall(
             needShowStatus: true,
             needRequest: true,
@@ -120,7 +125,7 @@ mixin DialDirectViewModel implements State<DialDirectView> {
 
   Future<void> checkAndPushToCallVideo() async {
     Navigator.pop(context);
-    await Future.delayed(const Duration(milliseconds: 200)).then((value) async{
+    await Future.delayed(const Duration(milliseconds: 200)).then((value) async {
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -128,6 +133,7 @@ mixin DialDirectViewModel implements State<DialDirectView> {
             return DirectCallScreen(
               isVideo: true,
               status: callStatus,
+
               /// User gọi ra ngoài
               isOutGoingCall: false,
             );
@@ -136,7 +142,6 @@ mixin DialDirectViewModel implements State<DialDirectView> {
       );
     });
   }
-
 
   Future<void> checkAndPushToCall() async {
     final call = await OmicallClient.instance.getInitialCall();
@@ -193,12 +198,17 @@ mixin DialDirectViewModel implements State<DialDirectView> {
 
   void updateScreen(int status) {
     setState(() {
-      if (status == OmiCallState.confirmed.rawValue) {
-        _startWatch();
-      } else if (status == OmiCallState.disconnected.rawValue) {
-        _stopWatch();
+      callStatus = status;
+      if (status == OmiCallState.incoming.rawValue) {
+        isOutGoingCall = false;
       }
     });
+
+    if (status == OmiCallState.confirmed.rawValue) {
+      _startWatch();
+    } else if (status == OmiCallState.disconnected.rawValue) {
+      _stopWatch();
+    }
   }
 
   Future<void> makeCall() async {

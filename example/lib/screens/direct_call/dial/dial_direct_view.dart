@@ -44,7 +44,7 @@ class _DialDirectViewState extends State<DialDirectView>
   @override
   void initState() {
     phoneNumberController = TextEditingController(text: widget.phoneNumber);
-    isOutGoingCall= widget.isOutGoingCall;
+    isOutGoingCall = widget.isOutGoingCall;
     callStatus = widget.status;
     initializeControllers();
     super.initState();
@@ -61,6 +61,7 @@ class _DialDirectViewState extends State<DialDirectView>
     OmicallClient.instance.removeAudioChangedListener();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     final screenWith = MediaQuery.of(context).size.width;
@@ -127,7 +128,9 @@ class _DialDirectViewState extends State<DialDirectView>
                             Column(
                               children: [
                                 Text(
-                                  phoneNumberController.text.isEmpty
+                                  phoneNumberController.text.isEmpty &&
+                                          (callStatus ==
+                                              OmiCallState.confirmed.rawValue)
                                       ? "..."
                                       : "${guestUser?["extension"] ?? "..."}",
                                   style: Theme.of(context)
@@ -304,11 +307,17 @@ class _DialDirectViewState extends State<DialDirectView>
                 children: [
                   GestureDetector(
                     onTap: () async {
-                      await endCall(
-                        needShowStatus: true,
-                        needRequest: true,
-                      );
-                      Navigator.of(context).pop();
+                      debugPrint("=======+++++++$callStatus++++++======");
+                      if (callStatus == OmiCallState.confirmed.rawValue) {
+                        await endCall(
+                          needShowStatus: true,
+                          needRequest: true,
+                        ).then(
+                          (value) => Navigator.of(context).pop(),
+                        );
+                      } else {
+                        Navigator.of(context).pop();
+                      }
                     },
                     child: Material(
                       elevation: 4,
