@@ -56,7 +56,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final TextEditingController _phoneNumberController =
-      TextEditingController()..text = Platform.isAndroid ? '1000071' : '100';
+      TextEditingController()..text = Platform.isAndroid ? '1000071' : '167631';
 
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,

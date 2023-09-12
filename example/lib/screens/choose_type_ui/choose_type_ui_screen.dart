@@ -262,30 +262,30 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
 
   Future<void> onChooseDirectCall(BuildContext context) async {
     bool result = false;
-    EasyLoading.show();
-    if (widget.apiKey.isEmpty) {
-      result = await OmicallClient.instance.initCallWithUserPassword(
-        userName: widget.userName,
-        password: widget.password,
-        realm: widget.realm,
-        host: widget.host,
-        isVideo: _supportVideoCall,
-      );
-      debugPrint(result.toString());
-    } else {
-      result = await OmicallClient.instance.initCallWithApiKey(
-        usrName: widget.userName,
-        usrUuid: widget.usrUuid,
-        isVideo: _supportVideoCall,
-        phone: widget.usrUuid,
-        apiKey: widget.apiKey,
-      );
-      debugPrint(result.toString());
-    }
-    EasyLoading.dismiss();
-    if (result == false || !mounted) {
-      return;
-    }
+    // EasyLoading.show();
+    // if (widget.apiKey.isEmpty) {
+    //   result = await OmicallClient.instance.initCallWithUserPassword(
+    //     userName: widget.userName,
+    //     password: widget.password,
+    //     realm: widget.realm,
+    //     host: widget.host,
+    //     isVideo: _supportVideoCall,
+    //   );
+    //   debugPrint(result.toString());
+    // } else {
+    //   result = await OmicallClient.instance.initCallWithApiKey(
+    //     usrName: widget.userName,
+    //     usrUuid: widget.usrUuid,
+    //     isVideo: _supportVideoCall,
+    //     phone: widget.usrUuid,
+    //     apiKey: widget.apiKey,
+    //   );
+    //   debugPrint(result.toString());
+    // }
+    // EasyLoading.dismiss();
+    // if (result == false || !mounted) {
+    //   return;
+    // }
 
     await Navigator.push(
       context,
