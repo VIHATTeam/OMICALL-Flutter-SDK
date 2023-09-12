@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'dart:io';
 
@@ -51,13 +53,13 @@ class DialScreenState extends State<DialScreen> {
 
   Future<void> initController() async {
     _callStatus = widget.status;
-    debugPrint("status _callStatus omiAction::: $_callStatus");
-    debugPrint("status _callStatus omiAction::: ${widget.status}");
+    debugPrint("status OmicallClient 00 ::: $_callStatus");
     if (widget.status == OmiCallState.confirmed.rawValue) {
       _startWatch();
     }
+
     /// Todo: check pop page more time
-     int i = 0;
+    int i = 0;
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
       debugPrint(
@@ -70,9 +72,9 @@ class DialScreenState extends State<DialScreen> {
 
       final data = omiAction.data;
       final status = data["status"] as int;
-      debugPrint("status OmicallClient 00 ::: $status");
-      updateDialScreen(status);
 
+      updateDialScreen(status);
+      debugPrint("status OmicallClient 00 ::: $status");
       if (status == OmiCallState.disconnected.rawValue) {
         i++;
         if (i >= 2) return;
@@ -216,7 +218,9 @@ class DialScreenState extends State<DialScreen> {
     setState(() {
       _callStatus = status;
     });
-    if (status == OmiCallState.confirmed.rawValue) {
+    debugPrint("status _callStatus omiAction::: $_callStatus");
+    if (status == OmiCallState.confirmed.rawValue ||
+        status == OmiCallState.connecting.rawValue) {
       _startWatch();
     }
   }
@@ -320,7 +324,8 @@ class DialScreenState extends State<DialScreen> {
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 0.05,
                         ),
-                        if (_callStatus == OmiCallState.connecting.rawValue) ...[
+                        if (_callStatus == OmiCallState.connecting.rawValue ||
+                            _callStatus == OmiCallState.early.rawValue) ...[
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -380,9 +385,13 @@ class DialScreenState extends State<DialScreen> {
                             ],
                           ),
                         ],
-                        if (_callStatus != OmiCallState.confirmed.rawValue)
+                        if (_callStatus == OmiCallState.incoming.rawValue)
                           SizedBox(
                             height: MediaQuery.of(context).size.height * 0.43,
+                          )
+                        else if (_callStatus != OmiCallState.confirmed.rawValue)
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.2,
                           )
                         else
                           SizedBox(
@@ -400,7 +409,7 @@ class DialScreenState extends State<DialScreen> {
                                 press: () async {
                                   final result =
                                       await OmicallClient.instance.joinCall();
-                                  if (result == false && context.mounted) {
+                                  if (result == false && mounted) {
                                     Navigator.pop(context);
                                   }
                                 },

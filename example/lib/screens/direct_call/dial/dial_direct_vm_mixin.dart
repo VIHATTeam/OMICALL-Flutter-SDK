@@ -16,6 +16,7 @@ mixin DialDirectViewModel implements State<DialDirectView> {
   bool isMuted = false;
   Map? currentAudio;
   TextEditingController phoneNumberController = TextEditingController();
+
   /// Todo: check pop page more time
   int i = 0;
   Future<void> initializeControllers() async {
@@ -52,8 +53,8 @@ mixin DialDirectViewModel implements State<DialDirectView> {
       if (omiAction.actionName == OmiEventList.onCallStateChanged) {
         final data = omiAction.data;
         final status = data["status"] as int;
-
-        debugPrint("status OmicallClient ::: $callStatus");
+        //if (callStatus == status) return;
+        debugPrint("status OmicallClient 00 ::: $status");
         debugPrint("isOutGoingCall OmicallClient ::: $isOutGoingCall");
 
         // if(data.keys.contains("isVideo")){
@@ -72,7 +73,7 @@ mixin DialDirectViewModel implements State<DialDirectView> {
         updateScreen(status);
         if (callStatus == OmiCallState.disconnected.rawValue) {
           i++;
-          if(i > 1) return;
+          if (i >= 2) return;
           await endCall(
             needShowStatus: true,
             needRequest: true,
@@ -203,8 +204,8 @@ mixin DialDirectViewModel implements State<DialDirectView> {
         isOutGoingCall = false;
       }
     });
-
-    if (status == OmiCallState.confirmed.rawValue) {
+    debugPrint("status OmicallClient 00 ::: $status");
+    if (status == OmiCallState.confirmed.rawValue || status == OmiCallState.connecting.rawValue) {
       _startWatch();
     } else if (status == OmiCallState.disconnected.rawValue) {
       _stopWatch();
