@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
+import '../../components/textfield_custom_widget.dart';
 import '../dial/Dial_Screen_2.dart';
 import '../dial/dial_screen.dart';
 import '../video_call/video_call_screen.dart';
@@ -47,8 +48,6 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
     color: Colors.white,
     fontSize: 16,
   );
-
-
 
   // Initially password is obscure
   bool _obscureText = true;
@@ -189,17 +188,11 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
                           elevation: 4,
                           borderRadius: BorderRadius.circular(
                               MediaQuery.of(context).size.width * 0.1),
-                          child: TextFormField(
+                          child: TextFieldCustomWidget(
                             controller: _userNameController,
                             keyboardType: TextInputType.number,
-                            decoration:
-                                inputDecoration('User Name', Icons.person),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'This field cannot be empty';
-                              }
-                              return null;
-                            },
+                            hintLabel: 'User Name',
+                            icon: Icons.person,
                           ),
                         ),
                       ),
@@ -212,20 +205,12 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
                           elevation: 4,
                           borderRadius: BorderRadius.circular(
                               MediaQuery.of(context).size.width * 0.1),
-                          child: TextFormField(
+                          child: TextFieldCustomWidget(
                             controller: _passwordController,
-                            obscureText: _obscureText,
-                            enableSuggestions: false,
-                            autocorrect: false,
-                            decoration: inputDecoration('Password', Icons.lock,
-                                isPass: true),
                             keyboardType: TextInputType.visiblePassword,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'This field cannot be empty';
-                              }
-                              return null;
-                            },
+                            hintLabel: 'Password',
+                            icon: Icons.lock,
+                            isPassword: true,
                           ),
                         ),
                       ),
@@ -238,17 +223,11 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
                           elevation: 4,
                           borderRadius: BorderRadius.circular(
                               MediaQuery.of(context).size.width * 0.1),
-                          child: TextFormField(
+                          child: TextFieldCustomWidget(
                             controller: _serviceUrlController,
-                            decoration: inputDecoration(
-                                'Service', Icons.cleaning_services),
+                            hintLabel: 'Service',
+                            icon: Icons.cleaning_services,
                             keyboardType: TextInputType.text,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'This field cannot be empty';
-                              }
-                              return null;
-                            },
                           ),
                         ),
                       ),
@@ -261,17 +240,11 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
                           elevation: 4,
                           borderRadius: BorderRadius.circular(
                               MediaQuery.of(context).size.width * 0.1),
-                          child: TextFormField(
+                          child: TextFieldCustomWidget(
                             controller: _hostUrlController,
-                            decoration:
-                                inputDecoration("Host", Icons.location_city),
+                            hintLabel: 'Host',
+                            icon:  Icons.location_city,
                             keyboardType: TextInputType.text,
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'This field cannot be empty';
-                              }
-                              return null;
-                            },
                           ),
                         ),
                       ),

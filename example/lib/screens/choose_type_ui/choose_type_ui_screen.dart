@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:omicall_flutter_plugin/action/action_model.dart';
 import 'package:omicall_flutter_plugin/omicallsdk.dart';
 
 import '../../local_storage/local_storage.dart';
 import '../call_home/call_home_screen.dart';
+import '../direct_call/direct_call_screen.dart';
 import '../home/home_screen.dart';
 import '../video_call/video_call_screen.dart';
 
@@ -39,6 +41,7 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
     _supportVideoCall = widget.isVideo;
     super.initState();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -224,7 +227,7 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
             child: Align(
               alignment: Alignment.topLeft,
               child: GestureDetector(
-                onTap: () async{
+                onTap: () async {
                   EasyLoading.show();
                   await OmicallClient.instance.logout();
                   await LocalStorage.instance.logout();
@@ -283,23 +286,38 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
     if (result == false || !mounted) {
       return;
     }
-    if (!_supportVideoCall) {
-      await Navigator.push(context, MaterialPageRoute(builder: (_) {
-        return CallHomeScreen(
-          isVideo: _supportVideoCall,
-          status: 0,
-          isOutGoingCall: true,
-        );
-      }));
-    } else {
 
-      await Navigator.push(context, MaterialPageRoute(builder: (_) {
-        return const VideoCallScreen(
-          status: 0,
-          isOutGoingCall: true,
-          isTypeDirectCall: true,
-        );
-      }));
-    }
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) {
+          return DirectCallScreen(
+            isVideo: _supportVideoCall,
+            status: OmiCallState.unknown.rawValue,
+            /// User gọi ra ngoài
+            isOutGoingCall: true,
+          );
+        },
+      ),
+    );
+    // if (!_supportVideoCall) {
+    //   await Navigator.push(context, MaterialPageRoute(builder: (_) {
+    //     return CallHomeScreen(
+    //       isVideo: _supportVideoCall,
+    //       status: 0,
+    //       isOutGoingCall: true,
+    //     );
+    //   }));
+    // } else {
+    //
+    //   await Navigator.push(context, MaterialPageRoute(builder: (_) {
+    //     return const VideoCallScreen(
+    //       status: 0,
+    //       /// User gọi ra ngoài
+    //       isOutGoingCall: true,
+    //       isTypeDirectCall: true,
+    //     );
+    //   }));
+    // }
   }
 }
