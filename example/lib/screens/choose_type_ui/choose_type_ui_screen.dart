@@ -132,9 +132,9 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
                         ),
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height * 0.07,
-                        child: const Row(
+                        child:  Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
+                          children: const [
                             Text(
                               'Indirect Call',
                               style: TextStyle(
@@ -182,9 +182,9 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
                         ),
                         width: MediaQuery.of(context).size.width,
                         height: MediaQuery.of(context).size.height * 0.07,
-                        child: const Row(
+                        child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
+                          children: const [
                             Text(
                               'Direct Call',
                               style: TextStyle(
