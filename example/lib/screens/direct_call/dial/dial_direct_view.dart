@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -46,7 +48,7 @@ class _DialDirectViewState extends State<DialDirectView>
     phoneNumberController = TextEditingController(text: widget.phoneNumber);
     isOutGoingCall = widget.isOutGoingCall;
     callStatus = widget.status;
-    initializeControllers();
+    initializeControllers(callStatus);
     super.initState();
   }
 
@@ -69,7 +71,9 @@ class _DialDirectViewState extends State<DialDirectView>
     if (correctWidth > 100) {
       correctWidth = 100;
     }
-
+    bool checkShowOption = callStatus == OmiCallState.early.rawValue ||
+        callStatus == OmiCallState.connecting.rawValue ||
+        callStatus == OmiCallState.confirmed.rawValue;
     return WillPopScope(
       child: Scaffold(
         body: Stack(
@@ -89,8 +93,24 @@ class _DialDirectViewState extends State<DialDirectView>
               ),
             ),
             SingleChildScrollView(
-              child: Column(
+              child: Stack(
+                alignment: AlignmentDirectional.topCenter,
                 children: [
+                  if (callStatus == OmiCallState.confirmed.rawValue)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        top: 270,
+                      ),
+                      child: Text(
+                        callQuality,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
                   Padding(
                     padding:
                         const EdgeInsets.only(left: 20, right: 20, top: 150),
@@ -128,11 +148,7 @@ class _DialDirectViewState extends State<DialDirectView>
                             Column(
                               children: [
                                 Text(
-                                  phoneNumberController.text.isEmpty &&
-                                          (callStatus ==
-                                              OmiCallState.confirmed.rawValue)
-                                      ? "..."
-                                      : "${guestUser?["extension"] ?? "..."}",
+                                  "${guestUser?["extension"] ?? "..."}",
                                   style: Theme.of(context)
                                       .textTheme
                                       .headlineMedium!
@@ -167,137 +183,17 @@ class _DialDirectViewState extends State<DialDirectView>
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 0.05,
                         ),
-                        if (callStatus == OmiCallState.confirmed.rawValue) ...[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              DialButton(
-                                iconSrc: !isMuted
-                                    ? 'assets/icons/ic_microphone.svg'
-                                    : 'assets/icons/ic_block_microphone.svg',
-                                text: "Microphone",
-                                press: () {
-                                  toggleMute(context);
-                                },
-                              ),
-                              if (currentAudio != null)
-                                DialButton(
-                                  iconSrc: 'assets/images/$_audioImage.png',
-                                  text: _audioTitle,
-                                  press: () {
-                                    toggleAndCheckDevice();
-                                  },
-                                ),
-                              DialButton(
-                                iconSrc: "assets/icons/ic_video.svg",
-                                text: "Video",
-                                press: () {},
-                                color: Colors.grey,
-                              ),
-                            ],
+                        ...callOtherOptionWidget(checkShowOption),
+                        Padding(
+                          padding: EdgeInsets.only(
+                            top: MediaQuery.of(context).size.height *
+                                (checkShowOption ? 0.19 : 0.43),
                           ),
-                          const SizedBox(
-                            height: 16,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              DialButton(
-                                iconSrc: "assets/icons/ic_message.svg",
-                                text: "Message",
-                                press: () {
-                                  setState(() {
-                                    isShowKeyboard = !isShowKeyboard;
-                                  });
-                                },
-                                color: Colors.grey,
-                              ),
-                              DialButton(
-                                iconSrc: "assets/icons/ic_user.svg",
-                                text: "Add contact",
-                                press: () {},
-                                color: Colors.grey,
-                              ),
-                              DialButton(
-                                iconSrc: "assets/icons/ic_voicemail.svg",
-                                text: "Voice mail",
-                                press: () {},
-                                color: Colors.grey,
-                              ),
-                            ],
-                          ),
-                        ],
-                        if (callStatus != OmiCallState.confirmed.rawValue)
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.43,
-                          )
-                        else
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.19,
-                          ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            if (callStatus == OmiCallState.unknown.rawValue)
-                              RoundedCircleButton(
-                                iconSrc: "assets/icons/call_end.svg",
-                                press: () async {
-                                  if (phoneNumberController.text.isNotEmpty) {
-                                    makeCall();
-                                  }
-                                },
-                                color: phoneNumberController.text.isNotEmpty
-                                    ? kGreenColor
-                                    : kSecondaryColor,
-                                iconColor: Colors.white,
-                              ),
-                            if ((callStatus == OmiCallState.early.rawValue ||
-                                    callStatus ==
-                                        OmiCallState.incoming.rawValue) &&
-                                isOutGoingCall == false)
-                              RoundedCircleButton(
-                                iconSrc: "assets/icons/call_end.svg",
-                                press: () async {
-                                  final result =
-                                      await OmicallClient.instance.joinCall();
-                                  if (result == false && context.mounted) {
-                                    Navigator.pop(context);
-                                  }
-                                },
-                                color: kGreenColor,
-                                iconColor: Colors.white,
-                              ),
-                            if (callStatus > OmiCallState.unknown.rawValue)
-                              RoundedCircleButton(
-                                iconSrc: "assets/icons/call_end.svg",
-                                press: () {
-                                  endCall(
-                                    needShowStatus: true,
-                                  );
-                                },
-                                color: kRedColor,
-                                iconColor: Colors.white,
-                              ),
-                          ],
+                          child: callButtonWidget(callStatus),
                         ),
                       ],
                     ),
                   ),
-
-                  // Positioned(
-                  //   top: 10,
-                  //   left: 12,
-                  //   right: 12,
-                  //   child: Text(
-                  //     _callQuality,
-                  //     textAlign: TextAlign.center,
-                  //     style: const TextStyle(
-                  //       color: Colors.white,
-                  //       fontSize: 16,
-                  //       fontWeight: FontWeight.w600,
-                  //     ),
-                  //   ),
-                  // )
                 ],
               ),
             ),
@@ -446,5 +342,133 @@ class _DialDirectViewState extends State<DialDirectView>
       ),
       onWillPop: () async => false,
     );
+  }
+
+  List<Widget> callOtherOptionWidget(bool checkShowOption) {
+    if (checkShowOption) {
+      return [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            DialButton(
+              iconSrc: !isMuted
+                  ? 'assets/icons/ic_microphone.svg'
+                  : 'assets/icons/ic_block_microphone.svg',
+              text: "Microphone",
+              press: () {
+                toggleMute(context);
+              },
+            ),
+            if (currentAudio != null)
+              DialButton(
+                iconSrc: 'assets/images/$_audioImage.png',
+                text: _audioTitle,
+                press: () {
+                  toggleAndCheckDevice();
+                },
+              ),
+            DialButton(
+              iconSrc: "assets/icons/ic_video.svg",
+              text: "Video",
+              press: () {},
+              color: Colors.grey,
+            ),
+          ],
+        ),
+        const SizedBox(
+          height: 16,
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            DialButton(
+              iconSrc: "assets/icons/ic_message.svg",
+              text: "Message",
+              press: () {
+                setState(() {
+                  isShowKeyboard = !isShowKeyboard;
+                });
+              },
+              color: Colors.grey,
+            ),
+            DialButton(
+              iconSrc: "assets/icons/ic_user.svg",
+              text: "Add contact",
+              press: () {},
+              color: Colors.grey,
+            ),
+            DialButton(
+              iconSrc: "assets/icons/ic_voicemail.svg",
+              text: "Voice mail",
+              press: () {},
+              color: Colors.grey,
+            ),
+          ],
+        ),
+      ];
+    } else {
+      return [];
+    }
+  }
+
+  Widget callButtonWidget(int statusCall) {
+    if (statusCall == OmiCallState.unknown.rawValue ||
+        statusCall == OmiCallState.disconnected.rawValue) {
+      return RoundedCircleButton(
+        iconSrc: "assets/icons/call_end.svg",
+        press: () async {
+          if (phoneNumberController.text.isNotEmpty) {
+            makeCall();
+          }
+        },
+        color: phoneNumberController.text.isNotEmpty
+            ? kGreenColor
+            : kSecondaryColor,
+        iconColor: Colors.white,
+      );
+    } else if (statusCall == OmiCallState.incoming.rawValue) {
+      return Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          RoundedCircleButton(
+            iconSrc: "assets/icons/call_end.svg",
+            press: () async {
+              final result = await OmicallClient.instance.joinCall();
+              if (result == false && mounted) {
+                Navigator.pop(context);
+              }
+            },
+            color: kGreenColor,
+            iconColor: Colors.white,
+          ),
+          RoundedCircleButton(
+            iconSrc: "assets/icons/call_end.svg",
+            press: () {
+              endCall(
+                needShowStatus: true,
+              );
+            },
+            color: kRedColor,
+            iconColor: Colors.white,
+          ),
+        ],
+      );
+    } else if (statusCall == OmiCallState.calling.rawValue ||
+        statusCall == OmiCallState.early.rawValue ||
+        statusCall == OmiCallState.connecting.rawValue ||
+        statusCall == OmiCallState.confirmed.rawValue) {
+      return RoundedCircleButton(
+        iconSrc: "assets/icons/call_end.svg",
+        press: () {
+          endCall(
+            needShowStatus: true,
+          );
+        },
+        color: kRedColor,
+        iconColor: Colors.white,
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 }
