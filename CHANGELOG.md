@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.0.18
+
+- Fix Status call android 
 
 ## 3.0.17
 
@@ -18,7 +21,6 @@ All notable changes to this project will be documented in this file.
 - Fix open app from Notification
 
 
-## 3.0.14
 
 - Increase ios core
 - Increase android core
