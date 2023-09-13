@@ -45,7 +45,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private var callerNumberTemp: String = ""
 
     override fun incomingReceived(callerId: Int?, phoneNumber: String?, isVideo: Boolean?) {
-        Log.d("SDK", "incomingReceived -> callerId=$callerId, phoneNumber=$phoneNumber")
+        Log.d("SDK ====> CALL ACTION:::  ", "incomingReceived -> callerId=$callerId, phoneNumber=$phoneNumber")
         isIncomming = true;
         callerNumberTemp = phoneNumber ?: "";
         channel.invokeMethod(
@@ -66,7 +66,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         startTime: Long,
         transactionId: String?,
     ) {
-        Log.d("SDK", "onCallEstablished -> callerId=$callerId, phoneNumber=$phoneNumber")
+        Log.d("SDK ====> CALL ACTION:::  ", "onCallEstablished -> callerId=$callerId, phoneNumber=$phoneNumber")
         Handler(Looper.getMainLooper()).postDelayed({
             Log.d("aaaa", transactionId ?: "")
             channel.invokeMethod(
@@ -83,13 +83,14 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onCallEnd(callInfo: MutableMap<String, Any?>, statusCode: Int) {
-        Log.d("SDK", "onCallEnd -> callInfo=$callInfo, statusCode=$statusCode")
+        Log.d("SDK ====> CALL ACTION:::  ", "onCallEnd -> callInfo=$callInfo, statusCode=$statusCode")
         callInfo["status"] = CallState.disconnected.value
         channel.invokeMethod(CALL_STATE_CHANGED, callInfo)
         isIncomming = false;
     }
 
     override fun onConnecting() {
+        Log.d("SDK ====> CALL ACTION:::  ", "onConnecting )
         channel.invokeMethod(
             CALL_STATE_CHANGED, mapOf(
                 "status" to CallState.connecting.value,
@@ -103,7 +104,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     override fun onRinging(callerId: Int, transactionId: String?) {
         var callDirection  = OmiClient.callDirection
-        Log.d("SDK", "onRinging -> callerId=$callerId, transactionId=$transactionId , callDirection=$callDirection")
+        Log.d("SDK ====> CALL ACTION:::  ", "onRinging -> callerId=$callerId, transactionId=$transactionId , callDirection=$callDirection")
         if(callDirection == "inbound") {
             channel.invokeMethod(
                 CALL_STATE_CHANGED, mapOf(
@@ -129,6 +130,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     override fun onOutgoingStarted(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
         isIncomming = false;
+        Log.d("SDK ====> CALL ACTION:::  ", "onOutgoingStarted -> callerId=$callerId, phoneNumber=$phoneNumber")
         channel.invokeMethod(
             CALL_STATE_CHANGED, mapOf(
                 "status" to CallState.calling.value,
