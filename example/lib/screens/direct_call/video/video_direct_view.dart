@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -77,7 +75,9 @@ class _VideoDirectViewState extends State<VideoDirectView>
                         Stack(
                           alignment: Alignment.center,
                           children: [
-                            if (_callStatus == OmiCallState.confirmed.rawValue)
+                            if (_callStatus ==
+                                    OmiCallState.confirmed.rawValue ||
+                                _callStatus == OmiCallState.connecting.rawValue)
                               RemoteCameraView(
                                 width: double.infinity,
                                 height: MediaQuery.of(context).size.height,
@@ -92,13 +92,13 @@ class _VideoDirectViewState extends State<VideoDirectView>
                                   }
                                 },
                               ),
-                            if (_callStatus != OmiCallState.confirmed.rawValue)
+                            if (_callStatus !=
+                                    OmiCallState.confirmed.rawValue ||
+                                _callStatus == OmiCallState.unknown.rawValue ||_callStatus == OmiCallState.disconnected.rawValue)
                               Column(
                                 children: [
                                   Text(
-                                    _phoneNumberController.text.isEmpty &&
-                                            (_callStatus ==
-                                                OmiCallState.confirmed.rawValue)
+                                    _phoneNumberController.text.isEmpty
                                         ? "..."
                                         : "${guestUser?["extension"] ?? "..."}",
                                     style: Theme.of(context)
@@ -121,13 +121,115 @@ class _VideoDirectViewState extends State<VideoDirectView>
                                   ),
                                 ],
                               ),
-                            Padding(
-                              padding: EdgeInsets.only(
-                                  top: MediaQuery.of(context).size.height *
-                                      0.85),
-                              child: callButtonWidget(_callStatus),
-                            ),
+                            if (_callStatus == OmiCallState.unknown.rawValue)
+                              Padding(
+                                padding: EdgeInsets.only(
+                                    top: MediaQuery.of(context).size.height *
+                                        0.85),
+                                child: RoundedCircleButton(
+                                  iconSrc: "assets/icons/call_end.svg",
+                                  press: () async {
+                                    if (_phoneNumberController
+                                        .text.isNotEmpty) {
+                                      makeCall(context);
+                                    }
+                                  },
+                                  color: _phoneNumberController.text.isNotEmpty
+                                      ? kGreenColor
+                                      : kSecondaryColor,
+                                  iconColor: Colors.white,
+                                ),
+                              ),
+                            if (_callStatus == OmiCallState.confirmed.rawValue)
+                              Padding(
+                                padding: EdgeInsets.only(
+                                    top: MediaQuery.of(context).size.height *
+                                        0.85),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    OptionItem(
+                                      icon: "video",
+                                      showDefaultIcon: true,
+                                      callback: () {
+                                        OmicallClient.instance.toggleVideo();
+                                      },
+                                    ),
+                                    OptionItem(
+                                      icon: "hangup",
+                                      showDefaultIcon: true,
+                                      callback: () {
+                                        endCall(
+                                          needShowStatus: true,
+                                        );
+                                      },
+                                    ),
+                                    OptionItem(
+                                      icon: "mic",
+                                      showDefaultIcon: isMuted,
+                                      callback: () {
+                                        OmicallClient.instance.toggleAudio();
+                                      },
+                                    ),
+                                    if (_currentAudio != null)
+                                      OptionItem(
+                                        icon: _audioImage,
+                                        showDefaultIcon: true,
+                                        color: Colors.white,
+                                        callback: () {
+                                          toggleAndCheckDevice();
+                                        },
+                                      ),
+                                  ],
+                                ),
+                              ),
+                            if (_callStatus == OmiCallState.calling.rawValue ||
+                                _callStatus == OmiCallState.incoming.rawValue ||
+                                _callStatus == OmiCallState.early.rawValue)
+                              Padding(
+                                padding: EdgeInsets.only(
+                                    top: MediaQuery.of(context).size.height *
+                                        0.85),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    if ((_callStatus ==
+                                                OmiCallState.early.rawValue ||
+                                            _callStatus ==
+                                                OmiCallState
+                                                    .incoming.rawValue) &&
+                                        _isOutGoingCall == false)
+                                      RoundedCircleButton(
+                                        iconSrc: "assets/icons/call_end.svg",
+                                        press: () async {
+                                          final result = await OmicallClient
+                                              .instance
+                                              .joinCall();
+                                          if (result == false &&
+                                              mounted) {
+                                            Navigator.pop(context);
+                                          }
+                                        },
+                                        color: kGreenColor,
+                                        iconColor: Colors.white,
+                                      ),
 
+                                    RoundedCircleButton(
+                                      iconSrc: "assets/icons/call_end.svg",
+                                      press: () {
+                                        endCall(
+                                          needShowStatus: true,
+                                        );
+                                      },
+                                      color: kRedColor,
+                                      iconColor: Colors.white,
+                                    ),
+
+                                  ],
+                                ),
+                              ),
                           ],
                         ),
                       ],
@@ -136,8 +238,8 @@ class _VideoDirectViewState extends State<VideoDirectView>
                 ],
               ),
             ),
-            // if (_callStatus == OmiCallState.confirmed.rawValue ||
-            //     _callStatus == OmiCallState.connecting.rawValue)
+            // if (_callStatus == OmiCallState.confirmed.rawValue &&
+            //     !widget.isTypeDirectCall)
             //   Positioned(
             //     right: 15,
             //     top: 50,
@@ -169,6 +271,7 @@ class _VideoDirectViewState extends State<VideoDirectView>
             //       ),
             //     ),
             //   ),
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 50),
               child: Row(
@@ -216,8 +319,7 @@ class _VideoDirectViewState extends State<VideoDirectView>
                       ),
                     ),
                   ),
-                  if (_callStatus == OmiCallState.confirmed.rawValue ||
-                      _callStatus == OmiCallState.connecting.rawValue)
+                  if (_callStatus == OmiCallState.confirmed.rawValue)
                     Padding(
                       padding: const EdgeInsets.only(left: 10),
                       child: GestureDetector(
@@ -299,102 +401,5 @@ class _VideoDirectViewState extends State<VideoDirectView>
       ),
       onWillPop: () async => false,
     );
-  }
-
-  Widget callButtonWidget(int statusCall) {
-    if (statusCall == OmiCallState.unknown.rawValue) {
-      return RoundedCircleButton(
-        iconSrc: "assets/icons/call_end.svg",
-        press: () async {
-          if (_phoneNumberController.text.isNotEmpty) {
-            makeCall(context);
-          }
-        },
-        color: _phoneNumberController.text.isNotEmpty
-            ? kGreenColor
-            : kSecondaryColor,
-        iconColor: Colors.white,
-      );
-    } else if (statusCall == OmiCallState.incoming.rawValue) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          RoundedCircleButton(
-            iconSrc: "assets/icons/call_end.svg",
-            press: () async {
-              final result = await OmicallClient.instance.joinCall();
-              if (result == false && mounted) {
-                Navigator.pop(context);
-              }
-            },
-            color: kGreenColor,
-            iconColor: Colors.white,
-          ),
-          RoundedCircleButton(
-            iconSrc: "assets/icons/call_end.svg",
-            press: () {
-              endCall(
-                needShowStatus: true,
-              );
-            },
-            color: kRedColor,
-            iconColor: Colors.white,
-          ),
-        ],
-      );
-    } else if (statusCall == OmiCallState.calling.rawValue ||
-        statusCall == OmiCallState.early.rawValue ||
-        statusCall == OmiCallState.connecting.rawValue) {
-      return RoundedCircleButton(
-        iconSrc: "assets/icons/call_end.svg",
-        press: () {
-          endCall(
-            needShowStatus: true,
-          );
-        },
-        color: kRedColor,
-        iconColor: Colors.white,
-      );
-    } else if (statusCall == OmiCallState.confirmed.rawValue) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          OptionItem(
-            icon: "video",
-            showDefaultIcon: true,
-            callback: () {
-              OmicallClient.instance.toggleVideo();
-            },
-          ),
-          OptionItem(
-            icon: "hangup",
-            showDefaultIcon: true,
-            callback: () {
-              endCall(
-                needShowStatus: true,
-              );
-            },
-          ),
-          OptionItem(
-            icon: "mic",
-            showDefaultIcon: isMuted,
-            callback: () {
-              OmicallClient.instance.toggleAudio();
-            },
-          ),
-          if (_currentAudio != null)
-            OptionItem(
-              icon: _audioImage,
-              showDefaultIcon: true,
-              color: Colors.white,
-              callback: () {
-                toggleAndCheckDevice();
-              },
-            ),
-        ],
-      );
-    } else {
-      return const SizedBox.shrink();
-    }
   }
 }

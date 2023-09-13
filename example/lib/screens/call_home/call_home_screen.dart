@@ -125,7 +125,7 @@ class CallHomeScreenState extends State<CallHomeScreen> {
       //     "status callStateChangeEvent omiAction::: ${omiAction.actionName}");
       // debugPrint("status callStateChangeEvent omiAction::: $data");
       debugPrint("status OmicallClient ::: $_callStatus");
-      if (data.keys.contains("isVideo")) {
+      if(data.keys.contains("isVideo")){
         _isVideo = data["isVideo"] ?? false;
       }
 
