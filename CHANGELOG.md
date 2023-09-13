@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 
 
+## 3.0.17
+
+- Fix Status call android 
+
 ## 3.0.16
 
 - Fix Status call android 
