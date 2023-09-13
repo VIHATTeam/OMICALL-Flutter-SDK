@@ -243,7 +243,7 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
                           child: TextFieldCustomWidget(
                             controller: _hostUrlController,
                             hintLabel: 'Host',
-                            icon:  Icons.location_city,
+                            icon: Icons.location_city,
                             keyboardType: TextInputType.text,
                           ),
                         ),
@@ -420,6 +420,7 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
   }
 
   void _login() async {
+    bool result = false;
     if (_userNameController.text.isEmpty ||
         _passwordController.text.isEmpty ||
         _serviceUrlController.text.isEmpty ||
@@ -428,24 +429,40 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
       return;
     }
 
+    EasyLoading.show();
+    result = await OmicallClient.instance.initCallWithUserPassword(
+      userName: _userNameController.text,
+      password: _passwordController.text,
+      realm: _serviceUrlController.text,
+      host: _hostUrlController.text,
+      isVideo: _supportVideoCall,
+    );
+    await LocalStorage.instance.setLoginInfo({
+      "usrName": _userNameController.text,
+      "usrUuid": '',
+      "isVideo": _supportVideoCall,
+      "apiKey": '',
+      "realm": _serviceUrlController.text,
+      "host": _hostUrlController.text,
+    });
 
-    // EasyLoading.show();
-    // await OmicallClient.instance.initCallWithUserPassword(
-    //   userName: _userNameController.text,
-    //   password: _passwordController.text,
-    //   realm: _serviceUrlController.text,
-    //   host: _hostUrlController.text,
-    //   isVideo: _supportVideoCall,
-    // );
+    EasyLoading.dismiss();
+    if (result == false || !mounted) {
+      return;
+    }
 
-    Navigator.push(context, MaterialPageRoute(builder: (_) {
+    if (!mounted) {
+      return;
+    }
+
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) {
       return ChooseTypeUIScreen(
-        userName: _userNameController.text,
-        password: _passwordController.text,
-        realm: _serviceUrlController.text,
-        host: _hostUrlController.text,
-        usrUuid: '',
-        apiKey: '',
+        // userName: _userNameController.text,
+        // password: _passwordController.text,
+        // realm: _serviceUrlController.text,
+        // host: _hostUrlController.text,
+        // usrUuid: '',
+        // apiKey: '',
         isVideo: _supportVideoCall,
       );
 //       return const HomeScreen(

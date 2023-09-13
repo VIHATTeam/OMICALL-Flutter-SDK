@@ -1,32 +1,25 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/action/action_model.dart';
+import 'package:omicall_flutter_plugin/constant/events.dart';
 import 'package:omicall_flutter_plugin/omicallsdk.dart';
 
 import '../../local_storage/local_storage.dart';
+import '../HomeLoginScreen.dart';
 import '../call_home/call_home_screen.dart';
 import '../direct_call/direct_call_screen.dart';
 import '../home/home_screen.dart';
 import '../video_call/video_call_screen.dart';
 
 class ChooseTypeUIScreen extends StatefulWidget {
-  final String userName;
-  final String password;
-  final String realm;
-  final String host;
   final bool isVideo;
 
   // usrName: _userNameController.text,
-  final String usrUuid;
-  final String apiKey;
+
   const ChooseTypeUIScreen({
     Key? key,
-    required this.userName,
-    required this.password,
-    required this.realm,
-    required this.host,
-    required this.usrUuid,
-    required this.apiKey,
     required this.isVideo,
   }) : super(key: key);
 
@@ -36,9 +29,39 @@ class ChooseTypeUIScreen extends StatefulWidget {
 
 class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
   bool _supportVideoCall = false;
+
   @override
   void initState() {
     _supportVideoCall = widget.isVideo;
+    // _subscription =
+    //     OmicallClient.instance.callStateChangeEvent.listen((omiAction) async {
+    //   if (omiAction.actionName == OmiEventList.onCallStateChanged) {
+    //     final data = omiAction.data;
+    //     final status = data["status"] as int;
+    //     //if (callStatus == status) return;
+    //
+    //     debugPrint("status OmicallClient 00 ::: $status");
+    //     if (status == OmiCallState.incoming.rawValue ||
+    //         status == OmiCallState.confirmed.rawValue) {
+    //       final isVideo = data["isVideo"] ?? false;
+    //
+    //       Navigator.push(
+    //         context,
+    //         MaterialPageRoute(
+    //           builder: (_) {
+    //             return DirectCallScreen(
+    //               isVideo: isVideo,
+    //               status: status,
+    //               /// User gọi ra ngoài
+    //               isOutGoingCall: false,
+    //             );
+    //           },
+    //         ),
+    //       );
+    //     }
+    //   }
+    //   // if(data.keys.contains("isVideo")){
+    // });
     super.initState();
   }
 
@@ -229,10 +252,22 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
               child: GestureDetector(
                 onTap: () async {
                   EasyLoading.show();
+                  Navigator.of(context).pop();
+                  Navigator.push(context, MaterialPageRoute(builder: (_) {
+                    return const HomeLoginScreen();
+                  }));
+                  //((route) {
+                  //   MaterialPageRoute(
+                  //     builder: (_) {
+                  //       return const HomeLoginScreen();
+                  //     },
+                  //   );
+                  //   return false;
+                  // });
                   await OmicallClient.instance.logout();
                   await LocalStorage.instance.logout();
+
                   EasyLoading.dismiss();
-                  Navigator.of(context).pop();
                 },
                 child: Material(
                   elevation: 4,
@@ -261,32 +296,6 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
   }
 
   Future<void> onChooseDirectCall(BuildContext context) async {
-    bool result = false;
-    // EasyLoading.show();
-    // if (widget.apiKey.isEmpty) {
-    //   result = await OmicallClient.instance.initCallWithUserPassword(
-    //     userName: widget.userName,
-    //     password: widget.password,
-    //     realm: widget.realm,
-    //     host: widget.host,
-    //     isVideo: _supportVideoCall,
-    //   );
-    //   debugPrint(result.toString());
-    // } else {
-    //   result = await OmicallClient.instance.initCallWithApiKey(
-    //     usrName: widget.userName,
-    //     usrUuid: widget.usrUuid,
-    //     isVideo: _supportVideoCall,
-    //     phone: widget.usrUuid,
-    //     apiKey: widget.apiKey,
-    //   );
-    //   debugPrint(result.toString());
-    // }
-    // EasyLoading.dismiss();
-    // if (result == false || !mounted) {
-    //   return;
-    // }
-
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -294,30 +303,12 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
           return DirectCallScreen(
             isVideo: _supportVideoCall,
             status: OmiCallState.unknown.rawValue,
+
             /// User gọi ra ngoài
             isOutGoingCall: true,
           );
         },
       ),
     );
-    // if (!_supportVideoCall) {
-    //   await Navigator.push(context, MaterialPageRoute(builder: (_) {
-    //     return CallHomeScreen(
-    //       isVideo: _supportVideoCall,
-    //       status: 0,
-    //       isOutGoingCall: true,
-    //     );
-    //   }));
-    // } else {
-    //
-    //   await Navigator.push(context, MaterialPageRoute(builder: (_) {
-    //     return const VideoCallScreen(
-    //       status: 0,
-    //       /// User gọi ra ngoài
-    //       isOutGoingCall: true,
-    //       isTypeDirectCall: true,
-    //     );
-    //   }));
-    // }
   }
 }

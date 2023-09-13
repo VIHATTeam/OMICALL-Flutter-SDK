@@ -13,7 +13,6 @@ mixin VideoDirectViewModel implements State<VideoDirectView> {
   bool _isOutGoingCall = false;
   int i = 0;
 
-
   Future<void> initializeControllers() async {
     OmicallClient.instance.registerVideoEvent();
     _isOutGoingCall = widget.isOutGoingCall;
@@ -26,45 +25,46 @@ mixin VideoDirectViewModel implements State<VideoDirectView> {
     });
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) async {
-          if (omiAction.actionName == OmiEventList.onCallStateChanged) {
-            final data = omiAction.data;
-            _callStatus = data["status"] as int;
-            print('============STATUS: $_callStatus');
-            final isVideo = data["isVideo"] ?? false;
-            if (!isVideo &&  _callStatus == OmiCallState.early.rawValue) {
-              await checkAndPushToCallDial();
-            }
-            // if (data.keys.contains("isVideo")) {
-            //   _isVideo = data["isVideo"] ?? false;
-            // }
-            _callStatus = data["status"] as int;
-            updateVideoScreen(_callStatus);
-            if (_callStatus == OmiCallState.incoming.rawValue || _callStatus == OmiCallState.confirmed.rawValue) {
-              _isOutGoingCall = false;
-              // setState(() {});
-            }
+      if (omiAction.actionName == OmiEventList.onCallStateChanged) {
+        final data = omiAction.data;
+        _callStatus = data["status"] as int;
+        debugPrint("status OmicallClient 00 ::: $_callStatus");
+        final isVideo = data["isVideo"] ?? false;
+        if (!isVideo && _callStatus == OmiCallState.early.rawValue) {
+          await checkAndPushToCallDial();
+        }
+        // if (data.keys.contains("isVideo")) {
+        //   _isVideo = data["isVideo"] ?? false;
+        // }
 
-            if (_callStatus == OmiCallState.confirmed.rawValue) {
-              if (Platform.isAndroid) {
-                refreshRemoteCamera();
-                refreshLocalCamera();
-              }
-            }
+        updateVideoScreen(_callStatus);
+        if (_callStatus == OmiCallState.incoming.rawValue ||
+            _callStatus == OmiCallState.confirmed.rawValue) {
+          _isOutGoingCall = false;
+          // setState(() {});
+        }
 
-            if (_callStatus == OmiCallState.disconnected.rawValue) {
-              i++;
-              if (i >= 2) return;
-
-              await endCall(
-                needShowStatus: true,
-                needRequest: true,
-              );
-
-              return;
-            }
-            print('_isOutGoingCall: $_isOutGoingCall');
+        if (_callStatus == OmiCallState.confirmed.rawValue) {
+          if (Platform.isAndroid) {
+            refreshRemoteCamera();
+            refreshLocalCamera();
           }
-        });
+        }
+
+        if (_callStatus == OmiCallState.disconnected.rawValue) {
+          // i++;
+          // if (i >= 2) return;
+
+          await endCall(
+            needShowStatus: true,
+            needRequest: true,
+          );
+
+          return;
+        }
+        print('_isOutGoingCall: $_isOutGoingCall');
+      }
+    });
 
     OmicallClient.instance.setVideoListener((data) {
       refreshRemoteCamera();
@@ -103,7 +103,7 @@ mixin VideoDirectViewModel implements State<VideoDirectView> {
 
   Future<void> checkAndPushToCallDial() async {
     Navigator.pop(context);
-    await Future.delayed(const Duration(milliseconds: 200)).then((value) async{
+    await Future.delayed(const Duration(milliseconds: 200)).then((value) async {
       await Navigator.push(
         context,
         MaterialPageRoute(
@@ -111,6 +111,7 @@ mixin VideoDirectViewModel implements State<VideoDirectView> {
             return DirectCallScreen(
               isVideo: false,
               status: OmiCallState.incoming.rawValue,
+
               /// User gọi ra ngoài
               isOutGoingCall: false,
             );
@@ -139,10 +140,10 @@ mixin VideoDirectViewModel implements State<VideoDirectView> {
       phone,
       true,
     );
-
+    await getGuestUser();
     EasyLoading.dismiss();
     Map<String, dynamic> jsonMap = {};
-    bool callStatus = false;
+    bool startCallSuccess = false;
     String messageError = "";
     debugPrint("result  OmicallClient  zzz ::: $result");
 
@@ -150,18 +151,33 @@ mixin VideoDirectViewModel implements State<VideoDirectView> {
     messageError = jsonMap['message'];
     int status = jsonMap['status'];
     if (status == OmiStartCallStatus.startCallSuccess.rawValue) {
-      setState(() {
-        callStatus = true;
-        _isOutGoingCall = true;
-      });
+      startCallSuccess = true;
     }
 
-    if (!callStatus) {
+    if (startCallSuccess) {
+      setState(() {
+        _callStatus = OmiCallState.calling.rawValue;
+        _isOutGoingCall = true;
+      });
+    } else {
       EasyDialog(
-        title: Text("Notification"),
+        title: const Text("Notification"),
         description: Text("Error code ${messageError}"),
       ).show(context);
     }
+    // if (status == OmiStartCallStatus.startCallSuccess.rawValue) {
+    //   setState(() {
+    //     callStatus = true;
+    //     _isOutGoingCall = true;
+    //   });
+    // }
+    //
+    // if (!callStatus) {
+    //   EasyDialog(
+    //     title: Text("Notification"),
+    //     description: Text("Error code ${messageError}"),
+    //   ).show(context);
+    // }
     // OmicallClient.instance.startCallWithUUID(
     //   phone,
     //   _isVideoCall,
@@ -169,7 +185,6 @@ mixin VideoDirectViewModel implements State<VideoDirectView> {
   }
 
   Future<void> makeCallWithParams(
-
     String callerNumber,
     bool isVideo,
   ) async {
@@ -180,8 +195,6 @@ mixin VideoDirectViewModel implements State<VideoDirectView> {
       isVideo,
     );
   }
-
-
 
   void updateVideoScreen(int status) {
     setState(() {
@@ -202,13 +215,15 @@ mixin VideoDirectViewModel implements State<VideoDirectView> {
     if (!mounted) {
       return;
     }
-    _callStatus = OmiCallState.unknown.rawValue;
-    guestUser = {};
-    _phoneNumberController.clear();
-    if (i > 1) {
-      i = 0;
-    }
-    setState(() {});
+
+    // if (i > 1) {
+    //   i = 0;
+    // }
+    setState(() {
+      _callStatus = OmiCallState.unknown.rawValue;
+      guestUser = {};
+      _phoneNumberController.clear();
+    });
   }
 
   void refreshRemoteCamera() {

@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
-
 import '../../components/textfield_custom_widget.dart';
 import '../dial/Dial_Screen_2.dart';
 import '../dial/dial_screen.dart';
@@ -158,7 +157,7 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
                           elevation: 4,
                           borderRadius: BorderRadius.circular(
                               MediaQuery.of(context).size.width * 0.1),
-                          child:  TextFieldCustomWidget(
+                          child: TextFieldCustomWidget(
                             controller: _apiKeyController,
                             hintLabel: 'Host',
                             icon: Icons.location_city,
@@ -361,23 +360,24 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
       "usrUuid": _usrUuidController.text,
       "isVideo": _supportVideoCall,
       "apiKey": _apiKeyController.text,
+      "realm": '',
+      "host": '',
     });
 
     if (!mounted) {
       return;
     }
 
-    Navigator.push(context, MaterialPageRoute(builder: (_) {
-
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) {
       return ChooseTypeUIScreen(
-        userName: _userNameController.text,
-        password: _usrUuidController.text,
-        realm: '',
-        host: _usrUuidController.text,
-        usrUuid: _usrUuidController.text,
-        apiKey: _apiKeyController.text,
+        // userName: _userNameController.text,
+        // password: _usrUuidController.text,
+        // realm: '',
+        // host: _usrUuidController.text,
+        // usrUuid: _usrUuidController.text,
+        // apiKey: _apiKeyController.text,
         isVideo: _supportVideoCall,
-        );
+      );
 //       return const HomeScreen(
 //         needRequestNotification: true,
 //       );

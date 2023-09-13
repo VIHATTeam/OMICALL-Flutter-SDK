@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -521,7 +523,10 @@ class VideoCallState extends State<VideoCallScreen> {
                                       _callStatus ==
                                           OmiCallState.incoming.rawValue ||
                                       _callStatus ==
-                                          OmiCallState.early.rawValue)
+                                          OmiCallState.early.rawValue ||
+                                      _callStatus ==
+                                          OmiCallState.connecting
+                                              .rawValue)
                                     Padding(
                                       padding: EdgeInsets.only(
                                           top: MediaQuery.of(context)
@@ -547,7 +552,7 @@ class VideoCallState extends State<VideoCallScreen> {
                                                     await OmicallClient.instance
                                                         .joinCall();
                                                 if (result == false &&
-                                                    context.mounted) {
+                                                    mounted) {
                                                   Navigator.pop(context);
                                                 }
                                               },
