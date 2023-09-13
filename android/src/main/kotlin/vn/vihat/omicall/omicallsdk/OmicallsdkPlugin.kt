@@ -67,18 +67,15 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         transactionId: String?,
     ) {
         Log.d("SDK ====> CALL ACTION:::  ", "onCallEstablished -> callerId=$callerId, phoneNumber=$phoneNumber")
-        Handler(Looper.getMainLooper()).postDelayed({
-            Log.d("aaaa", transactionId ?: "")
-            channel.invokeMethod(
-                CALL_STATE_CHANGED, mapOf(
-                    "callerNumber" to phoneNumber,
-                    "status" to CallState.confirmed.value,
-                    "isVideo" to isVideo,
-                    "transactionId" to transactionId,
-                    "incoming" to isIncomming
-                )
+        channel.invokeMethod(
+            CALL_STATE_CHANGED, mapOf(
+                "callerNumber" to phoneNumber,
+                "status" to CallState.confirmed.value,
+                "isVideo" to isVideo,
+                "transactionId" to transactionId,
+                "incoming" to isIncomming
             )
-        }, 500)
+        )
         Log.d("omikit", "onCallEstablished: ")
     }
 
@@ -90,7 +87,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onConnecting() {
-        Log.d("SDK ====> CALL ACTION:::  ", "onConnecting )
+        Log.d("SDK ====> CALL ACTION:::  ", "onConnecting ->")
         channel.invokeMethod(
             CALL_STATE_CHANGED, mapOf(
                 "status" to CallState.connecting.value,
@@ -205,6 +202,13 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
             OmiClient(applicationContext!!)
             OmiClient.isAppReady = true
+            val intent = Intent(applicationContext, OmicallsdkPlugin::class.java)
+            val isNotPickup =  intent.getBooleanExtra("isNotPickup", false);
+            Log.d("IncomingCallReceiver", "ExampleActivity -> onCreate -> isNotPickup=${isNotPickup}");
+            if (isNotPickup) {
+                Log.d("IncomingCallReceiver", "ExampleActivity -> onCreate -> pickupppp")
+                OmiClient.instance.pickUp()
+            }
             OmiClient.instance.addCallStateListener(this)
         } catch(e: Throwable) {
             e.printStackTrace()
