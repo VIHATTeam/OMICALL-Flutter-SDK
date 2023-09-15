@@ -10,9 +10,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:omicall_flutter_plugin/action/action_model.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
 import 'screens/choose_type_ui/choose_type_ui_screen.dart';
+import 'screens/direct_call/direct_call_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,8 +25,10 @@ void main() async {
   ]);
   await Firebase.initializeApp();
   final userInfo = await LocalStorage.instance.loginInfo();
+  final isDirectCall = await LocalStorage.instance.getIsDirectCall();
   runApp(MyApp(
     loginInfo: userInfo,
+    isDirectCall: isDirectCall,
   ));
 }
 
@@ -32,8 +36,10 @@ class MyApp extends StatefulWidget {
   const MyApp({
     Key? key,
     this.loginInfo,
+    required this.isDirectCall,
   }) : super(key: key);
   final Map? loginInfo;
+  final bool isDirectCall;
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -69,10 +75,21 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         theme: ThemeData.light(),
         home: loginInfo == null
-            ? HomeLoginScreen()
-            : ChooseTypeUIScreen(
-                isVideo: loginInfo?['isVideo'],
-              ),
+            ? const HomeLoginScreen()
+            : widget.isDirectCall
+                ? DirectCallScreen(
+                    isVideo: loginInfo?['isVideo'],
+                    status: OmiCallState.unknown.rawValue,
+
+                    /// User gọi ra ngoài
+                    isOutGoingCall: true,
+                  )
+                : const HomeScreen(
+                    needRequestNotification: true,
+                  ),
+        // ChooseTypeUIScreen(
+        //     isVideo: loginInfo?['isVideo'],
+        //   ),
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
       ),

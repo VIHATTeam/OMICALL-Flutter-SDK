@@ -11,13 +11,15 @@ import 'package:omicall_flutter_plugin/action/action_model.dart';
 import 'package:omicall_flutter_plugin/constant/events.dart';
 import 'package:omicall_flutter_plugin/omicallsdk.dart';
 
+import '../../../components/dial_button.dart';
 import '../../../components/dial_user_pic.dart';
 import '../../../components/rounded_button.dart';
 import '../../../components/textfield_custom_widget.dart';
 import '../../../constants.dart';
+import '../../../local_storage/local_storage.dart';
 import '../../../main.dart';
 import '../../../numeric_keyboard/numeric_keyboard.dart';
-import '../../dial/widgets/dial_button.dart';
+import '../../HomeLoginScreen.dart';
 import '../direct_call_screen.dart';
 
 part 'dial_direct_vm_mixin.dart';
@@ -46,7 +48,7 @@ class _DialDirectViewState extends State<DialDirectView>
     phoneNumberController = TextEditingController(text: widget.phoneNumber);
     isOutGoingCall = widget.isOutGoingCall;
     callStatus = widget.status;
-    initializeControllers();
+    initializeControllers(callStatus);
     super.initState();
   }
 
@@ -313,10 +315,31 @@ class _DialDirectViewState extends State<DialDirectView>
                           needShowStatus: true,
                           needRequest: true,
                         ).then(
-                          (value) => Navigator.of(context).pop(),
+                          (value) async {
+                            EasyLoading.show();
+                            Navigator.of(context).pop();
+                            Navigator.push(context,
+                                MaterialPageRoute(builder: (_) {
+                              return const HomeLoginScreen();
+                            }));
+
+                            await OmicallClient.instance.logout();
+                            await LocalStorage.instance.logout();
+
+                            EasyLoading.dismiss();
+                          },
                         );
                       } else {
+                        EasyLoading.show();
                         Navigator.of(context).pop();
+                        Navigator.push(context, MaterialPageRoute(builder: (_) {
+                          return const HomeLoginScreen();
+                        }));
+
+                        await OmicallClient.instance.logout();
+                        await LocalStorage.instance.logout();
+
+                        EasyLoading.dismiss();
                       }
                     },
                     child: Material(
