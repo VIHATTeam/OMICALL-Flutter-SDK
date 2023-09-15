@@ -201,15 +201,15 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             Log.d("SDK", "onAttachedToEngine! ---- $applicationContext")
 
             OmiClient(applicationContext!!)
-            OmiClient.isAppReady = true
-            val intent = Intent(applicationContext, OmicallsdkPlugin::class.java)
+            OmiClient.isAppReady = true;
+             val intent = Intent(applicationContext, OmicallsdkPlugin::class.java)
             val isNotPickup =  intent.getBooleanExtra("isNotPickup", false);
             Log.d("IncomingCallReceiver", "ExampleActivity -> onCreate -> isNotPickup=${isNotPickup}");
             if (isNotPickup) {
                 Log.d("IncomingCallReceiver", "ExampleActivity -> onCreate -> pickupppp")
                 OmiClient.instance.pickUp()
             }
-            OmiClient.instance.addCallStateListener(this)
+            OmiClient.getInstance(applicationContext!!).addCallStateListener(this)
         } catch(e: Throwable) {
             e.printStackTrace()
         }
@@ -244,11 +244,11 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         val dataOmi = data["data"] as HashMap<String, Any>
         when (data["actionName"]) {
             START_SERVICES -> {
-                OmiClient.instance.addAccountListener(accountListener)
+                OmiClient.getInstance(applicationContext!!).addAccountListener(accountListener)
                 result.success(true)
             }
             GET_INITIAL_CALL -> {
-                val callInfo = OmiClient.instance.getCurrentCallInfo()
+                val callInfo = OmiClient.getInstance(applicationContext!!).getCurrentCallInfo()
                 result.success(callInfo)
             }
             CONFIG_NOTIFICATION -> {
@@ -268,7 +268,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val videoNotificationDescription = dataOmi["videoNotificationDescription"] as? String
                 val displayNameType = dataOmi["displayNameType"] as? String
 
-                OmiClient.instance.configPushNotification(
+                OmiClient.getInstance(applicationContext!!).configPushNotification(
                     showMissedCall = true,
                     notificationIcon = notificationIcon ?: "ic_notification",
                     notificationAvatar = userImage ?: "ic_inbound_avatar_notification",
@@ -336,7 +336,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val deviceTokenAndroid = dataOmi["fcmToken"] as String
                     withContext(Dispatchers.Default) {
                         try {
-                            OmiClient.instance.updatePushToken(
+                            OmiClient.getInstance(applicationContext!!).updatePushToken(
                                 "",
                                 deviceTokenAndroid,
                             )
@@ -350,7 +350,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             START_CALL -> {
                 val phoneNumber = dataOmi["phoneNumber"] as String
                 val isVideo = dataOmi["isVideo"] as Boolean
-                val startCallResult = OmiClient.instance.startCall(phoneNumber, isVideo)
+                val startCallResult = OmiClient.getInstance(applicationContext!!).startCall(phoneNumber, isVideo)
                 val dataSend = mapOf(
                     "status" to startCallResult.value ,
                     "_id" to "",
@@ -365,11 +365,11 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 result.success(jsonData)
             }
             JOIN_CALL -> {
-                OmiClient.instance.pickUp()
+                OmiClient.getInstance(applicationContext!!).pickUp()
                 result.success(true)
             }
             END_CALL -> {
-                val callInfo = OmiClient.instance.hangUp()
+                val callInfo = OmiClient.getInstance(applicationContext!!).hangUp()
                 result.success(callInfo)
             }
             TOGGLE_MUTE -> {
@@ -377,7 +377,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     var newStatus: Boolean? = null
                     withContext(Dispatchers.Default) {
                         try {
-                            newStatus = OmiClient.instance.toggleMute()
+                            newStatus = OmiClient.getInstance(applicationContext!!).toggleMute()
                         } catch (_: Throwable) {
 
                         }
@@ -387,7 +387,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 }
             }
             TOGGLE_SPEAK -> {
-                val newStatus = OmiClient.instance.toggleSpeaker()
+                val newStatus = OmiClient.getInstance(applicationContext!!).toggleSpeaker()
                 result.success(newStatus)
                 channel.invokeMethod(SPEAKER, newStatus)
             }
@@ -402,29 +402,29 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     characterCode = 11
                 }
                 if (characterCode != null) {
-                    OmiClient.instance.sendDtmf(characterCode)
+                    OmiClient.getInstance(applicationContext!!).sendDtmf(characterCode)
                 }
                 result.success(true)
             }
             SWITCH_CAMERA -> {
-                OmiClient.instance.switchCamera()
+                OmiClient.getInstance(applicationContext!!).switchCamera()
                 channel.invokeMethod(CAMERA_STATUS, true)
             }
             TOGGLE_VIDEO -> {
-                OmiClient.instance.toggleCamera()
+                OmiClient.getInstance(applicationContext!!).toggleCamera()
             }
             GET_AUDIO -> {
-                val inputs = OmiClient.instance.getAudioOutputs()
+                val inputs = OmiClient.getInstance(applicationContext!!).getAudioOutputs()
                 result.success(inputs)
             }
             SET_AUDIO -> {
                 val portType = dataOmi["portType"] as Int
-                OmiClient.instance.setAudio(portType)
+                OmiClient.getInstance(applicationContext!!).setAudio(portType)
                 result.success(true)
             }
 
             GET_CURRENT_AUDIO -> {
-                val audio = OmiClient.instance.getCurrentAudio()
+                val audio = OmiClient.getInstance(applicationContext!!).getCurrentAudio()
                 result.success(listOf(audio))
             }
             START_CALL_WITH_UUID -> {
@@ -435,7 +435,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                             val uuid = dataOmi["usrUuid"] as String
                             val isVideo = dataOmi["isVideo"] as Boolean
                             callResult =
-                                OmiClient.instance.startCallWithUuid(
+                                OmiClient.getInstance(applicationContext!!).startCallWithUuid(
                                     uuid = uuid,
                                     isVideo = isVideo
                                 )
@@ -451,7 +451,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 mainScope.launch {
                     withContext(Dispatchers.Default) {
                         try {
-                            OmiClient.instance.logout()
+                            OmiClient.getInstance(applicationContext!!).logout()
                         } catch (_: Throwable) {
 
                         }
@@ -464,7 +464,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     var callResult: Any? = null
                     withContext(Dispatchers.Default) {
                         try {
-                            callResult = OmiClient.instance.getCurrentUser()
+                            callResult = OmiClient.getInstance(applicationContext!!).getCurrentUser()
                         } catch (_: Throwable) {
 
                         }
@@ -477,7 +477,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     var callResult: Any? = null
                     withContext(Dispatchers.Default) {
                         try {
-                            callResult = OmiClient.instance.getIncomingCallUser()
+                            callResult = OmiClient.getInstance(applicationContext!!).getIncomingCallUser()
                         } catch (_: Throwable) {
 
                         }
@@ -491,7 +491,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     withContext(Dispatchers.Default) {
                         try {
                             val phone = dataOmi["phone"] as String
-                            callResult = OmiClient.instance.getUserInfo(phone)
+                            callResult = OmiClient.getInstance(applicationContext!!).getUserInfo(phone)
                         } catch (_: Throwable) {
 
                         }
@@ -505,7 +505,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         Log.d("SDK", "onDetachedFromEngine!")
         channel.setMethodCallHandler(null)
-        OmiClient.instance.removeCallStateListener(this)
+        OmiClient.getInstance(applicationContext!!).removeCallStateListener(this)
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {

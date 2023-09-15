@@ -10,11 +10,11 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/action/action_model.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
+import '../../components/dial_button.dart';
 import '../../components/dial_user_pic.dart';
 import '../../components/rounded_button.dart';
 import '../../numeric_keyboard/numeric_keyboard.dart';
 import '../home/home_screen.dart';
-import 'widgets/dial_button.dart';
 
 class DialScreen2 extends StatefulWidget {
   const DialScreen2({

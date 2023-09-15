@@ -26,6 +26,7 @@ internal class FLLocalCameraView(
     PlatformView, MethodChannel.MethodCallHandler, TextureView.SurfaceTextureListener {
     private val localView: TextureView
     private var methodChannel: MethodChannel
+    private val appContext: Context = context
 
     override fun getView(): View {
         return localView
@@ -43,7 +44,7 @@ internal class FLLocalCameraView(
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         if (call.method == "refresh") {
             localView.surfaceTexture?.let {
-                OmiClient.instance.setupLocalVideoFeed(Surface(it))
+                OmiClient.getInstance(appContext).setupLocalVideoFeed(Surface(it))
                 ScaleManager.adjustAspectRatio(
                     localView,
                     Size(localView.width, localView.height),
@@ -53,7 +54,7 @@ internal class FLLocalCameraView(
         }
         if (call.method == "permission") {
             val permission = ContextCompat.checkSelfPermission(
-                OmiClient.instance.context,
+                OmiClient.getInstance(appContext).context,
                 Manifest.permission.CAMERA
             )
             val isGranted = permission == PackageManager.PERMISSION_GRANTED
