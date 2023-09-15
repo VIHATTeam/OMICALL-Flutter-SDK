@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.0.19
+
+- Fix Click Notification Call 
+
+
 ## 3.0.18
 
 - Fix Status call android 
