@@ -18,6 +18,7 @@ internal class FLRemoteCameraView(context: Context, id: Int, creationParams: Map
     PlatformView, MethodChannel.MethodCallHandler, TextureView.SurfaceTextureListener {
     private val remoteView : TextureView
     private var methodChannel : MethodChannel
+    private val appContext: Context = context
 
     override fun getView(): View {
         return remoteView
@@ -35,7 +36,7 @@ internal class FLRemoteCameraView(context: Context, id: Int, creationParams: Map
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         if (call.method == "refresh") {
             remoteView.surfaceTexture?.let {
-                OmiClient.instance.setupIncomingVideoFeed(Surface(it))
+                OmiClient.getInstance(appContext).setupIncomingVideoFeed(Surface(it))
                 ScaleManager.adjustAspectRatio(remoteView,
                     Size(remoteView.width, remoteView.height),
                     Size(1280,720)
