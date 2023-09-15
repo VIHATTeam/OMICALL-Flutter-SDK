@@ -209,7 +209,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 Log.d("IncomingCallReceiver", "ExampleActivity -> onCreate -> pickupppp")
                 OmiClient.instance.pickUp()
             }
-            OmiClient.instance.addCallStateListener(this)
+            OmiClient.getInstance(applicationContext!!).addCallStateListener(this)
         } catch(e: Throwable) {
             e.printStackTrace()
         }
