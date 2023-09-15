@@ -207,7 +207,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             Log.d("IncomingCallReceiver", "ExampleActivity -> onCreate -> isNotPickup=${isNotPickup}");
             if (isNotPickup) {
                 Log.d("IncomingCallReceiver", "ExampleActivity -> onCreate -> pickupppp")
-                OmiClient.instance.pickUp()
+                OmiClient.getInstance(applicationContext!!).pickUp()
             }
             OmiClient.getInstance(applicationContext!!).addCallStateListener(this)
         } catch(e: Throwable) {
