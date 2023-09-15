@@ -53,7 +53,7 @@ class DialScreenState extends State<DialScreen> {
 
   Future<void> initController() async {
     _callStatus = widget.status;
-    debugPrint("status OmicallClient 00 ::: $_callStatus");
+    debugPrint("status OmicallClient 33 ::: $_callStatus");
     if (widget.status == OmiCallState.confirmed.rawValue) {
       _startWatch();
     }
@@ -74,7 +74,7 @@ class DialScreenState extends State<DialScreen> {
       final status = data["status"] as int;
 
       updateDialScreen(status);
-      debugPrint("status OmicallClient 00 ::: $status");
+      debugPrint("status OmicallClient 44 ::: $status");
       if (status == OmiCallState.disconnected.rawValue) {
         i++;
         if (i >= 2) return;

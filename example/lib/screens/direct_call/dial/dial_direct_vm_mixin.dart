@@ -65,7 +65,7 @@ mixin DialDirectViewModel implements State<DialDirectView> {
         final status = data["status"] as int;
         //if (callStatus == status) return;
 
-        debugPrint("status OmicallClient 00 ::: $status");
+        debugPrint("status OmicallClient 11 ::: $status");
         debugPrint("isOutGoingCall OmicallClient ::: $isOutGoingCall");
 
         // if(data.keys.contains("isVideo")){
@@ -218,7 +218,7 @@ mixin DialDirectViewModel implements State<DialDirectView> {
         isOutGoingCall = false;
       }
     });
-    debugPrint("status OmicallClient 00 ::: $status");
+    debugPrint("status OmicallClient 22 ::: $status");
     if (status == OmiCallState.confirmed.rawValue) {
       _startWatch();
     } else if (status == OmiCallState.disconnected.rawValue) {
@@ -233,10 +233,15 @@ mixin DialDirectViewModel implements State<DialDirectView> {
     }
     EasyLoading.show();
 
-    final result = await OmicallClient.instance.startCall(
-      phone,
-      false,
-    );
+    // final result = await OmicallClient.instance.startCall(
+    //   phone,
+    //   false,
+    // );
+    // );
+
+    final result = await OmicallClient.instance.joinCall();
+
+    debugPrint("result  joinCall  zzz ::: $result");
     await getGuestUser();
     EasyLoading.dismiss();
     Map<String, dynamic> jsonMap = {};
@@ -244,7 +249,7 @@ mixin DialDirectViewModel implements State<DialDirectView> {
     String messageError = "";
     debugPrint("result  OmicallClient  zzz ::: $result");
 
-    jsonMap = json.decode(result);
+    // jsonMap = json.decode(result);
     messageError = jsonMap['message'];
     int status = jsonMap['status'];
     if (status == OmiStartCallStatus.startCallSuccess.rawValue) {
@@ -273,12 +278,16 @@ mixin DialDirectViewModel implements State<DialDirectView> {
     bool needShowStatus = true,
   }) async {
     if (needRequest) {
-      OmicallClient.instance.endCall().then((value) {});
+      print("endCall:...");
+
+     var result  = await OmicallClient.instance.endCall();
+      print("endCall:... $result");
+
     }
     if (needShowStatus) {
       _stopWatch();
       updateScreen(OmiCallState.disconnected.rawValue);
-      await Future.delayed(const Duration(milliseconds: 400));
+      //await Future.delayed(const Duration(milliseconds: 400));
     }
     if (!mounted) {
       return;
@@ -288,7 +297,7 @@ mixin DialDirectViewModel implements State<DialDirectView> {
       callStatus = OmiCallState.unknown.rawValue;
       guestUser = {};
       callTime = null;
-      phoneNumberController.clear();
+      //phoneNumberController.clear();
     });
     //Navigator.pop(context);
   }
