@@ -43,6 +43,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private val mainScope = CoroutineScope(Dispatchers.Main)
     private var isIncomming: Boolean = false
     private var callerNumberTemp: String = ""
+    private var isAnserCall: Boolean = false
 
     override fun incomingReceived(callerId: Int?, phoneNumber: String?, isVideo: Boolean?) {
         Log.d("SDK ====> CALL ACTION:::  ", "incomingReceived -> callerId=$callerId, phoneNumber=$phoneNumber")
@@ -66,6 +67,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         startTime: Long,
         transactionId: String?,
     ) {
+        isAnserCall = true
         Log.d("SDK ====> CALL ACTION:::  ", "onCallEstablished -> callerId=$callerId, phoneNumber=$phoneNumber")
         channel.invokeMethod(
             CALL_STATE_CHANGED, mapOf(
@@ -84,6 +86,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         callInfo["status"] = CallState.disconnected.value
         channel.invokeMethod(CALL_STATE_CHANGED, callInfo)
         isIncomming = false;
+        isAnserCall  = false
     }
 
     override fun onConnecting() {
@@ -202,13 +205,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
             OmiClient(applicationContext!!)
             OmiClient.isAppReady = true;
-             val intent = Intent(applicationContext, OmicallsdkPlugin::class.java)
-            val isNotPickup =  intent.getBooleanExtra("isNotPickup", false);
-            Log.d("IncomingCallReceiver", "ExampleActivity -> onCreate -> isNotPickup=${isNotPickup}");
-            if (isNotPickup) {
-                Log.d("IncomingCallReceiver", "ExampleActivity -> onCreate -> pickupppp")
-                OmiClient.getInstance(applicationContext!!).pickUp()
-            }
             OmiClient.getInstance(applicationContext!!).addCallStateListener(this)
         } catch(e: Throwable) {
             e.printStackTrace()
@@ -365,12 +361,18 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 result.success(jsonData)
             }
             JOIN_CALL -> {
-                OmiClient.getInstance(applicationContext!!).pickUp()
-                result.success(true)
+                if(applicationContext != null) {
+                    OmiClient.getInstance(applicationContext!!).pickUp()
+                    result.success(true)
+                }
             }
             END_CALL -> {
-                val callInfo = OmiClient.getInstance(applicationContext!!).hangUp()
-                result.success(callInfo)
+                if(isIncomming && !isAnserCall){
+                    OmiClient.getInstance(applicationContext!!).decline()
+                } else {
+                    OmiClient.getInstance(applicationContext!!).hangUp()
+                }
+                result.success(true)
             }
             TOGGLE_MUTE -> {
                 mainScope.launch {

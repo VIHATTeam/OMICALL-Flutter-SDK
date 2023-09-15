@@ -49,7 +49,7 @@ class DialScreen2State extends State<DialScreen2> {
 
   @override
   void initState() {
-    _phoneNumber = widget.phoneNumber ?? "";
+    _phoneNumber = widget.phoneNumber ?? "167631";
     makeCall(context);
     _callStatus = widget.status;
     debugPrint("status _callStatus omiAction::: $_callStatus");

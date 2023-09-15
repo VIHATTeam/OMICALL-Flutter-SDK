@@ -28,7 +28,7 @@ mixin VideoDirectViewModel implements State<VideoDirectView> {
       if (omiAction.actionName == OmiEventList.onCallStateChanged) {
         final data = omiAction.data;
         _callStatus = data["status"] as int;
-        debugPrint("status OmicallClient 00 ::: $_callStatus");
+        debugPrint("status OmicallClient 44 ::: $_callStatus");
         final isVideo = data["isVideo"] ?? false;
         if (!isVideo && _callStatus == OmiCallState.early.rawValue) {
           await checkAndPushToCallDial();
