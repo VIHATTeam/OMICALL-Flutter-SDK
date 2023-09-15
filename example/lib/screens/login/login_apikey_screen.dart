@@ -8,6 +8,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
 import '../../components/textfield_custom_widget.dart';
+import '../../model/login_information.dart';
 import '../dial/Dial_Screen_2.dart';
 import '../dial/dial_screen.dart';
 import '../video_call/video_call_screen.dart';
@@ -355,6 +356,7 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
     if (result == false) {
       return;
     }
+
     await LocalStorage.instance.setLoginInfo({
       "usrName": _userNameController.text,
       "usrUuid": _usrUuidController.text,
