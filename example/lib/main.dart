@@ -67,6 +67,18 @@ class _MyAppState extends State<MyApp> {
       channelId: 'comcung.channelid.notification',
       audioNotificationDescription: "Có cuộc gọi audio",
     );
+    init();
+  }
+
+   bool isVideo = false;
+
+  Future<void> init()async{
+    isVideo = loginInfo?['isVideo'];
+    final call = await OmicallClient.instance.getInitialCall();
+    if (call is Map) {
+      setState(() {
+        isVideo = call["isVideo"] as bool;
+      });}
   }
 
   @override
@@ -78,9 +90,8 @@ class _MyAppState extends State<MyApp> {
             ? const HomeLoginScreen()
             : widget.isDirectCall
                 ? DirectCallScreen(
-                    isVideo: loginInfo?['isVideo'],
+                    isVideo: isVideo,
                     status: OmiCallState.unknown.rawValue,
-
                     /// User gọi ra ngoài
                     isOutGoingCall: true,
                   )
