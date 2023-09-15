@@ -9,7 +9,7 @@ class LocalStorage {
   Future<Map?> loginInfo() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final loginInfoString = prefs.getString("login_info");
-    if  (loginInfoString != null) {
+    if (loginInfoString != null) {
       return json.decode(loginInfoString);
     }
     return null;
@@ -19,6 +19,17 @@ class LocalStorage {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final loginInfoString = json.encode(loginInfo);
     await prefs.setString("login_info", loginInfoString);
+  }
+
+  Future<bool> getIsDirectCall() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final isDirectCall = prefs.getBool("is_direct_call");
+    return isDirectCall ?? false;
+  }
+
+  Future<void> setIsDirectCall(bool isDirectCall) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setBool("is_direct_call", isDirectCall);
   }
 
   Future<void> logout() async {
