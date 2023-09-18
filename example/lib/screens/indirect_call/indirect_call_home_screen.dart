@@ -14,7 +14,9 @@ import 'package:omicall_flutter_plugin/omicall.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io' show Platform;
 import '../../components/textfield_custom_widget.dart';
+import '../../local_storage/local_storage.dart';
 import '../../main.dart';
+import '../HomeLoginScreen.dart';
 import '../dial/dial_screen.dart';
 
 part 'indirect_call_home_vm_mixin.dart';
@@ -237,7 +239,16 @@ class _InDirectCallHomeScreenState extends State<InDirectCallHomeScreen>
                 alignment: Alignment.topLeft,
                 child: GestureDetector(
                   onTap: () async {
+                    EasyLoading.show();
                     Navigator.of(context).pop();
+                    Navigator.push(context, MaterialPageRoute(builder: (_) {
+                      return const HomeLoginScreen();
+                    }));
+
+                    await OmicallClient.instance.logout();
+                    await LocalStorage.instance.logout();
+
+                    EasyLoading.dismiss();
                   },
                   child: Material(
                     elevation: 4,
