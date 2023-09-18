@@ -15,6 +15,7 @@ import 'package:omicall_flutter_plugin/omicall.dart';
 
 import 'screens/choose_type_ui/choose_type_ui_screen.dart';
 import 'screens/direct_call/direct_call_screen.dart';
+import 'screens/indirect_call/indirect_call_home_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -70,15 +71,16 @@ class _MyAppState extends State<MyApp> {
     init();
   }
 
-   bool isVideo = false;
+  bool isVideo = false;
 
-  Future<void> init()async{
+  Future<void> init() async {
     isVideo = loginInfo?['isVideo'];
     final call = await OmicallClient.instance.getInitialCall();
     if (call is Map) {
       setState(() {
         isVideo = call["isVideo"] as bool;
-      });}
+      });
+    }
   }
 
   @override
@@ -92,10 +94,11 @@ class _MyAppState extends State<MyApp> {
                 ? DirectCallScreen(
                     isVideo: isVideo,
                     status: OmiCallState.unknown.rawValue,
+
                     /// User gọi ra ngoài
                     isOutGoingCall: true,
                   )
-                : const HomeScreen(
+                : const InDirectCallHomeScreen(
                     needRequestNotification: true,
                   ),
         // ChooseTypeUIScreen(
