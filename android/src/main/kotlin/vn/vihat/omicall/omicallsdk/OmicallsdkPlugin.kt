@@ -203,7 +203,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
             Log.d("SDK", "onAttachedToEngine! ---- $applicationContext")
 
-            OmiClient(applicationContext!!)
+            OmiClient.getInstance(applicationContext!!)
             OmiClient.isAppReady = true;
             OmiClient.getInstance(applicationContext!!).addCallStateListener(this)
         } catch(e: Throwable) {
@@ -519,7 +519,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     override fun onDetachedFromActivity() {
         Log.d("SDK", "onDetachedFromActivity!")
         activity = null
-        OmiClient.isAppReady = false
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
@@ -531,7 +530,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     override fun onDetachedFromActivityForConfigChanges() {
         Log.d("SDK", "onDetachedFromActivityForConfigChanges!")
         activity = null
-        OmiClient.isAppReady = false
     }
 
     companion object {
