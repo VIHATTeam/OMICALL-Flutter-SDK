@@ -1,0 +1,36 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.omicrm.omisdk.OmiSDK-merged_res-43:/values-watch-v20/values-watch-v20.xml",
+            "map": [
+                {
+                    "source": "/Users/vihat/.gradle/caches/transforms-3/c87a8b20b0adae437a8dd1911a12c06a/transformed/appcompat-1.6.1/res/values-watch-v20/values-watch-v20.xml",
+                    "from": {
+                        "startLines": "2,5,8",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,214,385",
+                        "endLines": "4,7,10",
+                        "endColumns": "12,12,12",
+                        "endOffsets": "209,380,553"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "com.omicrm.omisdk.OmiSDK-mergeReleaseResources-41:/values-watch-v20/values-watch-v20.xml",
+            "map": [
+                {
+                    "source": "/Users/vihat/.gradle/caches/transforms-3/c87a8b20b0adae437a8dd1911a12c06a/transformed/appcompat-1.6.1/res/values-watch-v20/values-watch-v20.xml",
+                    "from": {
+                        "startLines": "2,5,8",
+                        "startColumns": "4,4,4",
+                        "startOffsets": "55,214,385",
+                        "endLines": "4,7,10",
+                        "endColumns": "12,12,12",
+                        "endOffsets": "209,380,553"
+                    }
+                }
+            ]
+        }
+    ]
+}

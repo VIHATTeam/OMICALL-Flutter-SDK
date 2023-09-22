@@ -1,0 +1,72 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.omicrm.omisdk.OmiSDK-merged_res-43:/values-v16/values-v16.xml",
+            "map": [
+                {
+                    "source": "/Users/vihat/.gradle/caches/transforms-3/c87a8b20b0adae437a8dd1911a12c06a/transformed/appcompat-1.6.1/res/values-v16/values-v16.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "5",
+                        "endColumns": "12",
+                        "endOffsets": "223"
+                    },
+                    "to": {
+                        "startLines": "3",
+                        "startColumns": "4",
+                        "startOffsets": "121",
+                        "endLines": "6",
+                        "endColumns": "12",
+                        "endOffsets": "289"
+                    }
+                },
+                {
+                    "source": "/Users/vihat/.gradle/caches/transforms-3/d7ed56a5cfb087272fa0414132c259c8/transformed/core-1.9.0/res/values-v16/values-v16.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "65",
+                        "endOffsets": "116"
+                    }
+                }
+            ]
+        },
+        {
+            "outputFile": "com.omicrm.omisdk.OmiSDK-mergeReleaseResources-41:/values-v16/values-v16.xml",
+            "map": [
+                {
+                    "source": "/Users/vihat/.gradle/caches/transforms-3/c87a8b20b0adae437a8dd1911a12c06a/transformed/appcompat-1.6.1/res/values-v16/values-v16.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endLines": "5",
+                        "endColumns": "12",
+                        "endOffsets": "223"
+                    },
+                    "to": {
+                        "startLines": "3",
+                        "startColumns": "4",
+                        "startOffsets": "121",
+                        "endLines": "6",
+                        "endColumns": "12",
+                        "endOffsets": "289"
+                    }
+                },
+                {
+                    "source": "/Users/vihat/.gradle/caches/transforms-3/d7ed56a5cfb087272fa0414132c259c8/transformed/core-1.9.0/res/values-v16/values-v16.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "65",
+                        "endOffsets": "116"
+                    }
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,191 @@
+-- Merging decision tree log ---
+manifest
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:2:1-75:12
+INJECTED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:2:1-75:12
+INJECTED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:2:1-75:12
+	package
+		INJECTED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:2:1-75:12
+		INJECTED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml
+	xmlns:tools
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:3:5-51
+	xmlns:android
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:2:11-69
+uses-permission#android.permission.ACCESS_NETWORK_STATE
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:5:5-79
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:5:22-76
+uses-permission#android.permission.CHANGE_NETWORK_STATE
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:6:5-79
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:6:22-76
+uses-permission#android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:7:5-8:47
+	tools:ignore
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:8:9-44
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:7:22-86
+uses-permission#android.permission.INTERNET
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:9:5-67
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:9:22-64
+uses-permission#android.permission.USE_SIP
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:10:5-66
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:10:22-63
+uses-permission#android.permission.SYSTEM_ALERT_WINDOW
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:11:5-78
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:11:22-75
+uses-permission#android.permission.CAMERA
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:12:5-65
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:12:22-62
+uses-permission#android.permission.RECORD_AUDIO
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:13:5-71
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:13:22-68
+uses-permission#android.permission.ACCESS_WIFI_STATE
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:14:5-76
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:14:22-73
+uses-permission#android.permission.MODIFY_AUDIO_SETTINGS
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:15:5-80
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:15:22-77
+uses-permission#android.permission.FOREGROUND_SERVICE
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:16:5-77
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:16:22-74
+uses-permission#android.permission.USE_FULL_SCREEN_INTENT
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:17:5-81
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:17:22-78
+uses-permission#android.permission.VIBRATE
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:18:5-66
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:18:22-63
+uses-permission#android.permission.WAKE_LOCK
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:19:5-67
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:19:22-65
+uses-permission#android.permission.RECEIVE_BOOT_COMPLETED
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:20:5-80
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:20:22-78
+uses-permission#com.google.android.c2dm.permission.RECEIVE
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:21:5-82
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:21:22-79
+uses-permission#android.permission.POST_NOTIFICATIONS
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:22:5-76
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:22:22-74
+uses-permission#android.permission.BLUETOOTH
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:23:5-68
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:23:22-65
+uses-permission#android.permission.BLUETOOTH_ADMIN
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:24:5-74
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:24:22-71
+uses-permission#android.permission.READ_PHONE_STATE
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:25:5-75
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:25:22-72
+application
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:27:5-74:19
+receiver#vn.vihat.omicall.omisdk.receiver.FirebaseMessageReceiver
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:28:9-36:20
+	android:enabled
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:31:13-35
+	android:exported
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:30:13-36
+	android:permission
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:32:13-73
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:29:13-84
+intent-filter#action:name:com.google.android.c2dm.intent.RECEIVE
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:33:13-35:29
+action#com.google.android.c2dm.intent.RECEIVE
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:34:17-81
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:34:25-78
+service#vn.vihat.omicall.omisdk.service.NotificationService
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:37:9-41:19
+	android:enabled
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:39:13-35
+	android:exported
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:40:13-37
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:38:13-79
+receiver#vn.vihat.omicall.omisdk.receiver.IncomingCallReceiver
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:42:9-49:20
+	android:enabled
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:44:13-35
+	android:exported
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:45:13-37
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:43:13-81
+intent-filter#action:name:com.omicall.INCOMING_CALL
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:46:13-48:29
+action#com.omicall.INCOMING_CALL
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:47:17-68
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:47:25-65
+receiver#vn.vihat.omicall.omisdk.receiver.HangUpBroadcast
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:50:9-56:20
+	android:exported
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:52:13-37
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:51:13-76
+intent-filter#action:name:com.omicall.app.HANGUP
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:53:13-55:29
+action#com.omicall.app.HANGUP
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:54:17-65
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:54:25-62
+receiver#vn.vihat.omicall.omisdk.receiver.PickUpBroadcast
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:57:9-63:20
+	android:exported
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:59:13-37
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:58:13-76
+intent-filter#action:name:com.omicall.app.PICKUP
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:60:13-62:29
+action#com.omicall.app.PICKUP
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:61:17-65
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:61:25-62
+activity#vn.vihat.omicall.omisdk.IncomingCallActivity
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:64:9-69:20
+	android:launchMode
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:66:13-43
+	android:showOnLockScreen
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:67:13-44
+	android:theme
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:68:13-60
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:65:13-72
+activity#vn.vihat.omicall.omisdk.TransparentActivity
+ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:70:9-73:73
+	android:exported
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:71:13-37
+	android:theme
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:72:13-52
+	android:name
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml:73:13-71
+uses-sdk
+INJECTED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml reason: use-sdk injection requested
+INJECTED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml
+INJECTED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml
+INJECTED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml
+INJECTED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml
+	android:targetSdkVersion
+		INJECTED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml
+		INJECTED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml
+	android:minSdkVersion
+		INJECTED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml
+		ADDED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml
+		INJECTED from /Users/vihat/hotfix/OmiSDK/src/main/AndroidManifest.xml

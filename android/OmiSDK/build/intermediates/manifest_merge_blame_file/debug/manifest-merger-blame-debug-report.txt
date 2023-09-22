@@ -1,0 +1,166 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    xmlns:tools="http://schemas.android.com/tools"
+4    package="com.omicrm.omisdk" >
+5
+6    <uses-sdk android:minSdkVersion="21" />
+6-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml
+7
+8    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+8-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:5:5-79
+8-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:5:22-76
+9    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+9-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:6:5-79
+9-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:6:22-76
+10    <uses-permission
+10-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:7:5-8:47
+11        android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"
+11-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:7:22-86
+12        tools:ignore="ProtectedPermissions" />
+12-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:8:9-44
+13    <uses-permission android:name="android.permission.INTERNET" />
+13-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:9:5-67
+13-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:9:22-64
+14    <uses-permission android:name="android.permission.USE_SIP" />
+14-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:10:5-66
+14-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:10:22-63
+15    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+15-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:11:5-78
+15-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:11:22-75
+16    <uses-permission android:name="android.permission.CAMERA" />
+16-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:12:5-65
+16-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:12:22-62
+17    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+17-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:13:5-71
+17-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:13:22-68
+18    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+18-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:14:5-76
+18-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:14:22-73
+19    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+19-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:15:5-80
+19-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:15:22-77
+20    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+20-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:16:5-77
+20-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:16:22-74
+21    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+21-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:17:5-81
+21-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:17:22-78
+22    <uses-permission android:name="android.permission.VIBRATE" />
+22-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:18:5-66
+22-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:18:22-63
+23    <uses-permission android:name="android.permission.WAKE_LOCK" />
+23-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:19:5-67
+23-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:19:22-65
+24    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+24-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:20:5-80
+24-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:20:22-78
+25    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+25-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:21:5-82
+25-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:21:22-79
+26    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+26-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:22:5-76
+26-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:22:22-74
+27    <uses-permission android:name="android.permission.BLUETOOTH" />
+27-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:23:5-68
+27-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:23:22-65
+28    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+28-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:24:5-74
+28-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:24:22-71
+29    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+29-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:25:5-75
+29-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:25:22-72
+30
+31    <application>
+31-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:27:5-74:19
+32        <receiver
+32-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:28:9-36:20
+33            android:name="vn.vihat.omicall.omisdk.receiver.FirebaseMessageReceiver"
+33-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:29:13-84
+34            android:enabled="true"
+34-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:31:13-35
+35            android:exported="true"
+35-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:30:13-36
+36            android:permission="com.google.android.c2dm.permission.SEND" >
+36-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:32:13-73
+37            <intent-filter>
+37-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:33:13-35:29
+38                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+38-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:34:17-81
+38-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:34:25-78
+39            </intent-filter>
+40        </receiver>
+41
+42        <service
+42-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:37:9-41:19
+43            android:name="vn.vihat.omicall.omisdk.service.NotificationService"
+43-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:38:13-79
+44            android:enabled="true"
+44-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:39:13-35
+45            android:exported="false" >
+45-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:40:13-37
+46        </service>
+47
+48        <receiver
+48-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:42:9-49:20
+49            android:name="vn.vihat.omicall.omisdk.receiver.IncomingCallReceiver"
+49-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:43:13-81
+50            android:enabled="true"
+50-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:44:13-35
+51            android:exported="false" >
+51-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:45:13-37
+52            <intent-filter>
+52-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:46:13-48:29
+53                <action android:name="com.omicall.INCOMING_CALL" />
+53-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:47:17-68
+53-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:47:25-65
+54            </intent-filter>
+55        </receiver>
+56        <receiver
+56-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:50:9-56:20
+57            android:name="vn.vihat.omicall.omisdk.receiver.HangUpBroadcast"
+57-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:51:13-76
+58            android:exported="false" >
+58-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:52:13-37
+59            <intent-filter>
+59-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:53:13-55:29
+60                <action android:name="com.omicall.app.HANGUP" />
+60-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:54:17-65
+60-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:54:25-62
+61            </intent-filter>
+62        </receiver>
+63        <receiver
+63-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:57:9-63:20
+64            android:name="vn.vihat.omicall.omisdk.receiver.PickUpBroadcast"
+64-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:58:13-76
+65            android:exported="false" >
+65-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:59:13-37
+66            <intent-filter>
+66-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:60:13-62:29
+67                <action android:name="com.omicall.app.PICKUP" />
+67-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:61:17-65
+67-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:61:25-62
+68            </intent-filter>
+69        </receiver>
+70
+71        <activity
+71-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:64:9-69:20
+72            android:name="vn.vihat.omicall.omisdk.IncomingCallActivity"
+72-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:65:13-72
+73            android:launchMode="singleTop"
+73-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:66:13-43
+74            android:showOnLockScreen="true"
+74-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:67:13-44
+75            android:theme="@style/Theme.Design.NoActionBar" >
+75-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:68:13-60
+76        </activity>
+77        <activity
+77-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:70:9-73:73
+78            android:name="vn.vihat.omicall.omisdk.TransparentActivity"
+78-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:73:13-71
+79            android:exported="false"
+79-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:71:13-37
+80            android:theme="@style/TranslucentTheme" />
+80-->/Users/vihat/Downloads/SDK/OmiSDK/src/main/AndroidManifest.xml:72:13-52
+81    </application>
+82
+83</manifest>

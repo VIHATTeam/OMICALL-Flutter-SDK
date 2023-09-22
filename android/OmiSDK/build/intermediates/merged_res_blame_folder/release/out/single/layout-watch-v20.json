@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "com.omicrm.omisdk.OmiSDK-merged_res-43:/layout-watch-v20/abc_alert_dialog_button_bar_material.xml",
+        "source": "com.omicrm.omisdk.OmiSDK-appcompat-1.6.1-29:/layout-watch-v20/abc_alert_dialog_button_bar_material.xml"
+    },
+    {
+        "merged": "com.omicrm.omisdk.OmiSDK-merged_res-43:/layout-watch-v20/abc_alert_dialog_title_material.xml",
+        "source": "com.omicrm.omisdk.OmiSDK-appcompat-1.6.1-29:/layout-watch-v20/abc_alert_dialog_title_material.xml"
+    }
+]
