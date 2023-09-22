@@ -29,12 +29,11 @@ class VideoInDirectView extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<VideoInDirectView> createState() => _VideoInDirectViewState();
+  State<VideoInDirectView> createState() => VideoInDirectViewState();
 }
 
-class _VideoInDirectViewState extends State<VideoInDirectView>
+class VideoInDirectViewState extends State<VideoInDirectView>
     with VideoInDirectViewModel {
-
   @override
   void initState() {
     _callStatus = widget.status;
@@ -57,14 +56,14 @@ class _VideoInDirectViewState extends State<VideoInDirectView>
     final width = MediaQuery.of(context).size.width;
     return WillPopScope(
       child: Scaffold(
-        backgroundColor: Colors.grey,
+        backgroundColor: const Color(0xFF1e3150),
         body: Stack(
           children: [
             SingleChildScrollView(
               child: Column(
                 children: [
                   Container(
-                    color: Colors.grey,
+                    color: const Color(0xFF1e3150),
                     child: Column(
                       children: [
                         Stack(

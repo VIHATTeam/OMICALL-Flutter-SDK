@@ -28,11 +28,11 @@ mixin VideoDirectViewModel implements State<VideoDirectView> {
       if (omiAction.actionName == OmiEventList.onCallStateChanged) {
         final data = omiAction.data;
         _callStatus = data["status"] as int;
-        debugPrint("status OmicallClient 44 ::: $_callStatus");
-        final isVideo = data["isVideo"] ?? false;
-        if (!isVideo && _callStatus == OmiCallState.early.rawValue) {
-          await checkAndPushToCallDial();
-        }
+        debugPrint("status OmicallClient 00 ::: $_callStatus");
+        // final isVideo = data["isVideo"] ?? false;
+        // if (!isVideo && _callStatus == OmiCallState.early.rawValue) {
+        //   await checkAndPushToCallDial();
+        // }
         // if (data.keys.contains("isVideo")) {
         //   _isVideo = data["isVideo"] ?? false;
         // }
@@ -101,25 +101,25 @@ mixin VideoDirectViewModel implements State<VideoDirectView> {
     });
   }
 
-  Future<void> checkAndPushToCallDial() async {
-    Navigator.pop(context);
-    await Future.delayed(const Duration(milliseconds: 200)).then((value) async {
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) {
-            return DirectCallScreen(
-              isVideo: false,
-              status: OmiCallState.incoming.rawValue,
+  // Future<void> checkAndPushToCallDial() async {
+  //   Navigator.pop(context);
+  //   await Future.delayed(const Duration(milliseconds: 200)).then((value) async {
+  //     await Navigator.push(
+  //       context,
+  //       MaterialPageRoute(
+  //         builder: (_) {
+  //           return DirectCallScreen(
+  //             isVideo: false,
+  //             status: OmiCallState.incoming.rawValue,
 
-              /// User gọi ra ngoài
-              isOutGoingCall: false,
-            );
-          },
-        ),
-      );
-    });
-  }
+  //             /// User gọi ra ngoài
+  //             isOutGoingCall: false,
+  //           );
+  //         },
+  //       ),
+  //     );
+  //   });
+  // }
 
   Future<void> getGuestUser() async {
     final user = await OmicallClient.instance.getGuestUser();

@@ -13,6 +13,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/action/action_model.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
+import 'router/routes.dart';
 import 'screens/choose_type_ui/choose_type_ui_screen.dart';
 import 'screens/direct_call/direct_call_screen.dart';
 import 'screens/indirect_call/indirect_call_home_screen.dart';
@@ -74,7 +75,7 @@ class _MyAppState extends State<MyApp> {
   bool isVideo = false;
 
   Future<void> init() async {
-    isVideo = loginInfo?['isVideo'];
+    isVideo = loginInfo == null ? false : loginInfo?['isVideo'];
     final call = await OmicallClient.instance.getInitialCall();
     if (call is Map) {
       setState(() {
@@ -88,22 +89,25 @@ class _MyAppState extends State<MyApp> {
     return GestureDetector(
       child: MaterialApp(
         theme: ThemeData.light(),
+        onGenerateRoute: routes,
         home: loginInfo == null
             ? const HomeLoginScreen()
-            : widget.isDirectCall
-                ? DirectCallScreen(
-                    isVideo: isVideo,
-                    status: OmiCallState.unknown.rawValue,
+            : ChooseTypeUIScreen(
+                isVideo: isVideo,
+              ),
 
-                    /// User gọi ra ngoài
-                    isOutGoingCall: true,
-                  )
-                : const InDirectCallHomeScreen(
-                    needRequestNotification: true,
-                  ),
-        // ChooseTypeUIScreen(
-        //     isVideo: loginInfo?['isVideo'],
-        //   ),
+        // widget.isDirectCall
+        //     ? DirectCallScreen(
+        //         isVideo: isVideo,
+        //         status: OmiCallState.unknown.rawValue,
+
+        //         /// User gọi ra ngoài
+        //         isOutGoingCall: true,
+        //       )
+        //     : const InDirectCallHomeScreen(
+        //         needRequestNotification: true,
+        //       ),
+
         debugShowCheckedModeBanner: false,
         builder: EasyLoading.init(),
       ),
