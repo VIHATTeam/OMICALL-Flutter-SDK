@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.omicrm.omisdk" >
+
+    <uses-sdk android:minSdkVersion="21" />
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <uses-permission
+        android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"
+        tools:ignore="ProtectedPermissions" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.USE_SIP" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
+    <application>
+        <receiver
+            android:name="vn.vihat.omicall.omisdk.receiver.FirebaseMessageReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND" >
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name="vn.vihat.omicall.omisdk.service.NotificationService"
+            android:enabled="true"
+            android:exported="false" >
+        </service>
+
+        <receiver
+            android:name="vn.vihat.omicall.omisdk.receiver.IncomingCallReceiver"
+            android:enabled="true"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.omicall.INCOMING_CALL" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="vn.vihat.omicall.omisdk.receiver.HangUpBroadcast"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.omicall.app.HANGUP" />
+            </intent-filter>
+        </receiver>
+        <receiver
+            android:name="vn.vihat.omicall.omisdk.receiver.PickUpBroadcast"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.omicall.app.PICKUP" />
+            </intent-filter>
+        </receiver>
+
+        <activity
+            android:name="vn.vihat.omicall.omisdk.IncomingCallActivity"
+            android:launchMode="singleTop"
+            android:showOnLockScreen="true"
+            android:theme="@style/Theme.Design.NoActionBar" >
+        </activity>
+        <activity
+            android:name="vn.vihat.omicall.omisdk.TransparentActivity"
+            android:exported="false"
+            android:theme="@style/TranslucentTheme" />
+    </application>
+
+</manifest>

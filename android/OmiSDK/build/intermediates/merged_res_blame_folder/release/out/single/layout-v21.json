@@ -1,0 +1,18 @@
+[
+    {
+        "merged": "com.omicrm.omisdk.OmiSDK-merged_res-43:/layout-v21/notification_action_tombstone.xml",
+        "source": "com.omicrm.omisdk.OmiSDK-core-1.9.0-32:/layout-v21/notification_action_tombstone.xml"
+    },
+    {
+        "merged": "com.omicrm.omisdk.OmiSDK-merged_res-43:/layout-v21/notification_template_custom_big.xml",
+        "source": "com.omicrm.omisdk.OmiSDK-core-1.9.0-32:/layout-v21/notification_template_custom_big.xml"
+    },
+    {
+        "merged": "com.omicrm.omisdk.OmiSDK-merged_res-43:/layout-v21/notification_action.xml",
+        "source": "com.omicrm.omisdk.OmiSDK-core-1.9.0-32:/layout-v21/notification_action.xml"
+    },
+    {
+        "merged": "com.omicrm.omisdk.OmiSDK-merged_res-43:/layout-v21/notification_template_icon_group.xml",
+        "source": "com.omicrm.omisdk.OmiSDK-core-1.9.0-32:/layout-v21/notification_template_icon_group.xml"
+    }
+]

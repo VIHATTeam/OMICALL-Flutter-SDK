@@ -1,0 +1,38 @@
+[
+    {
+        "merged": "com.omicrm.omisdk.OmiSDK-merged_res-43:/anim-v21/design_bottom_sheet_slide_in.xml",
+        "source": "com.omicrm.omisdk.OmiSDK-material-1.9.0-37:/anim-v21/design_bottom_sheet_slide_in.xml"
+    },
+    {
+        "merged": "com.omicrm.omisdk.OmiSDK-merged_res-43:/anim-v21/m3_side_sheet_slide_in.xml",
+        "source": "com.omicrm.omisdk.OmiSDK-material-1.9.0-37:/anim-v21/m3_side_sheet_slide_in.xml"
+    },
+    {
+        "merged": "com.omicrm.omisdk.OmiSDK-merged_res-43:/anim-v21/m3_bottom_sheet_slide_in.xml",
+        "source": "com.omicrm.omisdk.OmiSDK-material-1.9.0-37:/anim-v21/m3_bottom_sheet_slide_in.xml"
+    },
+    {
+        "merged": "com.omicrm.omisdk.OmiSDK-merged_res-43:/anim-v21/mtrl_bottom_sheet_slide_out.xml",
+        "source": "com.omicrm.omisdk.OmiSDK-material-1.9.0-37:/anim-v21/mtrl_bottom_sheet_slide_out.xml"
+    },
+    {
+        "merged": "com.omicrm.omisdk.OmiSDK-merged_res-43:/anim-v21/m3_bottom_sheet_slide_out.xml",
+        "source": "com.omicrm.omisdk.OmiSDK-material-1.9.0-37:/anim-v21/m3_bottom_sheet_slide_out.xml"
+    },
+    {
+        "merged": "com.omicrm.omisdk.OmiSDK-merged_res-43:/anim-v21/design_bottom_sheet_slide_out.xml",
+        "source": "com.omicrm.omisdk.OmiSDK-material-1.9.0-37:/anim-v21/design_bottom_sheet_slide_out.xml"
+    },
+    {
+        "merged": "com.omicrm.omisdk.OmiSDK-merged_res-43:/anim-v21/fragment_fast_out_extra_slow_in.xml",
+        "source": "com.omicrm.omisdk.OmiSDK-fragment-1.3.6-9:/anim-v21/fragment_fast_out_extra_slow_in.xml"
+    },
+    {
+        "merged": "com.omicrm.omisdk.OmiSDK-merged_res-43:/anim-v21/m3_side_sheet_slide_out.xml",
+        "source": "com.omicrm.omisdk.OmiSDK-material-1.9.0-37:/anim-v21/m3_side_sheet_slide_out.xml"
+    },
+    {
+        "merged": "com.omicrm.omisdk.OmiSDK-merged_res-43:/anim-v21/mtrl_bottom_sheet_slide_in.xml",
+        "source": "com.omicrm.omisdk.OmiSDK-material-1.9.0-37:/anim-v21/mtrl_bottom_sheet_slide_in.xml"
+    }
+]

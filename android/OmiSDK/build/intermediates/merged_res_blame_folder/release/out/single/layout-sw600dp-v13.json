@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "com.omicrm.omisdk.OmiSDK-merged_res-43:/layout-sw600dp-v13/mtrl_layout_snackbar.xml",
+        "source": "com.omicrm.omisdk.OmiSDK-material-1.9.0-37:/layout-sw600dp-v13/mtrl_layout_snackbar.xml"
+    },
+    {
+        "merged": "com.omicrm.omisdk.OmiSDK-merged_res-43:/layout-sw600dp-v13/design_layout_snackbar.xml",
+        "source": "com.omicrm.omisdk.OmiSDK-material-1.9.0-37:/layout-sw600dp-v13/design_layout_snackbar.xml"
+    }
+]

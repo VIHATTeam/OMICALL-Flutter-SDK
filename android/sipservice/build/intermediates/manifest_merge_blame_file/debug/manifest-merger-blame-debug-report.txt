@@ -1,0 +1,61 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="net.gotev.sipservice" >
+4
+5    <uses-sdk android:minSdkVersion="21" />
+5-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml
+6
+7    <uses-permission android:name="android.permission.INTERNET" />
+7-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:4:5-67
+7-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:4:22-64
+8    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+8-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:5:5-71
+8-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:5:22-68
+9    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+9-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:6:5-80
+9-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:6:22-77
+10    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+10-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:7:5-75
+10-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:7:22-72
+11    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+11-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:8:5-76
+11-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:8:22-73
+12    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+12-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:9:5-79
+12-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:9:22-76
+13    <uses-permission android:name="android.permission.WAKE_LOCK" />
+13-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:10:5-68
+13-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:10:22-65
+14    <uses-permission android:name="android.permission.VIBRATE" />
+14-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:11:5-66
+14-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:11:22-63
+15    <uses-permission android:name="android.permission.CAMERA" />
+15-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:12:5-65
+15-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:12:22-62
+16
+17    <uses-feature
+17-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:14:5-16:36
+18        android:glEsVersion="0x00020000"
+18-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:15:9-41
+19        android:required="false" />
+19-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:16:9-33
+20    <uses-feature
+20-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:18:5-20:35
+21        android:name="android.hardware.audio.low_latency"
+21-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:19:9-58
+22        android:required="false" />
+22-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:20:9-33
+23
+24    <application>
+24-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:22:5-27:19
+25        <service
+25-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:23:9-26:39
+26            android:name="net.gotev.sipservice.SipService"
+26-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:24:13-39
+27            android:enabled="true"
+27-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:25:13-35
+28            android:exported="false" />
+28-->/Users/vihat/Downloads/SDK/sipservice/src/main/AndroidManifest.xml:26:13-37
+29    </application>
+30
+31</manifest>
