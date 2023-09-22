@@ -10,7 +10,7 @@ import '../../main.dart';
 import 'dial/dial_direct_view.dart';
 import 'video/video_direct_view.dart';
 
-class DirectCallScreen extends StatefulWidget {
+class DirectCallScreen extends StatelessWidget {
   final bool isVideo;
   final int status;
   final bool isOutGoingCall;
@@ -22,26 +22,20 @@ class DirectCallScreen extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<DirectCallScreen> createState() => _DirectCallScreenState();
-}
-
-class _DirectCallScreenState extends State<DirectCallScreen> {
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-  }
-  @override
   Widget build(BuildContext context) {
-    return widget.isVideo
+    final videoDirectViewKey = GlobalKey<VideoDirectViewState>();
+    final dialDirectViewKey = GlobalKey<DialDirectViewState>();
+
+    return isVideo
         ? VideoDirectView(
-            status: widget.status,
-            isOutGoingCall: widget.isOutGoingCall,
+            key: videoDirectViewKey,
+            status: status,
+            isOutGoingCall: isOutGoingCall,
           )
         : DialDirectView(
-            status: widget.status,
-            isOutGoingCall: widget.isOutGoingCall,
+            key: dialDirectViewKey,
+            status: status,
+            isOutGoingCall: isOutGoingCall,
           );
   }
 }

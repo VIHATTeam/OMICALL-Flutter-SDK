@@ -14,10 +14,9 @@ import 'package:omicall_flutter_plugin/omicall.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io' show Platform;
 import '../../components/textfield_custom_widget.dart';
-import '../../local_storage/local_storage.dart';
 import '../../main.dart';
-import '../HomeLoginScreen.dart';
-import '../dial/dial_screen.dart';
+import 'dial/dial_indirect_view.dart';
+import 'video/video_indirect_view.dart';
 
 part 'indirect_call_home_vm_mixin.dart';
 
@@ -50,10 +49,10 @@ class InDirectCallHomeScreen extends StatefulWidget {
   final bool needRequestNotification;
 
   @override
-  State<InDirectCallHomeScreen> createState() => _InDirectCallHomeScreenState();
+  State<InDirectCallHomeScreen> createState() => InDirectCallHomeScreenState();
 }
 
-class _InDirectCallHomeScreenState extends State<InDirectCallHomeScreen>
+class InDirectCallHomeScreenState extends State<InDirectCallHomeScreen>
     with InDirectCallHomeViewModel {
   @override
   void initState() {
@@ -239,16 +238,7 @@ class _InDirectCallHomeScreenState extends State<InDirectCallHomeScreen>
                 alignment: Alignment.topLeft,
                 child: GestureDetector(
                   onTap: () async {
-                    EasyLoading.show();
                     Navigator.of(context).pop();
-                    Navigator.push(context, MaterialPageRoute(builder: (_) {
-                      return const HomeLoginScreen();
-                    }));
-
-                    await OmicallClient.instance.logout();
-                    await LocalStorage.instance.logout();
-
-                    EasyLoading.dismiss();
                   },
                   child: Material(
                     elevation: 4,

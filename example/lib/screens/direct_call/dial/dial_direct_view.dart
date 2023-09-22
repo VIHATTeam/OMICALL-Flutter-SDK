@@ -40,10 +40,10 @@ class DialDirectView extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<DialDirectView> createState() => _DialDirectViewState();
+  State<DialDirectView> createState() => DialDirectViewState();
 }
 
-class _DialDirectViewState extends State<DialDirectView>
+class DialDirectViewState extends State<DialDirectView>
     with DialDirectViewModel {
   @override
   void initState() {
@@ -210,33 +210,24 @@ class _DialDirectViewState extends State<DialDirectView>
                         await endCall(
                           needShowStatus: true,
                           needRequest: true,
-                        ).then(
-                          (value) async {
-                            EasyLoading.show();
-                            Navigator.of(context).pop();
-                            Navigator.push(context,
-                                MaterialPageRoute(builder: (_) {
-                              return const HomeLoginScreen();
-                            }));
-
-                            await OmicallClient.instance.logout();
-                            await LocalStorage.instance.logout();
-
-                            EasyLoading.dismiss();
-                          },
                         );
-                      } else {
-                        EasyLoading.show();
-                        Navigator.of(context).pop();
-                        Navigator.push(context, MaterialPageRoute(builder: (_) {
-                          return const HomeLoginScreen();
-                        }));
+                        // .then(
+                        //   (value) async {
+                        //     EasyLoading.show();
+                        //     Navigator.of(context).pop();
+                        //     Navigator.push(context,
+                        //         MaterialPageRoute(builder: (_) {
+                        //       return const HomeLoginScreen();
+                        //     }));
 
-                        await OmicallClient.instance.logout();
-                        await LocalStorage.instance.logout();
+                        //     await OmicallClient.instance.logout();
+                        //     await LocalStorage.instance.logout();
 
-                        EasyLoading.dismiss();
+                        //     EasyLoading.dismiss();
+                        //   },
+                        // );
                       }
+                      Navigator.of(context).pop();
                     },
                     child: Material(
                       elevation: 4,

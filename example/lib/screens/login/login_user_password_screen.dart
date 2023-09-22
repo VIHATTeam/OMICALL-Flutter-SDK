@@ -29,12 +29,15 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
   // NSString * USER_NAME2 = @"101";
   // NSString * PASS_WORD2 = @"Kunkun12345";
   //video
-  late final TextEditingController _userNameController = TextEditingController()
-    ..text = Platform.isIOS ? '101' : '100';
-  late final TextEditingController _passwordController = TextEditingController()
-    ..text = Platform.isIOS ? 'M1zx7YyK30' : 'Jx2hM9aYrT';
+  late final TextEditingController _userNameController =
+      TextEditingController();
+  //..text = Platform.isIOS ? '101' : '100';
+  late final TextEditingController _passwordController =
+      TextEditingController();
+  //..text = Platform.isIOS ? 'M1zx7YyK30' : 'Jx2hM9aYrT';
   late final TextEditingController _serviceUrlController =
-      TextEditingController()..text = 'hungth12';
+      TextEditingController();
+  //..text = 'hungth12';
   late final TextEditingController _hostUrlController = TextEditingController()
     ..text = 'vh.omicrm.com';
 
@@ -42,8 +45,6 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
 
   bool _isVideoCall = false;
   late StreamSubscription _subscription;
-  GlobalKey<DialScreenState>? _dialScreenKey;
-  GlobalKey<VideoCallState>? _videoScreenKey;
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,
     fontSize: 16,
@@ -71,73 +72,6 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    InputDecoration inputDecoration(
-      String text,
-      IconData? icon, {
-      bool isPass = false,
-    }) {
-      return InputDecoration(
-        suffixIcon: isPass
-            ? IconButton(
-                icon: Icon(
-                    _obscureText ? Icons.visibility_off : Icons.visibility),
-                onPressed: () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
-                },
-              )
-            : const SizedBox.shrink(),
-        labelText: text,
-        labelStyle: const TextStyle(
-          color: Colors.grey,
-        ),
-        hintText: text,
-        hintStyle: const TextStyle(
-          color: Colors.grey,
-        ),
-        prefixIcon: Icon(
-          icon,
-          size: MediaQuery.of(context).size.width * 0.06,
-          color: Colors.grey,
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(MediaQuery.of(context).size.width * 0.01),
-          ),
-          borderSide: const BorderSide(
-            color: Colors.red,
-          ),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(MediaQuery.of(context).size.width * 0.1),
-          ),
-          borderSide: BorderSide(
-            color: Colors.red,
-            width: MediaQuery.of(context).size.width * 0.01,
-          ),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(MediaQuery.of(context).size.width * 0.1),
-          ),
-          borderSide: const BorderSide(
-            color: Colors.white,
-          ),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.all(
-            Radius.circular(MediaQuery.of(context).size.width * 0.1),
-          ),
-          borderSide: BorderSide(
-            color: const Color.fromARGB(255, 225, 121, 243),
-            width: MediaQuery.of(context).size.width * 0.008,
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
       body: Stack(
         children: [
@@ -426,6 +360,16 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
         _serviceUrlController.text.isEmpty ||
         _serviceUrlController.text.isEmpty ||
         _hostUrlController.text.isEmpty) {
+      const snackBar = SnackBar(
+        backgroundColor: Colors.red,
+        content: Text(
+          'Opps!!! \n\nLogin information is incorrect',
+          style: TextStyle(
+            fontSize: 15,
+          ),
+        ),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
       return;
     }
 

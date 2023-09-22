@@ -36,10 +36,10 @@ class VideoDirectView extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<VideoDirectView> createState() => _VideoDirectViewState();
+  State<VideoDirectView> createState() => VideoDirectViewState();
 }
 
-class _VideoDirectViewState extends State<VideoDirectView>
+class VideoDirectViewState extends State<VideoDirectView>
     with VideoDirectViewModel {
   @override
   void initState() {
@@ -66,14 +66,14 @@ class _VideoDirectViewState extends State<VideoDirectView>
     final width = MediaQuery.of(context).size.width;
     return WillPopScope(
       child: Scaffold(
-        backgroundColor: Colors.grey,
+        backgroundColor: const Color(0xFF1e3150),
         body: Stack(
           children: [
             SingleChildScrollView(
               child: Column(
                 children: [
                   Container(
-                    color: Colors.grey,
+                    color: const Color(0xFF1e3150),
                     child: Column(
                       children: [
                         Stack(
@@ -137,63 +137,19 @@ class _VideoDirectViewState extends State<VideoDirectView>
                 ],
               ),
             ),
-            // if (_callStatus == OmiCallState.confirmed.rawValue ||
-            //     _callStatus == OmiCallState.connecting.rawValue)
-            //   Positioned(
-            //     right: 15,
-            //     top: 50,
-            //     child: Padding(
-            //       padding: const EdgeInsets.only(left: 10),
-            //       child: GestureDetector(
-            //         onTap: () async {
-            //           OmicallClient.instance.switchCamera();
-            //         },
-            //         child: Material(
-            //           elevation: 4,
-            //           borderRadius: BorderRadius.all(
-            //             Radius.circular(
-            //                 MediaQuery.of(context).size.width * 0.1),
-            //           ),
-            //           child: Container(
-            //             width: 52,
-            //             height: 52,
-            //             decoration: const BoxDecoration(
-            //               shape: BoxShape.circle,
-            //               color: Colors.white,
-            //             ),
-            //             child: const Icon(
-            //               Icons.cameraswitch_rounded,
-            //               size: 25,
-            //             ),
-            //           ),
-            //         ),
-            //       ),
-            //     ),
-            //   ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 50),
               child: Row(
                 children: [
                   GestureDetector(
                     onTap: () async {
-                      await endCall(
-                        needShowStatus: true,
-                        needRequest: true,
-                      ).then(
-                        (value) async {
-                          EasyLoading.show();
-                          Navigator.of(context).pop();
-                          Navigator.push(context,
-                              MaterialPageRoute(builder: (_) {
-                            return const HomeLoginScreen();
-                          }));
-
-                          await OmicallClient.instance.logout();
-                          await LocalStorage.instance.logout();
-
-                          EasyLoading.dismiss();
-                        },
-                      );
+                      if (_callStatus == OmiCallState.confirmed.rawValue) {
+                        await endCall(
+                          needShowStatus: true,
+                          needRequest: true,
+                        );
+                      }
+                      Navigator.of(context).pop();
                     },
                     child: Material(
                       elevation: 4,
@@ -330,7 +286,7 @@ class _VideoDirectViewState extends State<VideoDirectView>
       );
     } else if (statusCall == OmiCallState.incoming.rawValue) {
       return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           RoundedCircleButton(
             iconSrc: "assets/icons/call_end.svg",
