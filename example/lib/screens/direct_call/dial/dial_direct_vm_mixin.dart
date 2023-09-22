@@ -284,9 +284,8 @@ mixin DialDirectViewModel implements State<DialDirectView> {
     if (needRequest) {
       print("endCall:...");
 
-     var result  = await OmicallClient.instance.endCall();
+      var result = await OmicallClient.instance.endCall();
       print("endCall:... $result");
-
     }
     if (needShowStatus) {
       _stopWatch();
