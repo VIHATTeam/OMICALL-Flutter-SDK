@@ -468,7 +468,7 @@ class DialDirectViewState extends State<DialDirectView>
     //     ],
     //   );
     // } else
-  /*  if (statusCall == OmiCallState.calling.rawValue ||
+    /*  if (statusCall == OmiCallState.calling.rawValue ||
         statusCall == OmiCallState.early.rawValue ||
         statusCall == OmiCallState.connecting.rawValue ||
         statusCall == OmiCallState.confirmed.rawValue) {
@@ -496,32 +496,31 @@ class DialDirectViewState extends State<DialDirectView>
       iconColor: Colors.white,
     );*/
 
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          RoundedCircleButton(
-            iconSrc: "assets/icons/call_end.svg",
-            press: () async {
-              if (phoneNumberController.text.isNotEmpty) {
-                makeCall();
-
-              }
-            },
-            color: kGreenColor,
-            iconColor: Colors.white,
-          ),
-          RoundedCircleButton(
-            iconSrc: "assets/icons/call_end.svg",
-            press: () {
-              endCall(
-                needShowStatus: true,
-              );
-            },
-            color: kRedColor,
-            iconColor: Colors.white,
-          ),
-        ],
-      );
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        RoundedCircleButton(
+          iconSrc: "assets/icons/call_end.svg",
+          press: () async {
+            if (phoneNumberController.text.isNotEmpty) {
+              makeCall();
+            }
+          },
+          color: kGreenColor,
+          iconColor: Colors.white,
+        ),
+        RoundedCircleButton(
+          iconSrc: "assets/icons/call_end.svg",
+          press: () {
+            endCall(
+              needShowStatus: true,
+            );
+          },
+          color: kRedColor,
+          iconColor: Colors.white,
+        ),
+      ],
+    );
 
     // } else {
     //   return const SizedBox.shrink();
