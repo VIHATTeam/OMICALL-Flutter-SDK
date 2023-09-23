@@ -233,13 +233,12 @@ mixin DialDirectViewModel implements State<DialDirectView> {
     }
     EasyLoading.show();
 
-    // final result = await OmicallClient.instance.startCall(
-    //   phone,
-    //   false,
-    // );
-    // );
+    final result = await OmicallClient.instance.startCall(
+      phone,
+      false
+    );
 
-    final result = await OmicallClient.instance.joinCall();
+    // final result = await OmicallClient.instance.joinCall();
 
     debugPrint("result  joinCall  zzz ::: $result");
     await getGuestUser();

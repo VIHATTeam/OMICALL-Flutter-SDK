@@ -367,12 +367,13 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 }
             }
             END_CALL -> {
+                var callResult: Any? = null
                 if(isIncomming && !isAnserCall){
-                    OmiClient.getInstance(applicationContext!!).decline()
+                    callResult =  OmiClient.getInstance(applicationContext!!).decline()
                 } else {
-                    OmiClient.getInstance(applicationContext!!).hangUp()
+                    callResult = OmiClient.getInstance(applicationContext!!).hangUp()
                 }
-                result.success(true)
+                result.success(callResult)
             }
             TOGGLE_MUTE -> {
                 mainScope.launch {
