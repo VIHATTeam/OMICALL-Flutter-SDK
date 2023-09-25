@@ -40,8 +40,8 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
 
   bool _isVideoCall = false;
   late StreamSubscription _subscription;
-  GlobalKey<DialScreenState>? _dialScreenKey;
-  GlobalKey<VideoCallState>? _videoScreenKey;
+  // GlobalKey<DialScreenState>? _dialScreenKey;
+  // GlobalKey<VideoCallState>? _videoScreenKey;
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,
     fontSize: 16,

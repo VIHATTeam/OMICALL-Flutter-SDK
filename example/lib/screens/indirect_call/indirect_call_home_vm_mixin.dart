@@ -2,7 +2,7 @@ part of 'indirect_call_home_screen.dart';
 
 mixin InDirectCallHomeViewModel implements State<InDirectCallHomeScreen> {
   late final TextEditingController _phoneNumberController =
-  TextEditingController()..text = Platform.isAndroid ? '1000071' : '167631';
+      TextEditingController()..text = Platform.isAndroid ? '1000071' : '167631';
 
   TextStyle basicStyle = const TextStyle(
     color: Colors.white,
@@ -10,11 +10,10 @@ mixin InDirectCallHomeViewModel implements State<InDirectCallHomeScreen> {
   );
   bool _isVideoCall = false;
   late StreamSubscription _subscription;
-  GlobalKey<DialScreenState>? _dialScreenKey;
-  GlobalKey<VideoCallState>? _videoScreenKey;
+  GlobalKey<DialInDirectViewState>? _dialScreenKey;
+  GlobalKey<VideoInDirectViewState>? _videoScreenKey;
 
   void initControllers() {
-
     // _isVideoCall = widget.isVideo;
     if (Platform.isAndroid) {
       checkAndPushToCall();
@@ -33,66 +32,88 @@ mixin InDirectCallHomeViewModel implements State<InDirectCallHomeScreen> {
     });
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
-          postData(jsonEncode(omiAction));
-          debugPrint("omiAction  OmicallClient ::: $omiAction");
-          if (omiAction.actionName != OmiEventList.onCallStateChanged) {
-            return;
-          }
-          final data = omiAction.data;
-          debugPrint("data  OmicallClient  zzz ::: $data");
-          final status = data["status"] as int;
-          debugPrint("status  OmicallClient  zzz ::: $status");
-          if (status == OmiCallState.incoming.rawValue ||
-              status == OmiCallState.confirmed.rawValue) {
-            debugPrint("data  OmicallClient  zzz ::: $data");
+      postData(jsonEncode(omiAction));
+      debugPrint("omiAction  OmicallClient ::: $omiAction");
+      if (omiAction.actionName != OmiEventList.onCallStateChanged) {
+        return;
+      }
+      final data = omiAction.data;
+      debugPrint("data  OmicallClient  zzz ::: $data");
+      String statusString = '';
+      final status = data["status"] as int;
 
-            _isVideoCall = data['isVideo'] as bool;
-            var callerNumber = "";
-            // bool isVideo =false;
+      switch (status) {
+        case 1:
+          statusString = 'calling';
+          break;
+        case 2:
+          statusString = 'incoming';
+          break;
+        case 3:
+          statusString = 'early';
+          break;
+        case 4:
+          statusString = 'connecting';
+          break;
+        case 5:
+          statusString = 'confirmed';
+          break;
+        default:
+          statusString = 'disconnect';
+          break;
+      }
+      debugPrint("status  OmicallClient  zzz ::: $statusString");
+      if (status == OmiCallState.incoming.rawValue ||
+          status == OmiCallState.confirmed.rawValue ||
+          status == OmiCallState.early.rawValue) {
+        debugPrint("data  OmicallClient  zzz ::: $data");
 
-            if (_isVideoCall) {
-              pushToVideoScreen(
-                callerNumber,
-                status: status,
-                isOutGoingCall: false,
-              );
-              return;
-            }
-            pushToDialScreen(
-              callerNumber ?? "",
-              status: status,
-              isOutGoingCall: false,
-            );
-            return;
-          }
-          if (status == OmiCallState.confirmed.rawValue) {
-            if (_dialScreenKey?.currentState != null) {
-              return;
-            }
-            if (_videoScreenKey?.currentState != null) {
-              return;
-            }
-            final data = omiAction.data;
-            final callerNumber = data["callerNumber"];
-            _isVideoCall = data["isVideo"];
-            if (_isVideoCall) {
-              pushToVideoScreen(
-                callerNumber,
-                status: status,
-                isOutGoingCall: false,
-              );
-              return;
-            }
-            pushToDialScreen(
-              callerNumber ?? "",
-              status: status,
-              isOutGoingCall: false,
-            );
-          }
-          if (status == OmiCallState.disconnected.rawValue) {
-            debugPrint(data.toString());
-          }
-        });
+        _isVideoCall = data['isVideo'] as bool;
+        var callerNumber = "";
+        // bool isVideo =false;
+
+        if (_isVideoCall) {
+          pushToVideoScreen(
+            callerNumber,
+            status: status,
+            isOutGoingCall: false,
+          );
+        } else {
+          pushToDialScreen(
+            callerNumber,
+            status: status,
+            isOutGoingCall: false,
+          );
+        }
+      }
+      // if (status == OmiCallState.confirmed.rawValue) {
+      //   if (_dialScreenKey?.currentState != null) {
+      //     return;
+      //   }
+      //   if (_videoScreenKey?.currentState != null) {
+      //     return;
+      //   }
+      //   final data = omiAction.data;
+      //   final callerNumber = data["callerNumber"];
+      //   _isVideoCall = data["isVideo"];
+      //   if (_isVideoCall) {
+      //     pushToVideoScreen(
+      //       callerNumber,
+      //       status: status,
+      //       isOutGoingCall: false,
+      //     );
+      //     return;
+      //   }
+      //   pushToDialScreen(
+      //     callerNumber ?? "",
+      //     status: status,
+      //     isOutGoingCall: false,
+      //   );
+      // }
+      if (status == OmiCallState.disconnected.rawValue) {
+        debugPrint(data.toString());
+      }
+    });
     // checkSystemAlertPermission();
     OmicallClient.instance.setCallLogListener((data) {
       final callerNumber = data["callerNumber"];
@@ -135,28 +156,25 @@ mixin InDirectCallHomeViewModel implements State<InDirectCallHomeScreen> {
     }
   }
 
-
   void disposeControllers() {
     _subscription.cancel();
     _phoneNumberController.dispose();
-
   }
 
   void pushToVideoScreen(
-      String phoneNumber, {
-        required int status,
-        required bool isOutGoingCall,
-      }) {
+    String phoneNumber, {
+    required int status,
+    required bool isOutGoingCall,
+  }) {
     if (_videoScreenKey != null) {
       return;
     }
-    _videoScreenKey = GlobalKey();
+    //_videoScreenKey = GlobalKey();
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-      return VideoCallScreen(
+      return VideoInDirectView(
         key: _videoScreenKey,
         status: status,
         isOutGoingCall: isOutGoingCall,
-        isTypeDirectCall: false,
       );
     })).then((value) {
       _videoScreenKey = null;
@@ -164,17 +182,17 @@ mixin InDirectCallHomeViewModel implements State<InDirectCallHomeScreen> {
   }
 
   void pushToDialScreen(
-      String phoneNumber, {
-        required int status,
-        required bool isOutGoingCall,
-      }) {
+    String phoneNumber, {
+    required int status,
+    required bool isOutGoingCall,
+  }) {
     if (_dialScreenKey != null) {
       return;
     }
-    _dialScreenKey = GlobalKey();
+    //_dialScreenKey = GlobalKey();
     print("Pussh to screen");
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-      return DialScreen(
+      return DialInDirectView(
         key: _dialScreenKey,
         phoneNumber: phoneNumber,
         status: status,
@@ -260,10 +278,10 @@ mixin InDirectCallHomeViewModel implements State<InDirectCallHomeScreen> {
   }
 
   Future<void> makeCallWithParams(
-      BuildContext context,
-      String callerNumber,
-      bool isVideo,
-      ) async {
+    BuildContext context,
+    String callerNumber,
+    bool isVideo,
+  ) async {
     if (isVideo) {
       pushToVideoScreen(
         callerNumber,

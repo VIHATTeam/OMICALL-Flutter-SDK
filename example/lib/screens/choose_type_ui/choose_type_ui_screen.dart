@@ -1,5 +1,6 @@
+// ignore_for_file: unused_field
+
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -10,11 +11,8 @@ import 'package:omicall_flutter_plugin/omicallsdk.dart';
 
 import '../../local_storage/local_storage.dart';
 import '../../main.dart';
-import '../HomeLoginScreen.dart';
-import '../call_home/call_home_screen.dart';
 import '../direct_call/direct_call_screen.dart';
-import '../home/home_screen.dart';
-import '../video_call/video_call_screen.dart';
+import '../indirect_call/indirect_call_home_screen.dart';
 
 class ChooseTypeUIScreen extends StatefulWidget {
   final bool isVideo;
@@ -32,79 +30,107 @@ class ChooseTypeUIScreen extends StatefulWidget {
 
 class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
   bool _supportVideoCall = false;
-  // int _callStatus = 0;
-  // bool _isOutGoingCall = true;
-  // late StreamSubscription _subscription;
+
+  late StreamSubscription _subscription;
 
   @override
   void initState() {
     _supportVideoCall = widget.isVideo;
-    //initControllers();
+    initControllers();
     super.initState();
   }
 
-  // Future<void> initControllers() async {
-  //   if (Platform.isAndroid) {
-  //     /// Todo:(NOTE) Check có cuộc gọi, nếu có sẽ auto show màn hình cuộc gọi
-  //     await checkAndPushToCall();
-  //   }
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
 
-  //   updateToken();
-  //   OmicallClient.instance.getOutputAudios().then((value) {
-  //     debugPrint("audios ${value.toString()}");
-  //   });
-  //   OmicallClient.instance.getCurrentUser().then((value) {
-  //     debugPrint("user ${value.toString()}");
-  //   });
+  int i = 0;
 
-  //   _subscription =
-  //       OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
-  //     debugPrint("omiAction  OmicallClient ::: $omiAction");
-  //     if (omiAction.actionName != OmiEventList.onCallStateChanged) {
-  //       return;
-  //     }
-  //     final data = omiAction.data;
-  //     debugPrint("data  OmicallClient  zzz ::: $data");
-  //     final status = data["status"] as int;
-  //     debugPrint("status  OmicallClient  zzz ::: $status");
-  //     if (status == OmiCallState.incoming.rawValue ||
-  //         status == OmiCallState.confirmed.rawValue) {
-  //       debugPrint("data  OmicallClient  zzz ::: $data");
+  Future<void> initControllers() async {
+    if (Platform.isAndroid) {
+      /// Todo:(NOTE) Check có cuộc gọi, nếu có sẽ auto show màn hình cuộc gọi trường hợp kill app
+      await checkAndPushToCall();
+    }
 
-  //       _supportVideoCall = data['isVideo'] as bool;
-  //       Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-  //         return DirectCallScreen(
-  //           isVideo: _supportVideoCall,
-  //           status: _callStatus,
+    updateToken();
 
-  //           /// User gọi ra ngoài
-  //           isOutGoingCall: _isOutGoingCall,
-  //         );
-  //       }));
-  //       return;
-  //     }
-  //   });
-  // }
+    _subscription =
+        OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
+      debugPrint("omiAction  OmicallClient ::: $omiAction");
+      if (omiAction.actionName != OmiEventList.onCallStateChanged) {
+        return;
+      }
+      final data = omiAction.data;
+      String statusString = '';
+      debugPrint("data  OmicallClient  zzz ::: $data");
+      final status = data["status"] as int;
 
-  // Future<void> checkAndPushToCall() async {
-  //   final call = await OmicallClient.instance.getInitialCall();
-  //   if (call is Map) {
-  //     setState(() {
-  //       _supportVideoCall = call["isVideo"] as bool;
-  //       _callStatus = OmiCallState.confirmed.rawValue;
-  //       _isOutGoingCall = false;
-  //     });
-  //     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-  //       return DirectCallScreen(
-  //         isVideo: _supportVideoCall,
-  //         status: _callStatus,
+      switch (status) {
+        case 1:
+          statusString = 'calling';
+          break;
+        case 2:
+          statusString = 'incoming';
+          break;
+        case 3:
+          statusString = 'early';
+          break;
+        case 4:
+          statusString = 'connecting';
+          break;
+        case 5:
+          statusString = 'confirmed';
+          break;
+        default:
+          statusString = 'disconnect';
+          break;
+      }
+      debugPrint("status choose OmicallClient zzz ::: $statusString");
+      if (status == OmiCallState.incoming.rawValue) {
+        i++;
+        _supportVideoCall = data['isVideo'] as bool;
 
-  //         /// User gọi ra ngoài
-  //         isOutGoingCall: _isOutGoingCall,
-  //       );
-  //     }));
-  //   }
-  // }
+        if (i <= 1) {
+          Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+            return DirectCallScreen(
+              isVideo: _supportVideoCall,
+              status: status,
+
+              /// User gọi ra ngoài
+              isOutGoingCall: false,
+            );
+          })).then((value) {
+            i = 0;
+          });
+        }
+
+        return;
+      }
+    });
+  }
+
+  Future<void> checkAndPushToCall() async {
+    final call = await OmicallClient.instance.getInitialCall();
+    if (call is Map) {
+      Future.delayed(const Duration(milliseconds: 500)).then((value) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) {
+              return DirectCallScreen(
+                isVideo: call['isVideo'] as bool,
+                status: call['status'],
+
+                /// User gọi ra ngoài
+                isOutGoingCall: false,
+              );
+            },
+          ),
+        );
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +177,7 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
                           .then((value) async {
                         await Navigator.push(context,
                             MaterialPageRoute(builder: (_) {
-                          return const HomeScreen();
+                          return const InDirectCallHomeScreen();
                         }));
                       });
                     },
@@ -298,10 +324,11 @@ class _ChooseTypeUIScreenState extends State<ChooseTypeUIScreen> {
               child: GestureDetector(
                 onTap: () async {
                   EasyLoading.show();
-                  Navigator.of(context).pop();
-                  Navigator.push(context, MaterialPageRoute(builder: (_) {
-                    return const HomeLoginScreen();
-                  }));
+                  if (Navigator.canPop(context)) {
+                    Navigator.pop(context);
+                  } else {
+                    Navigator.pushReplacementNamed(context, '/home_login');
+                  }
 
                   await OmicallClient.instance.logout();
                   await LocalStorage.instance.logout();
