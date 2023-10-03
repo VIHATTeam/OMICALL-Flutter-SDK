@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/home/home_screen.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
@@ -429,12 +430,20 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
       return;
     }
 
+    await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    final token = await FirebaseMessaging.instance.getToken();
+
     EasyLoading.show();
     result = await OmicallClient.instance.initCallWithUserPassword(
       userName: _userNameController.text,
       password: _passwordController.text,
       realm: _serviceUrlController.text,
       host: _hostUrlController.text,
+      fcmToken: token,
       isVideo: _supportVideoCall,
     );
     await LocalStorage.instance.setLoginInfo({
@@ -443,6 +452,7 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
       "isVideo": _supportVideoCall,
       "apiKey": '',
       "realm": _serviceUrlController.text,
+      "fcmToken": token,
       "host": _hostUrlController.text,
     });
 

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/home/home_screen.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
@@ -344,12 +345,19 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
       return;
     }
     // EasyLoading.show();
+    await FirebaseMessaging.instance.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    final token = await FirebaseMessaging.instance.getToken();
     final result = await OmicallClient.instance.initCallWithApiKey(
       usrName: _userNameController.text,
       usrUuid: _usrUuidController.text,
       isVideo: _supportVideoCall,
       phone: _usrUuidController.text,
       apiKey: _apiKeyController.text,
+        fcmToken: token
     );
     // EasyLoading.dismiss();
     // debugPrint(result.toString());
@@ -364,6 +372,7 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
       "apiKey": _apiKeyController.text,
       "realm": '',
       "host": '',
+      "fcmToken": token
     });
 
     if (!mounted) {

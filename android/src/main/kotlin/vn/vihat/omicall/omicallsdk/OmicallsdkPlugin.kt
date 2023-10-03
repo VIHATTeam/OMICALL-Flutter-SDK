@@ -219,17 +219,26 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     private fun messageCall(type: Int): String {
         return when (type) {
-            0 -> "INVALID_UUID"
-            1 -> "INVALID_PHONE_NUMBER"
-            2 -> "SAME_PHONE_NUMBER_WITH_PHONE_REGISTER"
-            3 -> "MAX_RETRY"
-            4 -> "PERMISSION_DENIED"
-            5 -> "COULD_NOT_FIND_END_POINT"
-            6 -> "REGISTER_ACCOUNT_FAIL"
-            7 -> "START_CALL_FAIL"
-            8 -> "START_CALL_SUCCESS"
-            9 -> "HAVE_ANOTHER_CALL"
-            else -> "START_CALL_SUCCESS"
+//            0 -> "INVALID_UUID"
+//            1 -> "INVALID_PHONE_NUMBER"
+//            2 -> "SAME_PHONE_NUMBER_WITH_PHONE_REGISTER"
+//            3 -> "MAX_RETRY"
+//            4 -> "PERMISSION_DENIED"
+//            5 -> "COULD_NOT_FIND_END_POINT"
+//            6 -> "REGISTER_ACCOUNT_FAIL"
+//            7 -> "START_CALL_FAIL"
+//            8 -> "START_CALL_SUCCESS"
+//            9 -> "HAVE_ANOTHER_CALL"
+//            else -> "START_CALL_SUCCESS"
+            200 -> "START_CALL_SUCCESS"
+            400 -> "HAVE_ANOTHER_CALL"
+            401 -> "INVALID_UUID"
+            402 -> "INVALID_PHONE_NUMBER"
+            403 -> "CAN_NOT_CALL_YOURSELF"
+            404 -> "SWITCHBOARD_NOT_CONNECTED"
+            405 -> "PERMISSION_DENIED"
+            406 -> "PERMISSION_DENIED"
+            else -> "HAVE_ANOTHER_CALL"
         }
     }
 
@@ -284,18 +293,31 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 result.success(true)
             }
             INIT_CALL_USER_PASSWORD -> {
-                val userName = dataOmi["userName"] as? String
-                val password = dataOmi["password"] as? String
-                val realm = dataOmi["realm"] as? String
-                val host = dataOmi["host"] as? String
-                val isVideo = dataOmi["isVideo"] as? Boolean
-                if (userName != null && password != null && realm != null && host != null) {
-                    Log.d("dataOmi", "INIT_CALL_USER_PASSWORD $userName -- $password --$realm --$isVideo -- $host ")
-                    OmiClient.register(userName, password, realm ,  isVideo ?: true,  host)
+                mainScope.launch {
+                    val userName = dataOmi["userName"] as? String
+                    val password = dataOmi["password"] as? String
+                    val realm = dataOmi["realm"] as? String
+                    val host = dataOmi["host"] as? String
+                    val isVideo = dataOmi["isVideo"] as? Boolean
+                    val firebaseToken = dataOmi["fcmToken"] as String
+                    if (userName != null && password != null && realm != null && host != null) {
+//                        Log.d(
+//                            "dataOmi",
+//                            "INIT_CALL_API_KEY $firebaseToken "
+//                        )
+                        OmiClient.register(
+                            userName,
+                            password,
+                            realm,
+                            isVideo ?: true,
+                            firebaseToken,
+                            host
+                        )
 
+                    }
+                    requestPermission(isVideo ?: true)
+                    result.success(true)
                 }
-                requestPermission(isVideo ?: true)
-                result.success(true)
             }
             INIT_CALL_API_KEY -> {
                 mainScope.launch {
@@ -305,6 +327,11 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val apiKey = dataOmi["apiKey"] as? String
                     val isVideo = dataOmi["isVideo"] as? Boolean
                     val phone = dataOmi["phone"] as? String
+                    val firebaseToken = dataOmi["fcmToken"] as String
+                    Log.d(
+                        "dataOmi",
+                        "INIT_CALL_API_KEY $firebaseToken "
+                    )
                     withContext(Dispatchers.Default) {
                         try {
                             if (usrName != null && usrUuid != null && apiKey != null && phone != null) {
@@ -314,6 +341,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                                     uuid = usrUuid,
                                     phone = phone,
                                     isVideo ?: true,
+                                    firebaseToken
                                 )
                             }
                         } catch (_: Throwable) {
@@ -332,10 +360,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val deviceTokenAndroid = dataOmi["fcmToken"] as String
                     withContext(Dispatchers.Default) {
                         try {
-                            OmiClient.getInstance(applicationContext!!).updatePushToken(
-                                "",
-                                deviceTokenAndroid,
-                            )
+                            OmiClient.getInstance(applicationContext!!).updatePushToken(deviceTokenAndroid)
                         } catch (_: Throwable) {
 
                         }
@@ -347,11 +372,19 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val phoneNumber = dataOmi["phoneNumber"] as String
                 val isVideo = dataOmi["isVideo"] as Boolean
                 val startCallResult = OmiClient.getInstance(applicationContext!!).startCall(phoneNumber, isVideo)
+                var statusCalltemp =  startCallResult.value as Int;
+                if(startCallResult.value == 200 ){
+                    statusCalltemp = 8
+                }
                 val dataSend = mapOf(
-                    "status" to startCallResult.value ,
+                    "status" to statusCalltemp ,
                     "_id" to "",
                     "message" to messageCall(startCallResult.value),
                 )
+                // Log.d(
+                //     "dataOmi",
+                //     "START_CALL $dataSend "
+                // )
                 val gson = Gson()
 //                val dataSendResult = dataSend.entries.joinToString(", ") { (key, value) ->
 //                    "$key: ${value ?: "null"}"

@@ -73,7 +73,7 @@ class _MyAppState extends State<MyApp> {
    bool isVideo = false;
 
   Future<void> init()async{
-    isVideo = loginInfo?['isVideo'];
+    isVideo = loginInfo?['isVideo'] ?? false;
     final call = await OmicallClient.instance.getInitialCall();
     if (call is Map) {
       setState(() {
