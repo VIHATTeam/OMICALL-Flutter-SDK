@@ -248,9 +248,9 @@ mixin DialDirectViewModel implements State<DialDirectView> {
     String messageError = "";
     debugPrint("result  OmicallClient  zzz ::: $result");
 
-    // jsonMap = json.decode(result);
-    messageError = jsonMap['message'];
-    int status = jsonMap['status'];
+    jsonMap = json.decode(result);
+    messageError = jsonMap['message'] ?? "";
+    int status = jsonMap['status'] ?? -1;
     if (status == OmiStartCallStatus.startCallSuccess.rawValue) {
       startCallSuccess = true;
     }

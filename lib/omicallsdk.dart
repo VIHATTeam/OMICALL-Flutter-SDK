@@ -100,6 +100,7 @@ class OmicallClient {
     String? usrUuid,
     String? apiKey,
     String? phone,
+    String? fcmToken,
     bool isVideo = true,
   }) async {
     final action =
@@ -109,6 +110,7 @@ class OmicallClient {
       'apiKey': apiKey,
       'phone': phone,
       'isVideo': isVideo,
+          'fcmToken':fcmToken
     });
     return await _controller.action(action);
   }
@@ -154,6 +156,7 @@ class OmicallClient {
     String? password,
     String? realm,
     String? host,
+    String? fcmToken,
     bool isVideo = true,
   }) async {
     final action =
@@ -162,6 +165,7 @@ class OmicallClient {
           'password': password,
           'realm': realm,
           'isVideo': isVideo,
+          'fcmToken': fcmToken,
           'host': host,
         });
     return await _controller.action(action);
