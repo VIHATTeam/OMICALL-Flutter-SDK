@@ -101,10 +101,12 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       case GET_INITIAL_CALL:
           if let call = CallManager.shareInstance().getAvailableCall() {
               let data : [String: Any] = [
-                  "callerNumber" : call.callerNumber,
-                  "status": call.lastStatus,
-                  "muted": call.muted,
-                  "isVideo": call.isVideo,
+                   "startTime": call?.createDate,
+                  "sipNumber": call?.numberToCall,
+                  "callerNumber" : call?.callerNumber,
+                  "status": call?.lastStatus,
+                  "muted": call?.muted,
+                  "isVideo": call?.isVideo,
               ]
               result(data)
           } else {
