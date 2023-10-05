@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.0.25
+- Increase ios core
+
+
 ## 3.0.24
 - Increase android core
 - Update params off function initCallWithUserPassword, initCallWithApiKey
