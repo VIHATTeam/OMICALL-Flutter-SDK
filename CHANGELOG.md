@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.0.26
+- Increase ios core
+- Increase ios android
+
 ## 3.0.25
 - Increase ios core
 
