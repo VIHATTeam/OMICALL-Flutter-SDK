@@ -30,6 +30,7 @@ import vn.vihat.omicall.omisdk.service.NotificationService
 import vn.vihat.omicall.omisdk.utils.OmiSDKUtils
 import vn.vihat.omicall.omisdk.utils.OmiStartCallStatus
 import vn.vihat.omicall.omisdk.utils.SipServiceConstants
+import vn.vihat.omicall.omisdk.utils.OmiSipTransport
 import java.util.*
 import com.google.gson.Gson
 
@@ -238,6 +239,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             404 -> "SWITCHBOARD_NOT_CONNECTED"
             405 -> "PERMISSION_DENIED"
             406 -> "PERMISSION_DENIED"
+            407 -> "COULD_NOT_REGISTER_ACCOUNT"
             else -> "HAVE_ANOTHER_CALL"
         }
     }
@@ -533,6 +535,24 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                         }
                     }
                     result.success(callResult)
+                }
+            }
+            CHANGE_TRANSPORT -> {
+                mainScope.launch {
+                    try {
+                        val type = dataOmi["type"] as String;
+                         Log.d(
+                             "dataOmi",
+                             "CHANGE_TRANSPORT $type "
+                         )
+                        if(type == "UDP"){
+                            OmiClient.getInstance(applicationContext!!).updateSipTransport(OmiSipTransport.UDP)
+                        } else {
+                            OmiClient.getInstance(applicationContext!!).updateSipTransport(OmiSipTransport.TCP)
+                        }
+                    } catch (_: Throwable) {
+
+                    }
                 }
             }
         }

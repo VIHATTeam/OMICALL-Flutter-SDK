@@ -390,4 +390,19 @@ class OmicallClient {
     final result = await _controller.action(action);
     return result;
   }
+
+  Future<Map?> changeTransport({required String type}) async {
+    final action = OmiAction(
+      actionName: OmiActionName.CHANGE_TRANSPORT,
+      data: {
+        "type": type,
+      },
+    );
+    final result = await _controller.action(action);
+    if (result != null) {
+      return result as Map;
+    }
+    return null;
+  }
+
 }

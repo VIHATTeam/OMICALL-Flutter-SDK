@@ -65,6 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
     fontSize: 16,
   );
   bool _isVideoCall = false;
+  bool _isCallUDP = false;
   late StreamSubscription _subscription;
   GlobalKey<DialScreenState>? _dialScreenKey;
   GlobalKey<VideoCallState>? _videoScreenKey;
@@ -107,14 +108,14 @@ class _HomeScreenState extends State<HomeScreen> {
         var callerNumber = "";
         // bool isVideo =false;
 
-        if (_isVideoCall) {
-          pushToVideoScreen(
-            callerNumber,
-            status: status,
-            isOutGoingCall: false,
-          );
-          return;
-        }
+        // if (_isVideoCall) {
+        //   pushToVideoScreen(
+        //     callerNumber,
+        //     status: status,
+        //     isOutGoingCall: false,
+        //   );
+        //   return;
+        // }
         pushToDialScreen(
           callerNumber ?? "",
           status: status,
@@ -131,15 +132,15 @@ class _HomeScreenState extends State<HomeScreen> {
         }
         final data = omiAction.data;
         final callerNumber = data["callerNumber"];
-        _isVideoCall = data["isVideo"];
-        if (_isVideoCall) {
-          pushToVideoScreen(
-            callerNumber,
-            status: status,
-            isOutGoingCall: false,
-          );
-          return;
-        }
+        // _isVideoCall = data["isVideo"];
+        // if (_isVideoCall) {
+        //   pushToVideoScreen(
+        //     callerNumber,
+        //     status: status,
+        //     isOutGoingCall: false,
+        //   );
+        //   return;
+        // }
         pushToDialScreen(
           callerNumber ?? "",
           status: status,
@@ -157,7 +158,7 @@ class _HomeScreenState extends State<HomeScreen> {
       makeCallWithParams(
         context,
         callerNumber,
-        _isVideoCall,
+        false,
       );
     });
   }
@@ -326,42 +327,50 @@ class _HomeScreenState extends State<HomeScreen> {
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 0.03,
                         ),
-                        // Padding(
-                        //   padding: const EdgeInsets.symmetric(horizontal: 32),
-                        //   child: GestureDetector(
-                        //     onTap: () {
-                        //       setState(() {
-                        //         _isVideoCall = !_isVideoCall;
-                        //       });
-                        //     },
-                        //     child: Row(
-                        //       children: [
-                        //         Icon(
-                        //           _isVideoCall
-                        //               ? Icons.check_circle
-                        //               : Icons.circle_outlined,
-                        //           size: 24,
-                        //           color: _isVideoCall
-                        //               ? const Color.fromARGB(255, 225, 121, 243)
-                        //               : Colors.grey,
-                        //         ),
-                        //         const SizedBox(
-                        //           width: 8,
-                        //         ),
-                        //         Text(
-                        //           "Video call",
-                        //           style: TextStyle(
-                        //             fontSize: 16,
-                        //             color: _isVideoCall
-                        //                 ? const Color.fromARGB(
-                        //                     255, 225, 121, 243)
-                        //                 : Colors.grey,
-                        //           ),
-                        //         ),
-                        //       ],
-                        //     ),
-                        //   ),
-                        // ),
+                        if(Platform.isAndroid)  Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 32),
+                          child: GestureDetector(
+                            onTap: () {
+                              if(_isCallUDP){
+                                OmicallClient.instance.changeTransport(type: "UDP");
+                                setState(() {
+                                  _isCallUDP = !_isCallUDP;
+                                });
+                              } else {
+                                OmicallClient.instance.changeTransport(type: "TCP");
+                                setState(() {
+                                  _isCallUDP = !_isCallUDP;
+                                });
+                              }
+                            },
+                            child: Row(
+                              children: [
+                                Icon(
+                                  _isCallUDP
+                                      ? Icons.check_circle
+                                      : Icons.circle_outlined,
+                                  size: 24,
+                                  color: _isCallUDP
+                                      ? const Color.fromARGB(255, 225, 121, 243)
+                                      : Colors.grey,
+                                ),
+                                const SizedBox(
+                                  width: 8,
+                                ),
+                                Text(
+                                  "Call with UDP",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: _isCallUDP
+                                        ? const Color.fromARGB(
+                                        255, 225, 121, 243)
+                                        : Colors.grey,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ) else
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 0.05,
                         ),
@@ -550,7 +559,7 @@ class _HomeScreenState extends State<HomeScreen> {
     EasyLoading.show();
     final result = await OmicallClient.instance.startCall(
       phone,
-      _isVideoCall,
+      false,
     );
 
     EasyLoading.dismiss();
@@ -567,19 +576,24 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (callStatus) {
-      if (_isVideoCall) {
-        pushToVideoScreen(
-          phone,
-          status: OmiCallState.calling.rawValue,
-          isOutGoingCall: true,
-        );
-      } else {
-        pushToDialScreen(
-          phone,
-          status: OmiCallState.calling.rawValue,
-          isOutGoingCall: true,
-        );
-      }
+      // if (_isVideoCall) {
+      //   pushToVideoScreen(
+      //     phone,
+      //     status: OmiCallState.calling.rawValue,
+      //     isOutGoingCall: true,
+      //   );
+      // } else {
+      //   pushToDialScreen(
+      //     phone,
+      //     status: OmiCallState.calling.rawValue,
+      //     isOutGoingCall: true,
+      //   );
+      // }
+      pushToDialScreen(
+        phone,
+        status: OmiCallState.calling.rawValue,
+        isOutGoingCall: true,
+      );
     } else {
       EasyDialog(
         title: const Text("Notification"),
