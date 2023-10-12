@@ -16,7 +16,7 @@
   [GeneratedPluginRegistrant registerWithRegistry:self];
 
   [OmiClient setEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX userNameKey:@"full_name" maxCall:2 callKitImage:@"call_image" typePushVoip:@"default"];
-  [OmiClient setLogLevel:5];
+  [OmiClient setLogLevel:4];
 
   provider = [[CallKitProviderDelegate alloc] initWithCallManager: [OMISIPLib sharedInstance].callManager];
   voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];

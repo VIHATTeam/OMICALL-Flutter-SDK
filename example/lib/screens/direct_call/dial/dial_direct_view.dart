@@ -50,7 +50,7 @@ class _DialDirectViewState extends State<DialDirectView>
     phoneNumberController = TextEditingController(text: widget.phoneNumber);
     isOutGoingCall = widget.isOutGoingCall;
     callStatus = widget.status;
-    initializeControllers(callStatus);
+    initializeControllers(6);
     super.initState();
   }
 
@@ -441,7 +441,7 @@ class _DialDirectViewState extends State<DialDirectView>
     //     iconSrc: "assets/icons/call_end.svg",
     //     press: () async {
     //       if (phoneNumberController.text.isNotEmpty) {
-    //         makeCall();
+    //         mak();
     //       }
     //     },
     //     color: phoneNumberController.text.isNotEmpty
@@ -468,6 +468,7 @@ class _DialDirectViewState extends State<DialDirectView>
     //         iconSrc: "assets/icons/call_end.svg",
     //         press: () {
     //           endCall(
+    //             needRequest: true,
     //             needShowStatus: true,
     //           );
     //         },
@@ -485,6 +486,7 @@ class _DialDirectViewState extends State<DialDirectView>
         iconSrc: "assets/icons/call_end.svg",
         press: () {
           endCall(
+            needRequest: true,
             needShowStatus: true,
           );
         },
@@ -523,6 +525,7 @@ class _DialDirectViewState extends State<DialDirectView>
             iconSrc: "assets/icons/call_end.svg",
             press: () {
               endCall(
+                needRequest: true,
                 needShowStatus: true,
               );
             },

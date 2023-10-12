@@ -24,21 +24,17 @@ mixin DialDirectViewModel implements State<DialDirectView> {
       /// Todo:(NOTE) Check có cuộc gọi, nếu có sẽ auto show màn hình cuộc gọi
       await checkAndPushToCall();
     }
+
+    makeCall();
     await updateToken();
     OmicallClient.instance.getOutputAudios().then((value) {
       debugPrint("audios ${value.toString()}");
     });
-    OmicallClient.instance.getCurrentUser().then((value) {
-      debugPrint("user ${value.toString()}");
-    });
+    // OmicallClient.instance.getCurrentUser().then((value) {
+    //   debugPrint("user ${value.toString()}");
+    // });
     if (status == OmiCallState.incoming.rawValue ||
         status == OmiCallState.confirmed.rawValue) {
-      //guestNumber = data["callerNumber"];
-      //isVideo = data['isVideo'] as bool;
-      // guestNumber = data["callerNumber"];
-      //isOutGoingCall = false;
-      debugPrint("==============================");
-      debugPrint("isOutGoingCall OmicallClient ::: $isOutGoingCall");
       updateScreen(status);
     }
 
@@ -50,13 +46,12 @@ mixin DialDirectViewModel implements State<DialDirectView> {
       /// isVideo = data["isVideo"];
       await makeCallWithParams(guestNumber, false);
     });
-    debugPrint("status _callStatus omiAction::: $callStatus");
 
     /// Todo:(NOTE) Lắng nghe các sự kiện trạng thái thay đổi
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) async {
       await getGuestUser();
-      debugPrint("omiAction  OmicallClient ::: $omiAction");
+      // debugPrint("omiAction  OmicallClient ::: $omiAction");
       if (omiAction.actionName == OmiEventList.onSwitchboardAnswer) {
         await getGuestUser();
       }
@@ -75,12 +70,11 @@ mixin DialDirectViewModel implements State<DialDirectView> {
         }
         if (status == OmiCallState.incoming.rawValue ||
             status == OmiCallState.confirmed.rawValue) {
-          guestNumber = data["callerNumber"];
-          //isVideo = data['isVideo'] as bool;
-          // guestNumber = data["callerNumber"];
-          //isOutGoingCall = false;
-          debugPrint("==============================");
-          debugPrint("isOutGoingCall OmicallClient ::: $isOutGoingCall");
+
+          if(data != null && data["callerNumber"] != null) {
+            guestNumber = data["callerNumber"];
+          }
+
           updateScreen(status);
         }
 
@@ -241,7 +235,7 @@ mixin DialDirectViewModel implements State<DialDirectView> {
     // final result = await OmicallClient.instance.joinCall();
 
     debugPrint("result  joinCall  zzz ::: $result");
-    await getGuestUser();
+    // await getGuestUser();
     EasyLoading.dismiss();
     Map<String, dynamic> jsonMap = {};
     bool startCallSuccess = false;
