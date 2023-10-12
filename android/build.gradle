@@ -69,7 +69,7 @@ android {
 
     defaultConfig {
         targetSdkVersion 33
-        minSdkVersion 21
+        minSdkVersion 24
     }
 
     buildFeatures {
