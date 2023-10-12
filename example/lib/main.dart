@@ -70,15 +70,16 @@ class _MyAppState extends State<MyApp> {
     init();
   }
 
-   bool isVideo = false;
+  bool isVideo = false;
 
-  Future<void> init()async{
+  Future<void> init() async {
     isVideo = loginInfo?['isVideo'] ?? false;
     final call = await OmicallClient.instance.getInitialCall();
     if (call is Map) {
       setState(() {
         isVideo = call["isVideo"] as bool;
-      });}
+      });
+    }
   }
 
   @override
@@ -87,17 +88,20 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         theme: ThemeData.light(),
         home: loginInfo == null
-            ? const HomeLoginScreen()
-            : widget.isDirectCall
-                ? DirectCallScreen(
-                    isVideo: isVideo,
-                    status: OmiCallState.unknown.rawValue,
-                    /// User gọi ra ngoài
-                    isOutGoingCall: true,
-                  )
-                : const HomeScreen(
-                    needRequestNotification: true,
-                  ),
+            ? const LoginUserPasswordScreen()
+            :
+            // widget.isDirectCall
+            //     ? DirectCallScreen(
+            //         isVideo: isVideo,
+            //         status: OmiCallState.unknown.rawValue,
+
+            //         /// User gọi ra ngoài
+            //         isOutGoingCall: true,
+            //       )
+            //     :
+            const HomeScreen(
+                needRequestNotification: true,
+              ),
         // ChooseTypeUIScreen(
         //     isVideo: loginInfo?['isVideo'],
         //   ),
