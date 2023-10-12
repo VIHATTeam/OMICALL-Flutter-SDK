@@ -274,8 +274,12 @@ class DialScreenState extends State<DialScreen> {
                       ),
                     ),
                   Padding(
-                    padding:
-                        const EdgeInsets.only(left: 20, right: 20, top: 150),
+                    padding: const EdgeInsets.only(
+                      left: 20,
+                      right: 20,
+                      top: 150,
+                      bottom: 20,
+                    ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -310,7 +314,7 @@ class DialScreenState extends State<DialScreen> {
                             Column(
                               children: [
                                 Text(
-                                  "${guestUser?["extension"] ?? "..."}",
+                                  "${guestUser?["extension"] ?? "${widget.phoneNumber}"}",
                                   style: Theme.of(context)
                                       .textTheme
                                       .headlineMedium!
@@ -345,18 +349,17 @@ class DialScreenState extends State<DialScreen> {
                           height: MediaQuery.of(context).size.height * 0.05,
                         ),
                         ...callOtherOptionWidget(checkShowOption),
-
                         if (_callStatus == OmiCallState.incoming.rawValue)
                           SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.43,
+                            height: MediaQuery.of(context).size.height * 0.33,
                           )
                         else if (_callStatus != OmiCallState.confirmed.rawValue)
                           SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.2,
+                            height: MediaQuery.of(context).size.height * 0.1,
                           )
                         else
                           SizedBox(
-                            height: MediaQuery.of(context).size.height * 0.19,
+                            height: MediaQuery.of(context).size.height * 0.09,
                           ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -393,8 +396,6 @@ class DialScreenState extends State<DialScreen> {
                       ],
                     ),
                   ),
-
-
                 ],
               ),
             ),
@@ -486,8 +487,6 @@ class DialScreenState extends State<DialScreen> {
           ],
         ),
       ),
-
-
       onWillPop: () async => false,
     );
   }
