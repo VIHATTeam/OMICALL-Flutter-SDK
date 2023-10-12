@@ -166,6 +166,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (call is Map) {
       final isVideo = call["isVideo"] as bool;
       final callerNumber = call["callerNumber"];
+      if (call['muted'] == false) return;
       if (isVideo) {
         pushToVideoScreen(
           callerNumber,
@@ -324,42 +325,42 @@ class _HomeScreenState extends State<HomeScreen> {
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 0.03,
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 32),
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _isVideoCall = !_isVideoCall;
-                              });
-                            },
-                            child: Row(
-                              children: [
-                                Icon(
-                                  _isVideoCall
-                                      ? Icons.check_circle
-                                      : Icons.circle_outlined,
-                                  size: 24,
-                                  color: _isVideoCall
-                                      ? const Color.fromARGB(255, 225, 121, 243)
-                                      : Colors.grey,
-                                ),
-                                const SizedBox(
-                                  width: 8,
-                                ),
-                                Text(
-                                  "Video call",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: _isVideoCall
-                                        ? const Color.fromARGB(
-                                            255, 225, 121, 243)
-                                        : Colors.grey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                        // Padding(
+                        //   padding: const EdgeInsets.symmetric(horizontal: 32),
+                        //   child: GestureDetector(
+                        //     onTap: () {
+                        //       setState(() {
+                        //         _isVideoCall = !_isVideoCall;
+                        //       });
+                        //     },
+                        //     child: Row(
+                        //       children: [
+                        //         Icon(
+                        //           _isVideoCall
+                        //               ? Icons.check_circle
+                        //               : Icons.circle_outlined,
+                        //           size: 24,
+                        //           color: _isVideoCall
+                        //               ? const Color.fromARGB(255, 225, 121, 243)
+                        //               : Colors.grey,
+                        //         ),
+                        //         const SizedBox(
+                        //           width: 8,
+                        //         ),
+                        //         Text(
+                        //           "Video call",
+                        //           style: TextStyle(
+                        //             fontSize: 16,
+                        //             color: _isVideoCall
+                        //                 ? const Color.fromARGB(
+                        //                     255, 225, 121, 243)
+                        //                 : Colors.grey,
+                        //           ),
+                        //         ),
+                        //       ],
+                        //     ),
+                        //   ),
+                        // ),
                         SizedBox(
                           height: MediaQuery.of(context).size.height * 0.05,
                         ),
@@ -435,7 +436,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     EasyLoading.show();
                     Navigator.of(context).pop();
                     Navigator.push(context, MaterialPageRoute(builder: (_) {
-                      return const HomeLoginScreen();
+                      return const LoginUserPasswordScreen();
                     }));
 
                     await OmicallClient.instance.logout();

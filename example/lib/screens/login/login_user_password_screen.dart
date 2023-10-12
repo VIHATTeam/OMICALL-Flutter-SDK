@@ -256,42 +256,42 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 32),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _supportVideoCall = !_supportVideoCall;
-                                });
-                              },
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    _supportVideoCall
-                                        ? Icons.check_circle
-                                        : Icons.circle_outlined,
-                                    size: 24,
-                                    color: _supportVideoCall
-                                        ? const Color.fromARGB(
-                                            255, 225, 121, 243)
-                                        : Colors.grey,
-                                  ),
-                                  const SizedBox(
-                                    width: 8,
-                                  ),
-                                  Text(
-                                    "Video call",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: _supportVideoCall
-                                          ? const Color.fromARGB(
-                                              255, 225, 121, 243)
-                                          : Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const Text(
+                          children: const [
+                            // GestureDetector(
+                            //   onTap: () {
+                            //     setState(() {
+                            //       _supportVideoCall = !_supportVideoCall;
+                            //     });
+                            //   },
+                            //   child: Row(
+                            //     children: [
+                            //       Icon(
+                            //         _supportVideoCall
+                            //             ? Icons.check_circle
+                            //             : Icons.circle_outlined,
+                            //         size: 24,
+                            //         color: _supportVideoCall
+                            //             ? const Color.fromARGB(
+                            //                 255, 225, 121, 243)
+                            //             : Colors.grey,
+                            //       ),
+                            //       const SizedBox(
+                            //         width: 8,
+                            //       ),
+                            //       Text(
+                            //         "Video call",
+                            //         style: TextStyle(
+                            //           fontSize: 16,
+                            //           color: _supportVideoCall
+                            //               ? const Color.fromARGB(
+                            //                   255, 225, 121, 243)
+                            //               : Colors.grey,
+                            //         ),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
+                            Text(
                               "Forget you password",
                               style: TextStyle(
                                 color: Colors.grey,
@@ -386,35 +386,35 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
               ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 68),
-            child: Align(
-              alignment: Alignment.topLeft,
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pop();
-                },
-                child: Material(
-                  elevation: 4,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(MediaQuery.of(context).size.width * 0.1),
-                  ),
-                  child: Container(
-                    width: 52,
-                    height: 52,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                    ),
-                    child: const Icon(
-                      Icons.arrow_back,
-                      size: 25,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
+          // Padding(
+          //   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 68),
+          //   child: Align(
+          //     alignment: Alignment.topLeft,
+          //     child: GestureDetector(
+          //       onTap: () {
+          //         Navigator.of(context).pop();
+          //       },
+          //       child: Material(
+          //         elevation: 4,
+          //         borderRadius: BorderRadius.all(
+          //           Radius.circular(MediaQuery.of(context).size.width * 0.1),
+          //         ),
+          //         child: Container(
+          //           width: 52,
+          //           height: 52,
+          //           decoration: const BoxDecoration(
+          //             shape: BoxShape.circle,
+          //             color: Colors.white,
+          //           ),
+          //           child: const Icon(
+          //             Icons.arrow_back,
+          //             size: 25,
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
@@ -466,18 +466,18 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
     }
 
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) {
-      return ChooseTypeUIScreen(
-        // userName: _userNameController.text,
-        // password: _passwordController.text,
-        // realm: _serviceUrlController.text,
-        // host: _hostUrlController.text,
-        // usrUuid: '',
-        // apiKey: '',
-        isVideo: _supportVideoCall,
+      // return ChooseTypeUIScreen(
+      //   // userName: _userNameController.text,
+      //   // password: _passwordController.text,
+      //   // realm: _serviceUrlController.text,
+      //   // host: _hostUrlController.text,
+      //   // usrUuid: '',
+      //   // apiKey: '',
+      //   isVideo: _supportVideoCall,
+      // );
+      return const HomeScreen(
+        needRequestNotification: true,
       );
-//       return const HomeScreen(
-//         needRequestNotification: true,
-//       );
       // return DialScreen2(
       //   key: _dialScreenKey,
       //   phoneNumber: "100",
