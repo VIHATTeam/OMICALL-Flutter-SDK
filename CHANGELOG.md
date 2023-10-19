@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.0
+
+- Increase ios core to version 1.5.98
+- Increase ios android to version 2.0.43
+- Fix Call UDP IOS
+- Fix call UDP Android
+- Fix continuous calling error on iOS
+
 ## 3.0.26
 - Increase ios core
 - Increase ios android
