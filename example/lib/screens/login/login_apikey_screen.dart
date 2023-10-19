@@ -31,11 +31,11 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
   // NSString * PASS_WORD2 = @"Kunkun12345"; 0358380641
   //video
   late final TextEditingController _userNameController = TextEditingController()
-    ..text = Platform.isAndroid ? 'Phạm Thanh(Dev cc)' : 'Phạm Thanh(Dev cc)';
+    ..text = Platform.isAndroid ? 'Lê Hồng Thái' : 'Phạm Thanh(Dev cc)';
   late final TextEditingController _usrUuidController = TextEditingController()
-    ..text = Platform.isAndroid ? '0358380646' : '0358380646';
+    ..text = Platform.isAndroid ? '094d4f52-255c-4cdb-ad24-5adff34c3c87' : '0358380646';
   late final TextEditingController _apiKeyController = TextEditingController()
-    ..text = 'E7AF81703203FC31F5658FAF3B875149CD57368ED07DB4AF414D93D3D2EBC76E';
+    ..text = '687CB3BF9703A7F434964CC64EE72213962AB18812D7EB2FC9C83B89D917E61F';
 
   bool _supportVideoCall = true;
 

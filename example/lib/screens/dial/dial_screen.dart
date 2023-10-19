@@ -74,7 +74,7 @@ class DialScreenState extends State<DialScreen> {
       final status = data["status"] as int;
 
       updateDialScreen(status);
-      debugPrint("status OmicallClient 44 ::: $status");
+      debugPrint("status OmicallClient 44 =====> ::: $status");
       if (status == OmiCallState.disconnected.rawValue) {
         i++;
         if (i >= 2) return;

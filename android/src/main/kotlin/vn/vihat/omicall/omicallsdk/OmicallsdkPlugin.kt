@@ -143,6 +143,10 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         )
     }
 
+    override fun onSlowRegister(){
+        Log.d("Kds", "MainActivity -> callListener -> onSlowRegister")
+    }
+
     override fun networkHealth(stat: Map<String, *>, quality: Int) {
         channel.invokeMethod(CALL_QUALITY, mapOf(
             "quality" to quality,
