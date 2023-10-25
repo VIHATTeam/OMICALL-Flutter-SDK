@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.1
+
+- Increase ios core to version 1.6.4
+- Increase ios android to version 2.0.52
+
 ## 3.1.0
 
 - Increase ios core to version 1.5.98
