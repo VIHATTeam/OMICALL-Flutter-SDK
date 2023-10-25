@@ -211,6 +211,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             OmiClient.getInstance(applicationContext!!)
             OmiClient.isAppReady = true;
             OmiClient.getInstance(applicationContext!!).addCallStateListener(this)
+            OmiClient.getInstance(applicationContext!!).setDebug(false)
         } catch(e: Throwable) {
             e.printStackTrace()
         }

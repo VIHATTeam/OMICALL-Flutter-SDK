@@ -77,7 +77,7 @@ class CallManager {
     
     func initWithUserPasswordEndpoint(params: [String: Any]) -> Bool {
         if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String {
-            OmiClient.initWithUsername(userName, password: password, realm: realm, proxy:"")
+            OmiClient.initWithUsername(userName, password: password, realm: realm, proxy: "vh.omicrm.com")
         }
         return true
     }
@@ -411,8 +411,8 @@ class CallManager {
         if let phone = phoneNumber {
             guestPhone = phoneNumber ?? ""
             let secondsSinceCurrentTime = lastTimeCall.timeIntervalSinceNow
-            if (Int(secondsSinceCurrentTime) < 4 && !firstCall) { // check after 3s 
-                        DispatchQueue.main.asyncAfter(deadline: .now() + (4 + secondsSinceCurrentTime)) {
+            if (Int(secondsSinceCurrentTime) < 2 && !firstCall) { // check after 3s
+                        DispatchQueue.main.asyncAfter(deadline: .now() + (2 + secondsSinceCurrentTime)) {
                          OmiClient.startCall(phone, isVideo: isVideo) { statusCall in
                              let callCurrent = self.omiLib.getCurrentCall()
                                             var dataToSend: [String: Any] = [
