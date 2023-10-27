@@ -69,17 +69,21 @@ class CallManager {
     func initWithApiKeyEndpoint(params: [String: Any]) -> Bool {
         //request permission
         var result = false
-        if let usrUuid = params["usrUuid"] as? String, let fullName = params["fullName"] as? String, let apiKey = params["apiKey"] as? String, let phone = params["phone"] as? String {
+        if let usrUuid = params["usrUuid"] as? String, let fullName = params["fullName"] as? String, let apiKey = params["apiKey"] as? String, let phone = params["phone"] as? String, let fcmToken = params["fcmToken"] as? String {
             result = OmiClient.initWithUUIDAndPhone(usrUuid, fullName: fullName, apiKey: apiKey, phone: phone)
+            OmiClient.setUserPushNotificationToken(fcmToken);
         }
         return result
     }
     
     func initWithUserPasswordEndpoint(params: [String: Any]) -> Bool {
-        if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String {
+        var result = false
+        if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String, let fcmToken = params["fcmToken"] as? String {
             OmiClient.initWithUsername(userName, password: password, realm: realm, proxy: "vh.omicrm.com")
+            OmiClient.setUserPushNotificationToken(fcmToken);
+            result = true;
         }
-        return true
+        return result
     }
     
     func showMissedCall() {

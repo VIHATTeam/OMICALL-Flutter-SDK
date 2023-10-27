@@ -101,6 +101,7 @@ class _MyAppState extends State<MyApp> {
             //     :
             const HomeScreen(
                 needRequestNotification: true,
+                isLoginUUID: false
               ),
         // ChooseTypeUIScreen(
         //     isVideo: loginInfo?['isVideo'],
@@ -117,30 +118,30 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-Future<void> updateToken({
-  bool showLoading = true,
-}) async {
-  await FirebaseMessaging.instance.requestPermission(
-    alert: true,
-    badge: true,
-    sound: true,
-  );
-  final token = await FirebaseMessaging.instance.getToken();
-  String? apnToken;
-  if (Platform.isIOS) {
-    apnToken = await FirebaseMessaging.instance.getAPNSToken();
-  }
-  if (showLoading) {
-    EasyLoading.show();
-  }
-  await OmicallClient.instance.updateToken(
-    fcmToken: token,
-    apnsToken: apnToken,
-  );
-  if (showLoading) {
-    EasyLoading.dismiss();
-  }
-}
+// Future<void> updateToken({
+//   bool showLoading = true,
+// }) async {
+//   await FirebaseMessaging.instance.requestPermission(
+//     alert: true,
+//     badge: true,
+//     sound: true,
+//   );
+//   final token = await FirebaseMessaging.instance.getToken();
+//   String? apnToken;
+//   if (Platform.isIOS) {
+//     apnToken = await FirebaseMessaging.instance.getAPNSToken();
+//   }
+//   if (showLoading) {
+//     EasyLoading.show();
+//   }
+//   await OmicallClient.instance.updateToken(
+//     fcmToken: token,
+//     apnsToken: apnToken,
+//   );
+//   if (showLoading) {
+//     EasyLoading.dismiss();
+//   }
+// }
 
 class MyHttpOverrides extends HttpOverrides {
   @override

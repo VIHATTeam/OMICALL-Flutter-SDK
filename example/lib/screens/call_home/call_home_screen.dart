@@ -91,7 +91,6 @@ class CallHomeScreenState extends State<CallHomeScreen> {
     if (Platform.isAndroid) {
       await checkAndPushToCall();
     }
-    await updateToken();
     OmicallClient.instance.getOutputAudios().then((value) {
       debugPrint("audios ${value.toString()}");
     });

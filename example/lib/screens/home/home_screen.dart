@@ -47,10 +47,11 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({
     Key? key,
     this.needRequestNotification = false,
+    this.isLoginUUID = false,
     //required this.isVideo,
   }) : super(key: key);
   final bool needRequestNotification;
-
+  final bool isLoginUUID;
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -66,6 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
   );
   bool _isVideoCall = false;
   bool _isCallUDP = false;
+  bool _isLoginUUID = false;
   late StreamSubscription _subscription;
   GlobalKey<DialScreenState>? _dialScreenKey;
   GlobalKey<VideoCallState>? _videoScreenKey;
@@ -73,11 +75,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _isLoginUUID = widget.isLoginUUID;
     // _isVideoCall = widget.isVideo;
     if (Platform.isAndroid) {
       checkAndPushToCall();
     }
-    updateToken();
     OmicallClient.instance.getOutputAudios().then((value) {
       debugPrint("audios ${value.toString()}");
     });
@@ -446,6 +448,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     EasyLoading.show();
                     Navigator.of(context).pop();
                     Navigator.push(context, MaterialPageRoute(builder: (_) {
+                      if(_isLoginUUID){
+                        return const LoginApiKeyScreen();
+                      }
                       return const LoginUserPasswordScreen();
                     }));
 

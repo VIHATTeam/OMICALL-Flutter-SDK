@@ -86,10 +86,6 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           CallManager.shareInstance().configNotification(data: dataOmi)
           result(true)
           break
-      case UPDATE_TOKEN:
-          CallManager.shareInstance().updateToken(params: dataOmi)
-          result(true)
-          break
       case INIT_CALL_API_KEY:
           let value = CallManager.shareInstance().initWithApiKeyEndpoint(params: dataOmi)
           result(value)
