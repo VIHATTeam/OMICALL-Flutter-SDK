@@ -19,7 +19,6 @@ mixin InDirectCallHomeViewModel implements State<InDirectCallHomeScreen> {
     if (Platform.isAndroid) {
       checkAndPushToCall();
     }
-    updateToken();
     OmicallClient.instance.getOutputAudios().then((value) {
       debugPrint("audios ${value.toString()}");
     });

@@ -26,7 +26,6 @@ mixin DialDirectViewModel implements State<DialDirectView> {
     }
 
     makeCall();
-    await updateToken();
     OmicallClient.instance.getOutputAudios().then((value) {
       debugPrint("audios ${value.toString()}");
     });

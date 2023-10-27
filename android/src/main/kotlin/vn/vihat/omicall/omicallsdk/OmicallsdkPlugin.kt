@@ -306,12 +306,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val realm = dataOmi["realm"] as? String
                     val host = dataOmi["host"] as? String
                     val isVideo = dataOmi["isVideo"] as? Boolean
-                    val firebaseToken = dataOmi["fcmToken"] as String
-                    if (userName != null && password != null && realm != null && host != null) {
-//                        Log.d(
-//                            "dataOmi",
-//                            "INIT_CALL_API_KEY $firebaseToken "
-//                        )
+                    val firebaseToken = dataOmi["fcmToken"] as? String
+                    if (userName != null && password != null && realm != null && host != null && firebaseToken != null ) {
                         OmiClient.register(
                             userName,
                             password,
@@ -334,14 +330,11 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val apiKey = dataOmi["apiKey"] as? String
                     val isVideo = dataOmi["isVideo"] as? Boolean
                     val phone = dataOmi["phone"] as? String
-                    val firebaseToken = dataOmi["fcmToken"] as String
-                    Log.d(
-                        "dataOmi",
-                        "INIT_CALL_API_KEY $firebaseToken "
-                    )
+                    val firebaseToken = dataOmi["fcmToken"] as? String
+
                     withContext(Dispatchers.Default) {
                         try {
-                            if (usrName != null && usrUuid != null && apiKey != null && phone != null) {
+                            if (usrName != null && usrUuid != null && apiKey != null && phone != null && firebaseToken != null) {
                                 loginResult = OmiClient.registerWithApiKey(
                                     apiKey = apiKey,
                                     userName = usrName,
@@ -361,19 +354,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
             GET_INITIAL_CALL -> {
                 result.success(false)
-            }
-            UPDATE_TOKEN -> {
-                mainScope.launch {
-                    val deviceTokenAndroid = dataOmi["fcmToken"] as String
-                    withContext(Dispatchers.Default) {
-                        try {
-                            OmiClient.getInstance(applicationContext!!).updatePushToken(deviceTokenAndroid)
-                        } catch (_: Throwable) {
-
-                        }
-                    }
-                    result.success(true)
-                }
             }
             START_CALL -> {
                 val phoneNumber = dataOmi["phoneNumber"] as String

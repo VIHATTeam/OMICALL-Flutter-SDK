@@ -29,13 +29,19 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
   // NSString * PASS_WORD1 = @"Kunkun";
   // NSString * USER_NAME2 = @"101";
   // NSString * PASS_WORD2 = @"Kunkun12345"; 0358380641
+
+  String user_name = "thanh mơis";
+  String pass_word = "0358380646";
+  String apiKEY = "E7AF81703203FC31F5658FAF3B875149CD57368ED07DB4AF414D93D3D2EBC76E";
+
+
   //video
   late final TextEditingController _userNameController = TextEditingController()
-    ..text = Platform.isAndroid ? 'Lê Hồng Thái' : 'Phạm Thanh(Dev cc)';
+    ..text = user_name;
   late final TextEditingController _usrUuidController = TextEditingController()
-    ..text = Platform.isAndroid ? '094d4f52-255c-4cdb-ad24-5adff34c3c87' : '0358380646';
+    ..text = pass_word;
   late final TextEditingController _apiKeyController = TextEditingController()
-    ..text = '687CB3BF9703A7F434964CC64EE72213962AB18812D7EB2FC9C83B89D917E61F';
+    ..text = apiKEY;
 
   bool _supportVideoCall = true;
 
@@ -175,40 +181,41 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  _supportVideoCall = !_supportVideoCall;
-                                });
-                              },
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    _supportVideoCall
-                                        ? Icons.check_circle
-                                        : Icons.circle_outlined,
-                                    size: 24,
-                                    color: _supportVideoCall
-                                        ? const Color.fromARGB(
-                                            255, 225, 121, 243)
-                                        : Colors.grey,
-                                  ),
-                                  const SizedBox(
-                                    width: 8,
-                                  ),
-                                  Text(
-                                    "Video call",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: _supportVideoCall
-                                          ? const Color.fromARGB(
-                                              255, 225, 121, 243)
-                                          : Colors.grey,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            // GestureDetector(
+                            //   onTap: () {
+                            //     setState(() {
+                            //       _supportVideoCall = !_supportVideoCall;
+                            //     });
+                            //   },
+                            //   child: Row(
+                            //     children: [
+                            //       Icon(
+                            //         _supportVideoCall
+                            //             ? Icons.check_circle
+                            //             : Icons.circle_outlined,
+                            //         size: 24,
+                            //         color: _supportVideoCall
+                            //             ? const Color.fromARGB(
+                            //                 255, 225, 121, 243)
+                            //             : Colors.grey,
+                            //       ),
+                            //       const SizedBox(
+                            //         width: 8,
+                            //       ),
+                            //       Text(
+                            //         "Video call",
+                            //         style: TextStyle(
+                            //           fontSize: 16,
+                            //           color: _supportVideoCall
+                            //               ? const Color.fromARGB(
+                            //                   255, 225, 121, 243)
+                            //               : Colors.grey,
+                            //         ),
+                            //       ),
+                            //     ],
+                            //   ),
+                            // ),
+                            Spacer(),
                             const Text(
                               "Forget you password",
                               style: TextStyle(
@@ -350,7 +357,10 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
       badge: true,
       sound: true,
     );
-    final token = await FirebaseMessaging.instance.getToken();
+    String? token = await FirebaseMessaging.instance.getToken();
+    if (Platform.isIOS) {
+      token = await FirebaseMessaging.instance.getAPNSToken();
+    }
     final result = await OmicallClient.instance.initCallWithApiKey(
       usrName: _userNameController.text,
       usrUuid: _usrUuidController.text,
@@ -380,14 +390,15 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
     }
 
     Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) {
-      return ChooseTypeUIScreen(
+      return HomeScreen(
         // userName: _userNameController.text,
         // password: _usrUuidController.text,
         // realm: '',
         // host: _usrUuidController.text,
         // usrUuid: _usrUuidController.text,
         // apiKey: _apiKeyController.text,
-        isVideo: _supportVideoCall,
+        needRequestNotification: true,
+        isLoginUUID: true
       );
 //       return const HomeScreen(
 //         needRequestNotification: true,

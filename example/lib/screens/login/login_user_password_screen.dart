@@ -435,8 +435,11 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
       badge: true,
       sound: true,
     );
-    final token = await FirebaseMessaging.instance.getToken();
 
+    String? token = await FirebaseMessaging.instance.getToken();
+    if (Platform.isIOS) {
+      token = await FirebaseMessaging.instance.getAPNSToken();
+    }
     EasyLoading.show();
     result = await OmicallClient.instance.initCallWithUserPassword(
       userName: _userNameController.text,
@@ -477,6 +480,7 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
       // );
       return const HomeScreen(
         needRequestNotification: true,
+          isLoginUUID: false
       );
       // return DialScreen2(
       //   key: _dialScreenKey,
