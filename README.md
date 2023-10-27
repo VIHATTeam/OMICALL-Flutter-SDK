@@ -300,23 +300,33 @@ await Firebase.initializeApp();
     //Call in the root widget
     OmicallClient.instance.startServices();
     ```
-  - Create OmiKit: OmiKit need userName, password, realm, host to init enviroment. ViHAT Group will provides these information for you. Please contact for my sales:
+  - Create OmiKit: OmiKit need userName, password, realm, host, fcmToken to init environment(all parameters we require are mandatory). ViHAT Group will provides these information for you. Please contact for my sales:
     ```
+    String? token = await FirebaseMessaging.instance.getToken();
+    if (Platform.isIOS) {
+        token = await FirebaseMessaging.instance.getAPNSToken();
+    }
     await OmicallClient.instance.initCall(
       userName: "", 
       password: "",
       realm: "",
       host: "",
       isVideo: true/false,
+      fcmToken: token // Note: with IOS, we need APNSToken, and android is FCM_Token
     );
     ```
-  - Create OmiKit With ApiKey: OmiKit need apikey, username, user id to init enviroment. ViHAT Group will provides api key for you. Please contact for my sales:
+  - Create OmiKit With ApiKey: OmiKit need apikey, username, fcmToken, user id to init environment (All parameters we require are mandatory). ViHAT Group will provides api key for you. Please contact for my sales:
     ```
+    String? token = await FirebaseMessaging.instance.getToken();
+    if (Platform.isIOS) {
+        token = await FirebaseMessaging.instance.getAPNSToken();
+    }
      await OmicallClient.instance.initCallWithApiKey(
       usrName: "",
       usrUuid: "",
       isVideo: true/false,
       apiKey: "",
+      fcmToken: token // Note: with IOS, we need APNSToken, and android is FCM_Token
     );
     ```
   - Get call when user open app from killed status(only iOS):
@@ -343,20 +353,6 @@ await Firebase.initializeApp();
     );
     //incomingAcceptButtonImage, incomingDeclineButtonImage, backImage, userImage: Add these into `android/app/src/main/res/drawble`
     ```
-- Upload token: OmiKit need FCM for Android and APNS to push notification on user devices.
-  ```
-  final token = await FirebaseMessaging.instance.getToken();
-  String? apnToken;
-  if (Platform.isIOS) {
-      apnToken = await FirebaseMessaging.instance.getAPNSToken();
-  }
-  String appId = 'Bundle id on iOS/ App id on Android'
-  await OmicallClient.instance.updateToken(
-    fcmToken: token,
-    apnsToken: apnToken,
-  );
-  ```
-
 - Other functions:
   -  Call with phone number (mobile phone or internal number):
     ```

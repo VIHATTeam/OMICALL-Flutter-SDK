@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.2
+- Update README, 
+- Remove function updateToken,
+- Add params Token when innit account.
+
 ## 3.1.1
 
 - Increase ios core to version 1.6.4
