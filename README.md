@@ -81,13 +81,22 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
 
 ```
 //need request this permission
+<application android:allowBackup="false" .... > // add in tag application
 <uses-permission android:name="android.permission.INTERNET" />
-//add these lines inside <activity>
-<intent-filter>
-    <action android:name="com.omicall.sdk.CallingActivity"/>
-    <category android:name="android.intent.category.DEFAULT" />
-</intent-filter>
-//add these lines outside <activity>
+//add these lines inside 
+    <activity
+            android:launchMode="singleTop" // add in tag activity
+            android:exported="true"
+            android:showWhenLocked="true"
+            ....
+      >
+        <intent-filter>
+            <action android:name="com.omicall.sdk.CallingActivity"/>
+            <category android:name="android.intent.category.DEFAULT" />
+        </intent-filter>
+    </activity>
+//add these lines outside 
+    <activity>
 <receiver
     android:name="vn.vihat.omicall.omisdk.receiver.FirebaseMessageReceiver"
     android:exported="true"
