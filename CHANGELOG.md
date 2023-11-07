@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.4
+- Update README
+- Pump core android version 2.0.73
+- Pump core ios version 1.6.8
+- Fix bug sound in android
+
+
 ## 3.1.2
 - Update README, 
 - Remove function updateToken,
