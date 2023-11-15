@@ -79,7 +79,7 @@ class CallManager {
     func initWithUserPasswordEndpoint(params: [String: Any]) -> Bool {
         var result = false
         if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String, let fcmToken = params["fcmToken"] as? String {
-            OmiClient.initWithUsername(userName, password: password, realm: realm, proxy: "vh.omicrm.com")
+            OmiClient.initWithUsername(userName, password: password, realm: realm, proxy: "vh.omicrm.com:5222")
             OmiClient.setUserPushNotificationToken(fcmToken);
             result = true;
         }

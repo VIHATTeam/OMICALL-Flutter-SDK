@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.6
+- Remove lib voismart (android)
+- Cấu hình rung android.
+- Fix âm thanh android.
+- Fix connect iOS
+- Pump core android version 2.0.87
+- Pump core ios version 1.6.18
+
 ## 3.1.5
 - Update README
 - Pump core android version 2.0.75
