@@ -252,11 +252,11 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
                       SizedBox(
                         height: MediaQuery.of(context).size.height * 0.03,
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 32),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: const [
+                          children: [
                             // GestureDetector(
                             //   onTap: () {
                             //     setState(() {
@@ -437,9 +437,9 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
     );
 
     String? token = await FirebaseMessaging.instance.getToken();
-    if (Platform.isIOS) {
-      token = await FirebaseMessaging.instance.getAPNSToken();
-    }
+    // if (Platform.isIOS) {
+    //   token = await FirebaseMessaging.instance.getAPNSToken();
+    // }
     EasyLoading.show();
     result = await OmicallClient.instance.initCallWithUserPassword(
       userName: _userNameController.text,
