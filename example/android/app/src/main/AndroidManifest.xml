@@ -12,6 +12,7 @@
     <application
         android:name="${applicationName}"
         android:label="OmiCall Example"
+        android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
