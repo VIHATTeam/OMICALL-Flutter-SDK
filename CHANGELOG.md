@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.7
+- Pump core ios version 1.6.23
+- Tối ưu hiệu suất âm thanh cuộc gọi ở iOS.
+- Tối ưu khả năng kết nối ở IOS.
+- Fix lỗi crash về networking ở các dòng iPhone: 7 Plus (iOS 15.7.6), 6s(iOS 15.6.0), 8 Plus (iOS 15.7.6)
+
 ## 3.1.6
 - Remove lib voismart (android)
 - Cấu hình rung android.
