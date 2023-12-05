@@ -572,8 +572,17 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     companion object {
+        var applicationContext: Context? = null
         fun onDestroy() {
 //            OmiClient.instance.disconnect()
+        }
+
+        fun onResume() {
+            applicationContext?.let { context ->
+                if (!OmiClient.getInstance(context).isRegistering) {
+                    OmiClient.autoRegister();
+                }
+            }
         }
 
         fun onRequestPermissionsResult(

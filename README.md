@@ -81,34 +81,88 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
 
 ```
 //need request this permission
-<application android:allowBackup="false" .... > // add in tag application
-<uses-permission android:name="android.permission.INTERNET" />
-//add these lines inside 
-    <activity
-            android:launchMode="singleTop" // add in tag activity
-            android:exported="true"
-            android:showWhenLocked="true"
-            ....
-      >
-        <intent-filter>
-            <action android:name="com.omicall.sdk.CallingActivity"/>
-            <category android:name="android.intent.category.DEFAULT" />
-        </intent-filter>
-    </activity>
-//add these lines outside 
-    <activity>
-<receiver
-    android:name="vn.vihat.omicall.omisdk.receiver.FirebaseMessageReceiver"
-    android:exported="true"
-    android:permission="com.google.android.c2dm.permission.SEND">
-    <intent-filter>
-        <action android:name="com.google.android.c2dm.intent.RECEIVE" />
-    </intent-filter>
-</receiver>
-<service
-    android:name="vn.vihat.omicall.omisdk.service.NotificationService"
-    android:exported="false">
-</service>
+<manifest 
+        ...... // Your config  
+        xmlns:tools="http://schemas.android.com/tools">
+        ...... // Your config 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"/>
+        ...... // Your config 
+
+         <application
+                ...... // Your config 
+                android:alwaysRetainTaskState="true"
+                android:largeHeap="true"
+                android:exported="true"
+                android:supportsRtl="true"
+                android:allowBackup="false"
+                ...... // Your config  
+        >
+                <activity
+                            android:name=".MainActivity"
+                             ...... // Your config 
+                            android:windowSoftInputMode="adjustResize"
+                            android:showOnLockScreen="true"
+                            android:launchMode="singleTask"
+                            android:largeHeap="true"
+                            android:taskAffinity=""
+                            android:excludeFromRecents="true"
+                            android:alwaysRetainTaskState="true"
+                            android:launchMode="singleTop" // add in tag activity
+                            android:exported="true"
+                            ...... // Your config 
+                            >
+                        ...... // Your config 
+                         <intent-filter>
+                            <action
+                                android:name="com.omicall.sdk.CallingActivity"
+                                android:launchMode="singleTask"
+                                android:taskAffinity=""
+                                android:largeHeap="true"
+                                android:excludeFromRecents="true"
+                                android:alwaysRetainTaskState="true"
+                                />
+                            <category android:name="android.intent.category.DEFAULT" />
+                        ...... // Your config 
+                         </intent-filter>
+                     </activity>
+                     // add these lines outside 
+                 <receiver
+                    android:name="vn.vihat.omicall.omisdk.receiver.FirebaseMessageReceiver"
+                    android:exported="true"
+                    tools:replace="android:exported"
+                    android:permission="com.google.android.c2dm.permission.SEND">
+                    <intent-filter>
+                        <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                    </intent-filter>
+                </receiver>
+                <service
+                    android:name="vn.vihat.omicall.omisdk.service.NotificationService"
+                    android:exported="false">
+                </service>
+                ...... // Your config 
+           </application>
+</manifest>
+```
+* In the `MainActivity` file we need you to add the following configurations
+Class MainActivity : {
+        override fun onCreate(savedInstanceState: Bundle?) {
+                ..... // your config 
+            OmicallsdkPlugin.applicationContext = this;
+        }
+        
+        ..... // your config 
+
+        override fun onResume(){
+            super.onResume()
+            OmicallsdkPlugin.onResume();
+        }
+        ..... // your config 
+
+}
+
+```
 ```
 You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/main/OMICALL-Flutter-SDK-Sample/android/app/src/main/AndroidManifest.xml">AndroidManifest</a> to know more information.
 
