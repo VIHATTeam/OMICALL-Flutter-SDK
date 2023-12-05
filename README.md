@@ -146,6 +146,7 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
 </manifest>
 ```
 * In the `MainActivity` file we need you to add the following configurations
+```
 Class MainActivity : {
         override fun onCreate(savedInstanceState: Bundle?) {
                 ..... // your config 
@@ -161,6 +162,7 @@ Class MainActivity : {
         ..... // your config 
 
 }
+```
 
 ```
 ```
