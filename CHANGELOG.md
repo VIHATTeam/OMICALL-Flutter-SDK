@@ -3,7 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 ## 3.1.8
-- Update core android to version 2.1.26
+- Update core android to version 2.1.27
 - Update ios to version 1.6.34
 - Remove feature Foreground Service off Android
 - Update audio and call quality off Android.
