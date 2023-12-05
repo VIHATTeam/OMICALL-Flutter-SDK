@@ -109,7 +109,6 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
                             android:taskAffinity=""
                             android:excludeFromRecents="true"
                             android:alwaysRetainTaskState="true"
-                            android:launchMode="singleTop" // add in tag activity
                             android:exported="true"
                             ...... // Your config 
                             >
