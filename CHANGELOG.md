@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.8
+- Update core android to version 2.1.26
+- Update ios to version 1.6.34
+- Remove feature Foreground Service off Android
+- Update audio and call quality off Android.
+- Fix crash error related to NAT in iOS
+
+
 ## 3.1.7
 - Pump core ios version 1.6.23
 - Tối ưu hiệu suất âm thanh cuộc gọi ở iOS.
