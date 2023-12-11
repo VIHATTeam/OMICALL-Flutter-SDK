@@ -15,7 +15,6 @@ class MainActivity: FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
-            OmicallsdkPlugin.applicationContext = this;
             val callPermissions = arrayOf(
                 Manifest.permission.RECORD_AUDIO,
             )
@@ -38,7 +37,7 @@ class MainActivity: FlutterActivity() {
 
     override fun onResume(){
         super.onResume()
-        OmicallsdkPlugin.onResume();
+        OmicallsdkPlugin.onResume(this);
     }
 
     fun isGrantedPermission(permission: String): Boolean {

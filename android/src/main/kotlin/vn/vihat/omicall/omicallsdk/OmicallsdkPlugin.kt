@@ -21,8 +21,8 @@ import io.flutter.plugin.common.PluginRegistry
 import kotlinx.coroutines.*
 import vn.vihat.omicall.omicallsdk.constants.*
 import vn.vihat.omicall.omicallsdk.state.CallState
-import vn.vihat.omicall.omicallsdk.video_call.FLLocalCameraFactory
-import vn.vihat.omicall.omicallsdk.video_call.FLRemoteCameraFactory
+import vn.vihat.omicall.omicallsdk.videoCall.FLLocalCameraFactory
+import vn.vihat.omicall.omicallsdk.videoCall.FLRemoteCameraFactory
 import vn.vihat.omicall.omisdk.OmiAccountListener
 import vn.vihat.omicall.omisdk.OmiClient
 import vn.vihat.omicall.omisdk.OmiListener
@@ -209,7 +209,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             Log.d("SDK", "onAttachedToEngine! ---- $applicationContext")
 
             OmiClient.getInstance(applicationContext!!)
-            OmiClient.isAppReady = true;
             OmiClient.getInstance(applicationContext!!).addCallStateListener(this)
             OmiClient.getInstance(applicationContext!!).setDebug(false)
         } catch(e: Throwable) {
@@ -572,16 +571,16 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     companion object {
-        var applicationContext: Context? = null
         fun onDestroy() {
 //            OmiClient.instance.disconnect()
         }
 
-        fun onResume() {
+        fun onResume(applicationContext: Context ) {
             applicationContext?.let { context ->
                 if (!OmiClient.getInstance(context).isRegistering) {
-                    OmiClient.autoRegister();
+                    OmiClient.autoRegister(true);
                 }
+                OmiClient.isAppReady = true
             }
         }
 

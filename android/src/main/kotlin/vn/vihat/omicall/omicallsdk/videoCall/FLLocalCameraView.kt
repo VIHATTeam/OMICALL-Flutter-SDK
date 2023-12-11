@@ -1,11 +1,14 @@
-package vn.vihat.omicall.omicallsdk.video_call
+package vn.vihat.omicall.omicallsdk.videoCall
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.SurfaceTexture
 import android.util.Log
 import android.view.Surface
 import android.view.TextureView
 import android.view.View
+import androidx.core.content.ContextCompat
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
@@ -14,34 +17,48 @@ import vn.vihat.omicall.omisdk.OmiClient
 import vn.vihat.omicall.omisdk.videoutils.ScaleManager
 import vn.vihat.omicall.omisdk.videoutils.Size
 
-internal class FLRemoteCameraView(context: Context, id: Int, creationParams: Map<String?, Any?>?,  messenger: BinaryMessenger) :
+internal class FLLocalCameraView(
+    context: Context,
+    id: Int,
+    creationParams: Map<String?, Any?>?,
+    messenger: BinaryMessenger,
+) :
     PlatformView, MethodChannel.MethodCallHandler, TextureView.SurfaceTextureListener {
-    private val remoteView : TextureView
-    private var methodChannel : MethodChannel
+    private val localView: TextureView
+    private var methodChannel: MethodChannel
     private val appContext: Context = context
 
     override fun getView(): View {
-        return remoteView
+        return localView
     }
 
     override fun dispose() {}
 
     init {
-        methodChannel = MethodChannel(messenger, "omicallsdk/remote_camera_controller/$id")
+        methodChannel = MethodChannel(messenger, "omicallsdk/local_camera_controller/$id")
         methodChannel.setMethodCallHandler(this)
-        remoteView = TextureView(context)
-        remoteView.surfaceTextureListener = this
+        localView = TextureView(context)
+        localView.surfaceTextureListener = this
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         if (call.method == "refresh") {
-            remoteView.surfaceTexture?.let {
-                OmiClient.getInstance(appContext).setupIncomingVideoFeed(Surface(it))
-                ScaleManager.adjustAspectRatio(remoteView,
-                    Size(remoteView.width, remoteView.height),
-                    Size(1280,720)
+            localView.surfaceTexture?.let {
+                OmiClient.getInstance(appContext).setupLocalVideoFeed(Surface(it))
+                ScaleManager.adjustAspectRatio(
+                    localView,
+                    Size(localView.width, localView.height),
+                    Size(1280, 720)
                 )
             }
+        }
+        if (call.method == "permission") {
+            val permission = ContextCompat.checkSelfPermission(
+                OmiClient.getInstance(appContext).context,
+                Manifest.permission.CAMERA
+            )
+            val isGranted = permission == PackageManager.PERMISSION_GRANTED
+            result.success(isGranted)
         }
     }
 

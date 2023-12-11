@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.9
+- Update OMI core android to version 2.1.39
+- Remove flag excludeFromRecents , taskAffinity in AndroidMainifest.
+- Fix notification error when calling and shutting down the application.
+
+
 ## 3.1.8
 - Update core android to version 2.1.27
 - Update ios to version 1.6.34
