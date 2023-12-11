@@ -147,7 +147,7 @@ Class MainActivity : {
 
         override fun onResume(){
             super.onResume()
-            OmicallsdkPlugin.onResume();
+            OmicallsdkPlugin.onResume(this);
         }
         ..... // your config 
 
