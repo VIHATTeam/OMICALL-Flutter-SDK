@@ -34,8 +34,6 @@
             android:showOnLockScreen="true"
             android:launchMode="singleTask"
             android:largeHeap="true"
-            android:taskAffinity=""
-            android:excludeFromRecents="true"
             android:alwaysRetainTaskState="true"
 
             >
@@ -64,9 +62,7 @@
                 <action
                     android:name="com.omicall.sdk.CallingActivity"
                     android:launchMode="singleTask"
-                    android:taskAffinity=""
                     android:largeHeap="true"
-                    android:excludeFromRecents="true"
                     android:alwaysRetainTaskState="true"
                     />
             <category android:name="android.intent.category.DEFAULT" />

@@ -106,8 +106,6 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
                             android:showOnLockScreen="true"
                             android:launchMode="singleTask"
                             android:largeHeap="true"
-                            android:taskAffinity=""
-                            android:excludeFromRecents="true"
                             android:alwaysRetainTaskState="true"
                             android:exported="true"
                             ...... // Your config 
@@ -117,9 +115,7 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
                             <action
                                 android:name="com.omicall.sdk.CallingActivity"
                                 android:launchMode="singleTask"
-                                android:taskAffinity=""
                                 android:largeHeap="true"
-                                android:excludeFromRecents="true"
                                 android:alwaysRetainTaskState="true"
                                 />
                             <category android:name="android.intent.category.DEFAULT" />
