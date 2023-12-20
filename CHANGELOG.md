@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.11
+- Update OMI core android to version 2.1.48
+- Remove Throw RuntimeException off PrefManager.
+
+
 ## 3.1.9
 - Update OMI core android to version 2.1.39
 - Remove flag excludeFromRecents , taskAffinity in AndroidMainifest.

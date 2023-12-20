@@ -352,13 +352,15 @@ class CallManager {
         let status = call.callState == .confirmed ? "answered" : "no_answered"
         let timeEnd = Int(Date().timeIntervalSince1970)
         return [
+            "transaction_id" : call.omiId,
             "direction" : direction,
             "source_number" : user,
             "destination_number" : guestPhone,
             "time_start_to_answer" : call.createDate,
             "time_end" : timeEnd,
             "sip_user": OmiClient.getCurrentSip(),
-            "disposition" : lastStatusCall == nil ? "no_answered" : "answered"
+            "disposition" : lastStatusCall == nil ? "no_answered" : "answered",
+            "code_end_call" : call.lastStatus
         ]
     }
     
