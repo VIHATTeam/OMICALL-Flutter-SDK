@@ -84,8 +84,22 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     override fun onCallEnd(callInfo: MutableMap<String, Any?>, statusCode: Int) {
         Log.d("SDK ====> CALL ACTION:::  ", "onCallEnd -> callInfo=$callInfo, statusCode=$statusCode")
-        callInfo["status"] = CallState.disconnected.value
-        channel.invokeMethod(CALL_STATE_CHANGED, callInfo)
+        // callInfo["status"] = CallState.disconnected.value
+        val call = callInfo as Map<*, *>
+        val timeStartToAnswer = call["time_start_to_answer"] as Long?
+        val timeEnd = call["time_end"] as Long
+
+        channel.invokeMethod(CALL_STATE_CHANGED, mapOf(
+            "transaction_id" to call["transaction_id"] as String? ,
+            "direction" to call["direction"] as String ,
+            "source_number" to call["source_number"] as String ,
+            "destination_number" to (timeStartToAnswer ?: 0).toDouble() ,
+            "time_end" to timeEnd.toDouble(),
+            "sip_user" to call["sip_user"] as String ,
+            "disposition" to call["disposition"] as String ,
+            "status" to CallState.disconnected.value,
+            "code_end_call" to statusCode as Int
+        ))
         isIncomming = false;
         isAnserCall  = false
     }
@@ -306,17 +320,22 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val host = dataOmi["host"] as? String
                     val isVideo = dataOmi["isVideo"] as? Boolean
                     val firebaseToken = dataOmi["fcmToken"] as? String
-                    if (userName != null && password != null && realm != null && host != null && firebaseToken != null ) {
-                        OmiClient.register(
-                            userName,
-                            password,
-                            realm,
-                            isVideo ?: true,
-                            firebaseToken,
-                            host
-                        )
+                    try {
+                        if (userName != null && password != null && realm != null && host != null && firebaseToken != null ) {
+                            OmiClient.register(
+                                userName,
+                                password,
+                                realm,
+                                isVideo ?: true,
+                                firebaseToken,
+                                host
+                            )
 
+                        }
+                    } catch (_: Throwable) {
+                        throw RuntimeException("Error initializing PrefManager innit");
                     }
+                    throw RuntimeException("Error initializing PrefManager innit 2")
                     requestPermission(isVideo ?: true)
                     result.success(true)
                 }
@@ -344,8 +363,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                                 )
                             }
                         } catch (_: Throwable) {
-
+                            throw RuntimeException("Error initializing PrefManager innit")
                         }
+                        throw RuntimeException("Error initializing PrefManager innit 2")
                     }
 //                    requestPermission(isVideo ?: true)
                     result.success(loginResult)
