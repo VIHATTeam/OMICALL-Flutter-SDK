@@ -102,6 +102,7 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
                 android:exported="true"
                 android:supportsRtl="true"
                 android:allowBackup="false"
+                android:fullBackupContent="false"
                 android:enableOnBackInvokedCallback="true"
                 .....  // your config 
         >
