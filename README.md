@@ -82,50 +82,64 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
 ```
 //need request this permission
 <manifest 
-        ...... // Your config  
-        xmlns:tools="http://schemas.android.com/tools">
-        ...... // Your config 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE"/>
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"/>
-        ...... // Your config 
+      ...... 
+      xmlns:tools="http://schemas.android.com/tools">
+      ..... // your config 
+      <uses-feature android:name="android.hardware.telephony" android:required="false" />
+      <uses-permission android:name="android.permission.INTERNET" />
+      <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+      <uses-permission android:name="android.permission.WAKE_LOCK" />
+      <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE"/>
+      <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"/>
+      <uses-permission android:name="android.permission.CALL_PHONE"/>
+      ..... // your config 
 
          <application
-                ...... // Your config 
+                android:name=".MainApplication"
+                ...... // your config 
                 android:alwaysRetainTaskState="true"
                 android:largeHeap="true"
                 android:exported="true"
                 android:supportsRtl="true"
                 android:allowBackup="false"
-                ...... // Your config  
+                android:enableOnBackInvokedCallback="true"
+                .....  // your config 
         >
                 <activity
                             android:name=".MainActivity"
-                             ...... // Your config 
+                        .....  // your config 
                             android:windowSoftInputMode="adjustResize"
                             android:showOnLockScreen="true"
                             android:launchMode="singleTask"
                             android:largeHeap="true"
                             android:alwaysRetainTaskState="true"
+                            android:supportsPictureInPicture="false"
+                            android:showWhenLocked="true"
+                            android:turnScreenOn="true"
                             android:exported="true"
-                            ...... // Your config 
+                        .....  // your config 
                             >
-                        ...... // Your config 
-                         <intent-filter>
-                            <action
+                        .....  // your config 
+                          <intent-filter>
+                              <action android:name="android.intent.action.MAIN" />
+                              <category android:name="android.intent.category.LAUNCHER" />
+                          </intent-filter>
+                          <intent-filter>
+                            <action 
                                 android:name="com.omicall.sdk.CallingActivity"
                                 android:launchMode="singleTask"
                                 android:largeHeap="true"
                                 android:alwaysRetainTaskState="true"
-                                />
+                            />
                             <category android:name="android.intent.category.DEFAULT" />
-                        ...... // Your config 
-                         </intent-filter>
+                          </intent-filter>
+                        .....  // your config 
                      </activity>
-                     // add these lines outside 
-                 <receiver
+                 .....  // your config 
+                <receiver
                     android:name="vn.vihat.omicall.omisdk.receiver.FirebaseMessageReceiver"
                     android:exported="true"
+                    android:enabled="true"
                     tools:replace="android:exported"
                     android:permission="com.google.android.c2dm.permission.SEND">
                     <intent-filter>
@@ -133,10 +147,11 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
                     </intent-filter>
                 </receiver>
                 <service
-                    android:name="vn.vihat.omicall.omisdk.service.NotificationService"
-                    android:exported="false">
+                  android:name="vn.vihat.omicall.omisdk.service.NotificationService"
+                  android:enabled="true"
+                  android:exported="false">
                 </service>
-                ...... // Your config 
+                 .....  // your config 
            </application>
 </manifest>
 ```
@@ -210,7 +225,7 @@ PKPushRegistry * voipRegistry;
 ```
 - Add these lines into `didFinishLaunchingWithOptions`:
 ```
-[OmiClient setEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX userNameKey:@"extension" maxCall:1 callKitImage: @"callkit_image"];
+[OmiClient setEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX userNameKey:@"extension" maxCall:1 callKitImage: @"callkit_image" typePushVoip:@"default"];
 provider = [[CallKitProviderDelegate alloc] initWithCallManager: [OMISIPLib sharedInstance].callManager];
 voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
 pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
@@ -285,7 +300,7 @@ var voipRegistry: PKPushRegistry?
 - Add these lines into `didFinishLaunchingWithOptions`:
 
 ```
-OmiClient.setEnviroment(KEY_OMI_APP_ENVIROMENT_SANDBOX, prefix: "", userNameKey: "extension", maxCall: 1, callKitImage: "callkit_image")
+OmiClient.setEnviroment(KEY_OMI_APP_ENVIROMENT_SANDBOX, prefix: "", userNameKey: "extension", maxCall: 1, callKitImage: "callkit_image" typePushVoip:@"default")
 provider = CallKitProviderDelegate.init(callManager: OMISIPLib.sharedInstance().callManager)
 voipRegistry = PKPushRegistry.init(queue: .main)
 pushkitManager = PushKitManager.init(voipRegistry: voipRegistry)
@@ -342,6 +357,20 @@ We support 2 environments. So you need set correct key in Appdelegate.
 ```
 
 ## Implement
+
+## Request permission
+
+- We need you request permission about call before make call:
+
+```
+ + android.permission.CALL_PHONE (for android)
+ + Permission.audio
+ + Permission.microphone
+ + Permission.camera  (if you want to make Video calls)
+
+```
+
+
 - Set up for Firebase:
 
 ```
@@ -641,3 +670,29 @@ await Firebase.initializeApp();
   });
   // data is Map. Data has 2 keys: callerNumber, isVideo
   ```
+
+  - List of notable call codes `code_end_call`:
+  + `600, 503, 480` : These are the codes of the network operator or the user who did not answer the call
+  + `408` : call request timeout (Each call usually has a waiting time of 30 seconds. If the 30 seconds expire, it will time out)
+  + `403` : Your service plan only allows calls to dialed numbers. Please upgrade your service pack
+  + `404` : The current number is not allowed to make calls to the carrier
+  + `603` : The call was rejected. Please check your account limit or call barring configuration!
+  + `850` : Simultaneous call limit exceeded, please try again later
+  + `486` : The listener refuses the call and does not answer
+
+
+- Action Name value:
+  - `OmiCallEvent.onMuted`: Audio changed.
+  - `OmiCallEvent.onSpeaker`: Audio changed.
+  - `OmiCallEvent.onClickMissedCall`: Click missed call notification.
+  - `OmiCallEvent.onSwitchboardAnswer`: Switchboard sip is listening.
+  - `OmiCallEvent.onCallQuality`: The calling quality.
+- Data value: We return `callerNumber`, `sip`, `isVideo: true/false` information
+
+
+- Forward calls to internal staff:
+  + You can use function `transferCall` for transfer to staff you want.
+    example: 
+      transferCall({
+        phoneNumber: 102
+      })
