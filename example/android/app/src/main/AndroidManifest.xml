@@ -21,6 +21,8 @@
         android:largeHeap="true"
         android:exported="true"
         android:supportsRtl="true"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
