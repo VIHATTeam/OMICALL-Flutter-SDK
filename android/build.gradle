@@ -80,7 +80,7 @@ android {
 
 dependencies {
 
-    api 'vn.vihat.omicall:omi-sdk:2.1.48'
+    api 'vn.vihat.omicall:omi-sdk:2.1.51'
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
 
     implementation("androidx.work:work-runtime:2.8.1")
