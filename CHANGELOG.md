@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.12
+- Update OMI core android to version 2.1.51
+- Save data in SharedPreferences when initializing EncryptedSharedPreferences fails.
+
+
 ## 3.1.11
 - Update OMI core android to version 2.1.48
 - Remove Throw RuntimeException off PrefManager.
