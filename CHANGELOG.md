@@ -2,6 +2,9 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.14
+- Fix convert sendDtmf data to string
+
 ## 3.1.13
 - Commit file missed
 

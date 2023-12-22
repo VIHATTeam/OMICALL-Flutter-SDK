@@ -430,7 +430,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     characterCode = 11
                 }
                 if (characterCode != null) {
-                    OmiClient.getInstance(applicationContext!!).sendDtmf(characterCode as String)
+                    OmiClient.getInstance(applicationContext!!).sendDtmf(characterCode.toString())
                 }
                 result.success(true)
             }
