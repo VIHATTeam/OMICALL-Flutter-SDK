@@ -1,6 +1,8 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## 3.1.16
+- Update tag
 
 ## 3.1.15
 - Pump core ios version 1.6.40. 
