@@ -385,7 +385,9 @@ await Firebase.initializeApp();
     //Call in the root widget
     OmicallClient.instance.startServices();
     ```
-  - Create OmiKit: OmiKit need userName, password, realm, host, fcmToken to init environment(all parameters we require are mandatory). ViHAT Group will provides these information for you. Please contact for my sales:
+  - Create OmiKit: OmiKit need userName, password, realm, host, fcmToken to init environment(all parameters we require are mandatory). ViHAT Group will provides these information for you.
+    This function is used when you want to call any telecommunication number, calling back and forth between internal groups.
+    Please contact for my sales:
     ```
     String? token = await FirebaseMessaging.instance.getToken();
     if (Platform.isIOS) {
@@ -400,7 +402,9 @@ await Firebase.initializeApp();
       fcmToken: token // Note: with IOS, we need APNSToken, and android is FCM_Token
     );
     ```
-  - Create OmiKit With ApiKey: OmiKit need apikey, username, fcmToken, user id to init environment (All parameters we require are mandatory). ViHAT Group will provides api key for you. Please contact for my sales:
+  - Create OmiKit With ApiKey: OmiKit need apikey, username, fcmToken, user id to init environment (All parameters we require are mandatory). ViHAT Group will provides api key for you.
+    This function is used when you want to make a call to the switchboard number (not to call the employee number).
+    Please contact for my sales:
     ```
     String? token = await FirebaseMessaging.instance.getToken();
     if (Platform.isIOS) {
