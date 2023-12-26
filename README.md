@@ -438,7 +438,7 @@ await Firebase.initializeApp();
       userNameKey: 'uuid', //we have 3 values: uuid, full_name, extension
       channelId: 'channelid.callnotification' // need to use call notification,
       audioNotificationDescription: "" //audio description
-      videoNotificationDescription: "" //video descriptipn
+      videoNotificationDescription: "" //video description
     );
     //incomingAcceptButtonImage, incomingDeclineButtonImage, backImage, userImage: Add these into `android/app/src/main/res/drawble`
     ```

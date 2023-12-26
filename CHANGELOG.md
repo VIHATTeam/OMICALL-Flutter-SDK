@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.15
+- Pump core ios version 1.6.40. 
+- Fix incorrect display of prefixes on the web.
+- Fix params API add MOS of IOS
+
 ## 3.1.14
 - Fix convert sendDtmf data to string
 
