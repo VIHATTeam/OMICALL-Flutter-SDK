@@ -211,10 +211,25 @@ class CallManager {
     
     @objc func updateNetworkHealth(_ notification: NSNotification) {
         guard let userInfo = notification.userInfo,
-              let state     = userInfo[OMINotificationNetworkStatusKey] as? Int else {
-            return;
-        }
-        SwiftOmikitPlugin.instance?.sendEvent(CALL_QUALITY, ["quality": state])
+                let state     = userInfo[OMINotificationNetworkStatusKey] as? Int else { return;}
+                let jitter     = userInfo[OMINotificationJitterKey] as? Double;
+                let mos     = userInfo[OMINotificationMOSKey] as? Double
+                let ppl     = userInfo[OMINotificationPPLKey] as? Double
+                let latency     = userInfo[OMINotificationLatencyKey] as? Double
+        let currentTime = Date().timeIntervalSince1970
+        let currentTimeInMilliseconds = Int(currentTime * 1000)
+        
+        let jsonMos: [String: Any] = [
+            "req": currentTimeInMilliseconds,
+            "mos": mos as Any,
+            "jitter":jitter  as Any,
+            "latency": latency  as Any,
+            "ppl": ppl  as Any,
+            "lcn": 0
+        ]
+        SwiftOmikitPlugin.instance?.sendEvent(CALL_QUALITY, ["quality": state,
+                                                             "stat":jsonMos,
+                                                             "isNeedLoading": false])
         
     }
     
