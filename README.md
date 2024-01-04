@@ -625,6 +625,13 @@ await Firebase.initializeApp();
   ```
   OmicallClient.instance.setCallQualityListener((data) {
       final quality = data["quality"] as int;
+      final req = data["stat"]["req"] as double; // time taken mos call,
+      final mos = data["stat"]["mos"] as double; // mos call 
+      final jitter = data["stat"]["jitter"] as double; // jitter call
+      final latency = data["stat"]["latency"] as double; // latency call
+      final ppl = data["stat"]["ppl"] as double; // ppl call
+      final lcn = data["stat"]["lcn"] as int; // loss connect 
+      final lcn = data["isNeedLoading"] as boolean ; // when value is TRUE, you need show loading in your App, because this call have problem with networking
   });
   //we return `quality` key with: 0 is GOOD, 1 is NORMAL, 2 is BAD
   ```

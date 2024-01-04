@@ -1,6 +1,17 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## 3.1.18
+- Pump OMI core ios version 1.6.43
+- Fix URL get info call ios
+- Fix add networking event
+
+## 3.1.17
+- Pump OMI core ios version 1.6.42
+- Update OMI core android to version 2.1.56
+
+
 ## 3.1.16
 - Update tag
 

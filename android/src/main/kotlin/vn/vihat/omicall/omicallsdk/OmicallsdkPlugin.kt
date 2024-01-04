@@ -8,6 +8,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.annotation.NonNull
+import kotlinx.coroutines.*
 import androidx.core.app.ActivityCompat.requestPermissions
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -31,6 +32,8 @@ import vn.vihat.omicall.omisdk.utils.OmiSDKUtils
 import vn.vihat.omicall.omisdk.utils.OmiStartCallStatus
 import vn.vihat.omicall.omisdk.utils.SipServiceConstants
 import vn.vihat.omicall.omisdk.utils.OmiSipTransport
+import vn.vihat.omicall.omisdk.utils.AppUtils
+import vn.vihat.omicall.omisdk.utils.Utils
 import java.util.*
 import com.google.gson.Gson
 
@@ -45,6 +48,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private var isIncomming: Boolean = false
     private var callerNumberTemp: String = ""
     private var isAnserCall: Boolean = false
+    private var isShouldCancelCall: Boolean = false
+    private var isNeedLoading: Boolean = false
 
     override fun incomingReceived(callerId: Int?, phoneNumber: String?, isVideo: Boolean?) {
         Log.d("SDK ====> CALL ACTION:::  ", "incomingReceived -> callerId=$callerId, phoneNumber=$phoneNumber")
@@ -59,6 +64,16 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 "incoming" to isIncomming
             )
         )
+        applicationContext?.let {
+            if(!AppUtils.isAppOnForeground(it)) {
+                return
+            }
+            val activeCall = Utils.getActiveCall(it)
+            if(activeCall != null ) {
+                activeCall?.isShowed = true
+                Utils.saveActiveCall(it, activeCall)
+            }
+        }
     }
 
     override fun onCallEstablished(
@@ -155,9 +170,27 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun networkHealth(stat: Map<String, *>, quality: Int) {
+        Log.d("Kds", "zzzzz -> numLCN -> $stat ")
+        if(stat != null){
+            val numLCN = stat["lcn"] as? Int
+            Log.d("Kds", "networkHealth -> numLCN -> $numLCN ")
+            numLCN?.let {
+                isNeedLoading = it > 2
+                if (isNeedLoading) {
+                    mainScope.launch {
+                        delay(15000)
+                        isNeedLoading = false
+                    }
+                }
+            }
+        }
+
+//        Log.d("Kds", "zzzzz -> numLCN -> $stat ")
+
         channel.invokeMethod(CALL_QUALITY, mapOf(
             "quality" to quality,
             "stat" to stat,
+            "isNeedLoading" to isNeedLoading
         ))
     }
 
