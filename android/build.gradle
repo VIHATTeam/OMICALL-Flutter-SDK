@@ -80,12 +80,12 @@ android {
 
 dependencies {
 
-    api 'vn.vihat.omicall:omi-sdk:2.1.58'
+    api 'vn.vihat.omicall:omi-sdk:2.1.73'
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
 
     implementation("androidx.work:work-runtime:2.8.1")
     implementation "androidx.appcompat:appcompat:1.6.1"
-    implementation "androidx.lifecycle:lifecycle-process:2.6.1"
+    implementation "androidx.lifecycle:lifecycle-process:2.6.2"
 
     implementation "com.google.code.gson:gson:2.10.1"
     implementation "com.google.android.flexbox:flexbox:3.0.0"

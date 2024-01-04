@@ -226,7 +226,7 @@ PKPushRegistry * voipRegistry;
 ```
 - Add these lines into `didFinishLaunchingWithOptions`:
 ```
-[OmiClient setEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX userNameKey:@"extension" maxCall:1 callKitImage: @"callkit_image" typePushVoip:@"default"];
+[OmiClient setEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX userNameKey:@"extension" maxCall:1 callKitImage: @"callkit_image" typePushVoip:@"default" representName:@"OMICALL"];
 provider = [[CallKitProviderDelegate alloc] initWithCallManager: [OMISIPLib sharedInstance].callManager];
 voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
 pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
@@ -236,7 +236,7 @@ if (@available(iOS 10.0, *)) {
 
 Notes:
 - To custom callkit image, you need add image into assets and paste image name into setEnviroment function.
-
+- The variable representName is not required. If it has a value, when a call comes in, by default this name will be displayed on callKit. If nothing is transmitted, internal calls will display the Employee's name or the employee's internal 
 ```
 
 ```
@@ -439,6 +439,7 @@ await Firebase.initializeApp();
       channelId: 'channelid.callnotification' // need to use call notification,
       audioNotificationDescription: "" //audio description
       videoNotificationDescription: "" //video description
+      representName: "" //  Optional value, if nothing is passed down or nil, will display the employee's name or extension number when a call comes in. If you declare a value, this value will be displayed on CallKit when there is an incoming call
     );
     //incomingAcceptButtonImage, incomingDeclineButtonImage, backImage, userImage: Add these into `android/app/src/main/res/drawble`
     ```

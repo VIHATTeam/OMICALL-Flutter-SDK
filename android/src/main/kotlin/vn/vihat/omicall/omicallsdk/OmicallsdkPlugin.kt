@@ -36,6 +36,8 @@ import vn.vihat.omicall.omisdk.utils.AppUtils
 import vn.vihat.omicall.omisdk.utils.Utils
 import java.util.*
 import com.google.gson.Gson
+import androidx.lifecycle.ProcessLifecycleOwner
+
 
 /** OmicallsdkPlugin */
 class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
@@ -75,6 +77,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
         }
     }
+
+    override fun onFcmReceived(uuid: String, userName: String, avatar: String) {}
+
 
     override fun onCallEstablished(
         callerId: Int,
@@ -251,6 +256,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             OmiClient.getInstance(applicationContext!!)
             OmiClient.getInstance(applicationContext!!).addCallStateListener(this)
             OmiClient.getInstance(applicationContext!!).setDebug(false)
+            ProcessLifecycleOwner.get().lifecycle.addObserver(OmiClient.getInstance(applicationContext!!))
         } catch(e: Throwable) {
             e.printStackTrace()
         }
@@ -317,6 +323,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val missedCallTitle = dataOmi["missedCallTitle"] as? String
                 val audioNotificationDescription = dataOmi["audioNotificationDescription"] as? String
                 val videoNotificationDescription = dataOmi["videoNotificationDescription"] as? String
+                val appRepresentName = dataOmi["representName"] as? String
                 val displayNameType = dataOmi["displayNameType"] as? String
 
                 OmiClient.getInstance(applicationContext!!).configPushNotification(
@@ -334,7 +341,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     missedChannelId =  "${channelId}-missed",
                     missedChannelName = "Cuộc gọi nhỡ",
                     displayNameType = userNameKey ?: "full_name",
-                    notificationMissedCallPrefix = prefixMissedCallMessage ?: "Cuộc gọi nhỡ từ"
+                    notificationMissedCallPrefix = prefixMissedCallMessage ?: "Cuộc gọi nhỡ từ",
+                    representName= appRepresentName ?: ""
                 )
                 result.success(true)
             }
@@ -613,14 +621,15 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         fun onDestroy() {
 //            OmiClient.instance.disconnect()
         }
-
+        
+        // Current not use it 
         fun onResume(applicationContext: Context ) {
-            applicationContext?.let { context ->
-                if (!OmiClient.getInstance(context).isRegistering) {
-                    OmiClient.autoRegister(true);
-                }
-                OmiClient.isAppReady = true
-            }
+            // applicationContext?.let { context ->
+            //  if (!OmiClient.getInstance(context).isRegistering) {
+            //   OmiClient.autoRegister(true);
+            //  }
+            //  OmiClient.isAppReady = true
+            // }
         }
 
         fun onRequestPermissionsResult(

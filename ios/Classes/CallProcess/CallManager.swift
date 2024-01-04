@@ -96,12 +96,22 @@ class CallManager {
                         let user = UserDefaults.standard
                         let title = user.string(forKey: "omicall/missedCallTitle") ?? ""
                         let message = user.string(forKey: "omicall/prefixMissedCallMessage") ?? ""
+                        let representName = user.string(forKey: "omicall/representName")
                         let content      = UNMutableNotificationContent()
+                        var nameCaller = call.callerNumber
+                        
+                        if let stringRepresentName = representName, let callPhone = call.callerNumber {
+                            if(stringRepresentName.count > 0 &&  callPhone.count < 8 ) {
+                                nameCaller = representName
+                            }
+                        }
+                
+                    
                         content.title    = title
-                        content.body = "\(message) \(call.callerNumber ?? "")"
+                        content.body = "\(message) \(nameCaller ?? "")"
                         content.sound    = .default
                         content.userInfo = [
-                            "callerNumber": call.callerNumber,
+                            "callerNumber": nameCaller,
                             "isVideo": call.isVideo,
                         ]
                         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
