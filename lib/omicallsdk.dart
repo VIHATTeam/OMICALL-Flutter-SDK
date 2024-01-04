@@ -129,6 +129,7 @@ class OmicallClient {
     String? channelId,
     String? videoNotificationDescription,
     String? audioNotificationDescription,
+    String? representName,
   }) async {
     final action = OmiAction(
       actionName: OmiActionName.CONFIG_NOTIFICATION,
@@ -146,6 +147,7 @@ class OmicallClient {
         'channelId': channelId,
         'audioNotificationDescription': audioNotificationDescription,
         'videoNotificationDescription': videoNotificationDescription,
+        'representName': representName
       },
     );
     return await _controller.action(action);
