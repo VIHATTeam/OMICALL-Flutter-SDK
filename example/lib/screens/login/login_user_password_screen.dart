@@ -24,18 +24,41 @@ class LoginUserPasswordScreen extends StatefulWidget {
   State<LoginUserPasswordScreen> createState() => _LoginScreenState();
 }
 
+
 class _LoginScreenState extends State<LoginUserPasswordScreen> {
   // NSString * USER_NAME1 = @"100";
   // NSString * PASS_WORD1 = @"Kunkun";
   // NSString * USER_NAME2 = @"101";
   // NSString * PASS_WORD2 = @"Kunkun12345";
   //video
+
+  // QUI DN
+  //NSString * REALM = @"quidn";
+  //NSString * USER_NAME1 = @"100";
+  //NSString * PASS_WORD1 = @"Duongngocqui@98";
+
+  // HUNGTH
+  // String REALM = "hungth12";
+  // String USER_NAME1 = "100";
+  // String PASS_WORD1 = "Jx2hM9aYrT";
+
+  // HUNGTH
+  String REALM = "quidn";
+  String USER_NAME1 = "100";
+  String PASS_WORD1 = "Duongngocqui@98";
+
+
+  // // THANH CONCUNG
+  // String REALM = "omi1";
+  // String USER_NAME1 = "1000071";
+  // String PASS_WORD1 = "LdXQTyE9ul";
+
   late final TextEditingController _userNameController = TextEditingController()
-    ..text = Platform.isIOS ? '100' : '100';
+    ..text = USER_NAME1;
   late final TextEditingController _passwordController = TextEditingController()
-    ..text = Platform.isIOS ? 'Jx2hM9aYrT' : 'Jx2hM9aYrT';
-  late final TextEditingController _serviceUrlController =
-      TextEditingController()..text = 'hungth12';
+    ..text = PASS_WORD1;
+  late final TextEditingController _serviceUrlController = TextEditingController()
+    ..text = REALM;
   late final TextEditingController _hostUrlController = TextEditingController()
     ..text = 'vh.omicrm.com';
 

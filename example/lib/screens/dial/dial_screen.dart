@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:calling/constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/action/action_model.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
@@ -99,7 +100,19 @@ class DialScreenState extends State<DialScreen> {
       });
     });
     OmicallClient.instance.setCallQualityListener((data) {
+      debugPrint("quality setCallQualityListener  ===> ::: $data");
       final quality = data["quality"] as int;
+      final numLcn = data["stat"]["lcn"] as int;
+      final isShowLoading = data["isNeedLoading"] as bool;
+      debugPrint("quality numLcn  ===> ::: $isShowLoading --- $numLcn ");
+    
+      if(isShowLoading){
+        EasyLoading.show();
+      } else {
+        EasyLoading.dismiss();
+      }
+
+
       setState(() {
         if (quality == 0) {
           _callQuality = "GOOD";

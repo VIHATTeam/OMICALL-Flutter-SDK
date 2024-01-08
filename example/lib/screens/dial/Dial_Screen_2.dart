@@ -93,6 +93,7 @@ class DialScreen2State extends State<DialScreen2> {
     });
     OmicallClient.instance.setCallQualityListener((data) {
       final quality = data["quality"] as int;
+      debugPrint("quality setCallQualityListener  ===> ::: $data");
       setState(() {
         if (quality == 0) {
           _callQuality = "GOOD";
@@ -223,7 +224,8 @@ class DialScreen2State extends State<DialScreen2> {
   }
 
   Future<void> getCurrentUser() async {
-    final user = await OmicallClient.instance.getCurrentUser();
+    final user = await OmicallClient.instance.getUserInfo(phone: "102");
+    debugPrint("user info  OmicallClient  zzz ::: $user");
     if (user != null) {
       setState(() {
         current = user;
