@@ -167,7 +167,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> checkAndPushToCall() async {
     final call = await OmicallClient.instance.getInitialCall();
-    if (call is Map) {
+    debugPrint("call checkAndPushToCall ==>  ${call}");
+    if (call is Map && call['callerNumber'].length > 0) {
       final isVideo = call["isVideo"] as bool;
       final callerNumber = call["callerNumber"];
       if (call['muted'] == false) return;
@@ -561,13 +562,13 @@ class _HomeScreenState extends State<HomeScreen> {
     if (phone.isEmpty) {
       return;
     }
-    EasyLoading.show();
+    // EasyLoading.show();
     final result = await OmicallClient.instance.startCall(
       phone,
       false,
     );
 
-    EasyLoading.dismiss();
+    // EasyLoading.dismiss();
     Map<String, dynamic> jsonMap = {};
     bool callStatus = false;
     String messageError = "";

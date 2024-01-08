@@ -66,6 +66,7 @@ class _MyAppState extends State<MyApp> {
       userNameKey: 'full_name',
       channelId: 'comcung.channelid.notification',
       audioNotificationDescription: "Có cuộc gọi audio",
+      representName:"CSKH H-Solutions"
     );
     init();
   }
