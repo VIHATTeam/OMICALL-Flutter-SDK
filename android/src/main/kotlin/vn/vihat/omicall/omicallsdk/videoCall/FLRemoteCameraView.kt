@@ -14,7 +14,7 @@ import vn.vihat.omicall.omisdk.OmiClient
 import vn.vihat.omicall.omisdk.videoutils.ScaleManager
 import vn.vihat.omicall.omisdk.videoutils.Size
 
-internal class FLRemoteCameraView(context: Context, id: Int, creationParams: Map<String?, Any?>?,  messenger: BinaryMessenger) :
+class FLRemoteCameraView(context: Context, id: Int, creationParams: Map<String?, Any?>?,  messenger: BinaryMessenger) :
     PlatformView, MethodChannel.MethodCallHandler, TextureView.SurfaceTextureListener {
     private val remoteView : TextureView
     private var methodChannel : MethodChannel

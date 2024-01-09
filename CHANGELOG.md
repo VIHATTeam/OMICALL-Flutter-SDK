@@ -2,10 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.20
+- Pump OMI core ios version 1.6.45
+- Pump OMI core android version 2.1.81
+
 ## 3.1.19
 - Pump OMI core ios version 1.6.44
 - Added option to show business name in CallKit
-- Pump OMI core ios version 2.1.73
+- Pump OMI core android version 2.1.73
 - Add event networking for ios. 
 
 ## 3.1.18
