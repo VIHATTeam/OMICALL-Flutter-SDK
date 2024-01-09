@@ -624,12 +624,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         
         // Current not use it 
         fun onResume(applicationContext: Context ) {
-            // applicationContext?.let { context ->
-            //  if (!OmiClient.getInstance(context).isRegistering) {
-            //   OmiClient.autoRegister(true);
-            //  }
-            //  OmiClient.isAppReady = true
-            // }
+             applicationContext?.let { context ->
+              OmiClient.isAppReady = true
+             }
         }
 
         fun onRequestPermissionsResult(

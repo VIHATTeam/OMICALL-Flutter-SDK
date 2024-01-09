@@ -17,7 +17,7 @@ import vn.vihat.omicall.omisdk.OmiClient
 import vn.vihat.omicall.omisdk.videoutils.ScaleManager
 import vn.vihat.omicall.omisdk.videoutils.Size
 
-internal class FLLocalCameraView(
+class FLLocalCameraView(
     context: Context,
     id: Int,
     creationParams: Map<String?, Any?>?,
