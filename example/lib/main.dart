@@ -55,7 +55,7 @@ class _MyAppState extends State<MyApp> {
     OmicallClient.instance.startServices();
     OmicallClient.instance.configPushNotification(
       notificationIcon: "calling_face",
-      prefix: Platform.isIOS ? "" : "Cuộc gọi tới từ: ",
+      prefix: Platform.isIOS ? "" : "Cuộc gọi đến ",
       incomingBackgroundColor: "#FFFFFFFF",
       incomingAcceptButtonImage: "join_call",
       incomingDeclineButtonImage: "hangup",
@@ -66,7 +66,7 @@ class _MyAppState extends State<MyApp> {
       userNameKey: 'full_name',
       channelId: 'comcung.channelid.notification',
       audioNotificationDescription: "Có cuộc gọi audio",
-      representName:"CSKH H-Solutions"
+      representName:"CSKH H-Finance"
     );
     init();
   }
@@ -90,6 +90,7 @@ class _MyAppState extends State<MyApp> {
         theme: ThemeData.light(),
         home: loginInfo == null
             ? const LoginUserPasswordScreen()
+            // ? const LoginApiKeyScreen()
             :
             // widget.isDirectCall
             //     ? DirectCallScreen(

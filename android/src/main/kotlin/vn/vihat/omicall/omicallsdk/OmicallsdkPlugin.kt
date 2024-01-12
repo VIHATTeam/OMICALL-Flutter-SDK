@@ -38,7 +38,6 @@ import java.util.*
 import com.google.gson.Gson
 import androidx.lifecycle.ProcessLifecycleOwner
 
-
 /** OmicallsdkPlugin */
 class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     PluginRegistry.NewIntentListener, OmiListener {
@@ -625,8 +624,35 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         // Current not use it 
         fun onResume(applicationContext: Context ) {
              applicationContext?.let { context ->
-              OmiClient.isAppReady = true
+                OmiClient.isAppReady = true
              }
+        }
+
+        fun onOmiIntent(applicationContext: Context , intent: Intent)  {
+            applicationContext?.let { context ->
+
+                val isIncomingCall = intent.getBooleanExtra(SipServiceConstants.ACTION_IS_INCOMING_CALL, false)
+                val isReopenCall = intent.getBooleanExtra(SipServiceConstants.ACTION_REOPEN_CALL, false)
+                val isAcceptedCall = intent.getBooleanExtra(SipServiceConstants.ACTION_ACCEPT_INCOMING_CALL, false)
+                val isMissedCall = intent.getBooleanExtra(SipServiceConstants.PARAM_IS_MISSED_CALL, false)
+
+                if (isIncomingCall) {
+                    // case gọi đến
+                    if (isAcceptedCall) {
+                        // case bấm nút pickup trên thông báo cuộc gọi đến
+                        // cần gọi pickup
+                        OmiClient.getInstance(context).pickUp()
+                        return
+                    }
+
+                    if (isReopenCall) {
+                        //case bấm vào thông báo calling khi cuộc gọi đã được accept
+                        // xử lý giao diện của cuộc gọi đang diễn ra
+                        return
+                    }
+                    return
+                }
+            }
         }
 
         fun onRequestPermissionsResult(
@@ -664,17 +690,21 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onNewIntent(intent: Intent): Boolean {
-        if (intent.hasExtra(SipServiceConstants.PARAM_NUMBER)) {
-            //do your Stuff
-            channel.invokeMethod(
-                CLICK_MISSED_CALL,
+        val isIncomingCall = intent.getBooleanExtra(SipServiceConstants.ACTION_IS_INCOMING_CALL, false)
+        val isReopenCall = intent.getBooleanExtra(SipServiceConstants.ACTION_REOPEN_CALL, false)
+        val isAcceptedCall = intent.getBooleanExtra(SipServiceConstants.ACTION_ACCEPT_INCOMING_CALL, false)
+        val isMissedCall = intent.getBooleanExtra(SipServiceConstants.PARAM_IS_MISSED_CALL, false)
+
+        if (isMissedCall && !isIncomingCall ){
+            channel.invokeMethod(CLICK_MISSED_CALL,
                 mapOf(
                     "callerNumber" to intent.getStringExtra(SipServiceConstants.PARAM_NUMBER),
-                    "isVideo" to intent.getBooleanExtra(SipServiceConstants.PARAM_IS_VIDEO, false),
-                ),
-            )
+                    "isVideo" to intent.getBooleanExtra(SipServiceConstants.PARAM_IS_VIDEO, false)),
+                )
+                return true
         }
         return false
     }
+
 
 }

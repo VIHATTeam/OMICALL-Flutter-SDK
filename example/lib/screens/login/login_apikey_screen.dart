@@ -31,7 +31,7 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
   // NSString * PASS_WORD2 = @"Kunkun12345"; 0358380641
 
   String user_name = "thanh mơis";
-  String pass_word = "0358380646";
+  String pass_word = "0967884005";
   String apiKEY = "E7AF81703203FC31F5658FAF3B875149CD57368ED07DB4AF414D93D3D2EBC76E";
 
 

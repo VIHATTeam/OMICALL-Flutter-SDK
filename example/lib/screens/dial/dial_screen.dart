@@ -75,7 +75,7 @@ class DialScreenState extends State<DialScreen> {
       final status = data["status"] as int;
 
       updateDialScreen(status);
-      debugPrint("status OmicallClient 44 =====> ::: $status");
+      debugPrint("status OmicallClient DiaScreen =====> ::: $status");
       if (status == OmiCallState.disconnected.rawValue) {
         i++;
         if (i >= 2) return;
@@ -327,7 +327,7 @@ class DialScreenState extends State<DialScreen> {
                             Column(
                               children: [
                                 Text(
-                                  "${guestUser?["extension"] ?? "${widget.phoneNumber}"}",
+                                  "${guestUser?["represent_name"] ?? guestUser?["extension"] ?? "${widget.phoneNumber}"}",
                                   style: Theme.of(context)
                                       .textTheme
                                       .headlineMedium!
