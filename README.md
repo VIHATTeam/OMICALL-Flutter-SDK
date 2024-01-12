@@ -92,6 +92,7 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
       <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE"/>
       <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"/>
       <uses-permission android:name="android.permission.CALL_PHONE"/>
+      <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> 
       ..... // your config 
 
          <application
@@ -125,14 +126,13 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
                               <action android:name="android.intent.action.MAIN" />
                               <category android:name="android.intent.category.LAUNCHER" />
                           </intent-filter>
+                          
                           <intent-filter>
-                            <action 
-                                android:name="com.omicall.sdk.CallingActivity"
-                                android:launchMode="singleTask"
-                                android:largeHeap="true"
-                                android:alwaysRetainTaskState="true"
-                            />
-                            <category android:name="android.intent.category.DEFAULT" />
+                                <action android:name="android.intent.action.CALL" />
+                                <category android:name="android.intent.category.DEFAULT" />
+                            <data
+                                 android:host="incoming_call"
+                                 android:scheme="omisdk" />
                           </intent-filter>
                         .....  // your config 
                      </activity>
@@ -160,7 +160,16 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
 ```
 Class MainActivity : {
         ..... // your config 
-
+        
+        override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        try {
+            OmicallsdkPlugin.onOmiIntent(this, intent)
+        } catch (e: Throwable) {
+            e.printStackTrace()
+        }
+    }
+  
         override fun onResume(){
             super.onResume()
             OmicallsdkPlugin.onResume(this);
