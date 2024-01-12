@@ -19,8 +19,8 @@
 //    #else
 //        [OmiClient setEnviroment:@"3" userNameKey:@"full_name" maxCall:1 callKitImage:@"call_image" typePushVoip:@"default" representName: @"CTY H-SOLUTIONS"];
 //    #endif
-    [OmiClient setEnviroment:@"3" userNameKey:@"full_name" maxCall:1 callKitImage:@"call_image" typePushVoip:@"default" representName: @"CTY H-SOLUTIONS"];
-  [OmiClient setLogLevel:4];
+    [OmiClient setEnviroment:@"3" userNameKey:@"full_name" maxCall:1 callKitImage:@"call_image" typePushVoip:@"default" representName: @"CTY H-Finance"];
+    [OmiClient setLogLevel:4];
 
   provider = [[CallKitProviderDelegate alloc] initWithCallManager: [OMISIPLib sharedInstance].callManager];
   voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];

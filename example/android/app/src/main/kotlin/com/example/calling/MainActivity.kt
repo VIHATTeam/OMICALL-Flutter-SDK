@@ -9,6 +9,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import android.os.Bundle
+import android.content.Intent
+import android.util.Log
 
 class MainActivity: FlutterActivity() {
 
@@ -25,6 +27,7 @@ class MainActivity: FlutterActivity() {
                     0,
                 )
             }
+            OmicallsdkPlugin.onOmiIntent(this, intent)
         } catch (e: Throwable) {
             e.printStackTrace()
         }

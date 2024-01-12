@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.21
+- Pump OMI core android version 2.1.86
+- Fix lỗi leak memory cho các cuộc gọi dài trên android.
+- Cập nhật flow nhận cuộc gọi trong android. 
+
 ## 3.1.20
 - Pump OMI core ios version 1.6.45
 - Pump OMI core android version 2.1.81

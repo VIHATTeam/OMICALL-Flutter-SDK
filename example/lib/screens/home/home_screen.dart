@@ -89,6 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
     OmicallClient.instance.setMissedCallListener((data) {
       final String callerNumber = data["callerNumber"];
       final bool isVideo = data["isVideo"];
+      debugPrint("OMICALL FLUTTER setMissedCallListener ==>  ${data}");
       makeCallWithParams(context, callerNumber, isVideo);
     });
     _subscription =
@@ -102,9 +103,10 @@ class _HomeScreenState extends State<HomeScreen> {
       debugPrint("data  OmicallClient  zzz ::: $data");
       final status = data["status"] as int;
       debugPrint("status  OmicallClient  zzz ::: $status");
+
       if (status == OmiCallState.incoming.rawValue ||
           status == OmiCallState.confirmed.rawValue) {
-        debugPrint("data  OmicallClient  zzz ::: $data");
+        debugPrint("data  OmicallClient  zzz ZZZZ ::: $data");
 
         _isVideoCall = data['isVideo'] as bool;
         var callerNumber = "";
@@ -155,6 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
     // checkSystemAlertPermission();
     OmicallClient.instance.setCallLogListener((data) {
+      debugPrint("OMICALL FLUTTER setCallLogListener ==>  ${data}");
       final callerNumber = data["callerNumber"];
       _isVideoCall = data["isVideo"];
       makeCallWithParams(
@@ -167,11 +170,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> checkAndPushToCall() async {
     final call = await OmicallClient.instance.getInitialCall();
-    debugPrint("call checkAndPushToCall ==>  ${call}");
-    if (call is Map && call['callerNumber'].length > 0) {
+    debugPrint("call checkAndPushToCall ==>  ${call}}");
+    if (call is Map && call['callerNumber'].length > 0 && call['status'] == 3 &&  call['status'] == 5 ) {
       final isVideo = call["isVideo"] as bool;
       final callerNumber = call["callerNumber"];
-      if (call['muted'] == false) return;
+      // if (call['muted'] == false) return;
       if (isVideo) {
         pushToVideoScreen(
           callerNumber,
@@ -181,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
       } else {
         pushToDialScreen(
           callerNumber,
-          status: OmiCallState.confirmed.rawValue,
+          status: call['status'] == 5 ? OmiCallState.confirmed.rawValue : OmiCallState.incoming.rawValue,
           isOutGoingCall: false,
         );
       }
