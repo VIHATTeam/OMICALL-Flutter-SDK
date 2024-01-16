@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.22
+- Pump OMI core android version 2.2.0
+- Fix lỗi show popup cuộc gọi nhỡ trong android.
+
 ## 3.1.21
 - Pump OMI core android version 2.1.86
 - Fix lỗi leak memory cho các cuộc gọi dài trên android.
