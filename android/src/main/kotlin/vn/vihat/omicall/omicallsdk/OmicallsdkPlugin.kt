@@ -637,9 +637,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val isMissedCall = intent.getBooleanExtra(SipServiceConstants.PARAM_IS_MISSED_CALL, false)
 
                 if (isIncomingCall) {
-                    // case gọi đến
+                    //case gọi đến
                     if (isAcceptedCall) {
-                        // case bấm nút pickup trên thông báo cuộc gọi đến
+                        //case bấm nút pickup trên thông báo cuộc gọi đến
                         // cần gọi pickup
                         OmiClient.getInstance(context).pickUp()
                         return
@@ -650,7 +650,21 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                         // xử lý giao diện của cuộc gọi đang diễn ra
                         return
                     }
+                    //Khi không thoả 2 điều kiện trên thì là cuộc gọi đến chưa được accept, bao gồm:
+                    //case bấm vào body thông báo cuộc gọi đến
+                    //case bấm vào thông báo calling khi cuộc gọi đang ở trạng thái early
+                    //cần show nút nghe máy và nút từ chối
                     return
+                } else {
+                    //case gọi đi
+                    //trường hợp này chỉ xảy ra khi bấm vào thông báo calling khi gọi đi
+                    if(isReopenCall) {
+                        // case cuộc gọi đã được accept
+                        // xử lý giao diện của cuộc gọi đang diễn ra
+                    } else {
+                        // case cuộc gọi chưa được accept
+                        // cần xử lý ui bình thường như cuộc gọi đi khi đang early
+                    }
                 }
             }
         }
