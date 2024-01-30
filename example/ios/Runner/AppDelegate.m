@@ -37,4 +37,13 @@
     return value;
 }
 
+- (void)applicationWillTerminate:(UIApplication *)application {
+    @try {
+        [OmiClient OMICloseCall];
+    }
+    @catch (NSException *exception) {
+
+    }
+}
+
 @end

@@ -59,8 +59,10 @@ class DialScreen2State extends State<DialScreen2> {
     }
     super.initState();
     _subscription = OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
+
       debugPrint("status callStateChangeEvent omiAction::: ${omiAction.actionName}");
       debugPrint("status callStateChangeEvent omiAction data::: ${omiAction.data}");
+
       if (omiAction.actionName == OmiEventList.onCallStateChanged) {
         final data = omiAction.data;
         final status = data["status"] as int;
@@ -146,7 +148,7 @@ class DialScreen2State extends State<DialScreen2> {
     Map<String, dynamic> jsonMap = {};
     bool callStatus = false;
     String messageError = "";
-    debugPrint("result  OmicallClient  zzz ::: $result");
+    debugPrint("result  OmicallClient  zzzzzz ::: $result");
 
     jsonMap = json.decode(result);
     messageError = jsonMap['message'];
@@ -225,7 +227,6 @@ class DialScreen2State extends State<DialScreen2> {
 
   Future<void> getCurrentUser() async {
     final user = await OmicallClient.instance.getUserInfo(phone: "102");
-    debugPrint("user info  OmicallClient  zzz ::: $user");
     if (user != null) {
       setState(() {
         current = user;
@@ -301,7 +302,8 @@ class DialScreen2State extends State<DialScreen2> {
                         Column(
                           children: [
                             Text(
-                              "${guestUser?["extension"] ?? "..."}",
+                              // "${guestUser?["extension"] ?? "..."}",
+                              "zzzz",
                               style: Theme.of(context)
                                   .textTheme
                                   .headlineMedium!
