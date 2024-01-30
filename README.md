@@ -255,6 +255,16 @@ Notes:
 }
 ```
 
+```
+- (void)applicationWillTerminate:(UIApplication *)application {
+    @try {
+        [OmiClient OMICloseCall];
+    }
+    @catch (NSException *exception) {
+
+    }
+}
+```
 -  Add these lines into `Info.plist`:
 
 ```
