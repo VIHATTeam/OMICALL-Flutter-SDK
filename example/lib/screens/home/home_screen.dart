@@ -174,7 +174,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (call is Map && call['callerNumber'].length > 0 && call['status'] == 3 &&  call['status'] == 5 ) {
       final isVideo = call["isVideo"] as bool;
       final callerNumber = call["callerNumber"];
+
       // if (call['muted'] == false) return;
+
       if (isVideo) {
         pushToVideoScreen(
           callerNumber,

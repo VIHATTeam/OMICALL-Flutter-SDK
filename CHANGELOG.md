@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.23
+- Pump OMI core android version 2.2.10
+- Pump OMI core IOS version 1.6.51
+- Fix crash SDK 
+- Change params request off API
+- Add func clear All Call when kill app in ios. 
+
 ## 3.1.22
 - Pump OMI core android version 2.2.0
 - Fix lỗi show popup cuộc gọi nhỡ trong android.

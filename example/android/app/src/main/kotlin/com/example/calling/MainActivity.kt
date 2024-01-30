@@ -11,6 +11,7 @@ import androidx.core.content.ContextCompat
 import android.os.Bundle
 import android.content.Intent
 import android.util.Log
+import vn.vihat.omicall.omisdk.utils.SipServiceConstants
 
 class MainActivity: FlutterActivity() {
 
@@ -27,11 +28,18 @@ class MainActivity: FlutterActivity() {
                     0,
                 )
             }
+            val isIncomingCall = intent.getBooleanExtra(SipServiceConstants.ACTION_IS_INCOMING_CALL, false)
             OmicallsdkPlugin.onOmiIntent(this, intent)
         } catch (e: Throwable) {
             e.printStackTrace()
         }
     }
+
+    override fun onNewIntent(intent: Intent){
+        super.onNewIntent(intent);
+        OmicallsdkPlugin.onOmiIntent(this, intent)
+    }
+
 
     override fun onDestroy() {
         super.onDestroy()
