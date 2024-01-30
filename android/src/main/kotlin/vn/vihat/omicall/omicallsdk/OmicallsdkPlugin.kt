@@ -324,6 +324,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val videoNotificationDescription = dataOmi["videoNotificationDescription"] as? String
                 val appRepresentName = dataOmi["representName"] as? String
                 val displayNameType = dataOmi["displayNameType"] as? String
+                val isUseIntentFilter = dataOmi["isUseIntentFilter"] as? Boolean
 
                 OmiClient.getInstance(applicationContext!!).configPushNotification(
                     showMissedCall = true,
@@ -341,7 +342,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     missedChannelName = "Cuộc gọi nhỡ",
                     displayNameType = userNameKey ?: "full_name",
                     notificationMissedCallPrefix = prefixMissedCallMessage ?: "Cuộc gọi nhỡ từ",
-                    representName= appRepresentName ?: ""
+                    representName= appRepresentName ?: "",
+                    useIntentFilter= isUseIntentFilter ?: true
                 )
                 result.success(true)
             }
