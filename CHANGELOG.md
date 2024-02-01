@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.25
+- Pump OMI core IOS version 1.6.54
+- Fix lỗi logIn với API KEY fail trên ios
+
 ## 3.1.24
 - Pump OMI core android version 2.2.11
 - Add field isUseIntentFilter cho option có sử dụng intent Filter của Omi hay không
