@@ -3,6 +3,11 @@
 All notable changes to this project will be documented in this file.
 
 
+## 3.1.28
+- Pump OMI core IOS version 1.6.56
+
+
+
 ## 3.1.27
 - Pump OMI core Android version 2.2.18
 - Pump OMI core IOS version 1.6.55
