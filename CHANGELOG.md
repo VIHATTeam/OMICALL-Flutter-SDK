@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.29
+- Pump OMI core IOS version 1.6.57
 
 ## 3.1.28
 - Pump OMI core IOS version 1.6.56
