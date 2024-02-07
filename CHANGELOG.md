@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+
+## 3.1.27
+- Pump OMI core Android version 2.2.18
+- Pump OMI core IOS version 1.6.55
+- Thêm params vào api lưu thông tin cuộc gọi
+
 ## 3.1.26
 - Pump OMI core Android version 2.2.12
 - Fix lỗi crash android 
