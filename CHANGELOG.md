@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+
+## 3.1.31
+- Pump OMI core Android version 2.2.23
+- Fix bug crash android
+
 ## 3.1.30
 - Pump OMI core Android version 2.2.22 
 - Fix bug crash android
