@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.35
+- Pump OMI core IOS to version 1.7.18
+- Fix callkit bug when forwarding multiple times back to self
+
 ## 3.1.34
 - Pump OMI core Android version 2.2.34
 - Fix bug crash android
