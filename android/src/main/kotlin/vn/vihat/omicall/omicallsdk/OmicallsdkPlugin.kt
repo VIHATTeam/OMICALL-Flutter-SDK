@@ -165,8 +165,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         )
     }
 
-    override fun onSlowRegister(){
-        Log.d("Kds", "MainActivity -> callListener -> onSlowRegister")
+    override fun onRegisterCompleted(statusCode: Int) {
+        // Your code to handle the registration completion
+        Log.d("OMI Flutter", "OnRegisterCompleted")
     }
 
     override fun onDescriptionError() {

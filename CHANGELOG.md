@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.36
+- Pump OMI core Android version 2.2.82
+- Pump OMI core IOS to version 1.7.23
+- Improve quality call
+- Improve FCM call for android
+
 ## 3.1.35
 - Pump OMI core IOS to version 1.7.18
 - Fix callkit bug when forwarding multiple times back to self
