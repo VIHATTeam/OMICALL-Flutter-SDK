@@ -469,20 +469,26 @@ await Firebase.initializeApp();
         phone, //phone number
         _isVideoCall, //call video or audio. If true is video call. 
     );
-    Note: You need await for result == 8, this mean startCallSuccess after you navigate or make another action  
-    //we will return OmiStartCallStatus with:
-    - invalidUuid(0): uuid is invalid (we can not find on my page)
-    - invalidPhoneNumber(1): sip user is invalid.
-    - samePhoneNumber(2): Can not call same phone number.
-    - maxRetry(3): We try to refresh call but we can not start your call.
-    - permissionDenied(4): Check audio permission.
-    - couldNotFindEndpoint(5): Please login before make your call.
-    - accountRegisterFailed(6): We can not register your account.
-    - startCallFailed(7): We can not start you call.
-    - startCallSuccess(8): Start call successfully.
-    - haveAnotherCall(9): We can not start you call because you are joining another call.
     ```
+| Note                                                                                                                     |
+|--------------------------------------------------------------------------------------------------------------------------|
+| You need await for result == 8, this means startCallSuccess after you navigate or make another action.                   |
+|                                                                                                                          |
+| OmiStartCallStatus:                                                                                                      |
+| - invalidUuid(0): uuid is invalid (we cannot find on my page)                                                            |
+| - invalidPhoneNumber(1): sip user is invalid.                                                                            |
+| - samePhoneNumber(2): Cannot call the same phone number.                                                                 |
+| - maxRetry(3): We try to refresh the call but we cannot start your call.                                                 |
+| - permissionDenied(4): Check audio permission.                                                                           |
+| - couldNotFindEndpoint(5): Please login before making your call.                                                         |
+| - accountRegisterFailed(6): We cannot register your account.                                                             |
+| - startCallFailed(7): We cannot start your call.                                                                         |
+| - startCallSuccess(8): Start call successfully.                                                                          |
+| - haveAnotherCall(9): We cannot start your call because you are joining another call.                                    |
+
+    
   -  Call with UUID (only support with Api key):
+    
     ```
     final result = OmicallClient.instance.startCallWithUUID(
         uuid, //your user id
@@ -490,6 +496,7 @@ await Firebase.initializeApp();
     );
     // Result is the same with startCall
     ```
+
   - Accept a call:
     ```
     OmicallClient.instance.joinCall();
@@ -702,15 +709,20 @@ await Firebase.initializeApp();
   });
   // data is Map. Data has 2 keys: callerNumber, isVideo
   ```
+- Table describing code_end_call status
 
-  - List of notable call codes `code_end_call`:
-  + `600, 503, 480` : These are the codes of the network operator or the user who did not answer the call
-  + `408` : call request timeout (Each call usually has a waiting time of 30 seconds. If the 30 seconds expire, it will time out)
-  + `403` : Your service plan only allows calls to dialed numbers. Please upgrade your service pack
-  + `404` : The current number is not allowed to make calls to the carrier
-  + `603` : The call was rejected. Please check your account limit or call barring configuration!
-  + `850` : Simultaneous call limit exceeded, please try again later
-  + `486` : The listener refuses the call and does not answer
+
+| Code  | Description |
+|-------|-------------|
+| `600, 503, 480` | These are the codes of the network operator or the user who did not answer the call |
+| `408` | Call request timeout (Each call usually has a waiting time of 30 seconds. If the 30 seconds expire, it will time out) |
+| `403` | Your service plan only allows calls to dialed numbers. Please upgrade your service pack |
+| `404` | The current number is not allowed to make calls to the carrier |
+| `603` | The call was rejected. Please check your account limit or call barring configuration! |
+| `850` | Simultaneous call limit exceeded, please try again later |
+| `486` | The listener refuses the call and does not answer |
+| `601` | Call ended by the customer |
+| `602` | Call ended by the other employee |
 
 
 - Action Name value:
