@@ -39,14 +39,14 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
   //NSString * PASS_WORD1 = @"Duongngocqui@98";
 
   // HUNGTH
-  String REALM = "hungth12";
-  String USER_NAME1 = "100";
-  String PASS_WORD1 = "Jx2hM9aYrT";
+  // String REALM = "hungth12";
+  // String USER_NAME1 = "100";
+  // String PASS_WORD1 = "Jx2hM9aYrT";
 
   // HUNGTH
-  // String REALM = "quidn";
-  // String USER_NAME1 = "100";
-  // String PASS_WORD1 = "Duongngocqui@98";
+  String REALM = "quidn";
+  String USER_NAME1 = "102";
+  String PASS_WORD1 = "Duongngocqui@98";
 
 
   // // THANH CONCUNG
