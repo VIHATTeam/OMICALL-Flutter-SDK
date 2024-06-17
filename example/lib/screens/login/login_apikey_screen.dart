@@ -30,8 +30,8 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
   // NSString * USER_NAME2 = @"101";
   // NSString * PASS_WORD2 = @"Kunkun12345"; 0358380641
 
-  String user_name = "thanh mơis";
-  String pass_word = "0967884005";
+  String user_name = " Tài khoản test app Tài khoản test app";
+  String pass_word = "0906005535";
   String apiKEY = "E7AF81703203FC31F5658FAF3B875149CD57368ED07DB4AF414D93D3D2EBC76E";
 
 
@@ -361,6 +361,8 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
     if (Platform.isIOS) {
       token = await FirebaseMessaging.instance.getAPNSToken();
     }
+    final result0 = await OmicallClient.instance.getCurrentUser();
+    debugPrint(result0.toString());
     final result = await OmicallClient.instance.initCallWithApiKey(
       usrName: _userNameController.text,
       usrUuid: _usrUuidController.text,
