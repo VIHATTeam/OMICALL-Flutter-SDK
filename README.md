@@ -85,14 +85,10 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
       ...... 
       xmlns:tools="http://schemas.android.com/tools">
       ..... // your config 
-      <uses-feature android:name="android.hardware.telephony" android:required="false" />
-      <uses-permission android:name="android.permission.INTERNET" />
-      <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-      <uses-permission android:name="android.permission.WAKE_LOCK" />
-      <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE"/>
-      <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"/>
-      <uses-permission android:name="android.permission.CALL_PHONE"/>
-      <uses-permission android:name="android.permission.FOREGROUND_SERVICE" /> 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
       ..... // your config 
 
          <application
@@ -177,30 +173,6 @@ Class MainActivity : {
         ..... // your config 
 
 }
-```
-
-```
-```
-You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/main/OMICALL-Flutter-SDK-Sample/android/app/src/main/AndroidManifest.xml">AndroidManifest</a> to know more information.
-
-
-- We registered permissions into my plugin:
-```
-<uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS"
-    tools:ignore="ProtectedPermissions" />
-<uses-permission android:name="android.permission.INTERNET" />
-<uses-permission android:name="android.permission.USE_SIP" />
-<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-<uses-permission android:name="android.permission.WAKE_LOCK" />
-<uses-permission android:name="android.permission.CAMERA" />
-<uses-permission android:name="android.permission.RECORD_AUDIO" />
-<uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
-<uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-<uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
-<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-<uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
-<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 ```
 
 - Setup push notification: Only support Firebase for remote push notification.
