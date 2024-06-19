@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.37
+- Pump OMI core Android version 2.2.83
+- Remove permission in AndroidManifest
+
 ## 3.1.36
 - Pump OMI core Android version 2.2.82
 - Pump OMI core IOS to version 1.7.23
