@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.1.38
+- Pump OMI core IOS to version 1.7.25
+- Fix missed omi_id off incoming call ios
+
 ## 3.1.37
 - Pump OMI core Android version 2.2.83
 - Remove permission in AndroidManifest
