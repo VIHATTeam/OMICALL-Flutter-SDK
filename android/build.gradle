@@ -8,13 +8,13 @@ buildscript {
         mavenCentral()
         jcenter() // Warning: this repository is going to shut down soon
         maven {
-            url "https://gitlab.com/api/v4/projects/47675059/packages/maven"
-            credentials(HttpHeaderCredentials) {
-                name = "Private-Token"
-                value = "glpat-AzyyrvKz9_pjsgGW4xfp"
+            url "https://maven.pkg.github.com/omicall/OMICall-SDK"
+            credentials {
+                 username = "${omicallUsername}"
+                 password = "${omicallPassword}"
             }
             authentication {
-                header(HttpHeaderAuthentication)
+                basic(BasicAuthentication)
             }
         }
     }
@@ -35,13 +35,13 @@ allprojects {
         mavenCentral()
         jcenter() // Warning: this repository is going to shut down soon
         maven {
-            url "https://gitlab.com/api/v4/projects/47675059/packages/maven"
-            credentials(HttpHeaderCredentials) {
-                name = "Private-Token"
-                value = "glpat-AzyyrvKz9_pjsgGW4xfp"
+            url "https://maven.pkg.github.com/omicall/OMICall-SDK"
+            credentials {
+                username = "${omicallUsername}"
+                password = "${omicallPassword}"
             }
             authentication {
-                header(HttpHeaderAuthentication)
+                basic(BasicAuthentication)
             }
         }
     }
@@ -80,7 +80,7 @@ android {
 
 dependencies {
 
-    api 'vn.vihat.omicall:omi-sdk:2.2.83'
+    api 'vn.vihat.omicall:omi-sdk:2.2.85'
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
 
     implementation("androidx.work:work-runtime:2.8.1")
