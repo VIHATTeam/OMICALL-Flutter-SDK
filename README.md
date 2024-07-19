@@ -28,15 +28,15 @@ omicall_flutter_plugin: ^latest_version
 ```
 jcenter() 
 maven {
-    url "https://gitlab.com/api/v4/projects/47675059/packages/maven"
-    credentials(HttpHeaderCredentials) {
-        name = "Private-Token"
-        value = "glpat-AzyyrvKz9_pjsgGW4xfp"
-    }
-    authentication {
-        header(HttpHeaderAuthentication)
-    }
-}
+          url "https://maven.pkg.github.com/omicall/OMICall-SDK"
+          credentials {
+              username = OMI_USER
+              password = OMI_TOKEN
+          }
+          authentication {
+              basic(BasicAuthentication)
+          }
+        }
 ```
 
 ```
@@ -51,15 +51,15 @@ allprojects {
         google()
         mavenCentral()
         jcenter() // Warning: this repository is going to shut down soon
-         maven {
-            url "https://gitlab.com/api/v4/projects/47675059/packages/maven"
-            credentials(HttpHeaderCredentials) {
-                name = "Private-Token"
-                value = "glpat-AzyyrvKz9_pjsgGW4xfp"
-            }
-            authentication {
-                header(HttpHeaderAuthentication)
-            }
+        maven {
+          url "https://maven.pkg.github.com/omicall/OMICall-SDK"
+          credentials {
+              username = OMI_USER
+              password = OMI_TOKEN
+          }
+          authentication {
+              basic(BasicAuthentication)
+          }
         }
     }
 }
