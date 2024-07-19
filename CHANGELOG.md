@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+
+## 3.1.39
+- Change repo maven
+
+
 ## 3.1.38
 - Pump OMI core IOS to version 1.7.25
 - Fix missed omi_id off incoming call ios
