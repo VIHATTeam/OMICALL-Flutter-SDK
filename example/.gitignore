@@ -5,9 +5,11 @@
 *.swp
 .DS_Store
 .atom/
+.build/
 .buildlog/
 .history
 .svn/
+.swiftpm/
 migrate_working_dir/
 
 # IntelliJ related
@@ -46,4 +48,17 @@ app.*.map.json
 /android/app/release
 
 #fastlane
+example/android/app/cxx/
+example/build/
+
 /fastlane/report.xml
+
+/android/gradle
+/android/build/ios/*
+/android/.gradle
+/android/app/src/debug/
+/android/app/src/main/res/
+/android/app/src/profile/
+
+/ios/Flutter/
+/ios/Pods/

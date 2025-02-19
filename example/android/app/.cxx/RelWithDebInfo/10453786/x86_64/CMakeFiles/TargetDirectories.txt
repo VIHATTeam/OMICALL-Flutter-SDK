@@ -1,0 +1,2 @@
+/Users/hsolutions/Documents/CODING/VIHAT/SDK/OMICALL-Flutter-SDK/example/android/app/.cxx/RelWithDebInfo/10453786/x86_64/CMakeFiles/edit_cache.dir
+/Users/hsolutions/Documents/CODING/VIHAT/SDK/OMICALL-Flutter-SDK/example/android/app/.cxx/RelWithDebInfo/10453786/x86_64/CMakeFiles/rebuild_cache.dir

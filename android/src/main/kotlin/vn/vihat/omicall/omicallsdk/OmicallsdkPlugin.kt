@@ -206,6 +206,12 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onHold(isHold: Boolean) {
+        channel.invokeMethod(
+            HOLD, mapOf(
+                "isHold" to isHold,
+            )
+        )
+        Log.d("omikit", "onHold: $isHold")
     }
 
     override fun onMuted(isMuted: Boolean) {
@@ -270,17 +276,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     private fun messageCall(type: Int): String {
         return when (type) {
-//            0 -> "INVALID_UUID"
-//            1 -> "INVALID_PHONE_NUMBER"
-//            2 -> "SAME_PHONE_NUMBER_WITH_PHONE_REGISTER"
-//            3 -> "MAX_RETRY"
-//            4 -> "PERMISSION_DENIED"
-//            5 -> "COULD_NOT_FIND_END_POINT"
-//            6 -> "REGISTER_ACCOUNT_FAIL"
-//            7 -> "START_CALL_FAIL"
-//            8 -> "START_CALL_SUCCESS"
-//            9 -> "HAVE_ANOTHER_CALL"
-//            else -> "START_CALL_SUCCESS"
             200 -> "START_CALL_SUCCESS"
             400 -> "HAVE_ANOTHER_CALL"
             401 -> "INVALID_UUID"
@@ -289,7 +284,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             404 -> "SWITCHBOARD_NOT_CONNECTED"
             405 -> "PERMISSION_DENIED"
             406 -> "PERMISSION_DENIED"
-            407 -> "COULD_NOT_REGISTER_ACCOUNT"
+            407 -> "SWITCHBOARD_REGISTERING"
             else -> "HAVE_ANOTHER_CALL"
         }
     }
@@ -356,6 +351,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val host = dataOmi["host"] as? String
                     val isVideo = dataOmi["isVideo"] as? Boolean
                     val firebaseToken = dataOmi["fcmToken"] as? String
+                    val projectId = dataOmi["projectId"] as? String ?: ""
                     if (userName != null && password != null && realm != null && host != null && firebaseToken != null ) {
                             OmiClient.register(
                                 userName,
@@ -363,7 +359,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                                 realm,
                                 isVideo ?: true,
                                 firebaseToken,
-                                host
+                                host,
+                                projectId
                             )
                     }
                     requestPermission(isVideo ?: true)
@@ -379,6 +376,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val isVideo = dataOmi["isVideo"] as? Boolean
                     val phone = dataOmi["phone"] as? String
                     val firebaseToken = dataOmi["fcmToken"] as? String
+                    val projectId = dataOmi["projectId"] as? String ?: ""
 
                     withContext(Dispatchers.Default) {
                         try {
@@ -389,7 +387,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                                     uuid = usrUuid,
                                     phone = phone,
                                     isVideo ?: true,
-                                    firebaseToken
+                                    firebaseToken,
+                                    projectId
                                 )
                             }
                         } catch (_: Throwable) {
@@ -408,22 +407,18 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 val isVideo = dataOmi["isVideo"] as Boolean
                 val startCallResult = OmiClient.getInstance(applicationContext!!).startCall(phoneNumber, isVideo)
                 var statusCalltemp =  startCallResult.value as Int;
-                if(startCallResult.value == 200 ){
+
+                if(startCallResult.value == 200 || startCallResult.value == 407 ){
                     statusCalltemp = 8
                 }
+
                 val dataSend = mapOf(
                     "status" to statusCalltemp ,
                     "_id" to "",
                     "message" to messageCall(startCallResult.value),
                 )
-                // Log.d(
-                //     "dataOmi",
-                //     "START_CALL $dataSend "
-                // )
+
                 val gson = Gson()
-//                val dataSendResult = dataSend.entries.joinToString(", ") { (key, value) ->
-//                    "$key: ${value ?: "null"}"
-//                }
 
                 val jsonData = gson.toJson(dataSend)
                 result.success(jsonData)
@@ -455,6 +450,23 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     }
                     result.success(newStatus)
                     channel.invokeMethod(MUTED, newStatus)
+                }
+            }
+            TOGGLE_HOLD -> {
+                mainScope.launch {
+                    try {
+                        val rawResult = withContext(Dispatchers.IO) {
+                            OmiClient.getInstance(applicationContext!!).toggleHold()
+                        }
+                        println("Raw result from toggleHold(): $rawResult")
+                        // Nếu rawResult là Unit, gán false; nếu không, ép sang Boolean (nếu có thể).
+                        val newStatus = if (rawResult == Unit) false else rawResult as? Boolean ?: false
+                        println("New status after evaluation: $newStatus")
+                        result.success(newStatus)
+//                        channel.invokeMethod(HOLD, newStatus)
+                    } catch (e: Exception) {
+                        result.error("TOGGLE_HOLD_EXCEPTION", "Exception occurred: ${e.message}", e)
+                    }
                 }
             }
             TOGGLE_SPEAK -> {
