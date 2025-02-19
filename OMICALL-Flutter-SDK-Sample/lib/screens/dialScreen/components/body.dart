@@ -19,6 +19,7 @@ class Body extends StatefulWidget {
 
 class _BodyState extends State<Body> {
   bool _isMuted = false;
+  bool _isHold = false;
   bool _isMic = false;
   String _message = 'Connecting';
   bool _isShowKeyboard = false;
@@ -44,6 +45,15 @@ class _BodyState extends State<Body> {
           });
         }
       }
+
+      if (action.actionName == OmiEventList.onHold) {
+        if (mounted) {
+          setState(() {
+            _isHold = action.data["isHold"] as bool;
+          });
+        }
+      }
+
       if (action.actionName == OmiEventList.onRinging) {
         if (mounted) {
           setState(() {
@@ -105,7 +115,7 @@ class _BodyState extends State<Body> {
                       },
                     ),
                     DialButton(
-                      iconSrc: !_isMuted
+                      iconSrc: !_isHold
                           ? 'assets/icons/ic_audio.svg'
                           : 'assets/icons/ic_no_audio.svg',
                       text: "Audio",

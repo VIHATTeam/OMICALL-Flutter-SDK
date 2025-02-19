@@ -47,3 +47,7 @@ app.*.map.json
 
 #fastlane
 /fastlane/report.xml
+
+example/build/
+example/.dart_tool/
+example/.fvm/

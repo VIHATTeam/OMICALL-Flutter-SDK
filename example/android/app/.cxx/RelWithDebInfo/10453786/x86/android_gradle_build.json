@@ -1,0 +1,28 @@
+{
+  "buildFiles": [
+    "/Users/hsolutions/fvm/versions/3.27.2/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/hsolutions/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/hsolutions/Documents/CODING/VIHAT/SDK/OMICALL-Flutter-SDK/example/android/app/.cxx/RelWithDebInfo/10453786/x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/hsolutions/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/hsolutions/Documents/CODING/VIHAT/SDK/OMICALL-Flutter-SDK/example/android/app/.cxx/RelWithDebInfo/10453786/x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {},
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "/Users/hsolutions/Library/Android/sdk/ndk/23.1.7779620/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang.lld",
+      "cppCompilerExecutable": "/Users/hsolutions/Library/Android/sdk/ndk/23.1.7779620/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++.lld"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": []
+}
