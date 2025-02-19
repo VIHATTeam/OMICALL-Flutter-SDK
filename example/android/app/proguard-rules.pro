@@ -1,2 +1,0 @@
--keep class org.pjsip.pjsua2** {*;}
--keepclassmembers enum * {*;}

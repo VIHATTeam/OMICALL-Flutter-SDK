@@ -112,7 +112,7 @@ class CallHomeScreenState extends State<CallHomeScreen> {
     // Lắng nghe các sự kiện trạng thái thay đổi
     _subscription =
         OmicallClient.instance.callStateChangeEvent.listen((omiAction) async {
-      postData(jsonEncode(omiAction));
+      // postData(jsonEncode(omiAction));
       debugPrint("omiAction  OmicallClient ::: $omiAction");
       if (omiAction.actionName != OmiEventList.onCallStateChanged) {
         return;

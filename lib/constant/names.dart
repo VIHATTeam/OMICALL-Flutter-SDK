@@ -12,6 +12,7 @@ class OmiActionName {
   static const String END_CALL = "END_CALL";
   static const String JOIN_CALL = "JOIN_CALL";
   static const String TOGGLE_MUTE = "TOGGLE_MUTE";
+  static const String TOGGLE_HOLD = "TOGGLE_HOLD";
   static const String TOGGLE_SPEAK = "TOGGLE_SPEAK";
   static const String REGISTER = "REGISTER";
   static const String SEND_DTMF = "SEND_DTMF";

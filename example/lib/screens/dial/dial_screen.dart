@@ -44,6 +44,7 @@ class DialScreenState extends State<DialScreen> {
   Timer? timer;
   String _callQuality = "";
   bool isMuted = false;
+  bool isHold = false;
   Map? _currentAudio;
 
   @override
@@ -130,6 +131,13 @@ class DialScreenState extends State<DialScreen> {
         isMuted = data;
       });
     });
+
+    OmicallClient.instance.setHoldListener((data){
+      print("hold data listener ---> $data");
+      setState(() {
+        isHold = data;
+      });
+    });
   }
 
   String get _audioImage {
@@ -205,6 +213,7 @@ class DialScreenState extends State<DialScreen> {
     _stopWatch();
     OmicallClient.instance.removeCallQualityListener();
     OmicallClient.instance.removeMuteListener();
+    OmicallClient.instance.removeHoldListener();
     OmicallClient.instance.removeAudioChangedListener();
     super.dispose();
   }
@@ -248,7 +257,7 @@ class DialScreenState extends State<DialScreen> {
 
     bool checkShowOption = _callStatus == OmiCallState.early.rawValue ||
         _callStatus == OmiCallState.connecting.rawValue ||
-        _callStatus == OmiCallState.confirmed.rawValue;
+        _callStatus == OmiCallState.confirmed.rawValue ||  _callStatus == OmiCallState.hold.rawValue;
     return WillPopScope(
       child: Scaffold(
         body: Stack(
@@ -271,7 +280,7 @@ class DialScreenState extends State<DialScreen> {
               child: Stack(
                 alignment: AlignmentDirectional.topCenter,
                 children: [
-                  if (_callStatus == OmiCallState.confirmed.rawValue)
+                  if (_callStatus == OmiCallState.confirmed.rawValue || _callStatus == OmiCallState.hold.rawValue)
                     Padding(
                       padding: const EdgeInsets.only(
                         top: 270,
@@ -512,6 +521,11 @@ class DialScreenState extends State<DialScreen> {
     OmicallClient.instance.toggleSpeaker();
   }
 
+  Future<void> toggleHold(BuildContext context) async {
+    OmicallClient.instance.toggleHold();
+  }
+
+
   Future<void> endCall({
     bool needRequest = true,
     bool needShowStatus = true,
@@ -579,12 +593,13 @@ class DialScreenState extends State<DialScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             DialButton(
-              iconSrc: !isMuted
+              iconSrc: !isHold
                   ? 'assets/icons/ic_microphone.svg'
                   : 'assets/icons/ic_block_microphone.svg',
               text: "Microphone",
               press: () {
-                toggleMute(context);
+                // toggleMute(context);
+                toggleHold(context);
               },
             ),
             if (_currentAudio != null)

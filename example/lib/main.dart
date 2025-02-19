@@ -67,7 +67,7 @@ class _MyAppState extends State<MyApp> {
       channelId: 'comcung.channelid.notification',
       audioNotificationDescription: "Có cuộc gọi audio",
       representName:"CSKH H-Finance",
-        isUseIntentFilter: false
+      isUseIntentFilter: false
     );
     init();
   }

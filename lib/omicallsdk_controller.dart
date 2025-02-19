@@ -9,15 +9,17 @@ import 'action/action_model.dart';
 /// An implementation of [OmicallsdkPlatform] that uses method channels.
 class OmicallSDKController {
   /// The method channel used to interact with the native platform.
-
   final _methodChannel = const MethodChannel('omicallsdk');
+
   Function(Map)? videoListener;
   Function(bool)? muteListener;
+  Function(bool)? holdListener;
   Function(bool)? speakerListener;
   Function(Map)? missedCallListener;
   Function(Map)? callQualityListener;
   Function(Map)? callLogListener;
   Function(List<dynamic>)? audioChangedListener;
+
   final StreamController<OmiAction> _callStateChangeController =
       StreamController<OmiAction>.broadcast();
 
@@ -25,67 +27,58 @@ class OmicallSDKController {
     _methodChannel.setMethodCallHandler((call) async {
       final method = call.method;
       final data = call.arguments;
-      debugPrint("method OmicallSDKController:: ${method}");
-      if (method == OmiEventList.onMuted) {
-        if (muteListener != null) {
-          muteListener!(data);
-        }
-        return;
-      }
-      if (method == OmiEventList.onSpeaker) {
-        if (speakerListener != null) {
-          speakerListener!(data);
-        }
-        return;
-      }
-      if (method == OmiEventList.onRemoteVideoReady) {
-        final param = {
-          "name": method,
-          "data": data,
-        };
-        if (videoListener != null) {
-          videoListener!(param);
-        }
-        return;
-      }
-      if (method == OmiEventList.onMissedCall) {
-        if (missedCallListener != null) {
-          missedCallListener!(data);
-        }
-        return;
-      }
-      if (method == OmiEventList.onCallQuality) {
-        if (callQualityListener != null) {
-          callQualityListener!.call(data);
-        }
-        return;
-      }
-      if (method == OmiEventList.onHistoryCallLog) {
-        if (callLogListener != null) {
-          callLogListener!.call(data);
-        }
-        return;
-      }
-      if (method == OmiEventList.onAudioChanged) {
-        if (audioChangedListener != null) {
-          var correctData = data["data"];
-          if ((correctData is List) == false) {
-            correctData = [correctData];
+      debugPrint("method OmicallSDKController:: $method  --> data: $data");
+
+      switch (method) {
+        case OmiEventList.onMuted:
+          muteListener?.call(data);
+          return;
+       case OmiEventList.onHold:
+          bool result = false;
+          try {
+            result = data["isHold"] as bool;
+          } catch (e) {
+            if (data is bool) {
+              result = data;
+            } else {
+              debugPrint("Error extracting 'isHold': $e, data is not a bool: $data");
+            }
           }
-          audioChangedListener!.call(correctData);
-        }
-        return;
+          holdListener?.call(result);
+          return;
+        case OmiEventList.onSpeaker:
+          speakerListener?.call(data);
+          return;
+        case OmiEventList.onRemoteVideoReady:
+          final param = {"name": method, "data": data};
+          videoListener?.call(param);
+          return;
+        case OmiEventList.onMissedCall:
+          missedCallListener?.call(data);
+          return;
+        case OmiEventList.onCallQuality:
+          callQualityListener?.call(data);
+          return;
+        case OmiEventList.onHistoryCallLog:
+          callLogListener?.call(data);
+          return;
+        case OmiEventList.onAudioChanged:
+          final rawData = data["data"];
+          final correctData = rawData is List ? rawData : [rawData];
+          audioChangedListener?.call(correctData);
+          return;
+        default:
+          _callStateChangeController.sink.add(
+            OmiAction(
+              actionName: method,
+              data: data ?? <dynamic, dynamic>{},
+            ),
+          );
       }
-      _callStateChangeController.sink.add(
-        OmiAction(
-          actionName: call.method,
-          data: data ?? <dynamic, dynamic>{},
-        ),
-      );
     });
   }
 
-  dispose() {
+  void dispose() {
     _callStateChangeController.close();
   }
 
@@ -93,10 +86,6 @@ class OmicallSDKController {
       _callStateChangeController.stream;
 
   Future<dynamic> action(OmiAction action) async {
-    final response = await _methodChannel.invokeMethod<dynamic>(
-      'action',
-      action.toJson(),
-    );
-    return response;
+    return await _methodChannel.invokeMethod('action', action.toJson());
   }
 }

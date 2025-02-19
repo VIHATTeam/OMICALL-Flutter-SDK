@@ -30,6 +30,10 @@ class OmicallClient {
     _controller.muteListener = muteListener;
   }
 
+  void setHoldListener(Function(bool) holdListener) {
+    _controller.holdListener = holdListener;
+  }
+
   void setSpeakerListener(Function(bool) speakerListener) {
     _controller.speakerListener = speakerListener;
   }
@@ -60,6 +64,10 @@ class OmicallClient {
 
   void removeMuteListener() {
     _controller.muteListener = null;
+  }
+
+  void removeHoldListener() {
+    _controller.holdListener = null;
   }
 
   void removeSpeakerListener() {
@@ -102,6 +110,7 @@ class OmicallClient {
     String? phone,
     String? fcmToken,
     bool isVideo = true,
+    String projectId = "",
   }) async {
     final action =
         OmiAction(actionName: OmiActionName.INIT_CALL_API_KEY, data: {
@@ -110,7 +119,8 @@ class OmicallClient {
       'apiKey': apiKey,
       'phone': phone,
       'isVideo': isVideo,
-          'fcmToken':fcmToken
+      'fcmToken':fcmToken,
+      'projectId': projectId
     });
     return await _controller.action(action);
   }
@@ -156,25 +166,28 @@ class OmicallClient {
   }
 
   Future<bool> initCallWithUserPassword({
-    String? userName,
-    String? password,
-    String? realm,
-    String? host,
-    String? fcmToken,
-    bool isVideo = true,
-  }) async {
-    final action =
-        OmiAction(actionName: OmiActionName.INIT_CALL_USER_PASSWORD, data: {
-          'userName': userName,
-          'password': password,
-          'realm': realm,
-          'isVideo': isVideo,
-          'fcmToken': fcmToken,
-          'host': host,
-        });
-    return await _controller.action(action);
-  }
-
+  String? userName,
+  String? password,
+  String? realm,
+  String? host,
+  String? fcmToken,
+  bool isVideo = true,
+  String projectId = "",
+}) async {
+  final action = OmiAction(
+    actionName: OmiActionName.INIT_CALL_USER_PASSWORD,
+    data: {
+      'userName': userName,
+      'password': password,
+      'realm': realm,
+      'isVideo': isVideo,
+      'fcmToken': fcmToken,
+      'host': host,
+      'projectId': projectId,
+    },
+  );
+  return await _controller.action(action);
+}
 
   Future<dynamic> startCall(
     String phoneNumber,
@@ -245,6 +258,14 @@ class OmicallClient {
   Future<void> toggleSpeaker() async {
     final action = OmiAction(
       actionName: OmiActionName.TOGGLE_SPEAK,
+      data: {},
+    );
+    return await _controller.action(action);
+  }
+
+   Future<void> toggleHold() async {
+    final action = OmiAction(
+      actionName: OmiActionName.TOGGLE_HOLD,
       data: {},
     );
     return await _controller.action(action);
