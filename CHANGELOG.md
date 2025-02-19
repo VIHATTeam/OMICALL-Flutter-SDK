@@ -7,10 +7,8 @@ All notable changes to this project will be documented in this file.
 - Pump OMI core Android to version 2.3.19
 - Add func Hold call 
 
-
 ## 3.1.39, 3.1.40
 - Change repo maven
-
 
 ## 3.1.38
 - Pump OMI core IOS to version 1.7.25
