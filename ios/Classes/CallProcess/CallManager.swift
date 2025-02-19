@@ -67,23 +67,50 @@ class CallManager {
     }
     
     func initWithApiKeyEndpoint(params: [String: Any]) -> Bool {
-        //request permission
-        var result = false
-        if let usrUuid = params["usrUuid"] as? String, let fullName = params["fullName"] as? String, let apiKey = params["apiKey"] as? String, let phone = params["phone"] as? String, let fcmToken = params["fcmToken"] as? String {
-            result = OmiClient.initWithUUIDAndPhone(usrUuid, fullName: fullName, apiKey: apiKey, phone: phone)
-            OmiClient.setUserPushNotificationToken(fcmToken);
+        guard let usrUuid = params["usrUuid"] as? String,
+              let fullName = params["fullName"] as? String,
+              let apiKey = params["apiKey"] as? String,
+              let phone = params["phone"] as? String,
+              let fcmToken = params["fcmToken"] as? String else {
+            return false
         }
+        
+        if let projectId = params["projectId"] as? String, !projectId.isEmpty {
+            OmiClient.setFcmProjectId(projectId)
+        }
+        
+
+        let result = OmiClient.initWithUUIDAndPhone(
+            usrUuid,
+            fullName: fullName,
+            apiKey: apiKey,
+            phone: phone
+        )
+        
+        OmiClient.setUserPushNotificationToken(fcmToken)
+        
         return result
     }
     
     func initWithUserPasswordEndpoint(params: [String: Any]) -> Bool {
-        var result = false
-        if let userName = params["userName"] as? String, let password = params["password"] as? String, let realm = params["realm"] as? String, let fcmToken = params["fcmToken"] as? String {
-            OmiClient.initWithUsername(userName, password: password, realm: realm, proxy: "vh.omicrm.com:5222")
-            OmiClient.setUserPushNotificationToken(fcmToken);
-            result = true;
+        guard
+            let userName = params["userName"] as? String,
+            let password = params["password"] as? String,
+            let realm = params["realm"] as? String,
+            let fcmToken = params["fcmToken"] as? String
+        else {
+            // Thiếu dữ liệu → trả về false
+            return false
         }
-        return result
+        
+        if let projectId = params["projectId"] as? String, !projectId.isEmpty {
+            OmiClient.setFcmProjectId(projectId)
+        }
+        
+        OmiClient.initWithUsername(userName, password: password, realm: realm, proxy: "vh.omicrm.com:5222")
+        OmiClient.setUserPushNotificationToken(fcmToken)
+        
+        return true
     }
     
     func showMissedCall() {
@@ -393,24 +420,24 @@ class CallManager {
     func startCall(_ phoneNumber: String, isVideo: Bool, completion: @escaping (_ : String) -> Void) {
         guestPhone = phoneNumber;
         DispatchQueue.main.async {
-                       OmiClient.startCall(phoneNumber, isVideo: isVideo) { statusCall in
-                           let callCurrent = self.omiLib.getCurrentCall()
-                           var dataToSend: [String: Any] = [
-                               "status": statusCall.rawValue,
-                               "_id":  "",
-                               "message": self.messageCall(type: statusCall.rawValue)
-                           ]
-                           if(callCurrent != nil){
-                               dataToSend["_id"] = String(describing: OmiCallModel(omiCall: callCurrent!).uuid) ?? ""
-                           }
-                           if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
-                               completion(jsonString)
-                           } else {
-                               completion("Conversion to JSON failed")
-                           }
-
-                       }
-                   }
+            OmiClient.startCall(phoneNumber, isVideo: isVideo) { statusCall in
+                let callCurrent = self.omiLib.getCurrentCall()
+                var dataToSend: [String: Any] = [
+                    "status": statusCall.rawValue,
+                    "_id":  "",
+                    "message": self.messageCall(type: statusCall.rawValue)
+                ]
+                if(callCurrent != nil){
+                    dataToSend["_id"] = String(describing: OmiCallModel(omiCall: callCurrent!).uuid) ?? ""
+                }
+                if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
+                    completion(jsonString)
+                } else {
+                    completion("Conversion to JSON failed")
+                }
+                
+            }
+        }
     }
     
     /// Start call
@@ -419,26 +446,26 @@ class CallManager {
         if let phone = phoneNumber {
             guestPhone = phoneNumber ?? ""
             DispatchQueue.main.async {
-                                OmiClient.startCall(phone, isVideo: isVideo) { statusCall in
-                                    let callCurrent = self.omiLib.getCurrentCall()
-                                    var dataToSend: [String: Any] = [
-                                        "status": statusCall.rawValue,
-                                        "_id": "",
-                                        "message": self.messageCall(type: statusCall.rawValue)
-                                    ]
-                                    if(callCurrent != nil){
-                                        dataToSend["_id"] = String(describing: OmiCallModel(omiCall: callCurrent!).uuid)
-                                    }
-
-                                    if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
-                                        completion(jsonString)
-                                    } else {
-                                        completion("Conversion to JSON failed")
-                                    }
-                                }
-                            }
+                OmiClient.startCall(phone, isVideo: isVideo) { statusCall in
+                    let callCurrent = self.omiLib.getCurrentCall()
+                    var dataToSend: [String: Any] = [
+                        "status": statusCall.rawValue,
+                        "_id": "",
+                        "message": self.messageCall(type: statusCall.rawValue)
+                    ]
+                    if(callCurrent != nil){
+                        dataToSend["_id"] = String(describing: OmiCallModel(omiCall: callCurrent!).uuid)
+                    }
+                    
+                    if let jsonString = self.convertDictionaryToJson(dictionary: dataToSend) {
+                        completion(jsonString)
+                    } else {
+                        completion("Conversion to JSON failed")
+                    }
+                }
+            }
         }
-      
+        
     }
     
     func endAvailableCall() -> [String: Any] {
@@ -480,6 +507,20 @@ class CallManager {
             return
         }
         try? call.toggleMute()
+    }
+
+    func toggleHold() -> Bool {
+        guard let call = getAvailableCall() else {
+            return false // Không có cuộc gọi khả dụng
+        }
+            
+        do {
+            try call.toggleHold()
+            return true // Thành công
+        } catch {
+            print("Error toggling hold: \(error)")
+            return false // Thất bại
+        }
     }
     
     /// Toogle speaker

@@ -45,7 +45,7 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
 
   // HUNGTH
   String REALM = "quidn";
-  String USER_NAME1 = "102";
+  String USER_NAME1 = "100";
   String PASS_WORD1 = "Duongngocqui@98";
 
 
@@ -485,6 +485,7 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
       "realm": _serviceUrlController.text,
       "fcmToken": token,
       "host": _hostUrlController.text,
+      "projectId": "omicrm-6558a"
     });
 
     EasyLoading.dismiss();

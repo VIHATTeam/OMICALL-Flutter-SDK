@@ -57,6 +57,14 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       }
   }
     
+  func sendHoldStatus() {
+      if let call = CallManager.shareInstance().getAvailableCall() {
+          let isHold = call.onHold
+          channel.invokeMethod(HOLD, arguments: isHold)
+      }
+  }
+    
+
   func sendSpeakerStatus() {
       channel.invokeMethod(SPEAKER, arguments: CallManager.shareInstance().isSpeaker)
   }
@@ -127,17 +135,24 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       case TOGGLE_MUTE:
           CallManager.shareInstance().toggleMute()
           sendMuteStatus()
-          if let call = CallManager.init().getAvailableCall() {
+          if let call = CallManager.shareInstance().getAvailableCall() {
               result(call.muted)
           }
           break
       case TOGGLE_SPEAK:
           CallManager.shareInstance().toogleSpeaker()
           sendSpeakerStatus()
-          if let call = CallManager.init().getAvailableCall() {
+          if let call = CallManager.shareInstance().getAvailableCall() {
               result(call.speaker)
           }
           break
+      case TOGGLE_HOLD:
+            CallManager.shareInstance().toggleHold()
+            sendHoldStatus()
+            if let call = CallManager.shareInstance().getAvailableCall() {
+                result(call.onHold)
+            }
+            break
       case SEND_DTMF:
           CallManager.shareInstance().sendDTMF(character: dataOmi["character"] as! String)
           result(true)
