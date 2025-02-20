@@ -31,4 +31,6 @@ class OmiActionName {
   static const String GET_USER_INFO = "GET_USER_INFO";
   static const String GET_HISTORY_CALL_LOG = "GET_HISTORY_CALL_LOG";
   static const String CHANGE_TRANSPORT = "CHANGE_TRANSPORT";
+  static const String TRANSFER_CALL = "TRANSFER_CALL";
+  
 }

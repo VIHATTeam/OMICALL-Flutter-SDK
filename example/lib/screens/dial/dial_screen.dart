@@ -525,6 +525,10 @@ class DialScreenState extends State<DialScreen> {
     OmicallClient.instance.toggleHold();
   }
 
+  Future<void> transferCallAction(BuildContext context) async {
+    OmicallClient.instance.transferCall(phoneNumber: "101");
+  }
+
 
   Future<void> endCall({
     bool needRequest = true,
@@ -599,7 +603,7 @@ class DialScreenState extends State<DialScreen> {
               text: "Microphone",
               press: () {
                 // toggleMute(context);
-                toggleHold(context);
+                transferCallAction(context);
               },
             ),
             if (_currentAudio != null)

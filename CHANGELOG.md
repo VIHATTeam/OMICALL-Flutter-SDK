@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.2.1
+- Update readme 
+- Add func transfer call 
+
 ## 3.2.0
 - Pump OMI core IOS to version 1.8.5
 - Pump OMI core Android to version 2.3.19
