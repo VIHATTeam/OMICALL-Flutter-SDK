@@ -598,6 +598,19 @@ class CallManager {
         }
     }
     
+    func transferCall(_ phoneNumber: String) -> Bool {
+        do {
+            guard let callInfo = omiLib.getCurrentConfirmCall(), callInfo.callState != .disconnected else {
+                print("No active call or call is disconnected.")
+                return false
+            }
+            callInfo.blindTransferCall(withNumber: phoneNumber)
+            return true
+        } catch {
+            return false
+        }
+    }
+    
     private func baseInfoFromCall(call: OMICall) -> [String: Any] {
         return [
             "callerNumber": call.callerNumber,

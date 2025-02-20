@@ -420,4 +420,11 @@ class OmicallClient {
     return null;
   }
 
+  Future<bool> transferCall({
+    String? phoneNumber
+  }) async {
+    final action = OmiAction(actionName: OmiActionName.TRANSFER_CALL, data: { 'phoneNumber': phoneNumber});
+    return await _controller.action(action);
+  }
+
 }

@@ -229,6 +229,13 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           let audio = CallManager.shareInstance().getCurrentAudio()
           result(audio)
           break
+      case TRANSFER_CALL:
+        guard let phoneNumber = dataOmi["phoneNumber"] as? String, !phoneNumber.isEmpty else {
+            result(false)
+            return
+        }
+        let value = CallManager.shareInstance().transferCall(phoneNumber)
+        result(value)
       default:
           break
       }

@@ -542,7 +542,7 @@ final result = await OmicallClient.instance.getInitialCall();
 
 - ✅ OMI Plugin functions:
 
-##### Call with Phone Number (Mobile Phone or Internal Number)
+##### 📌 Call with Phone Number (Mobile Phone or Internal Number)
 
 ```dart
 // Used to initiate a call, to any number
@@ -570,7 +570,7 @@ final result = await OmicallClient.instance.startCall(
 | - **haveAnotherCall (9):** Cannot start the call because you are already in another call.                                                                          |
 
     
-##### Call with UUID (only support with Api key):
+##### 📌 Call with UUID (only support with Api key):
     
 ```dart
   final result = OmicallClient.instance.startCallWithUUID(
@@ -580,14 +580,14 @@ final result = await OmicallClient.instance.startCall(
   // Result is the same with startCall
 ```
 
-##### Accept a call:
-📌 Used to join (pick up) any incoming call
+##### 📌 Accept a call:
+Used to join (pick up) any incoming call
 ```dart
     OmicallClient.instance.joinCall();
 ```
 
-##### End a Call  
-📌 When a call ends, an event `endCall` is pushed and the call information is returned.
+##### 📌 End a Call  
+When a call ends, an event `endCall` is pushed and the call information is returned.
 
 ```dart
 OmicallClient.instance.endCall().then((callInfo) {
@@ -608,8 +608,8 @@ OmicallClient.instance.endCall().then((callInfo) {
 }
 */
 ```
-##### Toggle the Audio  
-📌 Toggle the audio on/off during a call.
+##### 📌 Toggle the Audio  
+Toggle the audio on/off during a call.
 
 ```dart
 OmicallClient.instance.toggleAudio();
@@ -626,8 +626,8 @@ OmicallClient.instance.toggleSpeaker();
 
 ---
 
-##### Toggle the Hold  
-📌 Used to hold an ongoing call
+##### 📌 Toggle the Hold  
+Used to hold an ongoing call
 
 ```dart
 OmicallClient.instance.toggleHold();
@@ -635,8 +635,8 @@ OmicallClient.instance.toggleHold();
 
 ---
 
-##### Send Character  
-📌 Send DTMF characters. Supported characters: `1` to `9`, `*` and `#`.
+##### 📌 Send Character  
+Send DTMF characters. Supported characters: `1` to `9`, `*` and `#`.
 
 ```dart
 OmicallClient.instance.sendDTMF(value);
@@ -644,8 +644,18 @@ OmicallClient.instance.sendDTMF(value);
 
 ---
 
-##### Get Current User Information  
-📌 Retrieve information of the current user.
+##### 📌 Transfer call  
+Used to forward the current ongoing call to any employee in your business
+
+```dart
+// phoneNumber: String - is number internal employee in your business 
+OmicallClient.instance.transferCall(phoneNumber: "101");
+```
+
+---
+
+##### 📌 Get Current User Information  
+Retrieve information of the current user.
 
 ```dart
 final user = await OmicallClient.instance.getCurrentUser();
@@ -660,8 +670,8 @@ final user = await OmicallClient.instance.getCurrentUser();
 
 ---
 
-##### Get Guest User Information  
-📌 Retrieve information of the guest user.
+##### 📌 Get Guest User Information  
+Retrieve information of the guest user.
 
 ```dart
 final user = await OmicallClient.instance.getGuestUser();
@@ -676,8 +686,8 @@ final user = await OmicallClient.instance.getGuestUser();
 
 ---
 
-##### Get User Information from SIP  
-📌 Retrieve user information based on a SIP phone number.
+##### 📌 Get User Information from SIP  
+Retrieve user information based on a SIP phone number.
 
 ```dart
 final user = await OmicallClient.instance.getUserInfo(phone: "111");
@@ -692,8 +702,8 @@ final user = await OmicallClient.instance.getUserInfo(phone: "111");
 
 ---
 
-##### Logout  
-📌 Log out the current user.
+##### 📌 Logout  
+Log out the current user.
 
 ```dart
 OmicallClient.instance.logout();
@@ -903,7 +913,7 @@ OmicallClient.instance.logout();
 
 <br>
 
-- 📝 Table describing code_end_call status
+- 📝 Table describing **code_end_call** status
 
 
 | Code            | Description                                                                                                           |

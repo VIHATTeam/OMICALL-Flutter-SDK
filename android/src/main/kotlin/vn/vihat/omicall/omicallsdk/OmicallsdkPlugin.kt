@@ -599,6 +599,20 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
                     }
                 }
+            } 
+            TRANSFER_CALL -> {
+                mainScope.launch {
+                    val transferResult = withContext(Dispatchers.Default) {
+                        try {
+                            val phone = dataOmi["phoneNumber"] as String
+                            OmiClient.getInstance(applicationContext!!).forwardCallTo(phone)
+                            true
+                        } catch (_: Throwable) {
+                            false
+                        }
+                    }
+                    result.success(transferResult)
+                }
             }
         }
     }
