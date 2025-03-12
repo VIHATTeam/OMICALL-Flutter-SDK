@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.2.2
+- Update OMI core iOS to version 1.8.9
+- Update OMI core Android to version 3.2.22
+- Fix Audio Call iOS
+- Update codec
+
 ## 3.2.1
 - Update readme 
 - Add func transfer call 
