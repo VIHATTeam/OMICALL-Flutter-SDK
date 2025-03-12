@@ -6,7 +6,7 @@ allprojects {
             url = uri("https://maven.pkg.github.com/omicall/OMICall-SDK")
             credentials {
                 username = project.findProperty("omicallUsername") as? String ?: "omicall"
-                password = project.findProperty("omicallPassword") as? String ?: "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"
+                password = project.findProperty("omicallPassword") as? String ?: "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"
             }
             authentication {
                 create<BasicAuthentication>("basic")
