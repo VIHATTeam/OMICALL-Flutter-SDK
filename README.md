@@ -118,7 +118,7 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
        // .... your config 
 
          <application
