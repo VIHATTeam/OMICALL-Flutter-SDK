@@ -2,13 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.2.4
+- Update OMI core Android to version 2.3.22-v2
+- Remove FOREGROUND_SERVICE_TYPE_DATA_SYNC at androidManifest
+
+- Update OMI core iOS to version 1.8.44
+- Improve quality call iOS 
+
+
 ## 3.2.3
 - Update OMI core iOS to version 1.8.11
   
 
 ## 3.2.2
 - Update OMI core iOS to version 1.8.9
-- Update OMI core Android to version 3.2.22
+- Update OMI core Android to version 2.3.22
 - Fix Audio Call iOS
 - Update codec
 
