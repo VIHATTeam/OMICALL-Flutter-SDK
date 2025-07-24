@@ -72,3 +72,9 @@ example/android/app/.cxx/
 example/build/
 example/android/app/debug/hash_key.txt
 example/android/app/debug/additional_project_files.txt
+
+
+android/local.properties
+android/local.*
+/android/local.properties
+/android/local.*

@@ -1,8 +1,10 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## 3.2.5 [24/07/2025]
+- re-build again 
 
-## 3.2.4
+## 3.2.4 [24/07/2025]
 - Update OMI core Android to version 2.3.22-v2
 - Remove FOREGROUND_SERVICE_TYPE_DATA_SYNC at androidManifest
 
