@@ -572,7 +572,6 @@ class _HomeScreenState extends State<HomeScreen> {
       phone,
       false,
     );
-
     // EasyLoading.dismiss();
     Map<String, dynamic> jsonMap = {};
     bool callStatus = false;
@@ -582,24 +581,12 @@ class _HomeScreenState extends State<HomeScreen> {
     jsonMap = json.decode(result);
     messageError = jsonMap['message'];
     int status = jsonMap['status'];
+
     if (status == OmiStartCallStatus.startCallSuccess.rawValue) {
       callStatus = true;
     }
 
     if (callStatus) {
-      // if (_isVideoCall) {
-      //   pushToVideoScreen(
-      //     phone,
-      //     status: OmiCallState.calling.rawValue,
-      //     isOutGoingCall: true,
-      //   );
-      // } else {
-      //   pushToDialScreen(
-      //     phone,
-      //     status: OmiCallState.calling.rawValue,
-      //     isOutGoingCall: true,
-      //   );
-      // }
       pushToDialScreen(
         phone,
         status: OmiCallState.calling.rawValue,
