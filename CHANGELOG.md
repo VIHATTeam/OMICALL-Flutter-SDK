@@ -1,6 +1,16 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+## 3.2.7 [07/11/2025]
+
+### Fixed
+- **[CRITICAL]** Removed unnecessary KAPT (Kotlin Annotation Processing Tool) plugin and dependency
+  - Fixed KAPT-related build failures reported by customers
+  - Resolved memory issues during build process (OutOfMemoryError)
+  - Fixed conflicts with KSP-based projects
+  - Eliminated unnecessary annotation processing overhead
+- Removed unused `kapt "com.github.bumptech.glide:compiler"` dependency
+- Removed `kotlin-kapt` plugin as SDK doesn't use annotation processors
 
 ## 3.2.6 [07/11/2025]
 
