@@ -1,6 +1,24 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## 3.2.6 [07/11/2025]
+
+### Changed
+- Upgraded Kotlin from 1.6.10 to 1.9.24
+- Upgraded Android Gradle Plugin from 7.1.2 to 8.1.4
+- Upgraded compileSdk and targetSdk to 34
+- Upgraded Java compatibility from 1.8 to 11
+- Upgraded dependencies to latest stable versions
+- Fixed compatibility issues with modern Android build environments
+
+### Dependencies
+- OkHttp: 5.0.0-alpha.11 → 4.12.0 (stable)
+- Kotlin Coroutines: 1.7.2 → 1.9.0
+- Firebase Messaging: 23.2.1 → 24.1.0
+- Material Design: 1.9.0 → 1.12.0
+  
+
 ## 3.2.5 [24/07/2025]
 - re-build again 
 
