@@ -102,7 +102,7 @@ dependencies {
 
     implementation "com.github.bumptech.glide:glide:4.16.0"
 
-    def coroutines_version = '1.9.0'
+    def coroutines_version = '1.8.1'
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"
 

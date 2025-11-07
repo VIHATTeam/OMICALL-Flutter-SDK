@@ -1,6 +1,14 @@
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## 3.2.8 [07/11/2025]
+
+### Dependencies
+- Kotlin Coroutines: 1.9.0 → 1.8.1
+
+
+
 ## 3.2.7 [07/11/2025]
 
 ### Fixed
