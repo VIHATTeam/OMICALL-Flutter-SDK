@@ -43,9 +43,12 @@ class DialScreen2State extends State<DialScreen2> {
   Map? guestUser;
   Stopwatch watch = Stopwatch();
   Timer? timer;
-  String _callQuality = "";
+  String _callQuality = ""; // MOS score display (e.g., "4.5")
   bool isMuted = false;
   Map? _currentAudio;
+
+  // Call quality tracker
+  final CallQualityTracker _qualityTracker = CallQualityTracker();
 
   @override
   void initState() {
@@ -94,18 +97,25 @@ class DialScreen2State extends State<DialScreen2> {
       });
     });
     OmicallClient.instance.setCallQualityListener((data) {
-      final quality = data["quality"] as int;
-      debugPrint("quality setCallQualityListener  ===> ::: $data");
+      // Parse call quality data using helper
+      final info = _qualityTracker.parseCallQuality(data);
+
+      debugPrint("CallQualityInfo => $info");
+
+      // Handle loading indicator
+      if (info.shouldShowLoading) {
+        debugPrint("Poor network detected (LCN stuck at ${info.lcn}) - showing loading");
+        EasyLoading.show();
+      } else if (info.isNetworkRecovered) {
+        debugPrint("Network recovered (LCN changed to ${info.lcn}) - dismissing loading");
+        EasyLoading.dismiss();
+      } else if (info.lcn == 0) {
+        EasyLoading.dismiss();
+      }
+
+      // Display MOS score
       setState(() {
-        if (quality == 0) {
-          _callQuality = "GOOD";
-        }
-        if (quality == 1) {
-          _callQuality = "NORMAL";
-        }
-        if (quality == 2) {
-          _callQuality = "BAD";
-        }
+        _callQuality = info.mosDisplay;
       });
     });
     OmicallClient.instance.setMuteListener((data) {

@@ -259,7 +259,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
             Log.d("SDK", "onAttachedToEngine! ---- $applicationContext")
 
-            OmiClient.getInstance(applicationContext!!)
+            // SDK 2.5.17: getInstance now requires needRegister parameter
+            // Set to false to prevent auto-registration (registration handled explicitly via initCall methods)
+            OmiClient.getInstance(applicationContext!!, false)
             OmiClient.getInstance(applicationContext!!).addCallStateListener(this)
             OmiClient.getInstance(applicationContext!!).setDebug(false)
             ProcessLifecycleOwner.get().lifecycle.addObserver(OmiClient.getInstance(applicationContext!!))
@@ -717,9 +719,19 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         if (isVideo) {
             permissions = permissions.plus(Manifest.permission.CAMERA)
         }
+
+        // Android 13+ (API 33) - Required for notifications
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permissions = permissions.plus(Manifest.permission.POST_NOTIFICATIONS)
         }
+
+        // Android 14+ (API 34) - Required for foreground service types (SDK 2.5.17)
+        // CRITICAL: These permissions are required for incoming calls on Android 14+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            permissions = permissions.plus(Manifest.permission.FOREGROUND_SERVICE_MICROPHONE)
+            permissions = permissions.plus(Manifest.permission.FOREGROUND_SERVICE_PHONE_CALL)
+        }
+
         if(activity!=null){
             requestPermissions(
                 activity!!,

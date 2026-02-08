@@ -1,3 +1,10 @@
+// Load local.properties for OMICall SDK credentials
+val localProperties = java.util.Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+
 allprojects {
     repositories {
         google()
@@ -5,8 +12,19 @@ allprojects {
         maven {
             url = uri("https://maven.pkg.github.com/omicall/OMICall-SDK")
             credentials {
-                username = project.findProperty("omicallUsername") as? String ?: "omicall"
-                password = project.findProperty("omicallPassword") as? String ?: "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"
+                username = localProperties.getProperty("omicallUsername")
+                    ?: project.findProperty("omicallUsername") as? String
+                    ?: "omicall"
+                password = localProperties.getProperty("omicallPassword")
+                    ?: project.findProperty("omicallPassword") as? String
+                    ?: throw GradleException(
+                        """
+                        OMICall SDK GitHub token not found!
+                        Please add to local.properties:
+                        omicallUsername=omicall
+                        omicallPassword=YOUR_GITHUB_PAT_HERE
+                        """.trimIndent()
+                    )
             }
             authentication {
                 create<BasicAuthentication>("basic")

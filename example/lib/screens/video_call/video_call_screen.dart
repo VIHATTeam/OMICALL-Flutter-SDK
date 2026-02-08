@@ -43,11 +43,15 @@ class VideoCallState extends State<VideoCallScreen> {
   int _callStatus = 0;
   bool isMuted = false;
   Map? _currentAudio;
-  String _callQuality = "";
+  String _callQuality = ""; // MOS score display (e.g., "4.5")
   TextEditingController _phoneNumberController = TextEditingController();
   Map? guestUser;
   bool _isOutGoingCall = false;
   bool _isVideo = true;
+
+  // Track consecutive same LCN values for loading logic
+  int _lastLcnValue = 0;
+  int _consecutiveSameLcnCount = 0;
 
   Future<void> getGuestUser() async {
     final user = await OmicallClient.instance.getGuestUser();
@@ -188,16 +192,36 @@ class VideoCallState extends State<VideoCallScreen> {
     });
     OmicallClient.instance.setCallQualityListener((data) {
       final quality = data["quality"] as int;
+      final stat = data["stat"] as Map<String, dynamic>;
+      final currentLcnValue = stat["lcn"] as int? ?? 0;
+      final mos = stat["mos"] as double? ?? 0.0;
+
+      debugPrint("quality setCallQualityListener => mos: $mos, lcn: $currentLcnValue, quality: $quality");
+
+      // Track consecutive same LCN values
+      if (currentLcnValue == _lastLcnValue && currentLcnValue != 0) {
+        _consecutiveSameLcnCount++;
+        debugPrint("Same LCN value ($currentLcnValue) detected $_consecutiveSameLcnCount times");
+
+        // Show loading overlay after 3 consecutive same values (indicating poor network)
+        if (_consecutiveSameLcnCount >= 3) {
+          debugPrint("Poor network detected - showing loading");
+          EasyLoading.show();
+        }
+      } else {
+        // LCN value changed or is 0 - network is working
+        if (_consecutiveSameLcnCount > 0) {
+          debugPrint("LCN changed from $_lastLcnValue to $currentLcnValue - network recovered");
+        }
+        _consecutiveSameLcnCount = 0;
+        EasyLoading.dismiss();
+      }
+
+      _lastLcnValue = currentLcnValue;
+
+      // Display MOS score instead of GOOD/NORMAL/BAD
       setState(() {
-        if (quality == 0) {
-          _callQuality = "GOOD";
-        }
-        if (quality == 1) {
-          _callQuality = "NORMAL";
-        }
-        if (quality == 2) {
-          _callQuality = "BAD";
-        }
+        _callQuality = mos > 0 ? mos.toStringAsFixed(1) : "";
       });
     });
   }

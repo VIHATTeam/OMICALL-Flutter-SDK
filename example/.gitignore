@@ -47,6 +47,9 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
+# Android local properties (contains SDK credentials)
+/android/local.properties
+
 #fastlane
 example/android/app/cxx/
 example/build/

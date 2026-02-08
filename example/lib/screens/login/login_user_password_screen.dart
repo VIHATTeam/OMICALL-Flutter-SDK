@@ -44,9 +44,9 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
   // String PASS_WORD1 = "Jx2hM9aYrT";
 
   // HUNGTH
-  String REALM = "quidn";
+  String REALM = "luuphuongmytrinh9a2";
   String USER_NAME1 = "100";
-  String PASS_WORD1 = "85UOj2IwFygOjAO";
+  String PASS_WORD1 = "iT2OjDYA0H";
 
 
   // // THANH CONCUNG
