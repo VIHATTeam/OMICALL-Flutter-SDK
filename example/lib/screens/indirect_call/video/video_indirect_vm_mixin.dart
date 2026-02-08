@@ -9,10 +9,13 @@ mixin VideoInDirectViewModel implements State<VideoInDirectView> {
   int _callStatus = 0;
   bool isMuted = false;
   Map? _currentAudio;
-  String _callQuality = "";
+  String _callQuality = ""; // MOS score display (e.g., "4.5")
   final TextEditingController _phoneNumberController = TextEditingController();
   Map? guestUser;
   bool _isOutGoingCall = false;
+
+  // Call quality tracker
+  final CallQualityTracker _qualityTracker = CallQualityTracker();
 
   Future<void> getGuestUser() async {
     final user = await OmicallClient.instance.getGuestUser();
@@ -143,17 +146,25 @@ mixin VideoInDirectViewModel implements State<VideoInDirectView> {
       });
     });
     OmicallClient.instance.setCallQualityListener((data) {
-      final quality = data["quality"] as int;
+      // Parse call quality data using helper
+      final info = _qualityTracker.parseCallQuality(data);
+
+      debugPrint("CallQualityInfo => $info");
+
+      // Handle loading indicator
+      if (info.shouldShowLoading) {
+        debugPrint("Poor network detected (LCN stuck at ${info.lcn}) - showing loading");
+        EasyLoading.show();
+      } else if (info.isNetworkRecovered) {
+        debugPrint("Network recovered (LCN changed to ${info.lcn}) - dismissing loading");
+        EasyLoading.dismiss();
+      } else if (info.lcn == 0) {
+        EasyLoading.dismiss();
+      }
+
+      // Display MOS score
       setState(() {
-        if (quality == 0) {
-          _callQuality = "GOOD";
-        }
-        if (quality == 1) {
-          _callQuality = "NORMAL";
-        }
-        if (quality == 2) {
-          _callQuality = "BAD";
-        }
+        _callQuality = info.mosDisplay;
       });
     });
   }

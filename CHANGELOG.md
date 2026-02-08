@@ -2,6 +2,48 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.2.9 [05/02/2026]
+
+### Changed
+- **[MAJOR UPDATE]** Updated OMI Android SDK from 2.3.22-v2 to 2.5.17
+- Upgraded compileSdk and targetSdk from 34 to 35 (Android 15 support)
+- Added support for Android 15-16 ConnectionService for incoming calls
+
+### Added
+- **Database Maintenance**: Added `MyApplication` class with `DatabaseMaintenanceHelper.performSafeMaintenance()` to prevent SQLiteFullException crashes
+- **Android 14+ Permissions**:
+  - `FOREGROUND_SERVICE_MICROPHONE` - Required for audio calls
+  - `FOREGROUND_SERVICE_PHONE_CALL` - Required for call functionality
+- **Android 13+ Permissions**:
+  - `POST_NOTIFICATIONS` - Required for call notifications
+- **Android 15-16 Support**:
+  - `MANAGE_OWN_CALLS` - Required for ConnectionService
+- Updated `NotificationService` with `foregroundServiceType="microphone|phoneCall"`
+
+### Fixed
+- **[CRITICAL]** Explicitly removed `FOREGROUND_SERVICE_CAMERA` permission to prevent crashes on Android 14-15 devices without camera (SDK 2.3.78 breaking change)
+- Fixed DNS network issues (SDK 2.5.15, 2.5.16, 2.5.17)
+- Fixed crash when receiving Firebase messages (SDK 2.5.11)
+- Fixed crash on `startForeground` (SDK 2.5.11)
+- Improved video call stability (SDK 2.5.11)
+- Fixed race condition when logout & login (SDK 2.5.9)
+- Fixed ANR register timeout for MIUI on Xiaomi devices (SDK 2.5.7)
+
+### Breaking Changes
+- **Application class required**: Must extend `Application` and call `DatabaseMaintenanceHelper.performSafeMaintenance()` in `onCreate()`
+- **Permission updates required**: Must add Android 14+ foreground service permissions
+- **Service declaration updated**: `NotificationService` now requires `foregroundServiceType` attribute
+- **Camera permission removed**: Apps without video call support must explicitly remove `FOREGROUND_SERVICE_CAMERA` permission
+
+### Dependencies (Android SDK 2.5.17)
+- SIP SDK: Updated to version 2.16 (SDK 2.5.8)
+- Support for Google Play 16KB package size requirement (SDK 2.5.1)
+- Multiple call handling improvements (SDK 2.3.70)
+- ConnectionService support for Android 15-16 (SDK 2.4.22)
+
+### Migration Guide
+See [Android SDK CHANGELOG](https://github.com/VIHATTeam/ANDROID-SDK/blob/main/CHANGELOG.md) for complete list of changes from 2.3.22-v2 to 2.5.17.
+
 ## 3.2.8 [07/11/2025]
 
 ### Dependencies

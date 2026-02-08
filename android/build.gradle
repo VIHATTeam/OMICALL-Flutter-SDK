@@ -50,7 +50,7 @@ apply plugin: 'kotlin-parcelize'
 
 android {
     namespace "vn.vihat.omicall.omicallsdk"
-    compileSdkVersion 34
+    compileSdkVersion 35
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
@@ -66,7 +66,7 @@ android {
     }
 
     defaultConfig {
-        targetSdkVersion 34
+        targetSdkVersion 35
         minSdkVersion 24
     }
 
@@ -78,7 +78,7 @@ android {
 dependencies {
 
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
-    api 'vn.vihat.omicall:omi-sdk:2.3.22-v2'
+    api 'io.omicrm.vihat:omi-sdk:2.5.21'
 
     implementation("androidx.work:work-runtime:2.9.0")
     implementation "androidx.appcompat:appcompat:1.7.0"

@@ -12,10 +12,13 @@ mixin DialDirectViewModel implements State<DialDirectView> {
   Map? guestUser;
   Stopwatch watch = Stopwatch();
   Timer? timer;
-  String callQuality = "";
+  String callQuality = ""; // MOS score display (e.g., "4.5")
   bool isMuted = false;
   Map? currentAudio;
   TextEditingController phoneNumberController = TextEditingController();
+
+  // Call quality tracker
+  final CallQualityTracker _qualityTracker = CallQualityTracker();
 
   /// Todo: check pop page more time
   int i = 0;
@@ -101,17 +104,25 @@ mixin DialDirectViewModel implements State<DialDirectView> {
       });
     });
     OmicallClient.instance.setCallQualityListener((data) {
-      final quality = data["quality"] as int;
+      // Parse call quality data using helper
+      final info = _qualityTracker.parseCallQuality(data);
+
+      debugPrint("CallQualityInfo => $info");
+
+      // Handle loading indicator
+      if (info.shouldShowLoading) {
+        debugPrint("Poor network detected (LCN stuck at ${info.lcn}) - showing loading");
+        EasyLoading.show();
+      } else if (info.isNetworkRecovered) {
+        debugPrint("Network recovered (LCN changed to ${info.lcn}) - dismissing loading");
+        EasyLoading.dismiss();
+      } else if (info.lcn == 0) {
+        EasyLoading.dismiss();
+      }
+
+      // Display MOS score
       setState(() {
-        if (quality == 0) {
-          callQuality = "GOOD";
-        }
-        if (quality == 1) {
-          callQuality = "NORMAL";
-        }
-        if (quality == 2) {
-          callQuality = "BAD";
-        }
+        callQuality = info.mosDisplay;
       });
     });
     OmicallClient.instance.setMuteListener((data) {
