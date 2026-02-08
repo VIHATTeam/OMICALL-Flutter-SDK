@@ -2,15 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
-## 3.2.9 [05/02/2026]
+## 3.2.9 [08/02/2026]
 
 ### Changed
 - **[MAJOR UPDATE]** Updated OMI Android SDK from 2.3.22-v2 to 2.5.17
+- **[MAJOR UPDATE]** Updated OmiKit iOS from 1.8.44 to 1.10.11
 - Upgraded compileSdk and targetSdk from 34 to 35 (Android 15 support)
 - Added support for Android 15-16 ConnectionService for incoming calls
 
 ### Added
-- **Database Maintenance**: Added `MyApplication` class with `DatabaseMaintenanceHelper.performSafeMaintenance()` to prevent SQLiteFullException crashes
+- **Call Quality Monitoring**: Added `CallQualityTracker` and `CallQualityInfo` helper classes for parsing call quality data (MOS, LCN, jitter, latency, packet loss)
 - **Android 14+ Permissions**:
   - `FOREGROUND_SERVICE_MICROPHONE` - Required for audio calls
   - `FOREGROUND_SERVICE_PHONE_CALL` - Required for call functionality
@@ -22,6 +23,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - **[CRITICAL]** Explicitly removed `FOREGROUND_SERVICE_CAMERA` permission to prevent crashes on Android 14-15 devices without camera (SDK 2.3.78 breaking change)
+- Fixed type casting bug in call quality listener (`Map<String, dynamic>` → `Map<dynamic, dynamic>`) that caused crash on iOS
 - Fixed DNS network issues (SDK 2.5.15, 2.5.16, 2.5.17)
 - Fixed crash when receiving Firebase messages (SDK 2.5.11)
 - Fixed crash on `startForeground` (SDK 2.5.11)
@@ -30,12 +32,13 @@ All notable changes to this project will be documented in this file.
 - Fixed ANR register timeout for MIUI on Xiaomi devices (SDK 2.5.7)
 
 ### Breaking Changes
-- **Application class required**: Must extend `Application` and call `DatabaseMaintenanceHelper.performSafeMaintenance()` in `onCreate()`
 - **Permission updates required**: Must add Android 14+ foreground service permissions
 - **Service declaration updated**: `NotificationService` now requires `foregroundServiceType` attribute
 - **Camera permission removed**: Apps without video call support must explicitly remove `FOREGROUND_SERVICE_CAMERA` permission
 
-### Dependencies (Android SDK 2.5.17)
+### Dependencies
+- Android SDK: 2.3.22-v2 → 2.5.17
+- iOS OmiKit: 1.8.44 → 1.10.11
 - SIP SDK: Updated to version 2.16 (SDK 2.5.8)
 - Support for Google Play 16KB package size requirement (SDK 2.5.1)
 - Multiple call handling improvements (SDK 2.3.70)
