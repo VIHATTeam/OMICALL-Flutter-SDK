@@ -50,6 +50,8 @@ enum OmiStartCallStatus {
   startCallFailed,
   startCallSuccess,
   haveAnotherCall,
+  accountTurnOffNumberInternal,
+  noNetwork,
 }
 
 extension ExtensionOmiStartCallStatus on OmiStartCallStatus {

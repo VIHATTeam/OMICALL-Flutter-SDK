@@ -964,6 +964,10 @@ final result = await OmicallClient.instance.startCall(
 | `startCallFailed` | 7 | Không thể bắt đầu cuộc gọi |
 | **`startCallSuccess`** | **8** | **Cuộc gọi bắt đầu thành công** ⬅️ Use this to navigate |
 | `haveAnotherCall` | 9 | Đang có cuộc gọi khác |
+| `accountTurnOffNumberInternal` | 10 | Tài khoản đã tắt tính năng gọi nội bộ |
+| `noNetwork` | 11 | Không có kết nối mạng |
+
+> **Note (Android/iOS difference):** The `status` code differs by platform (`408` on Android, `11` on iOS). Use `message` field instead for cross-platform handling: `jsonMap['message'] == 'NO_NETWORK'`.
 
 **Important:** Wait for status **8** before navigating to call screen!
 
@@ -1471,22 +1475,37 @@ final result = await OmicallClient.instance.startCall(phone, false);
 final jsonMap = json.decode(result);
 final status = jsonMap['status'];
 
-switch(status) {
-  case 0: // invalidUuid
-    print("Invalid UUID - check user credentials");
+// Use 'message' field for cross-platform handling (status code differs between Android/iOS)
+final message = jsonMap['message'];
+
+switch(message) {
+  case 'START_CALL_SUCCESS':
+    navigateToCallScreen();
     break;
-  case 1: // invalidPhoneNumber
-    print("Invalid phone number format");
+  case 'NO_NETWORK':
+    // Android: status=408 / iOS: status=11
+    print("No network connection - check internet");
+    showNoNetworkDialog();
     break;
-  case 4: // permissionDenied
+  case 'PERMISSION_DENIED':
     print("Microphone permission denied");
     await requestMicrophonePermission();
     break;
-  case 5: // couldNotFindEndpoint
+  case 'COULD_NOT_FIND_END_POINT':
     print("Not logged in - call initCall() first");
     break;
-  case 8: // SUCCESS
+  case 'HAVE_ANOTHER_CALL':
+    print("Already in a call");
+    break;
+  case 'SWITCHBOARD_NOT_CONNECTED':
+    print("Switchboard not connected - check account");
+    break;
+  case 'SWITCHBOARD_REGISTERING':
+    // status=8 on Android, call is being registered
     navigateToCallScreen();
+    break;
+  case 'ACCOUNT_TURN_OFF_NUMBER_INTERNAL':
+    print("Internal call feature is disabled for this account");
     break;
 }
 ```

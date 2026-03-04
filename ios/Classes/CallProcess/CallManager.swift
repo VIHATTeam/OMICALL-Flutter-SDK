@@ -212,6 +212,10 @@ class CallManager {
                     return "START_CALL_FAIL"
                 case 9:
                     return "HAVE_ANOTHER_CALL"
+                case 10:
+                    return "ACCOUNT_TURN_OFF_NUMBER_INTERNAL"
+                case 11:
+                    return "NO_NETWORK"
                 default:
                     return "START_CALL_SUCCESS"
             }

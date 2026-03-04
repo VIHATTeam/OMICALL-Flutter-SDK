@@ -287,6 +287,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             405 -> "PERMISSION_DENIED"
             406 -> "PERMISSION_DENIED"
             407 -> "SWITCHBOARD_REGISTERING"
+            408 -> "NO_NETWORK"
             else -> "HAVE_ANOTHER_CALL"
         }
     }

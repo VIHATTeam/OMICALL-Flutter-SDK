@@ -2,88 +2,108 @@
 
 All notable changes to this project will be documented in this file.
 
-## 3.2.9 [08/02/2026]
+## 3.3.1 [03/03/2026]
 
 ### Changed
-- **[MAJOR UPDATE]** Updated OMI Android SDK from 2.3.22-v2 to 2.5.17
-- **[MAJOR UPDATE]** Updated OmiKit iOS from 1.8.44 to 1.10.11
-- Upgraded compileSdk and targetSdk from 34 to 35 (Android 15 support)
+- **[MAJOR]** Updated OMI Android SDK: `2.3.22-v2` → `2.6.3`
+- **[MAJOR]** Updated OmiKit iOS: `1.8.44` → `1.10.29`
+- **[MAJOR]** Maven repository changed: `vn.vihat.omicall:omi-sdk` → `io.omicrm.vihat:omi-sdk`
+- Upgraded Kotlin: `1.6.10` → `1.9.24`
+- Upgraded Android Gradle Plugin: `7.1.2` → `8.1.4`
+- Upgraded compileSdk and targetSdk: `33` → `35` (Android 15 support)
+- Upgraded Java compatibility: `1.8` → `11`
 - Added support for Android 15-16 ConnectionService for incoming calls
+- Removed deprecated `jcenter()` repository
+- `OmiClient.getInstance(context)` → `OmiClient.getInstance(context, needRegister)`
 
 ### Added
-- **Call Quality Monitoring**: Added `CallQualityTracker` and `CallQualityInfo` helper classes for parsing call quality data (MOS, LCN, jitter, latency, packet loss)
-- **Android 14+ Permissions**:
+- **Call Quality Monitoring**: `CallQualityTracker` and `CallQualityInfo` helper classes for parsing call quality data (MOS, LCN, jitter, latency, packet loss)
+- **Android 14+ Permissions** (API 34+):
   - `FOREGROUND_SERVICE_MICROPHONE` - Required for audio calls
   - `FOREGROUND_SERVICE_PHONE_CALL` - Required for call functionality
-- **Android 13+ Permissions**:
+- **Android 13+ Permissions** (API 33+):
   - `POST_NOTIFICATIONS` - Required for call notifications
 - **Android 15-16 Support**:
   - `MANAGE_OWN_CALLS` - Required for ConnectionService
-- Updated `NotificationService` with `foregroundServiceType="microphone|phoneCall"`
+- `NotificationService` with `foregroundServiceType="microphone|phoneCall"`
+- `FirebaseMessageReceiver` with `foregroundServiceType="remoteMessaging"`
+- `<uses-feature android:name="android.hardware.telephony" android:required="false" />`
 
 ### Fixed
-- **[CRITICAL]** Explicitly removed `FOREGROUND_SERVICE_CAMERA` permission to prevent crashes on Android 14-15 devices without camera (SDK 2.3.78 breaking change)
+- **[CRITICAL]** Explicitly removed `FOREGROUND_SERVICE_CAMERA` permission (crashes on Android 14-15 devices without camera)
+- **[CRITICAL]** Removed KAPT plugin and `kapt "com.github.bumptech.glide:compiler"` (caused OutOfMemoryError, KSP conflicts)
 - Fixed type casting bug in call quality listener (`Map<String, dynamic>` → `Map<dynamic, dynamic>`) that caused crash on iOS
-- Fixed DNS network issues (SDK 2.5.15, 2.5.16, 2.5.17)
-- Fixed crash when receiving Firebase messages (SDK 2.5.11)
-- Fixed crash on `startForeground` (SDK 2.5.11)
-- Improved video call stability (SDK 2.5.11)
-- Fixed race condition when logout & login (SDK 2.5.9)
-- Fixed ANR register timeout for MIUI on Xiaomi devices (SDK 2.5.7)
+- Fixed DNS network issues (Android SDK 2.5.15-2.5.17)
+- Fixed crash on Firebase message received (Android SDK 2.5.11)
+- Fixed crash on `startForeground` (Android SDK 2.5.11)
+- Fixed race condition when logout & login (Android SDK 2.5.9)
+- Fixed ANR register timeout for MIUI on Xiaomi devices (Android SDK 2.5.7)
+- Improved video call stability (Android SDK 2.5.11)
+- Hardcoded GitHub token removed from example `build.gradle.kts` (now reads from `local.properties`)
 
 ### Breaking Changes
-- **Permission updates required**: Must add Android 14+ foreground service permissions
-- **Service declaration updated**: `NotificationService` now requires `foregroundServiceType` attribute
-- **Camera permission removed**: Apps without video call support must explicitly remove `FOREGROUND_SERVICE_CAMERA` permission
+- **Maven repository changed**: `vn.vihat.omicall:omi-sdk` → `io.omicrm.vihat:omi-sdk`
+- **Permission updates required**: Must add `FOREGROUND_SERVICE_MICROPHONE` + `FOREGROUND_SERVICE_PHONE_CALL` permissions
+- **Camera permission must be removed**: `<uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" tools:node="remove" />`
+- **Service declaration updated**: `NotificationService` requires `android:foregroundServiceType="microphone|phoneCall"`
+- **`OmiClient.getInstance()` signature changed**: Now requires `needRegister` parameter
 
 ### Dependencies
-- Android SDK: 2.3.22-v2 → 2.5.17
-- iOS OmiKit: 1.8.44 → 1.10.11
-- SIP SDK: Updated to version 2.16 (SDK 2.5.8)
-- Support for Google Play 16KB package size requirement (SDK 2.5.1)
-- Multiple call handling improvements (SDK 2.3.70)
-- ConnectionService support for Android 15-16 (SDK 2.4.22)
+| Package | 3.2.4 | 3.3.1 |
+|---------|-------|-------|
+| Android OMI SDK | 2.3.22-v2 | 2.6.3 |
+| iOS OmiKit | 1.8.44 | 1.10.29 |
+| Kotlin | 1.6.10 | 1.9.24 |
+| AGP | 7.1.2 | 8.1.4 |
+| compileSdk / targetSdk | 33 | 35 |
+| Java | 1.8 | 11 |
+| OkHttp | 5.0.0-alpha.11 | 4.12.0 |
+| Kotlin Coroutines | 1.7.2 | 1.8.1 |
+| Firebase Messaging | 23.2.1 | 24.1.0 |
+| Material Design | 1.9.0 | 1.12.0 |
+| Retrofit | 2.9.0 | 2.11.0 |
+| Gson | 2.10.1 | 2.11.0 |
+| Glide | 4.15.1 | 4.16.0 |
+| AppCompat | 1.6.1 | 1.7.0 |
+| Lifecycle Process | 2.6.2 | 2.8.7 |
+| Work Runtime | 2.8.1 | 2.9.0 |
+| Hilt | 2.39.1 | 2.48 |
 
-### Migration Guide
-See [Android SDK CHANGELOG](https://github.com/VIHATTeam/ANDROID-SDK/blob/main/CHANGELOG.md) for complete list of changes from 2.3.22-v2 to 2.5.17.
+### Migration Guide (from 3.2.4)
 
-## 3.2.8 [07/11/2025]
+**1. Update `android/build.gradle` (or `build.gradle.kts`)**:
+```groovy
+// Maven repo URL unchanged, but package name changed
+api 'io.omicrm.vihat:omi-sdk:2.6.3'  // was: vn.vihat.omicall:omi-sdk:2.3.22-v2
+```
 
-### Dependencies
-- Kotlin Coroutines: 1.9.0 → 1.8.1
+**2. Update `AndroidManifest.xml`**:
+```xml
+<!-- Add these permissions -->
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+<uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
 
+<!-- CRITICAL: Remove camera permission to prevent crashes -->
+<uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"
+    tools:node="remove" />
 
+<!-- Update NotificationService -->
+<service android:name="vn.vihat.omicall.omisdk.service.NotificationService"
+    android:foregroundServiceType="microphone|phoneCall" />
+```
 
-## 3.2.7 [07/11/2025]
+**3. Update iOS Podfile** - Run `pod update OmiKit`
 
-### Fixed
-- **[CRITICAL]** Removed unnecessary KAPT (Kotlin Annotation Processing Tool) plugin and dependency
-  - Fixed KAPT-related build failures reported by customers
-  - Resolved memory issues during build process (OutOfMemoryError)
-  - Fixed conflicts with KSP-based projects
-  - Eliminated unnecessary annotation processing overhead
-- Removed unused `kapt "com.github.bumptech.glide:compiler"` dependency
-- Removed `kotlin-kapt` plugin as SDK doesn't use annotation processors
-
-## 3.2.6 [07/11/2025]
-
-### Changed
-- Upgraded Kotlin from 1.6.10 to 1.9.24
-- Upgraded Android Gradle Plugin from 7.1.2 to 8.1.4
-- Upgraded compileSdk and targetSdk to 34
-- Upgraded Java compatibility from 1.8 to 11
-- Upgraded dependencies to latest stable versions
-- Fixed compatibility issues with modern Android build environments
-
-### Dependencies
-- OkHttp: 5.0.0-alpha.11 → 4.12.0 (stable)
-- Kotlin Coroutines: 1.7.2 → 1.9.0
-- Firebase Messaging: 23.2.1 → 24.1.0
-- Material Design: 1.9.0 → 1.12.0
-  
-
-## 3.2.5 [24/07/2025]
-- re-build again 
+**4. Optional: Use CallQualityTracker**:
+```dart
+final tracker = CallQualityTracker();
+OmicallClient.instance.setCallQualityListener((data) {
+  final info = tracker.parseCallQuality(data);
+  // info.mos, info.lcn, info.mosDisplay, info.shouldShowLoading
+});
+```
 
 ## 3.2.4 [24/07/2025]
 - Update OMI core Android to version 2.3.22-v2

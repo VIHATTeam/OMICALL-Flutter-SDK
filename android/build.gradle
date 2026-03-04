@@ -78,7 +78,7 @@ android {
 dependencies {
 
     implementation "androidx.security:security-crypto:1.1.0-alpha06"
-    api 'io.omicrm.vihat:omi-sdk:2.5.21'
+    api 'io.omicrm.vihat:omi-sdk:2.6.4'
 
     implementation("androidx.work:work-runtime:2.9.0")
     implementation "androidx.appcompat:appcompat:1.7.0"
