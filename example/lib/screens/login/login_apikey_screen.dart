@@ -25,14 +25,10 @@ class LoginApiKeyScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginApiKeyScreen> {
-  // NSString * USER_NAME1 = @"100";
-  // NSString * PASS_WORD1 = @"Kunkun";
-  // NSString * USER_NAME2 = @"101";
-  // NSString * PASS_WORD2 = @"Kunkun12345"; 0358380641
 
-  String user_name = "test account concung";
-  String pass_word = "0967884111";
-  String apiKEY = "78A39F234B91E5392855AFB9E1CB19F859F4FE3156757C94F89DC372BBBE3DF5";
+  String user_name = "";
+  String pass_word = "";
+  String apiKEY = "";
 
 
   //video

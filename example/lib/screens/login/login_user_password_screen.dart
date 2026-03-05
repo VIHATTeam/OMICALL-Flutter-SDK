@@ -518,7 +518,7 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
       "realm": _serviceUrlController.text,
       "fcmToken": token,
       "host": _hostUrlController.text,
-      "projectId": "omicrm-6558a"
+      "projectId": ""
     });
     if (!mounted) {
       return;
