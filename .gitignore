@@ -79,3 +79,5 @@ android/local.*
 /android/local.properties
 /android/local.*
 Claude.md
+docs/*
+/docs/*
