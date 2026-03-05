@@ -1698,7 +1698,7 @@ OmicallClient.instance.setSpeakerListener((isSpeakerOn) {
 
 ## Migration Guide
 
-### Upgrading from 2.3.x to 2.5.x
+### Upgrading from 2.x.x to 3.x.x
 
 #### Breaking Changes
 
@@ -1769,7 +1769,7 @@ import 'package:omicall_flutter_plugin/models/call_quality_info.dart';
 import 'package:omicall_flutter_plugin/utils/call_quality_tracker.dart';
 ```
 
-#### New Features in 2.5.x
+#### New Features in 3.x.x
 
 1. **CallQualityTracker Helper**
    - Automatic MOS parsing
@@ -1791,13 +1791,13 @@ import 'package:omicall_flutter_plugin/utils/call_quality_tracker.dart';
 
 ## Support
 
-- 📧 Email: support@vihat.vn
-- 📱 Hotline: 1900 2929 29
+- 📧 Email: contact@omicall.com
+- 📱 Hotline: 0272 7777 787
 - 🌐 Website: https://omicall.com
-- 📖 API Docs: https://api.omicall.com
+- 📖 API Docs: https://omicrm.io/post/detail/omicall-apis-post76
 
 ---
 
 ## License
 
-Copyright © 2024 VIHAT Team. All rights reserved.
+Copyright © 2021 VIHAT Team. All rights reserved.
