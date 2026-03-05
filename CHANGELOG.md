@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## 3.3.1 [05/03/2026]
+## 3.3.2 [05/03/2026]
 
 ### Changed
 - **[MAJOR]** Updated OMI Android SDK: `2.3.22-v2` → `2.6.4`
@@ -57,7 +57,7 @@ All notable changes to this project will be documented in this file.
 - **`OmiClient.getInstance()` signature changed**: Now requires `needRegister` parameter
 
 ### Dependencies
-| Package | 3.2.4 | 3.3.1 |
+| Package | 3.2.4 | 3.3.2 |
 |---------|-------|-------|
 | Android OMI SDK | 2.3.22-v2 | 2.6.4 |
 | iOS OmiKit | 1.8.44 | 1.10.34 |

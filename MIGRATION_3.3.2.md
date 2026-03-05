@@ -1,10 +1,10 @@
-# Migration Guide: 3.2.5 → 3.3.1
+# Migration Guide: 3.2.5 → 3.3.2
 
 ## Overview
 
-Version 3.3.1 includes major updates to both Android and iOS native SDKs, build toolchain upgrades, and new call quality monitoring features.
+Version 3.3.2 includes major updates to both Android and iOS native SDKs, build toolchain upgrades, and new call quality monitoring features.
 
-| | 3.2.5 | 3.3.1 |
+| | 3.2.5 | 3.3.2 |
 |--|-------|-------|
 | Android OMI SDK | 2.3.22-v2 | **2.6.4** |
 | iOS OmiKit | 1.8.44 | **1.10.34** |
@@ -20,7 +20,7 @@ Version 3.3.1 includes major updates to both Android and iOS native SDKs, build 
 **`pubspec.yaml`**:
 ```yaml
 dependencies:
-  omicall_flutter_plugin: ^3.3.1
+  omicall_flutter_plugin: ^3.3.2
 ```
 
 Then run:
@@ -320,9 +320,9 @@ Same pattern applies to `initCallWithApiKey`.
 
 ## Step 9: Verify `setMuteListener` Usage (Android)
 
-In versions prior to 3.3.1, `setMuteListener` was **silently broken on Android**. The Android SDK sent the muted event as `Map {isMuted: bool}` internally, causing a `TypeError` when passed to the `Function(bool)` listener — mute state changes were dropped without crashing.
+In versions prior to 3.3.2, `setMuteListener` was **silently broken on Android**. The Android SDK sent the muted event as `Map {isMuted: bool}` internally, causing a `TypeError` when passed to the `Function(bool)` listener — mute state changes were dropped without crashing.
 
-This is **fixed automatically** in 3.3.1. No code changes are required, but:
+This is **fixed automatically** in 3.3.2. No code changes are required, but:
 
 - If you had a workaround (polling, using `callStateChangeEvent`, or skipping the listener), you can now remove it and use `setMuteListener` directly.
 - Ensure your listener uses the `bool` value correctly:
@@ -348,7 +348,7 @@ OmicallClient.instance.removeMuteListener();
 
 ## Step 10: (Optional) Use CallQualityTracker
 
-New in 3.3.1 — typed helper classes for call quality monitoring:
+New in 3.3.2 — typed helper classes for call quality monitoring:
 
 ```dart
 import 'package:omicall_flutter_plugin/omicall.dart';
@@ -401,7 +401,7 @@ void dispose() {
 
 ## Checklist
 
-- [ ] Updated `pubspec.yaml` to `^3.3.1`
+- [ ] Updated `pubspec.yaml` to `^3.3.2`
 - [ ] **Updated `initCall*` result handling** — replaced `bool result == false` with JSON parsing (Step 8)
 - [ ] Updated Maven package: `vn.vihat.omicall` → `io.omicrm.vihat`
 - [ ] Moved GitHub credentials to `local.properties`
