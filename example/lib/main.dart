@@ -90,8 +90,8 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         theme: ThemeData.light(),
         home: loginInfo == null
-            ? const LoginUserPasswordScreen()
-            // ? const LoginApiKeyScreen()
+            // ? const LoginUserPasswordScreen()
+            ? const LoginApiKeyScreen()
             :
             // widget.isDirectCall
             //     ? DirectCallScreen(

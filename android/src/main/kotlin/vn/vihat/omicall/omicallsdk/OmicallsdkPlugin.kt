@@ -3,6 +3,7 @@ package vn.vihat.omicall.omicallsdk
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
@@ -53,25 +54,24 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private var isNeedLoading: Boolean = false
 
     override fun incomingReceived(callerId: Int?, phoneNumber: String?, isVideo: Boolean?) {
-        Log.d("SDK ====> CALL ACTION:::  ", "incomingReceived -> callerId=$callerId, phoneNumber=$phoneNumber")
-        isIncomming = true;
-        callerNumberTemp = phoneNumber ?: "";
-        channel.invokeMethod(
-            CALL_STATE_CHANGED, mapOf(
-                "isVideo" to isVideo,
-                "status" to CallState.incoming.value,
-                "callerNumber" to phoneNumber,
-                "_id" to "",
-                "incoming" to isIncomming
+        isIncomming = true
+        callerNumberTemp = phoneNumber ?: ""
+        Handler(Looper.getMainLooper()).post {
+            channel.invokeMethod(
+                CALL_STATE_CHANGED, mapOf(
+                    "isVideo" to isVideo,
+                    "status" to CallState.incoming.value,
+                    "callerNumber" to phoneNumber,
+                    "_id" to "",
+                    "incoming" to isIncomming
+                )
             )
-        )
+        }
         applicationContext?.let {
-            if(!AppUtils.isAppOnForeground(it)) {
-                return
-            }
+            if (!AppUtils.isAppOnForeground(it)) return
             val activeCall = Utils.getActiveCall(it)
-            if(activeCall != null ) {
-                activeCall?.isShowed = true
+            if (activeCall != null) {
+                activeCall.isShowed = true
                 Utils.saveActiveCall(it, activeCall)
             }
         }
@@ -88,81 +88,87 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         transactionId: String?,
     ) {
         isAnserCall = true
-        Log.d("SDK ====> CALL ACTION:::  ", "onCallEstablished -> callerId=$callerId, phoneNumber=$phoneNumber")
-        channel.invokeMethod(
-            CALL_STATE_CHANGED, mapOf(
-                "callerNumber" to phoneNumber,
-                "status" to CallState.confirmed.value,
-                "isVideo" to isVideo,
-                "transactionId" to transactionId,
-                "incoming" to isIncomming
+        Handler(Looper.getMainLooper()).post {
+            channel.invokeMethod(
+                CALL_STATE_CHANGED, mapOf(
+                    "callerNumber" to phoneNumber,
+                    "status" to CallState.confirmed.value,
+                    "isVideo" to isVideo,
+                    "transactionId" to transactionId,
+                    "incoming" to isIncomming
+                )
             )
-        )
+        }
         Log.d("omikit", "onCallEstablished: ")
     }
 
     override fun onCallEnd(callInfo: MutableMap<String, Any?>, statusCode: Int) {
         Log.d("SDK ====> CALL ACTION:::  ", "onCallEnd -> callInfo=$callInfo, statusCode=$statusCode")
-        
         callInfo["status"] = CallState.disconnected.value
         callInfo["code_end_call"] = statusCode
-        channel.invokeMethod(CALL_STATE_CHANGED, callInfo)
-
-        isIncomming = false;
-        isAnserCall  = false
+        Handler(Looper.getMainLooper()).post {
+            channel.invokeMethod(CALL_STATE_CHANGED, callInfo)
+        }
+        isIncomming = false
+        isAnserCall = false
     }
 
     override fun onConnecting() {
-        Log.d("SDK ====> CALL ACTION:::  ", "onConnecting ->")
-        channel.invokeMethod(
-            CALL_STATE_CHANGED, mapOf(
-                "status" to CallState.connecting.value,
-                "isVideo" to NotificationService.isVideo,
-                "callerNumber" to "",
-                "incoming" to isIncomming,
-                "_id" to ""
-            )
-        )
-    }
-
-    override fun onRinging(callerId: Int, transactionId: String?) {
-        var callDirection  = OmiClient.callDirection
-        Log.d("SDK ====> CALL ACTION:::  ", "onRinging -> callerId=$callerId, transactionId=$transactionId , callDirection=$callDirection")
-        if(callDirection == "inbound") {
+        Handler(Looper.getMainLooper()).post {
             channel.invokeMethod(
                 CALL_STATE_CHANGED, mapOf(
-                    "status" to CallState.incoming.value,
+                    "status" to CallState.connecting.value,
                     "isVideo" to NotificationService.isVideo,
-                    "callerNumber" to OmiClient.prePhoneNumber,
-                    "incoming" to true,
-                    "_id" to ""
-                )
-            )
-        } else {
-            channel.invokeMethod(
-                CALL_STATE_CHANGED, mapOf(
-                    "status" to CallState.early.value,
-                    "isVideo" to NotificationService.isVideo,
-                    "callerNumber" to OmiClient.prePhoneNumber,
-                    "incoming" to false,
+                    "callerNumber" to "",
+                    "incoming" to isIncomming,
                     "_id" to ""
                 )
             )
         }
     }
 
+    override fun onRinging(callerId: Int, transactionId: String?) {
+        val callDirection = OmiClient.callDirection
+
+        Handler(Looper.getMainLooper()).post {
+            if (callDirection == "inbound") {
+                channel.invokeMethod(
+                    CALL_STATE_CHANGED, mapOf(
+                        "status" to CallState.incoming.value,
+                        "isVideo" to NotificationService.isVideo,
+                        "callerNumber" to OmiClient.prePhoneNumber,
+                        "incoming" to true,
+                        "_id" to ""
+                    )
+                )
+            } else {
+                channel.invokeMethod(
+                    CALL_STATE_CHANGED, mapOf(
+                        "status" to CallState.early.value,
+                        "isVideo" to NotificationService.isVideo,
+                        "callerNumber" to OmiClient.prePhoneNumber,
+                        "incoming" to false,
+                        "_id" to ""
+                    )
+                )
+            }
+        }
+    }
+
     override fun onOutgoingStarted(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
-        isIncomming = false;
-        Log.d("SDK ====> CALL ACTION:::  ", "onOutgoingStarted -> callerId=$callerId, phoneNumber=$phoneNumber")
-        channel.invokeMethod(
-            CALL_STATE_CHANGED, mapOf(
-                "status" to CallState.calling.value,
-                "isVideo" to isVideo,
-                "callerNumber" to "",
-                "incoming" to isIncomming,
-                "_id" to ""
+        isIncomming = false
+
+        Handler(Looper.getMainLooper()).post {
+            channel.invokeMethod(
+                CALL_STATE_CHANGED, mapOf(
+                    "status" to CallState.calling.value,
+                    "isVideo" to isVideo,
+                    "callerNumber" to "",
+                    "incoming" to isIncomming,
+                    "_id" to ""
+                )
             )
-        )
+        }
     }
 
     override fun onRegisterCompleted(statusCode: Int) {
@@ -175,60 +181,47 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun networkHealth(stat: Map<String, *>, quality: Int) {
-        Log.d("Kds", "zzzzz -> numLCN -> $stat ")
-        if(stat != null){
-            val numLCN = stat["lcn"] as? Int
-            Log.d("Kds", "networkHealth -> numLCN -> $numLCN ")
-            numLCN?.let {
-                isNeedLoading = it > 2
-                if (isNeedLoading) {
-                    mainScope.launch {
-                        delay(15000)
-                        isNeedLoading = false
-                    }
+        val numLCN = stat["lcn"] as? Int
+        numLCN?.let {
+            isNeedLoading = it > 2
+            if (isNeedLoading) {
+                mainScope.launch {
+                    delay(15000)
+                    isNeedLoading = false
                 }
             }
         }
-
-//        Log.d("Kds", "zzzzz -> numLCN -> $stat ")
-
-        channel.invokeMethod(CALL_QUALITY, mapOf(
-            "quality" to quality,
-            "stat" to stat,
-            "isNeedLoading" to isNeedLoading
-        ))
+        Handler(Looper.getMainLooper()).post {
+            channel.invokeMethod(CALL_QUALITY, mapOf(
+                "quality" to quality,
+                "stat" to stat,
+                "isNeedLoading" to isNeedLoading
+            ))
+        }
     }
 
     override fun onAudioChanged(audioInfo: Map<String, Any>) {
-        channel.invokeMethod(AUDIO_CHANGE, mapOf(
-            "data" to audioInfo,
-        ))
+        Handler(Looper.getMainLooper()).post {
+            channel.invokeMethod(AUDIO_CHANGE, mapOf("data" to audioInfo))
+        }
     }
 
     override fun onHold(isHold: Boolean) {
-        channel.invokeMethod(
-            HOLD, mapOf(
-                "isHold" to isHold,
-            )
-        )
-        Log.d("omikit", "onHold: $isHold")
+        Handler(Looper.getMainLooper()).post {
+            channel.invokeMethod(HOLD, mapOf("isHold" to isHold))
+        }
     }
 
     override fun onMuted(isMuted: Boolean) {
-        channel.invokeMethod(
-            MUTED, mapOf(
-                "isMuted" to isMuted,
-            )
-        )
-        Log.d("omikit", "onMuted: $isMuted")
+        Handler(Looper.getMainLooper()).post {
+            channel.invokeMethod(MUTED, mapOf("isMuted" to isMuted))
+        }
     }
 
     override fun onSwitchBoardAnswer(sip: String) {
-        channel.invokeMethod(
-            SWITCHBOARD_ANSWER, mapOf(
-                "sip" to sip,
-            )
-        )
+        Handler(Looper.getMainLooper()).post {
+            channel.invokeMethod(SWITCHBOARD_ANSWER, mapOf("sip" to sip))
+        }
     }
 
     override fun onVideoSize(width: Int, height: Int) {  }
@@ -348,6 +341,12 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
             INIT_CALL_USER_PASSWORD -> {
                 mainScope.launch {
+                    val gson = Gson()
+                    val cm = applicationContext?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+                    if (cm?.activeNetwork == null) {
+                        result.success(gson.toJson(mapOf("status" to 600, "message" to "NETWORK_UNAVAILABLE")))
+                        return@launch
+                    }
                     val userName = dataOmi["userName"] as? String
                     val password = dataOmi["password"] as? String
                     val realm = dataOmi["realm"] as? String
@@ -355,24 +354,30 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val isVideo = dataOmi["isVideo"] as? Boolean
                     val firebaseToken = dataOmi["fcmToken"] as? String
                     val projectId = dataOmi["projectId"] as? String ?: ""
-                    if (userName != null && password != null && realm != null && host != null && firebaseToken != null ) {
-                            OmiClient.register(
-                                userName,
-                                password,
-                                realm,
-                                isVideo ?: true,
-                                firebaseToken,
-                                host,
-                                projectId
-                            )
+                    if (userName == null || password == null || realm == null || host == null || firebaseToken == null) {
+                        result.success(gson.toJson(mapOf("status" to 400, "message" to "MISSING_PARAMS")))
+                        return@launch
                     }
+                    val registerResult = OmiClient.register(
+                        userName, password, realm, isVideo ?: true, firebaseToken, host, projectId
+                    )
                     requestPermission(isVideo ?: true)
-                    result.success(true)
+                    val response = if (registerResult) {
+                        mapOf("status" to 200, "message" to "INIT_SUCCESS")
+                    } else {
+                        mapOf("status" to 500, "message" to "INIT_FAILED")
+                    }
+                    result.success(gson.toJson(response))
                 }
             }
             INIT_CALL_API_KEY -> {
                 mainScope.launch {
-                    var loginResult = false
+                    val gson = Gson()
+                    val cm = applicationContext?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+                    if (cm?.activeNetwork == null) {
+                        result.success(gson.toJson(mapOf("status" to 600, "message" to "NETWORK_UNAVAILABLE")))
+                        return@launch
+                    }
                     val usrName = dataOmi["fullName"] as? String
                     val usrUuid = dataOmi["usrUuid"] as? String
                     val apiKey = dataOmi["apiKey"] as? String
@@ -380,26 +385,30 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val phone = dataOmi["phone"] as? String
                     val firebaseToken = dataOmi["fcmToken"] as? String
                     val projectId = dataOmi["projectId"] as? String ?: ""
-
+                    if (usrName == null || usrUuid == null || apiKey == null || phone == null || firebaseToken == null) {
+                        result.success(gson.toJson(mapOf("status" to 400, "message" to "MISSING_PARAMS")))
+                        return@launch
+                    }
+                    var loginResult = false
                     withContext(Dispatchers.Default) {
                         try {
-                            if (usrName != null && usrUuid != null && apiKey != null && phone != null && firebaseToken != null) {
-                                loginResult = OmiClient.registerWithApiKey(
-                                    apiKey = apiKey,
-                                    userName = usrName,
-                                    uuid = usrUuid,
-                                    phone = phone,
-                                    isVideo ?: true,
-                                    firebaseToken,
-                                    projectId
-                                )
-                            }
-                        } catch (_: Throwable) {
-                        }
-
+                            loginResult = OmiClient.registerWithApiKey(
+                                apiKey = apiKey,
+                                userName = usrName,
+                                uuid = usrUuid,
+                                phone = phone,
+                                isVideo ?: true,
+                                firebaseToken,
+                                projectId
+                            )
+                        } catch (_: Throwable) {}
                     }
-//                    requestPermission(isVideo ?: true)
-                    result.success(loginResult)
+                    val response = if (loginResult) {
+                        mapOf("status" to 200, "message" to "INIT_SUCCESS")
+                    } else {
+                        mapOf("status" to 500, "message" to "INIT_FAILED")
+                    }
+                    result.success(gson.toJson(response))
                 }
             }
             GET_INITIAL_CALL -> {
@@ -495,9 +504,11 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             SWITCH_CAMERA -> {
                 OmiClient.getInstance(applicationContext!!).switchCamera()
                 channel.invokeMethod(CAMERA_STATUS, true)
+                result.success(true)
             }
             TOGGLE_VIDEO -> {
                 OmiClient.getInstance(applicationContext!!).toggleCamera()
+                result.success(true)
             }
             GET_AUDIO -> {
                 val inputs = OmiClient.getInstance(applicationContext!!).getAudioOutputs()
@@ -588,19 +599,15 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             CHANGE_TRANSPORT -> {
                 mainScope.launch {
                     try {
-                        val type = dataOmi["type"] as String;
-                         Log.d(
-                             "dataOmi",
-                             "CHANGE_TRANSPORT $type "
-                         )
-                        if(type == "UDP"){
+                        val type = dataOmi["type"] as String
+                        Log.d("dataOmi", "CHANGE_TRANSPORT $type")
+                        if (type == "UDP") {
                             OmiClient.getInstance(applicationContext!!).updateSipTransport(OmiSipTransport.UDP)
                         } else {
                             OmiClient.getInstance(applicationContext!!).updateSipTransport(OmiSipTransport.TCP)
                         }
-                    } catch (_: Throwable) {
-
-                    }
+                    } catch (_: Throwable) {}
+                    result.success(true)
                 }
             } 
             TRANSFER_CALL -> {
@@ -621,9 +628,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
-        Log.d("SDK", "onDetachedFromEngine!")
         channel.setMethodCallHandler(null)
         OmiClient.getInstance(applicationContext!!).removeCallStateListener(this)
+        mainScope.cancel()
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {

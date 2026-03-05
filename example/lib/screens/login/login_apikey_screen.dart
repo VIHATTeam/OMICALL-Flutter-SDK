@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:calling/local_storage/local_storage.dart';
@@ -30,9 +30,9 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
   // NSString * USER_NAME2 = @"101";
   // NSString * PASS_WORD2 = @"Kunkun12345"; 0358380641
 
-  String user_name = " Tài khoản test app Tài khoản test app";
-  String pass_word = "0906005535";
-  String apiKEY = "E7AF81703203FC31F5658FAF3B875149CD57368ED07DB4AF414D93D3D2EBC76E";
+  String user_name = "test account concung";
+  String pass_word = "0967884111";
+  String apiKEY = "78A39F234B91E5392855AFB9E1CB19F859F4FE3156757C94F89DC372BBBE3DF5";
 
 
   //video
@@ -46,7 +46,6 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
   bool _supportVideoCall = true;
 
   bool _isVideoCall = false;
-  late StreamSubscription _subscription;
   GlobalKey<DialScreenState>? _dialScreenKey;
   GlobalKey<VideoCallState>? _videoScreenKey;
   TextStyle basicStyle = const TextStyle(
@@ -345,6 +344,19 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
     );
   }
 
+  String _initErrorMessage(String message) {
+    switch (message) {
+      case 'NETWORK_UNAVAILABLE':
+        return 'No network connection. Please check your internet and try again.';
+      case 'MISSING_PARAMS':
+        return 'Missing required login fields.';
+      case 'INIT_FAILED':
+        return 'Login failed. Please check your credentials and try again.';
+      default:
+        return 'Login error: $message';
+    }
+  }
+
   void _login() async {
     if (_userNameController.text.isEmpty ||
         _usrUuidController.text.isEmpty ||
@@ -357,23 +369,50 @@ class _LoginScreenState extends State<LoginApiKeyScreen> {
       badge: true,
       sound: true,
     );
-    String? token = await FirebaseMessaging.instance.getToken();
-    if (Platform.isIOS) {
-      token = await FirebaseMessaging.instance.getAPNSToken();
+    String? token;
+    try {
+      token = await FirebaseMessaging.instance.getToken();
+      if (Platform.isIOS) {
+        token = await FirebaseMessaging.instance.getAPNSToken();
+      }
+    } catch (_) {
+      EasyLoading.showError(
+        'No network connection. Please check your internet and try again.',
+        duration: const Duration(seconds: 3),
+      );
+      return;
     }
     final result0 = await OmicallClient.instance.getCurrentUser();
     debugPrint(result0.toString());
-    final result = await OmicallClient.instance.initCallWithApiKey(
+    
+    EasyLoading.show();
+
+    final initResult = await OmicallClient.instance.initCallWithApiKey(
       usrName: _userNameController.text,
       usrUuid: _usrUuidController.text,
       isVideo: _supportVideoCall,
       phone: _usrUuidController.text,
       apiKey: _apiKeyController.text,
-        fcmToken: token
+      fcmToken: token,
     );
-    // EasyLoading.dismiss();
-    // debugPrint(result.toString());
-    if (result == false) {
+
+
+    EasyLoading.dismiss();
+
+    // Parse JSON response: {"status": 200, "message": "INIT_SUCCESS"}
+    Map<String, dynamic>? initJson;
+    if (initResult is String) {
+      try {
+        initJson = jsonDecode(initResult) as Map<String, dynamic>;
+      } catch (_) {}
+    }
+    final initStatus = initJson?['status'] as int? ?? 0;
+    if (initStatus != 200) {
+      final initMessage = initJson?['message'] as String? ?? 'INIT_FAILED';
+      EasyLoading.showError(
+        _initErrorMessage(initMessage),
+        duration: const Duration(seconds: 3),
+      );
       return;
     }
 

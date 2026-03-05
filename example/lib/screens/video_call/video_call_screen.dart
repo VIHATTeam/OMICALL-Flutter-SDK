@@ -13,6 +13,7 @@ import 'package:omicall_flutter_plugin/omicall.dart';
 
 import '../../components/dial_user_pic.dart';
 import '../../components/option_item.dart';
+import '../../utils/call_utils.dart';
 import '../../components/rounded_button.dart';
 import '../../constants.dart';
 import '../call_home/call_home_screen.dart';
@@ -159,12 +160,15 @@ class VideoCallState extends State<VideoCallScreen> {
         if (status == OmiCallState.disconnected.rawValue) {
           i++;
           if (i >= 2) return;
-
+          final endCode = data['code_end_call'] as int?;
+          final reason = callEndReason(endCode);
+          if (reason != null) {
+            EasyLoading.showToast(reason, duration: const Duration(seconds: 3));
+          }
           await endCall(
             needShowStatus: true,
             needRequest: true,
           );
-
           return;
         }
         print('_isOutGoingCall: $_isOutGoingCall');

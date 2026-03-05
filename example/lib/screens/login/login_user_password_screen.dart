@@ -1,4 +1,4 @@
-import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:calling/local_storage/local_storage.dart';
@@ -9,12 +9,8 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
 import '../../components/textfield_custom_widget.dart';
-import '../dial/Dial_Screen_2.dart';
 import '../dial/dial_screen.dart';
 import '../video_call/video_call_screen.dart';
-
-import '../call_home/call_home_screen.dart';
-import '../choose_type_ui/choose_type_ui_screen.dart';
 
 class LoginUserPasswordScreen extends StatefulWidget {
   const LoginUserPasswordScreen({Key? key}) : super(key: key);
@@ -43,10 +39,9 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
   // String USER_NAME1 = "100";
   // String PASS_WORD1 = "Jx2hM9aYrT";
 
-  // HUNGTH
-  String REALM = "luuphuongmytrinh9a2";
-  String USER_NAME1 = "100";
-  String PASS_WORD1 = "iT2OjDYA0H";
+  String REALM = "";
+  String USER_NAME1 = "";
+  String PASS_WORD1 = "";
 
 
   // // THANH CONCUNG
@@ -70,7 +65,6 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
   bool _supportVideoCall = true;
 
   bool _isVideoCall = false;
-  late StreamSubscription _subscription;
   GlobalKey<DialScreenState>? _dialScreenKey;
   GlobalKey<VideoCallState>? _videoScreenKey;
   TextStyle basicStyle = const TextStyle(
@@ -448,11 +442,22 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
     );
   }
 
+  String _initErrorMessage(String message) {
+    switch (message) {
+      case 'NETWORK_UNAVAILABLE':
+        return 'No network connection. Please check your internet and try again.';
+      case 'MISSING_PARAMS':
+        return 'Missing required login fields.';
+      case 'INIT_FAILED':
+        return 'Login failed. Please check your credentials and try again.';
+      default:
+        return 'Login error: $message';
+    }
+  }
+
   void _login() async {
-    bool result = false;
     if (_userNameController.text.isEmpty ||
         _passwordController.text.isEmpty ||
-        _serviceUrlController.text.isEmpty ||
         _serviceUrlController.text.isEmpty ||
         _hostUrlController.text.isEmpty) {
       return;
@@ -464,12 +469,21 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
       sound: true,
     );
 
-    String? token = await FirebaseMessaging.instance.getToken();
-    if (Platform.isIOS) {
-      token = await FirebaseMessaging.instance.getAPNSToken();
+    String? token;
+    try {
+      token = await FirebaseMessaging.instance.getToken();
+      if (Platform.isIOS) {
+        token = await FirebaseMessaging.instance.getAPNSToken();
+      }
+    } catch (_) {
+      EasyLoading.showError(
+        'No network connection. Please check your internet and try again.',
+        duration: const Duration(seconds: 3),
+      );
+      return;
     }
     EasyLoading.show();
-    result = await OmicallClient.instance.initCallWithUserPassword(
+    final initResult = await OmicallClient.instance.initCallWithUserPassword(
       userName: _userNameController.text,
       password: _passwordController.text,
       realm: _serviceUrlController.text,
@@ -477,6 +491,25 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
       fcmToken: token,
       isVideo: _supportVideoCall,
     );
+    EasyLoading.dismiss();
+
+    // Parse JSON response: {"status": 200, "message": "INIT_SUCCESS"}
+    Map<String, dynamic>? initJson;
+    if (initResult is String) {
+      try {
+        initJson = jsonDecode(initResult) as Map<String, dynamic>;
+      } catch (_) {}
+    }
+    final initStatus = initJson?['status'] as int? ?? 0;
+    if (initStatus != 200) {
+      final initMessage = initJson?['message'] as String? ?? 'INIT_FAILED';
+      EasyLoading.showError(
+        _initErrorMessage(initMessage),
+        duration: const Duration(seconds: 3),
+      );
+      return;
+    }
+
     await LocalStorage.instance.setLoginInfo({
       "usrName": _userNameController.text,
       "usrUuid": '',
@@ -487,9 +520,7 @@ class _LoginScreenState extends State<LoginUserPasswordScreen> {
       "host": _hostUrlController.text,
       "projectId": "omicrm-6558a"
     });
-
-    EasyLoading.dismiss();
-    if (result == false || !mounted) {
+    if (!mounted) {
       return;
     }
 

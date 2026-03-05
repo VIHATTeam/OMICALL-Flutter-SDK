@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:calling/constants.dart';
+import 'package:calling/utils/call_utils.dart';
 import 'package:easy_dialog/easy_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -174,7 +175,7 @@ class DialScreen2State extends State<DialScreen2> {
     } else {
       EasyDialog(
         title: const Text("Notification"),
-        description: Text("Error code ${messageError}"),
+        description: Text(callErrorMessage(messageError)),
       ).show(context);
     }
   }

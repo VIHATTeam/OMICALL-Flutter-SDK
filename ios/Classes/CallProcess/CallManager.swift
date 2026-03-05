@@ -66,51 +66,79 @@ class CallManager {
         }
     }
     
-    func initWithApiKeyEndpoint(params: [String: Any]) -> Bool {
+    // Build a JSON string for init result responses
+    private func initResultJson(status: Int, message: String) -> String {
+        let dict: [String: Any] = ["status": status, "message": message]
+        if let data = try? JSONSerialization.data(withJSONObject: dict),
+           let str = String(data: data, encoding: .utf8) {
+            return str
+        }
+        return "{\"status\":\(status),\"message\":\"\(message)\"}"
+    }
+
+    func initWithApiKeyEndpoint(params: [String: Any]) -> String {
+        // Skip re-initialization if a call is currently active to avoid destroying the SIP stack mid-call
+        if let activeCall = omiLib.getCurrentCall(), activeCall.callState != .disconnected {
+            return initResultJson(status: 200, message: "INIT_SUCCESS")
+        }
+
         guard let usrUuid = params["usrUuid"] as? String,
               let fullName = params["fullName"] as? String,
               let apiKey = params["apiKey"] as? String,
               let phone = params["phone"] as? String,
               let fcmToken = params["fcmToken"] as? String else {
-            return false
+            return initResultJson(status: 400, message: "MISSING_PARAMS")
         }
-        
+
+        if !OmiClient.isNetworkAvailable() {
+            return initResultJson(status: 600, message: "NETWORK_UNAVAILABLE")
+        }
+
         if let projectId = params["projectId"] as? String, !projectId.isEmpty {
             OmiClient.setFcmProjectId(projectId)
         }
-        
 
-        let result = OmiClient.initWithUUIDAndPhone(
+        let success = OmiClient.initWithUUIDAndPhone(
             usrUuid,
             fullName: fullName,
             apiKey: apiKey,
             phone: phone
         )
-        
+
         OmiClient.setUserPushNotificationToken(fcmToken)
-        
-        return result
+
+        return success
+            ? initResultJson(status: 200, message: "INIT_SUCCESS")
+            : initResultJson(status: 500, message: "INIT_FAILED")
     }
-    
-    func initWithUserPasswordEndpoint(params: [String: Any]) -> Bool {
+
+    func initWithUserPasswordEndpoint(params: [String: Any]) -> String {
+        // Skip re-initialization if a call is currently active to avoid destroying the SIP stack mid-call
+        if let activeCall = omiLib.getCurrentCall(), activeCall.callState != .disconnected {
+            return initResultJson(status: 200, message: "INIT_SUCCESS")
+        }
+
         guard
             let userName = params["userName"] as? String,
             let password = params["password"] as? String,
             let realm = params["realm"] as? String,
             let fcmToken = params["fcmToken"] as? String
         else {
-            // Thiếu dữ liệu → trả về false
-            return false
+            return initResultJson(status: 400, message: "MISSING_PARAMS")
         }
-        
+
+        if !OmiClient.isNetworkAvailable() {
+            return initResultJson(status: 600, message: "NETWORK_UNAVAILABLE")
+        }
+
         if let projectId = params["projectId"] as? String, !projectId.isEmpty {
             OmiClient.setFcmProjectId(projectId)
         }
-        
+
         OmiClient.initWithUsername(userName, password: password, realm: realm, proxy: "vh.omicrm.com:5222")
         OmiClient.setUserPushNotificationToken(fcmToken)
-        
-        return true
+
+        return initResultJson(status: 200, message: "INIT_SUCCESS")
     }
     
     func showMissedCall() {
@@ -374,7 +402,7 @@ class CallManager {
             }
             isSpeaker = call.isVideo
             lastStatusCall = "answered"
-            SwiftOmikitPlugin.instance.sendMuteStatus()
+            SwiftOmikitPlugin.instance?.sendMuteStatus()
             break
         case OMICallState.incoming.rawValue:
             guestPhone = call.callerNumber ?? ""
@@ -505,9 +533,9 @@ class CallManager {
         try? call.sendDTMF(character)
     }
     
-    /// Toogle mtue
+    /// Toggle mute using the proper async OmiKit API with completion callback
     func toggleMute() {
-        guard let call = getAvailableCall() else {
+        guard let call = self.omiLib.getCurrentCall() else {
             return
         }
         try? call.toggleMute()
@@ -535,7 +563,7 @@ class CallManager {
             try? AVAudioSession.sharedInstance().overrideOutputAudioPort(.none)
         }
         isSpeaker = !isSpeaker
-        SwiftOmikitPlugin.instance.sendSpeakerStatus()
+        SwiftOmikitPlugin.instance?.sendSpeakerStatus()
     }
     
     func getAudioOutputs() -> [[String: String]] {

@@ -55,8 +55,8 @@ mixin VideoDirectViewModel implements State<VideoDirectView> {
         }
 
         if (_callStatus == OmiCallState.disconnected.rawValue) {
-          // i++;
-          // if (i >= 2) return;
+          i++;
+          if (i >= 2) return;
 
           await endCall(
             needShowStatus: true,
@@ -173,7 +173,7 @@ mixin VideoDirectViewModel implements State<VideoDirectView> {
     } else {
       EasyDialog(
         title: const Text("Notification"),
-        description: Text("Error code ${messageError}"),
+        description: Text(callErrorMessage(messageError)),
       ).show(context);
     }
     // if (status == OmiStartCallStatus.startCallSuccess.rawValue) {

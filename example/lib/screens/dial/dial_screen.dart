@@ -596,13 +596,12 @@ class DialScreenState extends State<DialScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             DialButton(
-              iconSrc: !isHold
+              iconSrc: !isMuted
                   ? 'assets/icons/ic_microphone.svg'
                   : 'assets/icons/ic_block_microphone.svg',
               text: "Microphone",
               press: () {
-                // toggleMute(context);
-                transferCallAction(context);
+                toggleMute(context);
               },
             ),
             if (_currentAudio != null)

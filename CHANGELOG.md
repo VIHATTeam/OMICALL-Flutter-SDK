@@ -2,12 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## 3.3.1 [03/03/2026]
+## 3.3.1 [05/03/2026]
 
 ### Changed
-- **[MAJOR]** Updated OMI Android SDK: `2.3.22-v2` → `2.6.3`
-- **[MAJOR]** Updated OmiKit iOS: `1.8.44` → `1.10.29`
+- **[MAJOR]** Updated OMI Android SDK: `2.3.22-v2` → `2.6.4`
+- **[MAJOR]** Updated OmiKit iOS: `1.8.44` → `1.10.34`
 - **[MAJOR]** Maven repository changed: `vn.vihat.omicall:omi-sdk` → `io.omicrm.vihat:omi-sdk`
+- **[MAJOR]** Support Google 16 KB page size policy.
 - Upgraded Kotlin: `1.6.10` → `1.9.24`
 - Upgraded Android Gradle Plugin: `7.1.2` → `8.1.4`
 - Upgraded compileSdk and targetSdk: `33` → `35` (Android 15 support)
@@ -17,6 +18,12 @@ All notable changes to this project will be documented in this file.
 - `OmiClient.getInstance(context)` → `OmiClient.getInstance(context, needRegister)`
 
 ### Added
+- **Network error surfacing for `initCall*` methods**: Both `initCallWithUserPassword` and `initCallWithApiKey` now perform a network check before attempting SDK registration. Returns `NETWORK_UNAVAILABLE` if no connectivity.
+- **Descriptive init result**: `initCallWithUserPassword` / `initCallWithApiKey` now return a JSON string `{"status": Int, "message": String}` instead of `Bool`, letting integrators know exactly why initialization failed.
+- **`OmiStartCallStatus` enum** — added two new values:
+  - `noNetwork` (Android: `status=408`, iOS: `status=11`) — no network when starting a call
+  - `accountTurnOffNumberInternal` (iOS: `status=10`) — internal call disabled for this account
+- **`startCall()` message mapping** — added `NO_NETWORK` and `ACCOUNT_TURN_OFF_NUMBER_INTERNAL` to both Android and iOS `messageCall()` helpers
 - **Call Quality Monitoring**: `CallQualityTracker` and `CallQualityInfo` helper classes for parsing call quality data (MOS, LCN, jitter, latency, packet loss)
 - **Android 14+ Permissions** (API 34+):
   - `FOREGROUND_SERVICE_MICROPHONE` - Required for audio calls
@@ -42,6 +49,7 @@ All notable changes to this project will be documented in this file.
 - Hardcoded GitHub token removed from example `build.gradle.kts` (now reads from `local.properties`)
 
 ### Breaking Changes
+- **`initCallWithUserPassword` / `initCallWithApiKey` return type changed**: `Future<bool>` → `Future<dynamic>` (JSON string). Code checking `result == true/false` must be updated — see migration guide Step 9.
 - **Maven repository changed**: `vn.vihat.omicall:omi-sdk` → `io.omicrm.vihat:omi-sdk`
 - **Permission updates required**: Must add `FOREGROUND_SERVICE_MICROPHONE` + `FOREGROUND_SERVICE_PHONE_CALL` permissions
 - **Camera permission must be removed**: `<uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" tools:node="remove" />`
@@ -51,8 +59,8 @@ All notable changes to this project will be documented in this file.
 ### Dependencies
 | Package | 3.2.4 | 3.3.1 |
 |---------|-------|-------|
-| Android OMI SDK | 2.3.22-v2 | 2.6.3 |
-| iOS OmiKit | 1.8.44 | 1.10.29 |
+| Android OMI SDK | 2.3.22-v2 | 2.6.4 |
+| iOS OmiKit | 1.8.44 | 1.10.34 |
 | Kotlin | 1.6.10 | 1.9.24 |
 | AGP | 7.1.2 | 8.1.4 |
 | compileSdk / targetSdk | 33 | 35 |
@@ -69,41 +77,6 @@ All notable changes to this project will be documented in this file.
 | Work Runtime | 2.8.1 | 2.9.0 |
 | Hilt | 2.39.1 | 2.48 |
 
-### Migration Guide (from 3.2.4)
-
-**1. Update `android/build.gradle` (or `build.gradle.kts`)**:
-```groovy
-// Maven repo URL unchanged, but package name changed
-api 'io.omicrm.vihat:omi-sdk:2.6.3'  // was: vn.vihat.omicall:omi-sdk:2.3.22-v2
-```
-
-**2. Update `AndroidManifest.xml`**:
-```xml
-<!-- Add these permissions -->
-<uses-permission android:name="android.permission.FOREGROUND_SERVICE_MICROPHONE" />
-<uses-permission android:name="android.permission.FOREGROUND_SERVICE_PHONE_CALL" />
-<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-<uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
-
-<!-- CRITICAL: Remove camera permission to prevent crashes -->
-<uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA"
-    tools:node="remove" />
-
-<!-- Update NotificationService -->
-<service android:name="vn.vihat.omicall.omisdk.service.NotificationService"
-    android:foregroundServiceType="microphone|phoneCall" />
-```
-
-**3. Update iOS Podfile** - Run `pod update OmiKit`
-
-**4. Optional: Use CallQualityTracker**:
-```dart
-final tracker = CallQualityTracker();
-OmicallClient.instance.setCallQualityListener((data) {
-  final info = tracker.parseCallQuality(data);
-  // info.mos, info.lcn, info.mosDisplay, info.shouldShowLoading
-});
-```
 
 ## 3.2.4 [24/07/2025]
 - Update OMI core Android to version 2.3.22-v2

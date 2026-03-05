@@ -31,7 +31,16 @@ class OmicallSDKController {
 
       switch (method) {
         case OmiEventList.onMuted:
-          muteListener?.call(data);
+          // Android sends both Map {isMuted: bool} and raw bool - normalize to bool
+          bool muteValue = false;
+          try {
+            if (data is Map) {
+              muteValue = data["isMuted"] as bool;
+            } else {
+              muteValue = data as bool;
+            }
+          } catch (_) {}
+          muteListener?.call(muteValue);
           return;
        case OmiEventList.onHold:
           bool result = false;

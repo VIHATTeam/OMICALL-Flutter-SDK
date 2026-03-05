@@ -1,13 +1,13 @@
-# Migration Guide: 3.2.4 → 3.3.1
+# Migration Guide: 3.2.5 → 3.3.1
 
 ## Overview
 
 Version 3.3.1 includes major updates to both Android and iOS native SDKs, build toolchain upgrades, and new call quality monitoring features.
 
-| | 3.2.4 | 3.3.1 |
+| | 3.2.5 | 3.3.1 |
 |--|-------|-------|
-| Android OMI SDK | 2.3.22-v2 | **2.6.3** |
-| iOS OmiKit | 1.8.44 | **1.10.29** |
+| Android OMI SDK | 2.3.22-v2 | **2.6.4** |
+| iOS OmiKit | 1.8.44 | **1.10.34** |
 | Kotlin | 1.6.10 | **1.9.24** |
 | Android Gradle Plugin | 7.1.2 | **8.1.4** |
 | compileSdk / targetSdk | 33 | **35** |
@@ -40,7 +40,7 @@ The Maven package name has changed. Update your project-level `build.gradle` or 
 api 'vn.vihat.omicall:omi-sdk:2.3.22-v2'
 
 // NEW
-api 'io.omicrm.vihat:omi-sdk:2.6.3'
+api 'io.omicrm.vihat:omi-sdk:2.6.4'
 ```
 
 **`android/build.gradle.kts` (Kotlin DSL)**:
@@ -49,7 +49,7 @@ api 'io.omicrm.vihat:omi-sdk:2.6.3'
 api("vn.vihat.omicall:omi-sdk:2.3.22-v2")
 
 // NEW
-api("io.omicrm.vihat:omi-sdk:2.6.3")
+api("io.omicrm.vihat:omi-sdk:2.6.4")
 ```
 
 > **Note**: The Maven repository URL remains the same (`https://maven.pkg.github.com/omicall/OMICall-SDK`). Only the package group ID changed.
@@ -223,7 +223,7 @@ cd ios
 pod update OmiKit
 ```
 
-This will update OmiKit from 1.8.44 to 1.10.29.
+This will update OmiKit from 1.8.44 to 1.10.34.
 
 ### iOS Build Fixes (Xcode 26+)
 
@@ -265,7 +265,88 @@ end
 
 ---
 
-## Step 8: (Optional) Use CallQualityTracker
+## Step 8: Update `initCall*` Result Handling (Breaking Change)
+
+`initCallWithUserPassword` and `initCallWithApiKey` no longer return `bool`. They now return a **JSON string** with a `status` code and a `message` explaining the result.
+
+### Init result status codes
+
+| `status` | `message` | Meaning |
+|----------|-----------|---------|
+| `200` | `INIT_SUCCESS` | Initialization successful |
+| `400` | `MISSING_PARAMS` | Required parameters missing |
+| `500` | `INIT_FAILED` | SDK registration failed (wrong credentials, etc.) |
+| `600` | `NETWORK_UNAVAILABLE` | No internet connection at the time of call |
+
+### Migration
+
+**Before (will crash at runtime with `TypeError`):**
+```dart
+bool result = await OmicallClient.instance.initCallWithUserPassword(...);
+if (result == false) {
+  // show error
+}
+```
+
+**After:**
+```dart
+import 'dart:convert';
+
+final initResult = await OmicallClient.instance.initCallWithUserPassword(...);
+
+Map<String, dynamic>? initJson;
+if (initResult is String) {
+  try {
+    initJson = jsonDecode(initResult) as Map<String, dynamic>;
+  } catch (_) {}
+}
+
+final status = initJson?['status'] as int? ?? 0;
+final message = initJson?['message'] as String? ?? 'INIT_FAILED';
+
+if (status != 200) {
+  // message is one of: NETWORK_UNAVAILABLE, MISSING_PARAMS, INIT_FAILED
+  showError(message);
+  return;
+}
+// proceed — user is initialized
+```
+
+Same pattern applies to `initCallWithApiKey`.
+
+> **Why this change?** The previous `bool` return gave no indication of *why* initialization failed — network issue, wrong credentials, or missing parameters all returned `false`. The JSON response gives integrators actionable information.
+
+---
+
+## Step 9: Verify `setMuteListener` Usage (Android)
+
+In versions prior to 3.3.1, `setMuteListener` was **silently broken on Android**. The Android SDK sent the muted event as `Map {isMuted: bool}` internally, causing a `TypeError` when passed to the `Function(bool)` listener — mute state changes were dropped without crashing.
+
+This is **fixed automatically** in 3.3.1. No code changes are required, but:
+
+- If you had a workaround (polling, using `callStateChangeEvent`, or skipping the listener), you can now remove it and use `setMuteListener` directly.
+- Ensure your listener uses the `bool` value correctly:
+
+```dart
+OmicallClient.instance.setMuteListener((isMuted) {
+  setState(() {
+    this.isMuted = isMuted; // works correctly on both Android and iOS
+  });
+});
+
+// Clean up in dispose()
+OmicallClient.instance.removeMuteListener();
+```
+
+> **Note for example app adopters**: If you copied the microphone button from the old example app, verify the icon condition uses `isMuted` (not `isHold`):
+> ```dart
+> // Correct:
+> iconSrc: !isMuted ? 'assets/icons/ic_microphone.svg' : 'assets/icons/ic_block_microphone.svg'
+> ```
+
+---
+
+## Step 10: (Optional) Use CallQualityTracker
 
 New in 3.3.1 — typed helper classes for call quality monitoring:
 
@@ -321,6 +402,7 @@ void dispose() {
 ## Checklist
 
 - [ ] Updated `pubspec.yaml` to `^3.3.1`
+- [ ] **Updated `initCall*` result handling** — replaced `bool result == false` with JSON parsing (Step 8)
 - [ ] Updated Maven package: `vn.vihat.omicall` → `io.omicrm.vihat`
 - [ ] Moved GitHub credentials to `local.properties`
 - [ ] Added `FOREGROUND_SERVICE_MICROPHONE` permission

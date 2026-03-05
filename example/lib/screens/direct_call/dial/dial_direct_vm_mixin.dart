@@ -81,7 +81,13 @@ mixin DialDirectViewModel implements State<DialDirectView> {
         }
 
         if (status == OmiCallState.disconnected.rawValue) {
-
+          i++;
+          if (i >= 2) return;
+          final endCode = data['code_end_call'] as int?;
+          final reason = callEndReason(endCode);
+          if (reason != null) {
+            EasyLoading.showToast(reason, duration: const Duration(seconds: 3));
+          }
           await endCall(
             needShowStatus: true,
             needRequest: true,
@@ -267,7 +273,7 @@ mixin DialDirectViewModel implements State<DialDirectView> {
     } else {
       EasyDialog(
         title: const Text("Notification"),
-        description: Text("Error code ${messageError}"),
+        description: Text(callErrorMessage(messageError)),
       ).show(context);
     }
     // OmicallClient.instance.startCallWithUUID(

@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 
 import 'package:calling/local_storage/local_storage.dart';
 import 'package:calling/screens/video_call/video_call_screen.dart';
+import 'package:calling/utils/call_utils.dart';
 import 'package:easy_dialog/easy_dialog.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -153,6 +154,11 @@ class _HomeScreenState extends State<HomeScreen> {
       }
       if (status == OmiCallState.disconnected.rawValue) {
         debugPrint(data.toString());
+        final endCode = data['code_end_call'] as int?;
+        final reason = callEndReason(endCode);
+        if (reason != null) {
+          EasyLoading.showToast(reason, duration: const Duration(seconds: 3));
+        }
       }
     });
     // checkSystemAlertPermission();
@@ -595,7 +601,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       EasyDialog(
         title: const Text("Notification"),
-        description: Text("Error code ${messageError}"),
+        description: Text(callErrorMessage(messageError)),
       ).show(context);
     }
     // OmicallClient.instance.startCallWithUUID(

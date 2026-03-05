@@ -45,12 +45,15 @@ mixin DialInDirectViewModel implements State<DialInDirectView> {
           if (status == OmiCallState.disconnected.rawValue) {
             i++;
             if (i >= 2) return;
+            final endCode = data['code_end_call'] as int?;
+            final reason = callEndReason(endCode);
+            if (reason != null) {
+              EasyLoading.showToast(reason, duration: const Duration(seconds: 3));
+            }
             endCall(
               needShowStatus: true,
               needRequest: false,
             );
-
-            // return;
           }
         });
     await getCurrentUser();

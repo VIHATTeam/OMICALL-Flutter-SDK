@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:flutter/cupertino.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'action/action_model.dart';
@@ -103,7 +102,7 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
-  Future<bool> initCallWithApiKey({
+  Future<dynamic> initCallWithApiKey({
     String? usrName,
     String? usrUuid,
     String? apiKey,
@@ -165,7 +164,7 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
-  Future<bool> initCallWithUserPassword({
+  Future<dynamic> initCallWithUserPassword({
   String? userName,
   String? password,
   String? realm,
@@ -193,12 +192,11 @@ class OmicallClient {
     String phoneNumber,
     bool isVideo,
   ) async {
-    final action = await OmiAction(actionName: OmiActionName.START_CALL, data: {
-        'phoneNumber': phoneNumber,
-        'isVideo': isVideo,
-      });
-    print("action call zzz:    ${action}");
-      return await _controller.action(action);
+    final action = OmiAction(actionName: OmiActionName.START_CALL, data: {
+      'phoneNumber': phoneNumber,
+      'isVideo': isVideo,
+    });
+    return await _controller.action(action);
   }
 
   Future<int> startCallWithUUID(

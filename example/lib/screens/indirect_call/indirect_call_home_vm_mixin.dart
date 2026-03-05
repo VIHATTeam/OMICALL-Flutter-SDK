@@ -90,6 +90,11 @@ mixin InDirectCallHomeViewModel implements State<InDirectCallHomeScreen> {
           }
           if (status == OmiCallState.disconnected.rawValue) {
             debugPrint(data.toString());
+            final endCode = data['code_end_call'] as int?;
+            final reason = callEndReason(endCode);
+            if (reason != null) {
+              EasyLoading.showToast(reason, duration: const Duration(seconds: 3));
+            }
           }
         });
     // checkSystemAlertPermission();
@@ -249,7 +254,7 @@ mixin InDirectCallHomeViewModel implements State<InDirectCallHomeScreen> {
     } else {
       EasyDialog(
         title: const Text("Notification"),
-        description: Text("Error code ${messageError}"),
+        description: Text(callErrorMessage(messageError)),
       ).show(context);
     }
     // OmicallClient.instance.startCallWithUUID(

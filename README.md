@@ -830,39 +830,67 @@ await Firebase.initializeApp();
 - ✅ func initCall: This func is for employees. They can call any telecommunications number allowed in your business on the OMI system.
 
 ```dart
-    String? token = await FirebaseMessaging.instance.getToken();
-    if (Platform.isIOS) {
-        token = await FirebaseMessaging.instance.getAPNSToken();
-    }
-    await OmicallClient.instance.initCall(
-      userName: String,  // Replace with your username
-      password:String, // Replace with your password
-      realm: String,  // Replace with your realm
-      host: String, // Replace with your host
-      isVideo: bool, // true if video call is enabled, otherwise false
-      fcmToken: String // For iOS, use APNSToken; for Android, FCM token
-      projectId: String // Replace with your Firebase project ID
-    );
-    // result is true then user login successfully.
+import 'dart:convert';
+
+String? token = await FirebaseMessaging.instance.getToken();
+if (Platform.isIOS) {
+    token = await FirebaseMessaging.instance.getAPNSToken();
+}
+
+final initResult = await OmicallClient.instance.initCallWithUserPassword(
+  userName: String,
+  password: String,
+  realm: String,
+  host: String,
+  isVideo: bool,
+  fcmToken: token,
+  projectId: String,
+);
+
+// Parse JSON response
+final initJson = initResult is String ? jsonDecode(initResult) as Map : {};
+final status = initJson['status'] as int? ?? 0;
+final message = initJson['message'] as String? ?? '';
+
+if (status != 200) {
+  // message: NETWORK_UNAVAILABLE | MISSING_PARAMS | INIT_FAILED
+  showError(message);
+  return;
+}
+// Login successful — proceed
 ```
 <br>
 
 - ✅ func initCallWithApiKey: is usually used for your client, who only has a certain function, calling a fixed number. For example, you can only call your hotline number
 
 ```dart
-    String? token = await FirebaseMessaging.instance.getToken();
-    if (Platform.isIOS) {
-        token = await FirebaseMessaging.instance.getAPNSToken();
-    }
-     await OmicallClient.instance.initCallWithApiKey(
-      usrName:String, // Replace with your username
-      usrUuid: String, // Replace with your user UUID
-      isVideo: bool, // true if video call is enabled, otherwise false
-      apiKey:String,  // Replace with your API key
-      fcmToken: String // Note: with IOS, we need APNSToken, and android is FCM_Token,
-      projectId: String // Replace with your Firebase project ID
-    );
-    // result is true then user login successfully.
+import 'dart:convert';
+
+String? token = await FirebaseMessaging.instance.getToken();
+if (Platform.isIOS) {
+    token = await FirebaseMessaging.instance.getAPNSToken();
+}
+
+final initResult = await OmicallClient.instance.initCallWithApiKey(
+  usrName: String,
+  usrUuid: String,
+  isVideo: bool,
+  apiKey: String,
+  fcmToken: token,
+  projectId: String,
+);
+
+// Parse JSON response
+final initJson = initResult is String ? jsonDecode(initResult) as Map : {};
+final status = initJson['status'] as int? ?? 0;
+final message = initJson['message'] as String? ?? '';
+
+if (status != 200) {
+  // message: NETWORK_UNAVAILABLE | MISSING_PARAMS | INIT_FAILED
+  showError(message);
+  return;
+}
+// Login successful — proceed
 ```
 
 - ✅ Get call when user open app from killed status(only iOS):
@@ -900,34 +928,45 @@ final result = await OmicallClient.instance.getInitialCall();
 
 #### 📌 Authentication
 
-##### initCall
+##### initCallWithUserPassword
 Login for employees (can call any number allowed in business)
 
 ```dart
-await OmicallClient.instance.initCall(
+final initResult = await OmicallClient.instance.initCallWithUserPassword(
   userName: String,
   password: String,
   realm: String,
   host: String,
   isVideo: bool,
   fcmToken: String,
-  projectId: String
+  projectId: String,
 );
 ```
+
+**Returns** `Future<dynamic>` — JSON string `{"status": Int, "message": String}`
+
+| `status` | `message` | Meaning |
+|----------|-----------|---------|
+| `200` | `INIT_SUCCESS` | Login successful |
+| `400` | `MISSING_PARAMS` | Required fields missing |
+| `500` | `INIT_FAILED` | Wrong credentials or SDK error |
+| `600` | `NETWORK_UNAVAILABLE` | No internet connection |
 
 ##### initCallWithApiKey
 Login for clients (call fixed number, e.g., hotline)
 
 ```dart
-await OmicallClient.instance.initCallWithApiKey(
+final initResult = await OmicallClient.instance.initCallWithApiKey(
   usrName: String,
   usrUuid: String,
   isVideo: bool,
   apiKey: String,
   fcmToken: String,
-  projectId: String
+  projectId: String,
 );
 ```
+
+**Returns** `Future<dynamic>` — same JSON format as `initCallWithUserPassword` above.
 
 ##### logout
 Logout current user
@@ -1311,7 +1350,9 @@ OmicallClient.instance.callStateChangeEvent.listen((action) {
   "status": int,            // call state code (0-7)
   "callerNumber": String,   // phone number
   "incoming": bool,         // true if incoming
-  "_id": String            // (optional) call identifier
+  "_id": String,            // (optional) call identifier
+  // Only present when status == disconnected (6):
+  "code_end_call": int,     // SIP/OMI end reason code — see Call End Codes table
 }
 ```
 
@@ -1427,24 +1468,64 @@ OmicallClient.instance.setCallLogListener((data) {
 
 ## Error Codes
 
-### Call End Codes (code_end_call)
+### Call End Codes (`code_end_call`)
 
-| Code | Description |
-|------|-------------|
-| `600, 503` | Network operator codes or user did not answer |
-| `408` | Request timeout (usually 30 seconds) |
-| `403` | Service plan only allows dialed numbers - upgrade required |
-| `404` | Number not allowed to call carrier |
-| `480` | Number error - contact support |
-| `486` | Listener refuses and does not answer |
+The `code_end_call` field is included in the event data when `status == disconnected (6)`. It indicates why the call ended.
+
+#### How to handle end-call reasons
+
+```dart
+OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
+  if (omiAction.actionName != OmiEventList.onCallStateChanged) return;
+  final data = omiAction.data;
+  final status = data['status'] as int;
+
+  if (status == OmiCallState.disconnected.rawValue) {
+    final code = data['code_end_call'] as int?;
+    final reason = _endCallReason(code);
+    if (reason != null) {
+      // Show toast or dialog to user
+      showToast(reason);
+    }
+  }
+});
+
+String? _endCallReason(int? code) {
+  switch (code) {
+    case null:
+    case 0:
+    case 200:  // Normal BYE — both sides hung up
+    case 487:  // Caller cancelled before answer
+      return null;
+    case 408: return 'No answer. The call was not answered.';
+    case 480: return 'Callee is temporarily unavailable.';
+    case 486: return 'Line busy. Please try again later.';
+    case 503: return 'Service unavailable.';
+    default:  return 'Call ended (code: $code).';
+  }
+}
+```
+
+#### Standard OMISIP Codes
+
+| Code | Meaning | Action for user |
+|------|---------|-----------------|
+| `200` | Normal call end (BYE) | No toast needed |
+| `403` | Forbidden — service plan restricts this number | Upgrade service plan |
+| `404` | Number not found or not allowed to call carrier | Check number |
+| `408` | Request timeout — callee did not answer | Notify: no answer |
+| `480` | Temporarily unavailable — callee offline/busy | Notify: unavailable |
+| `486` | Busy here — callee rejected / busy | Notify: line busy |
+| `487` | Request terminated — caller cancelled | No toast needed |
+| `503` | Service unavailable | Notify: service error |
 | `601` | Call ended by customer |
-| `602` | Call ended by other employee |
-| `603` | Call rejected - check account limit or call barring |
+| `602` | Call ended by another employee |
+| `603` | Call rejected — check account limit or call barring |
 | `850` | Simultaneous call limit exceeded |
 | `851` | Call duration limit exceeded |
 | `852` | Service package not assigned |
 | `853` | Internal number disabled |
-| `854` | Subscriber in DNC list |
+| `854` | Subscriber in DNC (Do Not Call) list |
 | `855` | Exceeded allowed calls for trial package |
 | `856` | Exceeded allowed minutes for trial package |
 | `857` | Subscriber blocked in configuration |

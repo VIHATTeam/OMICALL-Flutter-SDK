@@ -47,26 +47,30 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
     
   func sendCameraEvent() {
       let cameraStatus = CallManager.shareInstance().videoManager?.isCameraOn ?? false
-      channel.invokeMethod(VIDEO, arguments: cameraStatus)
+      DispatchQueue.main.async { [weak self] in
+          self?.channel.invokeMethod(VIDEO, arguments: cameraStatus)
+      }
   }
-    
+
   func sendMuteStatus() {
-      if let call = CallManager.shareInstance().getAvailableCall() {
-          let isMuted = call.muted
-          channel.invokeMethod(MUTED, arguments: isMuted)
+      let isMuted = CallManager.shareInstance().getAvailableCall()?.muted ?? false
+      DispatchQueue.main.async { [weak self] in
+          self?.channel.invokeMethod(MUTED, arguments: isMuted)
       }
   }
-    
+
   func sendHoldStatus() {
-      if let call = CallManager.shareInstance().getAvailableCall() {
-          let isHold = call.onHold
-          channel.invokeMethod(HOLD, arguments: isHold)
+      let isHold = CallManager.shareInstance().getAvailableCall()?.onHold ?? false
+      DispatchQueue.main.async { [weak self] in
+          self?.channel.invokeMethod(HOLD, arguments: isHold)
       }
   }
-    
 
   func sendSpeakerStatus() {
-      channel.invokeMethod(SPEAKER, arguments: CallManager.shareInstance().isSpeaker)
+      let isSpeaker = CallManager.shareInstance().isSpeaker
+      DispatchQueue.main.async { [weak self] in
+          self?.channel.invokeMethod(SPEAKER, arguments: isSpeaker)
+      }
   }
 
 
@@ -137,6 +141,8 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           sendMuteStatus()
           if let call = CallManager.shareInstance().getAvailableCall() {
               result(call.muted)
+          } else {
+              result(false)
           }
           break
       case TOGGLE_SPEAK:
@@ -144,6 +150,8 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           sendSpeakerStatus()
           if let call = CallManager.shareInstance().getAvailableCall() {
               result(call.speaker)
+          } else {
+              result(false)
           }
           break
       case TOGGLE_HOLD:
@@ -151,6 +159,8 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
             sendHoldStatus()
             if let call = CallManager.shareInstance().getAvailableCall() {
                 result(call.onHold)
+            } else {
+                result(false)
             }
             break
       case SEND_DTMF:

@@ -56,7 +56,7 @@ mixin VideoInDirectViewModel implements State<VideoInDirectView> {
     if (!callStatus) {
       EasyDialog(
         title: const Text("Notification"),
-        description: Text("Error code $messageError"),
+        description: Text(callErrorMessage(messageError)),
       ).show(context);
     }
     // OmicallClient.instance.startCallWithUUID(
