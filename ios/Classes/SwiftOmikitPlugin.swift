@@ -99,12 +99,14 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           result(true)
           break
       case INIT_CALL_API_KEY:
-          let value = CallManager.shareInstance().initWithApiKeyEndpoint(params: dataOmi)
-          result(value)
+          CallManager.shareInstance().initWithApiKeyEndpoint(params: dataOmi) { value in
+              result(value)
+          }
           break
       case INIT_CALL_USER_PASSWORD:
-          let value = CallManager.shareInstance().initWithUserPasswordEndpoint(params: dataOmi)
-          result(value)
+          CallManager.shareInstance().initWithUserPasswordEndpoint(params: dataOmi) { value in
+              result(value)
+          }
           break
       case GET_INITIAL_CALL:
           if let call = CallManager.shareInstance().getAvailableCall() {

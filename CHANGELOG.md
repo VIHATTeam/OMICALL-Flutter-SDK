@@ -2,6 +2,25 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.3.3 [07/04/2026]
+
+### Changed
+- **[MAJOR]** Updated OMI Android SDK: `2.6.4` → `2.6.8`
+- **[MAJOR]** Updated OmiKit iOS: `1.10.34` → `1.11.9`
+
+### Fixed (iOS)
+- **[CRITICAL]** `initCallWithApiKey` / `initCallWithUserPassword` no longer block the main thread — SDK HTTP + SIP init now runs on a background thread, eliminating UI freeze during initialization
+- **[CRITICAL]** Fixed crash potential in `registerNotificationCenter` caused by force-unwrapping `CallManager.instance!` inside a `[weak self]` closure — replaced with safe `self` reference
+- Fixed race condition when user spams the init call button: concurrent HTTP + SIP init calls are now serialized via a dedicated serial queue with an `isInitializing` guard, preventing data corruption and PJSIP crashes
+- Fixed `isInitializing` flag being permanently stuck `true` on SDK exception — now guaranteed to reset via `defer`
+- Fixed wrong `direction` value in call info (`inbound`/`outbound`) — was incorrectly derived from `guestPhone.count < 10`, now correctly uses `call.isIncoming`
+- Fixed thread-unsafe singleton: `shareInstance()` previously had a race condition when called concurrently from multiple threads — now uses Swift's guaranteed thread-safe static initializer
+- Fixed duplicate `import AVFoundation` and unused `import SwiftUI` — removed both
+- Removed unused `requestPermission()` dead code
+- Removed unused `status` variable in `getCallInfo()`
+- Removed redundant `nil` check and force unwrap in `startCallWithUuid()`
+
+
 ## 3.3.2 [05/03/2026]
 
 ### Changed
