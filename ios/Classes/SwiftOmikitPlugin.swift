@@ -90,7 +90,7 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
 
       switch(action) {
       case START_SERVICES:
-          let showMissedCall = dataOmi["showMissedCall"] as! Bool
+          let showMissedCall = dataOmi["showMissedCall"] as? Bool ?? false
           CallManager.shareInstance().registerNotificationCenter(showMissedCall: showMissedCall)
           result(true)
           break
@@ -124,11 +124,11 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           }
           break
       case START_CALL:
-          let phoneNumber = dataOmi["phoneNumber"] as! String
-          var isVideo = false
-          if let isVideoCall = dataOmi["isVideo"] as? Bool {
-              isVideo = isVideoCall
+          guard let phoneNumber = dataOmi["phoneNumber"] as? String else {
+              result(false)
+              break
           }
+          let isVideo = dataOmi["isVideo"] as? Bool ?? false
           CallManager.shareInstance().startCall(phoneNumber, isVideo: isVideo) { callResult in
               self.sendMuteStatus()
               result(callResult)
@@ -166,7 +166,11 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
             }
             break
       case SEND_DTMF:
-          CallManager.shareInstance().sendDTMF(character: dataOmi["character"] as! String)
+          guard let character = dataOmi["character"] as? String else {
+              result(false)
+              break
+          }
+          CallManager.shareInstance().sendDTMF(character: character)
           result(true)
           break
       case SWITCH_CAMERA:
@@ -186,12 +190,12 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           CallManager.shareInstance().joinCall()
           result(true)
       case START_CALL_WITH_UUID:
-          let uuid = dataOmi["usrUuid"] as! String
-          var isVideo = false
-          if let isVideoCall = dataOmi["isVideo"] as? Bool {
-              isVideo = isVideoCall
+          guard let uuid = dataOmi["usrUuid"] as? String else {
+              result(false)
+              break
           }
-          CallManager.shareInstance().startCallWithUuid(uuid, isVideo: isVideo) { callResult in
+          let isVideoUuid = dataOmi["isVideo"] as? Bool ?? false
+          CallManager.shareInstance().startCallWithUuid(uuid, isVideo: isVideoUuid) { callResult in
               self.sendMuteStatus()
               result(callResult)
           }
@@ -219,7 +223,10 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           }
           break
       case GET_USER_INFO:
-          let phone = dataOmi["phone"] as! String
+          guard let phone = dataOmi["phone"] as? String else {
+              result([:])
+              break
+          }
           CallManager.shareInstance().getUserInfo(phone: phone) { data in
               result(data)
           }
@@ -229,7 +236,10 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           result(outputs)
           break
       case SET_AUDIO:
-          let portType = dataOmi["portType"] as! String
+          guard let portType = dataOmi["portType"] as? String else {
+              result(false)
+              break
+          }
           CallManager.shareInstance().setAudioOutputs(portType: portType)
           result(true)
           break
@@ -260,43 +270,36 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
     
     public func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         let userInfo = response.notification.request.content.userInfo
-        if let callerNumer = userInfo["callerNumber"] as? String, let isVideo = userInfo["isVideo"] as? Bool {
-            channel.invokeMethod(CLICK_MISSED_CALL, arguments: [
-                "callerNumber": callerNumer,
+        if let callerNumber = userInfo["callerNumber"] as? String,
+           let isVideo = userInfo["isVideo"] as? Bool {
+            channel?.invokeMethod(CLICK_MISSED_CALL, arguments: [
+                "callerNumber": callerNumber,
                 "isVideo": isVideo,
             ])
-            completionHandler()
         }
+        // Always call completionHandler — iOS requires this regardless of match result
+        completionHandler()
     }
     
     @objc public static func processUserActivity(userActivity: NSUserActivity) -> Bool {
-            let intraction = userActivity.interaction
-            if let startAudioCallIntent = intraction?.intent as? INStartAudioCallIntent {
-                let contact = startAudioCallIntent.contacts?[0]
-                let contactHandle = contact?.personHandle
-                if let phoneNumber = contactHandle?.value {
-                    instance.historyCallog = phoneNumber
-                    instance.sendEvent(HISTORY_CALL_LOG, [
-                        "callerNumber": phoneNumber,
-                        "isVideo": false,
-                    ])
-                }
-                return true
+        guard let inst = instance else { return false }
+        let interaction = userActivity.interaction
+        if let intent = interaction?.intent as? INStartAudioCallIntent {
+            if let phoneNumber = intent.contacts?.first?.personHandle?.value {
+                inst.historyCallog = phoneNumber
+                inst.sendEvent(HISTORY_CALL_LOG, ["callerNumber": phoneNumber, "isVideo": false])
             }
-            if let startAudioCallIntent = intraction?.intent as? INStartVideoCallIntent {
-                let contact = startAudioCallIntent.contacts?[0]
-                let contactHandle = contact?.personHandle
-                if let phoneNumber = contactHandle?.value {
-                    instance.historyCallog = phoneNumber
-                    instance.sendEvent(HISTORY_CALL_LOG, [
-                        "callerNumber": phoneNumber,
-                        "isVideo": true,
-                    ])
-                }
-                return true
-            }
-            return false
+            return true
         }
+        if let intent = interaction?.intent as? INStartVideoCallIntent {
+            if let phoneNumber = intent.contacts?.first?.personHandle?.value {
+                inst.historyCallog = phoneNumber
+                inst.sendEvent(HISTORY_CALL_LOG, ["callerNumber": phoneNumber, "isVideo": true])
+            }
+            return true
+        }
+        return false
+    }
 }
 
 @objc public extension FlutterAppDelegate {

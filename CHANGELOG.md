@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.3.4 [07/04/2026]
+
+### Refactored (iOS)
+- **[ARCHITECTURE]** Split monolithic `CallManager.swift` (~650 LOC) into focused files:
+  - `CallManager.swift` — singleton coordinator and shared state only
+  - `CallSipInitializer.swift` — SIP registration logic (`initWithApiKey`, `initWithUserPassword`)
+  - `CallEventHandler.swift` — OmiKit `NotificationCenter` observers → Flutter events
+  - `CallMediaController.swift` — audio (speaker, mute, DTMF) and video (camera) controls
+
+### Fixed (iOS)
+- **[CRITICAL]** Fixed crash in `processUserActivity` when plugin is not yet initialized — added `guard let inst = instance else { return false }` before any access
+- **[CRITICAL]** Fixed `completionHandler()` in `userNotificationCenter(_:didReceive:withCompletionHandler:)` not being called when `callerNumber`/`isVideo` keys were absent in `userInfo` — iOS requires `completionHandler()` to always be called
+- **[CRITICAL]** Fixed `startCallWithUuid` hanging the Flutter `await` forever when phone lookup returns `nil` — now always calls `completion` with `INVALID_UUID` error payload
+- Fixed `startCall` running SIP initiation on main thread — removed unnecessary `DispatchQueue.main.async` wrapper; `OmiClient.startCall` is already async
+- Fixed `startCallWithUuid` using sync `OmiClient.getPhone(_:)` which performed HTTP on the calling thread — replaced with async `OmiClient.getPhone(_:completion:)`
+- Fixed `registerVideoEvent` registering duplicate `OMICallVideoInfo` observers on repeated calls — now removes existing observer before re-adding
+- Fixed multiple force-cast crashes in `SwiftOmikitPlugin.handle(_:result:)`:
+  - `dataOmi["showMissedCall"] as! Bool` → `as? Bool ?? false`
+  - `dataOmi["phoneNumber"] as! String` → `guard as? String else { result(false); break }`
+  - `dataOmi["character"] as! String` → `guard as? String else { result(false); break }`
+  - `dataOmi["usrUuid"] as! String` → `guard as? String else { result(false); break }`
+  - `dataOmi["phone"] as! String` → `guard as? String else { result([:]) ; break }`
+  - `dataOmi["portType"] as! String` → `guard as? String else { result(false); break }`
+- Fixed `channel.invokeMethod` in missed call handler — changed to `channel?.invokeMethod` to avoid crash if channel is not yet set
+- Fixed `processUserActivity` using `contacts?[0]` (crashes on empty array) — replaced with `contacts?.first`
+- Fixed `processUserActivity` not returning `false` when instance is nil — previously fell through with uninitialized `instance` access
+
+### Fixed (Example App)
+- **[CRITICAL]** Fixed duplicate `DialScreen` stacking when making consecutive calls: guard `_dialScreenKey != null` could be `null` during the 400ms `endCall()` delay, allowing a second push before the first screen fully popped — replaced with `_isDialScreenActive` flag that resets only after `Navigator.pop()` resolves
+- Fixed lag when navigating from home screen to calling screen: `startCall()` now runs in background after navigation instead of blocking UI while awaiting SIP stack response; `DialScreen` updates reactively via `callStateChangeEvent`
+- Fixed `getCurrentUser()` and `getGuestUser()` fetched sequentially in `DialScreen.initController()` — now fetched in parallel via `Future.wait()`
+- Fixed redundant `getGuestUser()` calls on every `callStateChangeEvent` in `DialScreen` stream listener — now only refreshed on `onSwitchboardAnswer` events
+
 ## 3.3.3 [07/04/2026]
 
 ### Changed
