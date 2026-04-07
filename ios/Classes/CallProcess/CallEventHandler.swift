@@ -120,30 +120,30 @@ extension CallManager {
     }
 
     @objc func callDealloc(_ notification: NSNotification) {
-        DispatchQueue.main.async {
-            guard let userInfo = notification.userInfo as? [String: Any],
-                  let endCause = userInfo[OMINotificationEndCauseKey] as? Int else { return }
+        // Build payload on the notification thread — no UI work here
+        guard let userInfo = notification.userInfo as? [String: Any],
+              let endCause = userInfo[OMINotificationEndCauseKey] as? Int else { return }
 
-            let endMessage: String
-            switch endCause {
-            case 850: endMessage = "CCU_LIMITED"
-            case 487: endMessage = "REQUEST_TERMINATED"
-            case 486, 480: endMessage = "BUSY"
-            case 600, 503: endMessage = "BUSY_EVERYWHERE"
-            case 408: endMessage = "REQUEST_TIME_OUT"
-            case 403: endMessage = "YOUR_SERVICE_PLAN_ONLY_ALLOW_CALLS_TO_DIALED_NUMBER"
-            case 603: endMessage = "THE_CALL_WAS_REJECTED"
-            default:  endMessage = "UNKNOW"
-            }
-
-            let data: [String: Any] = [
-                "status": OMICallState.disconnected.rawValue,
-                "_id": "",
-                "message": endMessage,
-                "codeEndCall": endCause
-            ]
-            SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, data)
+        let endMessage: String
+        switch endCause {
+        case 850: endMessage = "CCU_LIMITED"
+        case 487: endMessage = "REQUEST_TERMINATED"
+        case 486, 480: endMessage = "BUSY"
+        case 600, 503: endMessage = "BUSY_EVERYWHERE"
+        case 408: endMessage = "REQUEST_TIME_OUT"
+        case 403: endMessage = "YOUR_SERVICE_PLAN_ONLY_ALLOW_CALLS_TO_DIALED_NUMBER"
+        case 603: endMessage = "THE_CALL_WAS_REJECTED"
+        default:  endMessage = "UNKNOW"
         }
+
+        let data: [String: Any] = [
+            "status": OMICallState.disconnected.rawValue,
+            "_id": "",
+            "message": endMessage,
+            "codeEndCall": endCause
+        ]
+        // sendEvent already dispatches to main thread internally
+        SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, data)
     }
 
     @objc func callStateChanged(_ notification: NSNotification) {
