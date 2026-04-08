@@ -523,6 +523,13 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
 4. **Android 15-16 requires MANAGE_OWN_CALLS:**
    - For connection service integration
 
+5. **Optional — Disable saving calls to device call history (`WRITE_CALL_LOG`):**
+   By default the SDK may request `WRITE_CALL_LOG` to log calls in the native call history. If your app does **not** want calls saved to the device's call history, explicitly remove this permission:
+   ```xml
+   <uses-permission android:name="android.permission.WRITE_CALL_LOG" tools:node="remove" />
+   ```
+   > **Note:** `xmlns:tools="http://schemas.android.com/tools"` must be declared in the `<manifest>` tag (already included in the manifest template above).
+
 **Runtime Permission Request Example:**
 ```kotlin
 // In your MainActivity or permissions handler
