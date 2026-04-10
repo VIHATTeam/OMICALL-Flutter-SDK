@@ -20,8 +20,8 @@ mixin DialDirectViewModel implements State<DialDirectView> {
   // Call quality tracker
   final CallQualityTracker _qualityTracker = CallQualityTracker();
 
-  /// Todo: check pop page more time
-  int i = 0;
+  // Guard against processing duplicate disconnected events for the same call
+  String? _lastDisconnectedCallId;
   Future<void> initializeControllers(int status) async {
     if (Platform.isAndroid) {
       /// Todo:(NOTE) Check có cuộc gọi, nếu có sẽ auto show màn hình cuộc gọi
@@ -70,30 +70,28 @@ mixin DialDirectViewModel implements State<DialDirectView> {
         if (isVideo && status == OmiCallState.early.rawValue) {
           await checkAndPushToCallVideo();
         }
-        if (status == OmiCallState.incoming.rawValue ||
-            status == OmiCallState.confirmed.rawValue) {
-
-          if(data != null && data["callerNumber"] != null) {
-            guestNumber = data["callerNumber"];
-          }
-
-          updateScreen(status);
+        if (data["callerNumber"] != null) {
+          guestNumber = data["callerNumber"];
         }
 
         if (status == OmiCallState.disconnected.rawValue) {
-          i++;
-          if (i >= 2) return;
+          // Use call _id to deduplicate: OmiKit fires disconnected twice
+          // (once from SIP stack, once from plugin layer with empty _id)
+          final callId = data['_id'] as String? ?? '';
+          if (callId.isNotEmpty && callId == _lastDisconnectedCallId) return;
+          if (callId.isNotEmpty) _lastDisconnectedCallId = callId;
+
           final endCode = data['code_end_call'] as int?;
           final reason = callEndReason(endCode);
           if (reason != null) {
             EasyLoading.showToast(reason, duration: const Duration(seconds: 3));
           }
-          await endCall(
-            needShowStatus: true,
-            needRequest: true,
-          );
+          await endCall(needShowStatus: true, needRequest: true);
+          // Reset so next call can be made cleanly
+          _lastDisconnectedCallId = null;
           return;
         }
+
         updateScreen(status);
       }
 
@@ -106,7 +104,7 @@ mixin DialDirectViewModel implements State<DialDirectView> {
     });
     await OmicallClient.instance.getCurrentAudio().then((value) {
       setState(() {
-        currentAudio = value?.first;
+        currentAudio = value.isNotEmpty ? value.first : null;
       });
     });
     OmicallClient.instance.setCallQualityListener((data) {
@@ -149,23 +147,20 @@ mixin DialDirectViewModel implements State<DialDirectView> {
   }
 
   Future<void> checkAndPushToCallVideo() async {
+    if (!mounted) return;
     Navigator.pop(context);
-    await Future.delayed(const Duration(milliseconds: 200)).then((value) async {
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) {
-            return DirectCallScreen(
-              isVideo: true,
-              status: callStatus,
-
-              /// User gọi ra ngoài
-              isOutGoingCall: false,
-            );
-          },
+    await Future.delayed(const Duration(milliseconds: 200));
+    if (!mounted) return;
+    await Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => DirectCallScreen(
+          isVideo: true,
+          status: callStatus,
+          isOutGoingCall: false,
         ),
-      );
-    });
+      ),
+    );
   }
 
   Future<void> checkAndPushToCall() async {
@@ -271,6 +266,7 @@ mixin DialDirectViewModel implements State<DialDirectView> {
         isOutGoingCall = true;
       });
     } else {
+      if (!mounted) return;
       EasyDialog(
         title: const Text("Notification"),
         description: Text(callErrorMessage(messageError)),
@@ -287,11 +283,8 @@ mixin DialDirectViewModel implements State<DialDirectView> {
     bool needShowStatus = true,
   }) async {
     if (needRequest) {
-      print("endCall:...");
-
-     var result  = await OmicallClient.instance.endCall();
-      print("endCall:... $result");
-
+      final result = await OmicallClient.instance.endCall();
+      debugPrint("endCall result: $result");
     }
     if (needShowStatus) {
       _stopWatch();

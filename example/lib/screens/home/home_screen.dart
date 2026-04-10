@@ -69,6 +69,9 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isVideoCall = false;
   bool _isCallUDP = false;
   bool _isLoginUUID = false;
+  // Guard against duplicate pushes: set true when DialScreen is on stack,
+  // reset only after Navigator.pop() resolves (inside .then()).
+  bool _isDialScreenActive = false;
   late StreamSubscription _subscription;
   GlobalKey<DialScreenState>? _dialScreenKey;
   GlobalKey<VideoCallState>? _videoScreenKey;
@@ -527,9 +530,14 @@ class _HomeScreenState extends State<HomeScreen> {
     required int status,
     required bool isOutGoingCall,
   }) {
-    if (_dialScreenKey != null) {
+    // Prevent duplicate pushes: guard on _isDialScreenActive, not _dialScreenKey.
+    // _dialScreenKey is reset by .then() which fires after pop resolves, but
+    // DialScreen.endCall() has a 400ms delay before pop — during that window
+    // _dialScreenKey can be null while the old screen is still on stack.
+    if (_isDialScreenActive) {
       return;
     }
+    _isDialScreenActive = true;
     _dialScreenKey = GlobalKey();
     print("Pussh to screen");
     Navigator.of(context).push(MaterialPageRoute(builder: (_) {
@@ -541,6 +549,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     })).then((value) {
       _dialScreenKey = null;
+      _isDialScreenActive = false;
     });
   }
 
@@ -573,41 +582,41 @@ class _HomeScreenState extends State<HomeScreen> {
     if (phone.isEmpty) {
       return;
     }
-    // EasyLoading.show();
-    final result = await OmicallClient.instance.startCall(
+
+    // Navigate immediately so the user sees the calling screen without waiting
+    // for the SIP stack to confirm. The dial screen listens to callStateChangeEvent
+    // and will update itself when the call status changes.
+    pushToDialScreen(
       phone,
-      false,
+      status: OmiCallState.calling.rawValue,
+      isOutGoingCall: true,
     );
-    // EasyLoading.dismiss();
+
+    // Start call in background — errors will be surfaced via callStateChangeEvent
+    final result = await OmicallClient.instance.startCall(phone, false);
+
     Map<String, dynamic> jsonMap = {};
-    bool callStatus = false;
     String messageError = "";
     debugPrint("result  OmicallClient  zzz ::: $result");
 
-    jsonMap = json.decode(result);
-    messageError = jsonMap['message'];
-    int status = jsonMap['status'];
+    try {
+      jsonMap = json.decode(result);
+    } catch (_) {}
+    messageError = jsonMap['message'] ?? '';
+    int status = jsonMap['status'] ?? -1;
 
-    if (status == OmiStartCallStatus.startCallSuccess.rawValue) {
-      callStatus = true;
-    }
-
-    if (callStatus) {
-      pushToDialScreen(
-        phone,
-        status: OmiCallState.calling.rawValue,
-        isOutGoingCall: true,
-      );
-    } else {
+    final callOk = status == OmiStartCallStatus.startCallSuccess.rawValue;
+    if (!callOk && mounted) {
+      // Pop the dial screen we pushed optimistically, then show error.
+      // _isDialScreenActive is reset by .then() when pop resolves.
+      if (_isDialScreenActive) {
+        Navigator.of(context).pop();
+      }
       EasyDialog(
         title: const Text("Notification"),
         description: Text(callErrorMessage(messageError)),
       ).show(context);
     }
-    // OmicallClient.instance.startCallWithUUID(
-    //   phone,
-    //   _isVideoCall,
-    // );
   }
 
   Future<void> makeCallWithParams(

@@ -47,24 +47,25 @@ class CallManager {
     /// Start call — OmiClient.startCall is already async, no DispatchQueue needed
     func startCall(_ phoneNumber: String, isVideo: Bool, completion: @escaping (String) -> Void) {
         guestPhone = phoneNumber
-        OmiClient.startCall(phoneNumber, isVideo: isVideo) { [weak self] statusCall in
+        // Run on background thread to avoid blocking UI when SIP connection is slow
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self else { return }
-            var data: [String: Any] = [
-                "status": statusCall.rawValue,
-                "_id": "",
-                "message": self.messageCall(type: statusCall.rawValue)
-            ]
-            if let current = self.omiLib.getCurrentCall() {
-                data["_id"] = String(describing: OmiCallModel(omiCall: current).uuid)
+            OmiClient.startCall(phoneNumber, isVideo: isVideo) { statusCall in
+                var data: [String: Any] = [
+                    "status": statusCall.rawValue,
+                    "_id": "",
+                    "message": self.messageCall(type: statusCall.rawValue)
+                ]
+                if let current = self.omiLib.getCurrentCall() {
+                    data["_id"] = String(describing: OmiCallModel(omiCall: current).uuid)
+                }
+                completion(self.convertDictionaryToJson(dictionary: data) ?? "Conversion to JSON failed")
             }
-            completion(self.convertDictionaryToJson(dictionary: data) ?? "Conversion to JSON failed")
         }
     }
 
-    /// Start call with UUID — uses async getPhone:completion: to avoid blocking main thread on HTTP lookup
+    /// Start call with UUID — getPhone is async (HTTP/cache), startCall runs on background thread
     func startCallWithUuid(_ uuid: String, isVideo: Bool, completion: @escaping (String) -> Void) {
-        // getPhone:completion: hits NSUserDefaults cache first (instant),
-        // async HTTP fallback only on cache miss — never blocks main thread
         OmiClient.getPhone(uuid) { [weak self] phone in
             guard let self = self else { return }
             guard let phone = phone else {
@@ -75,16 +76,19 @@ class CallManager {
                 return
             }
             self.guestPhone = phone
-            OmiClient.startCall(phone, isVideo: isVideo) { statusCall in
-                var data: [String: Any] = [
-                    "status": statusCall.rawValue,
-                    "_id": "",
-                    "message": self.messageCall(type: statusCall.rawValue)
-                ]
-                if let current = self.omiLib.getCurrentCall() {
-                    data["_id"] = String(describing: OmiCallModel(omiCall: current).uuid)
+            // Run on background thread to avoid blocking UI when SIP connection is slow
+            DispatchQueue.global(qos: .userInitiated).async {
+                OmiClient.startCall(phone, isVideo: isVideo) { statusCall in
+                    var data: [String: Any] = [
+                        "status": statusCall.rawValue,
+                        "_id": "",
+                        "message": self.messageCall(type: statusCall.rawValue)
+                    ]
+                    if let current = self.omiLib.getCurrentCall() {
+                        data["_id"] = String(describing: OmiCallModel(omiCall: current).uuid)
+                    }
+                    completion(self.convertDictionaryToJson(dictionary: data) ?? "Conversion to JSON failed")
                 }
-                completion(self.convertDictionaryToJson(dictionary: data) ?? "Conversion to JSON failed")
             }
         }
     }

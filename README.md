@@ -9,6 +9,14 @@ The most important part of the framework is :
 - ✅ Full interface to interactive with core function like sound/ringtone/codec.
 - ✅ Built-in Call Quality Monitoring (MOS score tracking)
 
+### 📦 SDK Versions
+
+| Component | Version |
+|---|---|
+| omicall_flutter_plugin | 3.3.5 |
+| Android OmiSDK (`io.omicrm.vihat:omi-sdk`) | 2.6.9 |
+| iOS OmiKit | 1.11.9 |
+
 ### 📝 Status
 Currently active maintenance and improve performance
 

@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.3.5 [07/04/2026]
+
+### Changed
+- **[MAJOR]** Updated OMI Android SDK: `2.6.8` → `2.6.9`
+  
+### Fixed (iOS)
+- `startCall` and `startCallWithUuid` now run `OmiClient.startCall` on a background thread (`DispatchQueue.global(qos: .userInitiated)`) — eliminates UI freeze when SIP connection is slow or network latency is high
+- `callDealloc` observer now builds the disconnect payload on the notification thread instead of dispatching the entire handler to main thread — reduces unnecessary main thread pressure on call teardown
+
 ## 3.3.4 [07/04/2026]
 
 ### Refactored (iOS)

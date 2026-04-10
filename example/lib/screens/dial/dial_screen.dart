@@ -70,8 +70,10 @@ class DialScreenState extends State<DialScreen> {
       debugPrint(
           "status callStateChangeEvent omiAction::: ${omiAction.actionName}");
       debugPrint("status callStateChangeEvent omiAction::: ${omiAction.data}");
+      // Refresh guest info only when switchboard routes call to a different agent
       if (omiAction.actionName == OmiEventList.onSwitchboardAnswer) {
         getGuestUser();
+        return;
       }
       if (omiAction.actionName != OmiEventList.onCallStateChanged) return;
 
@@ -91,8 +93,8 @@ class DialScreenState extends State<DialScreen> {
         // return;
       }
     });
-    await getCurrentUser();
-    await getGuestUser();
+    // Fetch both users in parallel — no dependency between them
+    await Future.wait([getCurrentUser(), getGuestUser()]);
     OmicallClient.instance.setAudioChangedListener((newAudio) {
       setState(() {
         _currentAudio = newAudio.first;
