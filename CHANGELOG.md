@@ -2,6 +2,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.3.6 [07/07/2026]
+
+### Changed — Native SDK bump (no public API change, no bridge code change)
+- **[MAJOR]** OMI Android SDK: `2.6.9` → `2.7.4`
+  - `2.7.4` — bọc `new SipEndpoint()` trong try-catch → chặn crash SIGABRT khi khởi tạo PJSIP Endpoint trong `startStack` (endpoint stale chưa `libDestroy()` sạch).
+  - `2.7.3` — diệt NPE khi hủy `CallSessionActivity` (thay 10 chỗ `account!!` bằng safe-call); mở rộng director callback `catch (Exception)` → `catch (Throwable)`; dừng spam re-INVITE / `getCallStreamStat` khi mất mạng giữa cuộc gọi (trước gây treo + reboot thiết bị).
+  - `2.7.2` — media recovery trên CGNAT (NAT keep-alive 15s→10s, RTP watchdog phát hiện half-dead path); crash hardening `null upcall object`, `pj::Account::isValid()`, `pjsip_tsx_terminate` UAF; fix mất tiếng sau unhold và khi chuyển mạng WiFi↔4G.
+- **[MAJOR]** iOS OmiKit: `1.11.9` → `1.11.23`
+  - `1.11.23` — on-premise endpoint config (`setOnPremiseInfo…`) cho HTTP/SIP/STUN/TURN, backward compatible tuyệt đối.
+  - `1.11.20`–`1.11.22` — CallKit display-name override (Zalo userId → tên người); fix `CXCallUpdate` bị từ chối khi tên chứa chữ/khoảng trắng.
+  - `1.11.10`–`1.11.19` — device registration check APIs; fix video resolution change (QQ series); mute/unmute state desync; incoming SDP `sprop-maxcapturerate=24000` sau khi app suspend; nhiều crash fix (Crashlytics v3.4.x); multi-call handling.
+
+### Bug Fix (iOS): toggleMute bypasses CallKit — lock screen / banner never updates
+
+**Files:** `ios/Classes/CallProcess/CallMediaController.swift`, `ios/Classes/SwiftOmikitPlugin.swift`
+
+**Root cause:** `CallMediaController.toggleMute()` called `call.toggleMute()` directly on the `OMICall` object, bypassing `omiLib.callManager.toggleMute(for:completion:)`. Audio-level mute worked (OMISIP conference bridge connected/disconnected correctly) but CallKit was never notified via `CXSetMutedCallAction` → lock screen mic icon and native call banner always showed mic active. `sendMuteStatus()` and `result()` were called immediately after, before OMISIP finished the operation — `call.muted` could be stale.
+
+**Fix:**
+- `CallMediaController.toggleMute()` now calls `omiLib.callManager.toggleMute(for:completion:)` — routes through `CXSetMutedCallAction` → CallKit updates native UI → `performSetMutedCallAction:` → OMISIP → `OMICallMediaStateChangedNotification`.
+- `SwiftOmikitPlugin` `TOGGLE_MUTE` handler moves `sendMuteStatus()` and `result()` inside the completion block — `call.muted` is authoritative at that point.
+
+---
+
 ## 3.3.5 [07/04/2026]
 
 ### Changed

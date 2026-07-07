@@ -24,9 +24,15 @@ extension CallManager {
         SwiftOmikitPlugin.instance?.sendSpeakerStatus()
     }
 
-    func toggleMute() {
-        guard let call = omiLib.getCurrentCall() else { return }
-        try? call.toggleMute()
+    /// Toggle mute via CallKit so the native call UI (lock screen, banner) stays in sync.
+    func toggleMute(completion: ((Error?) -> Void)? = nil) {
+        guard let call = omiLib.getCurrentCall() else {
+            completion?(nil)
+            return
+        }
+        omiLib.callManager.toggleMute(for: call) { error in
+            completion?(error)
+        }
     }
 
     func sendDTMF(character: String) {

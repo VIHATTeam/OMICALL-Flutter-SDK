@@ -139,12 +139,11 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           result(callInfo)
           break
       case TOGGLE_MUTE:
-          CallManager.shareInstance().toggleMute()
-          sendMuteStatus()
-          if let call = CallManager.shareInstance().getAvailableCall() {
-              result(call.muted)
-          } else {
-              result(false)
+          CallManager.shareInstance().toggleMute { [weak self] _ in
+              // Read call.muted AFTER CallKit completes — value is authoritative at this point.
+              let muted = CallManager.shareInstance().getAvailableCall()?.muted ?? false
+              self?.sendMuteStatus()
+              result(muted)
           }
           break
       case TOGGLE_SPEAK:
