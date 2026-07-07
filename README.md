@@ -13,9 +13,9 @@ The most important part of the framework is :
 
 | Component | Version |
 |---|---|
-| omicall_flutter_plugin | 3.3.5 |
-| Android OmiSDK (`io.omicrm.vihat:omi-sdk`) | 2.6.9 |
-| iOS OmiKit | 1.11.9 |
+| omicall_flutter_plugin | 3.3.6 |
+| Android OmiSDK (`io.omicrm.vihat:omi-sdk`) | 2.7.4 |
+| iOS OmiKit | 1.11.23 |
 
 ### 📝 Status
 Currently active maintenance and improve performance
