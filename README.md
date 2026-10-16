@@ -16,6 +16,8 @@ The most important part of the framework is :
 | omicall_flutter_plugin | 3.4.0 |
 | Android OmiSDK (`io.omicrm.vihat:omi-sdk`) | 2.9.1 |
 | iOS OmiKit | 1.12.0 |
+| Android minimum | minSdk 24, compileSdk 35 |
+| iOS minimum | 13.0 |
 
 ### 📝 Status
 Currently active maintenance and improve performance
@@ -49,7 +51,7 @@ Install via pubspec.yaml:
 
 ```yaml
 dependencies:
-  omicall_flutter_plugin: ^latest_version
+  omicall_flutter_plugin: ^3.4.0
 ```
 
 Minimum setup:
@@ -59,17 +61,18 @@ Minimum setup:
 await OmicallClient.instance.startServices();
 
 // 2. Login
-await OmicallClient.instance.initCall(
+final login = await OmicallClient.instance.register(
   userName: "your_username",
   password: "your_password",
   realm: "your_realm",
-  host: "your_host",
+  fcmToken: fcmToken,      // FCM token (Android) / APNS token (iOS)
+  host: "",                // optional SIP proxy; empty = OMICall default
   isVideo: false,
-  fcmToken: fcmToken,
-  projectId: "your_firebase_project_id"
+  projectId: "your_firebase_project_id",
 );
+if (!login.isSuccess) return; // login.message: MISSING_PARAMS | INIT_FAILED | NETWORK_UNAVAILABLE
 
-// 3. Make a call
+// 3. Make a call — returns a JSON string {"status", "_id", "message"}
 final result = await OmicallClient.instance.startCall(phoneNumber, false);
 ```
 
@@ -299,19 +302,19 @@ UNKNOWN   INCOMING  DISCONNECTED
 ```
 CONFIRMED (5)
      │
-     ├─ toggleHold() ──►  HOLD (7)
+     ├─ toggleHold() ──►  setHoldListener(true)            (HOLD event)
+     │                    setCallHoldChangedListener(...)  (CALL_HOLD_CHANGED, per call)
      │                       │
-     │                       ├─ "Call on hold"
-     │                       ├─ 🔇 Audio muted for both
+     │                       ├─ "Call on hold" — the customer hears nothing
      │                       │
      │  ◄──── toggleHold() ──┤
-     │
      ▼
-CONFIRMED (5)
-     │
-     ├─ "Call resumed"
-     ├─ 🔊 Audio restored
+setHoldListener(false) — "Call resumed"
 ```
+
+> Hold is reported through the `HOLD` / `CALL_HOLD_CHANGED` listeners. `CALL_STATE_CHANGED` with
+> status 7 is not emitted on Android, so do not rely on it. `toggleHold()` is ignored while a consult
+> transfer is running (the SDK keeps the customer on hold).
 
 ---
 
@@ -323,52 +326,24 @@ CONFIRMED (5)
 
 ##### 📌 - Config *gradle* file
 
-- Add these settings in `build.gradle`:
+- The Android SDK is served from GitHub Packages and needs credentials (ask the OMI team for the
+  token). Put them in `android/local.properties` — never commit this file:
 
-```gradle
-jcenter()
-maven {
-  url "https://maven.pkg.github.com/omicall/OMICall-SDK"
-  credentials {
-    username = OMI_USER // Please connect with developer OMI for get information
-    password = OMI_TOKEN
-  }
-  authentication {
-    basic(BasicAuthentication)
-  }
-}
+```properties
+omicallUsername=omicall
+omicallPassword=YOUR_GITHUB_PAT
 ```
 
-```gradle
-//in dependencies
-classpath 'com.google.gms:google-services:4.3.13' // You can choose the version of google-services to suit your project
-```
-
-```gradle
-//under buildscript
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        jcenter() // Warning: this repository is going to shut down soon
-        maven {
-          url "https://maven.pkg.github.com/omicall/OMICall-SDK"
-          credentials {
-              username = OMI_USER
-              password = OMI_TOKEN
-          }
-          authentication {
-              basic(BasicAuthentication)
-          }
-        }
-    }
-}
-```
-
-If you use the latest Flutter using the build.gradle.kts file, the configuration is as follows:
-
+- `android/build.gradle.kts` (Flutter 3.29+ default), as in [example/android/build.gradle.kts](example/android/build.gradle.kts):
 
 ```kotlin
+// Load local.properties for OMICall SDK credentials
+val localProperties = java.util.Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.inputStream().use { localProperties.load(it) }
+}
+
 allprojects {
     repositories {
         google()
@@ -376,8 +351,10 @@ allprojects {
         maven {
             url = uri("https://maven.pkg.github.com/omicall/OMICall-SDK")
             credentials {
-                username = project.findProperty("OMI_USER") as? String ?: ""
-                password = project.findProperty("OMI_TOKEN") as? String ?: ""
+                username = localProperties.getProperty("omicallUsername")
+                    ?: project.findProperty("omicallUsername") as? String ?: "omicall"
+                password = localProperties.getProperty("omicallPassword")
+                    ?: project.findProperty("omicallPassword") as? String ?: ""
             }
             authentication {
                 create<BasicAuthentication>("basic")
@@ -387,18 +364,49 @@ allprojects {
 }
 ```
 
+- Groovy `android/build.gradle` equivalent:
 
-You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/main/OMICALL-Flutter-SDK-Sample/android/build.gradle">android/build.gradle</a> to know more information.
+```gradle
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { localProperties.load(it) }
+}
 
-- Add these settings in `app/build.gradle`:
-
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+        maven {
+            url "https://maven.pkg.github.com/omicall/OMICall-SDK"
+            credentials {
+                username = localProperties.getProperty('omicallUsername') ?: 'omicall'
+                password = localProperties.getProperty('omicallPassword') ?: ''
+            }
+            authentication {
+                basic(BasicAuthentication)
+            }
+        }
+    }
+}
 ```
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'com.google.gms.google-services'
+
+- `android/app/build.gradle.kts` — apply Google Services (Firebase push), as in
+  [example/android/app/build.gradle.kts](example/android/app/build.gradle.kts):
+
+```kotlin
+plugins {
+    id("com.android.application")
+    id("kotlin-android")
+    id("dev.flutter.flutter-gradle-plugin")
+    id("com.google.gms.google-services") version "4.4.2"
+}
 ```
 
-You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/main/OMICALL-Flutter-SDK-Sample/android/app/build.gradle">android/app/build.gradle</a> to know more information.
+Groovy: `apply plugin: 'com.google.gms.google-services'` plus
+`classpath 'com.google.gms:google-services:4.4.2'` in the root `buildscript { dependencies { } }`.
+
+A `401 Unauthorized` while resolving `io.omicrm.vihat:omi-sdk` means the token is missing or expired.
 
 
 ##### 📌 - Config *AndroidManifest.xml* file
@@ -428,14 +436,14 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!-- CRITICAL: Explicitly remove FOREGROUND_SERVICE_CAMERA to prevent crashes on Android 14-15 -->
-    <!-- See CHANGELOG 2.3.78: This permission causes crashes on devices without camera -->
+    <!-- See CHANGELOG 3.3.2: this permission causes crashes on devices without camera -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" tools:node="remove" />
 
     <!-- Connection Service for Android 15-16 -->
     <uses-permission android:name="android.permission.MANAGE_OWN_CALLS" />
 
     <application
-        android:name=".MainApplication"
+        android:name="${applicationName}"
         android:label="Your App Name"
         android:enableOnBackInvokedCallback="true"
         android:alwaysRetainTaskState="true"
@@ -456,7 +464,11 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
             android:launchMode="singleTask"
             android:largeHeap="true"
             android:alwaysRetainTaskState="true"
-            android:supportsPictureInPicture="false">
+            android:supportsPictureInPicture="true"
+            android:resizeableActivity="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation">
+            <!-- supportsPictureInPicture / resizeableActivity / configChanges: only needed for
+                 video Picture-in-Picture (see "Picture-in-Picture"); use false if you do not use PiP -->
 
             <!-- Your theme configuration -->
             <meta-data
@@ -485,7 +497,6 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
             android:name="vn.vihat.omicall.omisdk.receiver.FirebaseMessageReceiver"
             android:exported="true"
             android:enabled="true"
-            android:foregroundServiceType="remoteMessaging"
             tools:replace="android:exported"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
@@ -499,7 +510,7 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="microphone|phoneCall">
-            <!-- IMPORTANT: Only microphone|phoneCall, NO camera (see CHANGELOG 2.3.78) -->
+            <!-- IMPORTANT: Only microphone|phoneCall, NO camera (see CHANGELOG 3.3.2) -->
         </service>
 
         <!-- Flutter plugin metadata -->
@@ -518,11 +529,12 @@ You can refer <a href="https://github.com/VIHATTeam/OMICALL-Flutter-SDK/blob/mai
    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CAMERA" tools:node="remove" />
    ```
    - Without `tools:node="remove"`, app **WILL CRASH** on Android 14-15 devices without camera
-   - See CHANGELOG 2.3.78 for details
+   - See CHANGELOG 3.3.2 for details
 
 2. **Android 14+ requires foregroundServiceType:**
    - NotificationService: `android:foregroundServiceType="microphone|phoneCall"` (NOT camera)
-   - FirebaseMessageReceiver: `android:foregroundServiceType="remoteMessaging"`
+   - (`foregroundServiceType` has no effect on a `<receiver>`; older guides that put
+     `remoteMessaging` on FirebaseMessageReceiver can drop it)
 
 3. **Android 13+ requires POST_NOTIFICATIONS:**
    - Request this permission at runtime for notifications to work
@@ -562,6 +574,7 @@ import android.content.pm.PackageManager
 import androidx.core.content.ContextCompat
 import android.os.Bundle
 import android.content.Intent
+import android.content.res.Configuration
 import android.util.Log
 import vn.vihat.omicall.omisdk.utils.SipServiceConstants
 
@@ -613,6 +626,17 @@ class MainActivity: FlutterActivity() {
         OmicallsdkPlugin.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
     }
 
+    // Only for video Picture-in-Picture (see "Picture-in-Picture")
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        OmicallsdkPlugin.onUserLeaveHint(this)
+    }
+
+    override fun onPictureInPictureModeChanged(isInPip: Boolean, newConfig: Configuration) {
+        super.onPictureInPictureModeChanged(isInPip, newConfig)
+        OmicallsdkPlugin.onPictureInPictureModeChanged(isInPip)
+    }
+
   // Your config
 }
 
@@ -634,18 +658,22 @@ class MainActivity: FlutterActivity() {
 
 <br></br>
 
-- 📌 Add variables in *Appdelegate.h*:
+- 📌 Add instance variables in *AppDelegate.h* (ivars, not file-scope globals — globals in a header
+  cause duplicate-symbol link errors):
 
 ```objc
+#import <Flutter/Flutter.h>
 #import <UIKit/UIKit.h>
 #import <UserNotifications/UserNotifications.h>
 #import <OmiKit/OmiKit-umbrella.h>
 #import <OmiKit/Constants.h>
-#import <UserNotifications/UserNotifications.h>
 
-PushKitManager *pushkitManager;
-CallKitProviderDelegate * provider;
-PKPushRegistry * voipRegistry;
+@interface AppDelegate : FlutterAppDelegate<UIApplicationDelegate> {
+    PushKitManager *pushkitManager;
+    CallKitProviderDelegate *provider;
+    PKPushRegistry *voipRegistry;
+}
+@end
 ```
 
 <br></br>
@@ -659,7 +687,7 @@ PKPushRegistry * voipRegistry;
 - 📌 Add these lines into `didFinishLaunchingWithOptions`:
 
 ```objc
-[OmiClient setEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX userNameKey:@"extension" maxCall:1 callKitImage: @"callkit_image" typePushVoip:@"default" representName:@"OMICALL"];
+[OmiClient setEnviroment:KEY_OMI_APP_ENVIROMENT_SANDBOX userNameKey:@"extension" maxCall:1 callKitImage: @"call_image" typePushVoip:@"default" representName:@"OMICALL"];
 provider = [[CallKitProviderDelegate alloc] initWithCallManager: [OMISIPLib sharedInstance].callManager];
 voipRegistry = [[PKPushRegistry alloc] initWithQueue:dispatch_get_main_queue()];
 pushkitManager = [[PushKitManager alloc] initWithVoipRegistry:voipRegistry];
@@ -701,7 +729,23 @@ if (@available(iOS 10.0, *)) {
 <string>Need camera access for video call functions</string>
 <key>NSMicrophoneUsageDescription</key>
 <string>Need microphone access for make Call</string>
+<!-- VoIP push, call audio in background (also required for video Picture-in-Picture) -->
+<key>UIBackgroundModes</key>
+<array>
+    <string>audio</string>
+    <string>fetch</string>
+    <string>remote-notification</string>
+    <string>voip</string>
+</array>
+<!-- Calls started from the iOS Recents list (setCallLogListener) -->
+<key>NSUserActivityTypes</key>
+<array>
+    <string>INStartCallIntent</string>
+</array>
 ```
+
+- 📌 In Xcode → Signing & Capabilities add **Push Notifications** and **Background Modes**
+  (Audio, Voice over IP, Remote notifications).
 
 - 💡 Save token for `OmiClient`: if you added `firebase_messaging` in your project so you don't need add these lines.
 
@@ -723,11 +767,11 @@ if (@available(iOS 10.0, *)) {
 
 ```
 
-✨ Only use under lines when added `firebase_messaging` plugin in your project
-  - ✅ Setup push notification: We only support Firebase for push notification.
-  - ✅ Add `google-service.json` in `android/app` (For more information, you can refer <a href="https://pub.dev/packages/firebase_core">firebase_core</a>)
-  - ✅ Add Firebase Messaging to receive `fcm_token` (You can refer <a href="https://pub.dev/packages/firebase_messaging">firebase_messaging</a> to setup notification for Flutter)
-
+✨ Push on iOS
+  - ✅ Incoming calls arrive through APNS VoIP (PushKit, handled by `PushKitManager`) and CallKit.
+  - ✅ Pass the APNS token as `fcmToken` to `register()` / `registerWithApiKey()`
+    (`await FirebaseMessaging.instance.getAPNSToken()` when you use `firebase_messaging`).
+  - ✅ Add `GoogleService-Info.plist` only if your app uses Firebase on iOS.
   - ✅ For more setting information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/ios-sdk/cau-hinh-push-notification">Config Push for iOS</a>
 
 #### 🚀  iOS(Swift):
@@ -739,6 +783,7 @@ if (@available(iOS 10.0, *)) {
 import OmiKit
 import PushKit
 import NotificationCenter
+import omicall_flutter_plugin
 
 var pushkitManager: PushKitManager?
 var provider: CallKitProviderDelegate?
@@ -748,7 +793,7 @@ var voipRegistry: PKPushRegistry?
 - 📌 Add these lines into `didFinishLaunchingWithOptions`:
 
 ```swift
-OmiClient.setEnviroment(KEY_OMI_APP_ENVIROMENT_SANDBOX, prefix: "", userNameKey: "extension", maxCall: 1, callKitImage: "callkit_image" typePushVoip:@"default")
+OmiClient.setEnviroment(KEY_OMI_APP_ENVIROMENT_SANDBOX, userNameKey: "extension", maxCall: 1, callKitImage: "call_image", typePushVoip: "default", representName: "OMICALL")
 provider = CallKitProviderDelegate.init(callManager: OMISIPLib.sharedInstance().callManager)
 voipRegistry = PKPushRegistry.init(queue: .main)
 pushkitManager = PushKitManager.init(voipRegistry: voipRegistry)
@@ -757,19 +802,16 @@ pushkitManager = PushKitManager.init(voipRegistry: voipRegistry)
 
 ```swift
 func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-    var value = SwiftOmikitPlugin.processUserActivity(userActivity: userActivity)
-    return value
+    return SwiftOmikitPlugin.processUserActivity(userActivity: userActivity)
+}
+
+// Close ongoing calls when the user kills the app
+override func applicationWillTerminate(_ application: UIApplication) {
+    OmiClient.omiCloseCall()
 }
 ```
 
--  Add these lines into `Info.plist`:
-
-```xml
-<key>NSCameraUsageDescription</key>
-<string>Need camera access for video call functions</string>
-<key>NSMicrophoneUsageDescription</key>
-<string>Need microphone access for make Call</string>
-```
+- 📌 `Info.plist` and capabilities: same as the Objective-C section above.
 
 - 💡 Save token for `OmiClient`: if you added `firebase_messaging` in your project so you don't need add these lines.
 
@@ -787,11 +829,11 @@ extension Data {
 }
 ```
 
-✨ Only use under lines when added `firebase_messaging` plugin in your project
-  - ✅ Setup push notification: We only support Firebase for push notification.
-  - ✅ Add `google-service.json` in `android/app` (For more information, you can refer <a href="https://pub.dev/packages/firebase_core">firebase_core</a>)
-  - ✅ Add Firebase Messaging to receive `fcm_token` (You can refer <a href="https://pub.dev/packages/firebase_messaging">firebase_messaging</a> to setup notification for Flutter)
-
+✨ Push on iOS
+  - ✅ Incoming calls arrive through APNS VoIP (PushKit, handled by `PushKitManager`) and CallKit.
+  - ✅ Pass the APNS token as `fcmToken` to `register()` / `registerWithApiKey()`
+    (`await FirebaseMessaging.instance.getAPNSToken()` when you use `firebase_messaging`).
+  - ✅ Add `GoogleService-Info.plist` only if your app uses Firebase on iOS.
   - ✅ For more setting information, please refer <a href="https://api.omicall.com/web-sdk/mobile-sdk/ios-sdk/cau-hinh-push-notification">Config Push for iOS</a>
 
 <br></br>
@@ -809,15 +851,16 @@ We support 2 environments. So you need set correct key in Appdelegate.
 
 #### Request permission
 
-- 📌 We need you request permission about call before make call:
+- 📌 Request these permissions before making a call (e.g. with `permission_handler`):
 
 ```
- + android.permission.CALL_PHONE (for android)
- + Permission.audio
  + Permission.microphone
- + Permission.camera  (if you want to make Video calls)
-
+ + Permission.camera        (video calls only)
+ + Permission.notification  (Android 13+, incoming-call notification)
 ```
+
+> On Android, `register()` also requests RECORD_AUDIO, POST_NOTIFICATIONS and — when
+> `isVideo: true` — CAMERA. Pass `isVideo: false` for audio-only apps.
 
 
 - 📌 Set up for Firebase:
@@ -885,32 +928,35 @@ if (!result.isSuccess) showError(result.message);
 
 > `initCallWithUserPassword` / `initCallWithApiKey` still work but are **deprecated** since 3.4.0 — they return the raw JSON string. See [Migration Guide](#upgrading-from-33x-to-340).
 
-- ✅ Get call when user open app from killed status(only iOS):
+- ✅ Get the ongoing call when the app is opened (e.g. from a call notification / killed state):
 ```dart
 final result = await OmicallClient.instance.getInitialCall();
-  ///if result is not equal False => have a calling.
+// A Map with the call info when a call exists;
+// otherwise `false` (iOS) or null (Android).
+final hasCall = result is Map && result.isNotEmpty;
 ```
 
-- ✅ Config push notification: With iOS, I only support these keys: `prefixMissedCallMessage`, `missedCallTitle`, `userNameKey`. With Android, We don't support `missedCallTitle`:
+- ✅ Config push notification:
   ```dart
-    OmicallClient.instance.configPushNotification(
-      notificationIcon : "calling_face", //notification icon on Android
-      prefix : "Cuộc gọi tới từ: ",
-      incomingBackgroundColor : "#FFFFFFFF",
-      incomingAcceptButtonImage : "join_call", //image name
-      incomingDeclineButtonImage : "hangup", //image name
-      backImage : "ic_back", //image name: icon of back button
-      userImage : "calling_face", //image name: icon of user default
-      prefixMissedCallMessage: 'Cuộc gọi nhỡ từ' //config prefix message for the missed call
-      missedCallTitle: 'Cuộc gọi nhỡ', //config title for the missed call
-      userNameKey: 'uuid', //we have 3 values: uuid, full_name, extension
-      channelId: 'channelid.callnotification' // need to use call notification,
-      audioNotificationDescription: "" //audio description
-      videoNotificationDescription: "" //video description
-      representName: "" //  Optional value, if nothing is passed down or nil, will display the employee's name or extension number when a call comes in. If you declare a value, this value will be displayed on CallKit when there is an incoming call
-    );
-    //incomingAcceptButtonImage, incomingDeclineButtonImage, backImage, userImage: Add these into `android/app/src/main/res/drawble`
+  OmicallClient.instance.configPushNotification(
+    notificationIcon: "calling_face",        // Android: notification icon (res/drawable)
+    prefix: "Cuộc gọi tới từ: ",             // Android: incoming-call text prefix
+    userImage: "calling_face",               // Android: default avatar (res/drawable)
+    prefixMissedCallMessage: "Cuộc gọi nhỡ từ", // both: missed-call message prefix
+    missedCallTitle: "Cuộc gọi nhỡ",         // iOS: missed-call title
+    userNameKey: "uuid",                     // Android: uuid | full_name | extension
+    channelId: "channelid.callnotification", // Android: used as <channelId>-inbound / -missed
+    representName: "",                       // Android: name shown for incoming calls (optional)
+    isUseIntentFilter: true,                 // Android: open the app through the intent filter
+  );
   ```
+
+  | Key | Android | iOS |
+  |---|---|---|
+  | `notificationIcon`, `prefix`, `userImage`, `userNameKey`, `channelId`, `representName`, `isUseIntentFilter` | ✅ | — (iOS takes `userNameKey` / `representName` from `setEnviroment` in AppDelegate) |
+  | `prefixMissedCallMessage` | ✅ | ✅ (only when `missedCallTitle` is also set) |
+  | `missedCallTitle` | — | ✅ |
+  | `incomingBackgroundColor`, `incomingAcceptButtonImage`, `incomingDeclineButtonImage`, `backImage`, `audioNotificationDescription`, `videoNotificationDescription` | accepted, not used by the current SDK | — |
 
 ---
 
@@ -1012,35 +1058,45 @@ final result = await OmicallClient.instance.startCall(
 );
 ```
 
-**Return values (OmiStartCallStatus):**
+**Returns** a JSON string `{"status": int, "_id": String, "message": String}` on both platforms:
 
-| Status | Code | Description |
-|--------|------|-------------|
-| `invalidUuid` | 0 | UUID không hợp lệ (không tìm thấy trong hệ thống) |
-| `invalidPhoneNumber` | 1 | Số điện thoại SIP không hợp lệ |
-| `samePhoneNumber` | 2 | Không thể gọi cùng số điện thoại |
-| `maxRetry` | 3 | Hết lượt retry, không thể khởi tạo cuộc gọi |
-| `permissionDenied` | 4 | Quyền audio bị từ chối |
-| `couldNotFindEndpoint` | 5 | Vui lòng đăng nhập trước khi gọi |
-| `accountRegisterFailed` | 6 | Không thể đăng ký tài khoản |
-| `startCallFailed` | 7 | Không thể bắt đầu cuộc gọi |
-| **`startCallSuccess`** | **8** | **Cuộc gọi bắt đầu thành công** ⬅️ Use this to navigate |
-| `haveAnotherCall` | 9 | Đang có cuộc gọi khác |
-| `accountTurnOffNumberInternal` | 10 | Tài khoản đã tắt tính năng gọi nội bộ |
-| `noNetwork` | 11 | Không có kết nối mạng |
+```dart
+final json = jsonDecode(result as String) as Map;
+final started = json['status'] == 8 || json['message'] == 'START_CALL_SUCCESS';
+if (started) openCallScreen(); else showError(json['message']);
+```
 
-> **Note (Android/iOS difference):** The `status` code differs by platform (`408` on Android, `11` on iOS). Use `message` field instead for cross-platform handling: `jsonMap['message'] == 'NO_NETWORK'`.
+The `status` codes differ by platform — branch on `message` for cross-platform handling.
 
-**Important:** Wait for status **8** before navigating to call screen!
+| `message` | iOS `status` | Android `status` |
+|---|---|---|
+| `START_CALL_SUCCESS` ⬅️ navigate to the call screen | 8 (also 12 = waiting for endpoint) | 8 |
+| `SWITCHBOARD_REGISTERING` (call continues once registered — treat as started) | — | 8 |
+| `INVALID_UUID` | 0 | 401 |
+| `INVALID_PHONE_NUMBER` | 1 | 402 |
+| `SAME_PHONE_NUMBER_WITH_PHONE_REGISTER` / `CAN_NOT_CALL_YOURSELF` | 2 | 403 |
+| `MAX_RETRY` | 3 | — |
+| `PERMISSION_DENIED` | 4 | 405 (audio) / 406 (video) |
+| `COULD_NOT_FIND_END_POINT` (log in first) | 5 | — |
+| `SWITCHBOARD_NOT_CONNECTED` | — | 404 |
+| `REGISTER_ACCOUNT_FAIL` | 6 | — |
+| `START_CALL_FAIL` | 7 | — |
+| `HAVE_ANOTHER_CALL` | 9 | 400 |
+| `ACCOUNT_TURN_OFF_NUMBER_INTERNAL` | 10 | — |
+| `NO_NETWORK` | 11 | 408 |
+
+`OmiStartCallStatus` (iOS codes 0-11) lives in `package:omicall_flutter_plugin/action/action_model.dart`.
 
 ##### 📌 Start Call (UUID)
 Call using user UUID (API key only)
 
 ```dart
-final result = OmicallClient.instance.startCallWithUUID(
+final int status = await OmicallClient.instance.startCallWithUUID(
     uuid,         // user id
     _isVideoCall  // call video or audio
 );
+// iOS: 8 = started (codes as in the table above). Android: raw SDK code, 200 = started.
+// 4 = microphone permission denied (both).
 ```
 
 ##### 📌 Join Call
@@ -1054,10 +1110,9 @@ OmicallClient.instance.joinCall();
 Hang up current call
 
 ```dart
-OmicallClient.instance.endCall().then((callInfo) {
-  // callInfo contains the call details
-  print(callInfo);
-});
+final Map? callInfo = await OmicallClient.instance.endCall();
+// Declines a ringing incoming call, hangs up otherwise.
+// Returns the call info (null when declining on Android, {} when there is no call on iOS).
 
 /* Sample output:
 {
@@ -1066,9 +1121,10 @@ OmicallClient.instance.endCall().then((callInfo) {
   "source_number": 111,
   "destination_number": 110,
   "time_start_to_answer": 1682858097393,
-  "time_end": 1682858152181,
+  "time_end": 1682858152181,   // iOS: seconds
   "sip_user": 111,
-  "disposition": "answered"
+  "disposition": "answered",
+  "code_end_call": 200
 }
 */
 ```
@@ -1107,7 +1163,7 @@ OmicallClient.instance.toggleHold();
 ```
 
 ##### 📌 Send DTMF
-Send number characters (1-9, *, #)
+Send a key (0-9, *, #)
 
 ```dart
 OmicallClient.instance.sendDTMF(value);
@@ -1117,11 +1173,12 @@ OmicallClient.instance.sendDTMF(value);
 Forward call to another employee
 
 ```dart
-OmicallClient.instance.transferCall(phoneNumber: "101");
+final bool sent = await OmicallClient.instance.transferCall(phoneNumber: "101");
 ```
 
-The PBX result arrives in `setTransferStatusListener` (see below). Since 3.4.0 a failed transfer no
-longer ends the call: you get `TRANSFER_STATUS` with `statusCode: 500, isFinal: true` and the call stays up.
+The PBX result arrives in `setTransferStatusListener` (see below). Since 3.4.0 (Android SDK 2.9.1)
+a failed transfer no longer ends the call on Android: you get `TRANSFER_STATUS` with
+`statusCode: 500, isFinal: true` and the call stays up.
 
 ##### 📌 Consult (Attended) Transfer — NEW 3.4.0
 Talk to a colleague before handing the customer over (answered **audio** calls only).
@@ -1160,7 +1217,8 @@ await client.cancelConsult();
 
 `OmiConsultStartStatus`: `success` (200), `emptyExtension` (402), `canNotCallYourself` (403),
 `switchboardNotConnected` (404), `missingAudioPermission` (405), `noActiveCall` (409),
-`consultInProgress` (410), `videoCallNotSupported` (411), `sameAsCustomer` (412).
+`consultInProgress` (410), `videoCallNotSupported` (411), `sameAsCustomer` (412),
+`unknown` (-1, a code this plugin version does not know).
 
 Rules (same on Android and iOS):
 - The consult call never fires `CALL_STATE_CHANGED`; follow it with `setConsultStateListener`.
@@ -1193,9 +1251,31 @@ final user = await OmicallClient.instance.getUserInfo(phone: "111");
 // Output: { "extension": "111", "full_name": "Alice", "avatar_url": "", "uuid": "789ccc" }
 ```
 
+##### 📌 Audio Output (earpiece / speaker / Bluetooth / headset)
+
+```dart
+final outputs = await OmicallClient.instance.getOutputAudios();  // List of {name, type}
+final current = await OmicallClient.instance.getCurrentAudio();  // List with the active output
+await OmicallClient.instance.setOutputAudio(portType: outputs.first["type"]);
+OmicallClient.instance.setAudioChangedListener((List<dynamic> audios) {
+  // AUDIO_CHANGE: the active output changed (Bluetooth connected, headset unplugged, ...)
+});
+```
+
+`portType` is the `type` value from `getOutputAudios()`: an `int` on Android, a `String` on iOS.
+
+##### 📌 Other
+
+| Function | Platform | Description |
+|---|---|---|
+| `changeTransport(type: "UDP" \| "TCP")` | Android | Switch the SIP transport |
+| `getHistoryCallLog()` | iOS | Number of a call started from the iOS Recents list (see Call Log Listener) |
+| `dispose()` | both | Close the call-state stream (only when the app no longer uses the SDK) |
+| `remove…Listener()` | both | Each `set…Listener` has a matching `remove…Listener` |
+
 ---
 
-### Video Call Functions   🚀🚀
+### Video Call Functions  🚀🚀
 >📝  **Note:** These functions support video calls only. Make sure you enable video in the initialization functions and when starting a call.
 
 ##### 📌 Switch Camera
@@ -1396,6 +1476,7 @@ class _MyCallScreenState extends State<MyCallScreen> {
 | `shouldShowLoading` | `bool` | Whether to show loading indicator |
 | `isNetworkRecovered` | `bool` | Whether network has recovered |
 | `consecutiveSameLcnCount` | `int` | Current consecutive same LCN count |
+| `requestCount` | `int` | Request counter (`req`) from the native quality report |
 
 #### MOS Score Scale
 
@@ -1409,11 +1490,13 @@ class _MyCallScreenState extends State<MyCallScreen> {
 
 #### Loading Logic (Network Issue Detection)
 
-The loading indicator is automatically shown/hidden based on LCN tracking:
+The loading indicator is automatically shown/hidden based on LCN tracking.
+**Android only** — iOS always reports `lcn: 0` / `isNeedLoading: false`, so `shouldShowLoading` never
+turns on there (use `setRemoteConnectionListener` on iOS instead).
 
 ```
 Show Loading:
-  ├─ LCN value stays the same for ≥3 consecutive events
+  ├─ The same non-zero LCN value arrives 4 times in a row (3 repeats)
   └─ Indicates network stuck/frozen
 
 Hide Loading:
@@ -1457,10 +1540,21 @@ OmicallClient.instance.callStateChangeEvent.listen((action) {
 
 #### Action Names
 
-| Action Name | Description |
-|-------------|-------------|
-| `onCallStateChanged` | Call state has changed |
-| `onSwitchboardAnswer` | Switchboard SIP is listening |
+`action.actionName` is a string; filter on it — the stream carries more than call states:
+
+| `actionName` | Constant | Payload |
+|-------------|----------|---------|
+| `"CALL_STATE_CHANGED"` | `OmiEventList.onCallStateChanged` | see Event Data below |
+| `"SWITCHBOARD_ANSWER"` | `OmiEventList.onSwitchboardAnswer` | `{sip}` — switchboard answered |
+| `"VIDEO"` | `OmiEventList.onVideo` | iOS: camera on/off after `toggleVideo()` |
+| `"CAMERA_STATUS"` | — | Android: sent after `switchCamera()` |
+
+```dart
+OmicallClient.instance.callStateChangeEvent.listen((action) {
+  if (action.actionName != OmiEventList.onCallStateChanged) return;
+  final status = action.data["status"] as int?;
+});
+```
 
 #### Call States
 
@@ -1483,11 +1577,17 @@ OmicallClient.instance.callStateChangeEvent.listen((action) {
   "status": int,            // call state code (0-7)
   "callerNumber": String,   // phone number
   "incoming": bool,         // true if incoming
-  "_id": String,            // (optional) call identifier
-  // Only present when status == disconnected (6):
+  "_id": String,            // iOS: call UUID; Android: ""
+  "transactionId": String,  // iOS: every event; Android: on CONFIRMED
+  // When status == disconnected (6):
   "code_end_call": int,     // SIP/OMI end reason code — see Call End Codes table
 }
 ```
+
+> **DISCONNECTED arrives twice on iOS**: once with the call info + `code_end_call`, and once from
+> the SDK teardown as `{status: 6, message, codeEndCall}`. Android sends it once. Handle
+> DISCONNECTED idempotently (e.g. close the call screen only once). iOS forwards the raw SDK
+> state, so ignore values you do not know.
 
 #### State Lifecycle
 
@@ -1577,9 +1677,9 @@ Remove with `removeConsultStateListener()`, `removeTransferStatusListener()`, `r
 #### Remote Video Ready Listener
 
 ```dart
+// data: {"name": "REMOTE_VIDEO_READY", "data": {...}} — once per call, Android and iOS
 OmicallClient.instance.setVideoListener((data) {
-  refreshRemoteCamera(); // Refresh remote camera view
-  refreshLocalCamera();  // Refresh local camera view
+  setState(() => _remoteVideoReady = true); // e.g. hide the "connecting video" placeholder
 });
 ```
 
@@ -1597,7 +1697,9 @@ OmicallClient.instance.setMissedCallListener((data) {
 
 #### Call Log Listener (iOS Only)
 
-Triggered when user taps call log entry:
+Triggered when the user starts a call from the iOS Recents list. Requires
+`processUserActivity` in AppDelegate and `NSUserActivityTypes` → `INStartCallIntent` in Info.plist
+(see iOS setup):
 
 ```dart
 OmicallClient.instance.setCallLogListener((data) {
@@ -1618,13 +1720,16 @@ The `code_end_call` field is included in the event data when `status == disconne
 #### How to handle end-call reasons
 
 ```dart
+import 'package:omicall_flutter_plugin/action/action_model.dart'; // OmiCallState
+
 OmicallClient.instance.callStateChangeEvent.listen((omiAction) {
   if (omiAction.actionName != OmiEventList.onCallStateChanged) return;
   final data = omiAction.data;
   final status = data['status'] as int;
 
   if (status == OmiCallState.disconnected.rawValue) {
-    final code = data['code_end_call'] as int?;
+    // iOS also sends a second DISCONNECTED with `codeEndCall` (see Event Data)
+    final code = (data['code_end_call'] ?? data['codeEndCall']) as int?;
     final reason = _endCallReason(code);
     if (reason != null) {
       // Show toast or dialog to user
@@ -1696,7 +1801,7 @@ String? _endCallReason(int? code) {
 ```dart
 // Check result and handle errors
 final result = await OmicallClient.instance.startCall(phone, false);
-final jsonMap = json.decode(result);
+final jsonMap = jsonDecode(result as String) as Map;
 final status = jsonMap['status'];
 
 // Use 'message' field for cross-platform handling (status code differs between Android/iOS)
@@ -1715,8 +1820,19 @@ switch(message) {
     print("Microphone permission denied");
     await requestMicrophonePermission();
     break;
-  case 'COULD_NOT_FIND_END_POINT':
-    print("Not logged in - call initCall() first");
+  case 'COULD_NOT_FIND_END_POINT': // iOS
+    print("Not logged in - call register() first");
+    break;
+  case 'INVALID_PHONE_NUMBER':
+  case 'INVALID_UUID':
+  case 'CAN_NOT_CALL_YOURSELF':                 // Android
+  case 'SAME_PHONE_NUMBER_WITH_PHONE_REGISTER': // iOS
+    print("Invalid destination");
+    break;
+  case 'MAX_RETRY':             // iOS
+  case 'REGISTER_ACCOUNT_FAIL': // iOS
+  case 'START_CALL_FAIL':       // iOS
+    print("Could not start the call - try again");
     break;
   case 'HAVE_ANOTHER_CALL':
     print("Already in a call");
@@ -1738,7 +1854,7 @@ switch(message) {
 
 **Android:**
 - ✅ Check `google-services.json` exists in `android/app/`
-- ✅ Verify FCM token is registered: `OmicallClient.instance.initCall(..., fcmToken: token)`
+- ✅ Verify the FCM token is registered: `OmicallClient.instance.register(..., fcmToken: token)`
 - ✅ Check `AndroidManifest.xml` has `FirebaseMessageReceiver`
 - ✅ Ensure app has notification permissions
 
@@ -1792,14 +1908,10 @@ OmicallClient.instance.setCallQualityListener((data) {
 #### 4. Video Call Issues
 
 **No Remote Video:**
-```dart
-// Register video event listener
-OmicallClient.instance.setVideoListener((data) {
-  // Refresh camera views when remote video ready
-  _remoteController?.refresh();
-  _localController?.refresh();
-});
-```
+- ✅ Show both `RemoteCameraView` and `LocalCameraView` — they attach to the SDK by themselves
+  (since 3.4.0 `refresh()` is optional).
+- ✅ `setVideoListener` fires `REMOTE_VIDEO_READY` once the first remote frame is decoded; if it
+  never comes, check the network / PBX video codec (H.264).
 
 **Camera Not Switching:**
 ```dart
@@ -1811,9 +1923,8 @@ if (_localController != null) {
 
 **Black Screen:**
 - ✅ Check camera permissions
-- ✅ Ensure `isVideo: true` in `initCall()` and `startCall()`
-- ✅ Call `registerVideoEvent()` before call starts
-- ✅ Refresh camera views when state changes
+- ✅ Ensure `isVideo: true` in `register()` and `startCall()`
+- ✅ Keep both camera widgets on screen during the video call (they attach automatically)
 
 #### 5. Audio Issues
 
@@ -1865,95 +1976,39 @@ final ok = result.isSuccess;
 Behaviour changes:
 - `host` is now optional on Android (empty = SDK default) and honored on iOS (was always `vh.omicrm.com:5222`).
 - `transferCall` failure no longer ends the call on Android — listen to `setTransferStatusListener`.
+- `toggleHold()` is ignored while a consult transfer is running (both platforms).
+
+Video calls:
+- `registerVideoEvent()` / `removeVideoEvent()` are no longer needed (kept as no-ops) and
+  `refresh()` is optional — the camera widgets attach themselves.
+- `REMOTE_VIDEO_READY` (`setVideoListener`) now also fires on Android, once per call.
+- iOS renders through `OMIVideoCallManager`: do not mirror the local preview yourself.
+- Picture-in-Picture: `setVideoPictureInPictureEnabled(true)`; on Android add the manifest flags and
+  forward `onUserLeaveHint` / `onPictureInPictureModeChanged` from MainActivity (see
+  [Picture-in-Picture](#-picture-in-picture-340)).
+
+Native setup:
+- Android: Maven credentials are `omicallUsername` / `omicallPassword` in `android/local.properties`.
+- iOS: minimum deployment target is now 13.0; run `pod install` to get OmiKit 1.12.0.
 
 ### Upgrading from 2.x.x to 3.x.x
 
-#### Breaking Changes
+Call quality: parse `setCallQualityListener` data with `CallQualityTracker` instead of reading the
+raw map yourself (see [Call Quality Monitoring](#-call-quality-monitoring-new)):
 
-1. **getInstance() Removed**
-
-❌ **Old Code:**
-```dart
-OmicallClient.getInstance(context).startCall(phone, false);
-```
-
-✅ **New Code:**
-```dart
-OmicallClient.instance.startCall(phone, false);
-```
-
-2. **Call Quality Monitoring**
-
-❌ **Old Code (Manual Parsing):**
-```dart
-OmicallClient.instance.setCallQualityListener((data) {
-  final quality = data["quality"] as int;
-  final stat = data["stat"] as Map<String, dynamic>;
-  final lcn = stat["lcn"] as int? ?? 0;
-  final mos = stat["mos"] as double? ?? 0.0;
-
-  // Manual LCN tracking
-  if (lcn == lastLcn && lcn != 0) {
-    consecutiveCount++;
-    if (consecutiveCount >= 3) {
-      showLoading();
-    }
-  }
-});
-```
-
-✅ **New Code (Using Helper):**
 ```dart
 final _qualityTracker = CallQualityTracker();
 
 OmicallClient.instance.setCallQualityListener((data) {
   final info = _qualityTracker.parseCallQuality(data);
-
   if (info.shouldShowLoading) {
-    EasyLoading.show();
+    EasyLoading.show();          // Android only, see Loading Logic
   } else if (info.isNetworkRecovered) {
     EasyLoading.dismiss();
   }
-
-  setState(() {
-    callQuality = info.mosDisplay; // "4.5"
-  });
+  setState(() => callQuality = info.mosDisplay); // "4.5"
 });
 ```
-
-3. **Package Name Changes**
-
-Update imports if you were using internal classes:
-
-❌ **Old:**
-```dart
-import 'package:omicall_flutter_plugin/some_internal_class.dart';
-```
-
-✅ **New:**
-```dart
-import 'package:omicall_flutter_plugin/omicall.dart';
-import 'package:omicall_flutter_plugin/models/call_quality_info.dart';
-import 'package:omicall_flutter_plugin/utils/call_quality_tracker.dart';
-```
-
-#### New Features in 3.x.x
-
-1. **CallQualityTracker Helper**
-   - Automatic MOS parsing
-   - Built-in LCN tracking
-   - Network recovery detection
-   - See [Call Quality Monitoring](#-call-quality-monitoring-new)
-
-2. **Enhanced Error Handling**
-   - Better error messages in `startCall()`
-   - Detailed error codes
-   - See [Error Codes](#error-codes)
-
-3. **Improved Documentation**
-   - ASCII architecture diagrams
-   - Call flow lifecycle charts
-   - Comprehensive troubleshooting
 
 ---
 

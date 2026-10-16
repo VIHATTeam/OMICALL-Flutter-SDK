@@ -33,7 +33,7 @@ All notable changes to this project will be documented in this file.
 - iOS: `endCall()` when only the consult call is left now ends it (same as Android).
 
 ### Changed — video calls, aligned with the OMICall store apps
-- **iOS:** rendering moved from `OMIVideoViewManager` to `OMIVideoCallManager` (as OMI-APP-IOS-FEATURES). The widgets host two persistent containers (a rebuilt widget re-parents them, no second `setup()` mid-call); the SDK handles rendering, background/foreground, re-INVITE recovery, PiP and the remote-connection overlay. Setup runs once when both widgets have a size (not waiting for CONFIRMED); `setup()` / `cleanup()` run on main, outside the SDK call-state callback; `cleanup()` only at call end. `REMOTE_VIDEO_READY` is sent once per call, also when video arrived before setup (answered from the lock screen), and replayed on `refresh()` for a late listener (both platforms). Fixes main-thread freezes from the synchronous `createViewForVideo*` calls (0.5 s to 9 s per the SDK header).
+- **iOS:** rendering moved from `OMIVideoViewManager` to `OMIVideoCallManager` (as OMI-APP-IOS-FEATURES). The widgets host two persistent containers (a rebuilt widget re-parents them, no second `setup()` mid-call); the SDK handles rendering, background/foreground, re-INVITE recovery, PiP and the remote-connection overlay. Setup runs once when both widgets have a size (not waiting for CONFIRMED); `setup()` / `cleanup()` run on main, outside the SDK call-state callback; `cleanup()` only at call end. `REMOTE_VIDEO_READY` is sent once per call, also when video arrived before setup (answered from the lock screen) (both platforms). `refresh()` does not resend it, so apps that call `refresh()` from `setVideoListener` do not loop. Fixes main-thread freezes from the synchronous `createViewForVideo*` calls (0.5 s to 9 s per the SDK header).
 - **Android:** as Android-Client — feeds attach as soon as the surface exists and again when the call connects; pictures are fitted 9:16 (was 1280x720 landscape → squashed portrait video); the remote ratio follows `onVideoSize` (square decoder sizes ignored); one `Surface` per `SurfaceTexture`; no per-frame logging; `REMOTE_VIDEO_READY` is now sent on Android too; loudspeaker forced for video calls when the SDK skipped it and no headset/Bluetooth is connected.
 - New: `setVideoPictureInPictureEnabled`, `setPictureInPictureListener` (Android + iOS), `setRemoteConnectionOverlayTexts`, `setRemoteConnectionListener` (iOS), `OmicallsdkPlugin.onUserLeaveHint` / `onPictureInPictureModeChanged` (Android host Activity).
 - `registerVideoEvent` / `removeVideoEvent` are no longer needed (kept as no-ops); `refresh()` is optional.
@@ -46,6 +46,13 @@ All notable changes to this project will be documented in this file.
 - iOS: `toggleHold` goes through CallKit (`toggleHoldForCall`) like mute — the lock-screen UI stays in sync and the SDK ignores it while consulting (the held customer can no longer be un-held by hand and overhear). `HOLD` now carries the confirmed state from `OMICallHoldChanged` instead of the value read right after the request.
 - iOS: DTMF goes to the consult call while consulting; the normal single-call path is unchanged (no CallKit round-trip).
 - Dart: event logging only in debug builds.
+
+### Fixed
+- Android: `endCall()` on a ringing incoming call replied `Unit`, which the method codec cannot encode.
+- iOS: `startCallWithUUID` replied a JSON string to a `Future<int>` (TypeError); it now returns the status code.
+- iOS: `endCall()` with no call sent status 5 (CONFIRMED) instead of 6 (DISCONNECTED).
+- iOS: podspec deployment target 11.0 → 13.0 (OmiKit minimum).
+- README: corrected against the code (Quick Start, Android credentials, iOS AppDelegate/Info.plist, startCall return codes per platform, event payloads, video, troubleshooting, migration).
 
 ### Not ported (platform-specific, needs app-side integration)
 - `onVideoQuality`, `onCallReconnectionState`, `onMediaRecovery`, `onMissedCall` (busy second call) on Android.
