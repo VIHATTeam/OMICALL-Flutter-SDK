@@ -101,12 +101,9 @@ final class OmiVideoCoordinator: NSObject, OMIVideoCallManagerDelegate {
         return view.window != nil && view.bounds.width > 0 && view.bounds.height > 0
     }
 
-    /// Dart refreshed a view: resend REMOTE_VIDEO_READY for a listener registered late.
+    /// Dart refreshed a view. No event replay: apps call refresh() from setVideoListener.
     func refresh() {
         trySetup()
-        if isRemoteVideoReadySent {
-            SwiftOmikitPlugin.instance?.sendEvent(REMOTE_VIDEO_READY, [:])
-        }
     }
 
     // MARK: - Call lifecycle (from CallEventHandler, inside the SDK notification stack)

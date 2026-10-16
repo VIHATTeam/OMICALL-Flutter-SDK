@@ -351,10 +351,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             OmiClient.getInstance(applicationContext!!).addCallStateListener(this)
             OmiClient.getInstance(applicationContext!!).setDebug(false)
             OmiPictureInPicture.addListener(pipListener)
-            // Late listener (screen opened after the first frame): refresh replays the event
-            FLVideoTextureView.onRefreshed = {
-                if (isRemoteVideoReadySent) runOnMain { channel.invokeMethod(REMOTE_VIDEO_READY, mapOf<String, Any>()) }
-            }
             ProcessLifecycleOwner.get().lifecycle.addObserver(OmiClient.getInstance(applicationContext!!))
         } catch(e: Throwable) {
             e.printStackTrace()
@@ -541,7 +537,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             END_CALL -> {
                 var callResult: Any? = null
                 if(isIncomming && !isAnserCall){
-                    callResult =  OmiClient.getInstance(applicationContext!!).decline()
+                    // decline() returns Unit, which the method codec cannot encode
+                    OmiClient.getInstance(applicationContext!!).decline()
                 } else {
                     callResult = OmiClient.getInstance(applicationContext!!).hangUp()
                 }
@@ -869,7 +866,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         channel.setMethodCallHandler(null)
         OmiClient.getInstance(applicationContext!!).removeCallStateListener(this)
         OmiPictureInPicture.removeListener(pipListener)
-        FLVideoTextureView.onRefreshed = null
         mainScope.cancel()
     }
 

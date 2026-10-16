@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:permission_handler/permission_handler.dart';
 
 import 'action/action_model.dart';
@@ -320,7 +321,15 @@ class OmicallClient {
         'usrUuid': uuid,
         'isVideo': isVideo,
       });
-      return await _controller.action(action);
+      final result = await _controller.action(action);
+      // Android: raw SDK code (int). iOS: JSON string {"status", "_id", "message"}.
+      if (result is int) return result;
+      if (result is String) {
+        try {
+          return (jsonDecode(result)['status'] as num?)?.toInt() ?? 0;
+        } catch (_) {}
+      }
+      return 0;
     }
     return OmiStartCallStatus.permissionDenied.rawValue;
   }

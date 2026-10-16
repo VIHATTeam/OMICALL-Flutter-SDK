@@ -53,10 +53,7 @@ abstract class FLVideoTextureView(
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
-            "refresh" -> {
-                result.success(attach())
-                onRefreshed?.invoke()
-            }
+            "refresh" -> result.success(attach())
             else -> onExtraMethodCall(call, result)
         }
     }
@@ -126,9 +123,6 @@ abstract class FLVideoTextureView(
         private var localView: WeakReference<FLVideoTextureView>? = null
         private var remoteView: WeakReference<FLVideoTextureView>? = null
         private var remoteSize: Size = DEFAULT_SIZE
-
-        /** Set by the plugin: a view was refreshed from Dart (lets it replay REMOTE_VIDEO_READY). */
-        var onRefreshed: (() -> Unit)? = null
         private val mainHandler = Handler(Looper.getMainLooper())
 
         /** Call established as video: (re)attach the views that already exist. */

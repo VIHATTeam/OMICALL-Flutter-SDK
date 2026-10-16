@@ -99,7 +99,7 @@ class CallManager {
                 _ = OmiClient.cancelConsult()
                 return [:]
             }
-            SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, ["status": CallState.disconnected.rawValue])
+            SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, ["status": OMICallState.disconnected.rawValue])
             return [:]
         }
         tempCallInfo = buildCallInfo(call: call)

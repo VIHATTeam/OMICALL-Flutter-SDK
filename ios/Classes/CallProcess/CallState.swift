@@ -17,13 +17,3 @@ enum CallStateStatus: Int {
     case disconnected = 6
     case hold = 7
 }
-
-enum CallState: Int {
-    case calling = 0
-    case early
-    case connecting
-    case confirmed
-    case incoming
-    case disconnected
-    case hold
-}
