@@ -277,6 +277,30 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       case SET_REMOTE_CONNECTION_TEXTS:
           OmiVideoCoordinator.shared.setOverlayTexts(dataOmi["texts"] as? [String: String] ?? [:])
           result(true)
+      // Device info — same as the React Native SDK
+      case GET_PROJECT_ID:
+          result(OmiClient.getProjectId())
+      case GET_SIP_INFO:
+          result(OmiClient.getSipInfo())
+      case GET_APP_ID:
+          result(OmiClient.getAppId())
+      case GET_DEVICE_ID:
+          result(OmiClient.getDeviceId())
+      case GET_FCM_TOKEN:
+          result(OmiClient.getFcmToken())
+      case GET_VOIP_TOKEN:
+          result(OmiClient.getVoipToken())
+      case GET_OMI_DEVICES, IS_CURRENT_DEVICE_REGISTERED, NEEDS_RE_LOGIN:
+          // OmiKit performs a synchronous HTTP request: keep it off the main thread
+          DispatchQueue.global(qos: .userInitiated).async {
+              let value: Any
+              switch action {
+              case GET_OMI_DEVICES: value = OmiClient.getOmiDevices()
+              case IS_CURRENT_DEVICE_REGISTERED: value = OmiClient.isCurrentDeviceRegistered()
+              default: value = OmiClient.needsReLogin()
+              }
+              DispatchQueue.main.async { result(value) }
+          }
       case GET_ACTIVE_CALLS:
           result(CallManager.shareInstance().getActiveCalls())
       default:

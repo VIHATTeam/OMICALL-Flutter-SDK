@@ -971,6 +971,33 @@ Logout current user
 OmicallClient.instance.logout();
 ```
 
+##### Device info & backend registration (3.4.0)
+Same names and behaviour as the React Native SDK — use them to check or add this device on the
+OMI backend yourself:
+
+```dart
+final client = OmicallClient.instance;
+final deviceId = await client.getDeviceId();   // value the SDK sends when adding the device
+final appId = await client.getAppId();         // bundle id / package name
+final fcm = await client.getFcmToken();        // push token registered by the SDK
+final voip = await client.getVoipToken();      // iOS PushKit token, null on Android
+final projectId = await client.getProjectId(); // Firebase project id
+final sip = await client.getSipInfo();         // current SIP account
+
+final devices = await client.getOmiDevices();  // List<OmiDeviceInfo> on the backend (HTTP, do not poll)
+final boundSip = client.findSipNumberByDeviceId(devices, deviceId);
+if (await client.needsReLogin()) {
+  // logged in locally but the backend has no record of this device → logout + register again
+}
+```
+
+| Function | Returns |
+|---|---|
+| `getDeviceId` / `getAppId` / `getFcmToken` / `getVoipToken` / `getProjectId` / `getSipInfo` | `String?` |
+| `getOmiDevices` | `List<OmiDeviceInfo>` (empty when not logged in or on network error) |
+| `isCurrentDeviceRegistered` / `needsReLogin` | `bool` (false when not logged in) |
+| `findSipNumberByDeviceId(devices, deviceId)` | `String?` (sync helper) |
+
 ---
 
 ### Call Control

@@ -19,6 +19,9 @@ All notable changes to this project will be documented in this file.
 - Both return `OmiRegisterResult` (`statusCode`, `message`, `isSuccess`) instead of a raw JSON string; same codes on both platforms (200 / 400 / 500 / 600).
 - `initCallWithUserPassword` and `initCallWithApiKey` are **deprecated** (still work, same behaviour).
 
+### Added — device info (same as the React Native SDK)
+- `getDeviceId`, `getAppId`, `getFcmToken`, `getVoipToken`, `getProjectId`, `getSipInfo`, `getOmiDevices` → `List<OmiDeviceInfo>`, `isCurrentDeviceRegistered`, `needsReLogin`, and the helper `findSipNumberByDeviceId`. Network calls run off the main thread on both platforms.
+
 ### Added — call functions
 - Consult transfer: `startConsultCall(extension, {extraHeaders})` → `OmiConsultStartStatus`, `completeConsultTransfer({extraHeaders})`, `cancelConsult()`, `isConsulting()`, `isConsultOriginalEnded()`, `getActiveCalls()` → `List<OmiCallSummary>`.
 - `rejectCall()` (486 Busy Here) and `dropCall()` (603, stops ringing on every device) — same as the React Native SDK.

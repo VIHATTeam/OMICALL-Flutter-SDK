@@ -6,6 +6,7 @@ import 'constant/names.dart';
 import 'models/consult_transfer.dart';
 import 'models/register_result.dart';
 import 'models/video_call_state.dart';
+import 'models/device_info.dart';
 import 'omicallsdk_controller.dart';
 
 class OmicallClient {
@@ -639,5 +640,63 @@ class OmicallClient {
       },
     );
     await _controller.action(action);
+  }
+
+  // MARK: - Device info (same names and behaviour as the React Native SDK)
+
+  Future<String?> _getString(String actionName) async {
+    final result = await _controller.action(OmiAction(actionName: actionName, data: {}));
+    return result is String && result.isNotEmpty ? result : null;
+  }
+
+  Future<bool> _getBool(String actionName) async {
+    return await _controller.action(OmiAction(actionName: actionName, data: {})) == true;
+  }
+
+  /// Firebase project id used when the device was added to the OMI backend.
+  Future<String?> getProjectId() => _getString(OmiActionName.GET_PROJECT_ID);
+
+  /// Current SIP account (`user@realm` on Android).
+  Future<String?> getSipInfo() => _getString(OmiActionName.GET_SIP_INFO);
+
+  /// App id the SDK sends when adding the device (bundle id / package name).
+  Future<String?> getAppId() => _getString(OmiActionName.GET_APP_ID);
+
+  /// Device id the SDK sends when adding the device — match it against [getOmiDevices].
+  Future<String?> getDeviceId() => _getString(OmiActionName.GET_DEVICE_ID);
+
+  /// Push token the SDK registered (FCM on Android).
+  Future<String?> getFcmToken() => _getString(OmiActionName.GET_FCM_TOKEN);
+
+  /// iOS VoIP (PushKit) token; null on Android.
+  Future<String?> getVoipToken() => _getString(OmiActionName.GET_VOIP_TOKEN);
+
+  /// Devices registered on the OMI backend for the current SIP user. Empty when not logged in
+  /// or on network failure; never throws. Each call is an HTTP request — do not poll.
+  Future<List<OmiDeviceInfo>> getOmiDevices() async {
+    final result = await _controller
+        .action(OmiAction(actionName: OmiActionName.GET_OMI_DEVICES, data: {}));
+    if (result is! List) return [];
+    return result.whereType<Map>().map((e) => OmiDeviceInfo.fromMap(e)).toList();
+  }
+
+  /// Whether THIS device (device id + app id) is registered on the backend for the current
+  /// SIP user. False when not logged in.
+  Future<bool> isCurrentDeviceRegistered() =>
+      _getBool(OmiActionName.IS_CURRENT_DEVICE_REGISTERED);
+
+  /// True when a SIP user is set locally but the backend has no matching device:
+  /// logout + login again to re-register. False when not logged in.
+  Future<bool> needsReLogin() => _getBool(OmiActionName.NEEDS_RE_LOGIN);
+
+  /// SIP number bound to [deviceId] in a list from [getOmiDevices], or null when none matches.
+  String? findSipNumberByDeviceId(List<OmiDeviceInfo>? devices, String? deviceId) {
+    if (devices == null || devices.isEmpty || deviceId == null || deviceId.isEmpty) {
+      return null;
+    }
+    for (final d in devices) {
+      if (d.deviceId == deviceId) return d.sipNumber;
+    }
+    return null;
   }
 }

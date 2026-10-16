@@ -7,4 +7,5 @@ export 'models/call_quality_info.dart';
 export 'models/register_result.dart';
 export 'models/consult_transfer.dart';
 export 'models/video_call_state.dart';
+export 'models/device_info.dart';
 export 'utils/call_quality_tracker.dart';

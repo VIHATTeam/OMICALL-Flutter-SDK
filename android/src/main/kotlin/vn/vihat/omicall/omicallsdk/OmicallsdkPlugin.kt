@@ -9,6 +9,7 @@ import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import androidx.annotation.NonNull
 import kotlinx.coroutines.*
@@ -757,6 +758,80 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 isPipEnabled = dataOmi["enabled"] as? Boolean ?: false
                 activity?.let { OmiPictureInPicture.setEnabled(it, isPipEnabled) }
                 result.success(applicationContext?.let { OmiPictureInPicture.isSupported(it) } ?: false)
+            }
+            // Device info — same sources and fallbacks as the React Native SDK
+            GET_PROJECT_ID -> {
+                val projectId = OmiClient.registrationInfo?.projectId
+                    ?: try { com.google.firebase.FirebaseApp.getInstance().options.projectId } catch (_: Exception) { null }
+                result.success(projectId)
+            }
+            GET_SIP_INFO -> {
+                val client = OmiClient.getInstance(applicationContext!!)
+                val user = client.getSipUser()
+                val realm = client.getSipRealm()
+                result.success(if (!user.isNullOrEmpty() && !realm.isNullOrEmpty()) "$user@$realm" else user)
+            }
+            GET_APP_ID -> {
+                val ctx = applicationContext!!
+                val appId = OmiClient.getInstance(ctx).getAppId().takeIf { it.isNotEmpty() }
+                    ?: OmiClient.registrationInfo?.appId
+                    ?: ctx.packageName
+                result.success(appId)
+            }
+            GET_DEVICE_ID -> {
+                val ctx = applicationContext!!
+                val deviceId = OmiClient.getInstance(ctx).getDeviceId().takeIf { it.isNotEmpty() }
+                    ?: OmiClient.registrationInfo?.deviceId
+                    ?: try { Settings.Secure.getString(ctx.contentResolver, Settings.Secure.ANDROID_ID) } catch (_: Exception) { null }
+                result.success(deviceId)
+            }
+            GET_FCM_TOKEN -> {
+                val token = OmiClient.registrationInfo?.firebaseToken
+                if (token != null) {
+                    result.success(token)
+                } else {
+                    try {
+                        com.google.firebase.messaging.FirebaseMessaging.getInstance().token
+                            .addOnSuccessListener { result.success(it) }
+                            .addOnFailureListener { result.success(null) }
+                    } catch (_: Exception) {
+                        result.success(null)
+                    }
+                }
+            }
+            GET_VOIP_TOKEN -> result.success(null) // iOS only
+            GET_OMI_DEVICES -> {
+                mainScope.launch {
+                    val devices = withContext(Dispatchers.IO) {
+                        try { OmiClient.getInstance(applicationContext!!).getOmiDevices() } catch (_: Throwable) { emptyList() }
+                    }
+                    result.success(devices.map {
+                        mapOf(
+                            "device_id" to it.deviceId,
+                            "token" to it.token,
+                            "device_type" to it.deviceType,
+                            "voip_token" to it.voipToken,
+                            "app_id" to it.appId,
+                            "created_time" to it.createdTime,
+                            "project_id" to it.projectId,
+                            "sipNumber" to it.sipNumber
+                        )
+                    })
+                }
+            }
+            IS_CURRENT_DEVICE_REGISTERED -> {
+                mainScope.launch {
+                    result.success(withContext(Dispatchers.IO) {
+                        try { OmiClient.getInstance(applicationContext!!).isCurrentDeviceRegistered() } catch (_: Throwable) { false }
+                    })
+                }
+            }
+            NEEDS_RE_LOGIN -> {
+                mainScope.launch {
+                    result.success(withContext(Dispatchers.IO) {
+                        try { OmiClient.getInstance(applicationContext!!).needsReLogin() } catch (_: Throwable) { false }
+                    })
+                }
             }
             GET_ACTIVE_CALLS -> {
                 val calls = OmiClient.getInstance(applicationContext!!).getActiveCalls().map {

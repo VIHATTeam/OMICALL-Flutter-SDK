@@ -43,4 +43,14 @@ class OmiActionName {
   static const String SET_PICTURE_IN_PICTURE = "SET_PICTURE_IN_PICTURE";
   static const String SET_REMOTE_CONNECTION_TEXTS =
       "SET_REMOTE_CONNECTION_TEXTS";
+  static const String GET_PROJECT_ID = "GET_PROJECT_ID";
+  static const String GET_SIP_INFO = "GET_SIP_INFO";
+  static const String GET_APP_ID = "GET_APP_ID";
+  static const String GET_DEVICE_ID = "GET_DEVICE_ID";
+  static const String GET_FCM_TOKEN = "GET_FCM_TOKEN";
+  static const String GET_VOIP_TOKEN = "GET_VOIP_TOKEN";
+  static const String GET_OMI_DEVICES = "GET_OMI_DEVICES";
+  static const String IS_CURRENT_DEVICE_REGISTERED =
+      "IS_CURRENT_DEVICE_REGISTERED";
+  static const String NEEDS_RE_LOGIN = "NEEDS_RE_LOGIN";
 }
