@@ -7,7 +7,6 @@
 
 import Foundation
 import Flutter
-import WebKit
 import UIKit
 import OmiKit
 
@@ -38,8 +37,8 @@ class FLLocalCameraFactory: NSObject, FlutterPlatformViewFactory {
 }
 
 class FLLocalCameraView: NSObject, FlutterPlatformView {
-    private var _view: OMIVideoPreviewView
-    private var _arg : [String : Any]?
+    // Host only: the coordinator re-parents its persistent video container in here
+    private let _view = UIView(frame: .zero)
     private let methodChannel: FlutterMethodChannel?
 
     init(
@@ -48,39 +47,31 @@ class FLLocalCameraView: NSObject, FlutterPlatformView {
         arguments args: Any?,
         binaryMessenger messenger: FlutterBinaryMessenger?
     ) {
-        _view = OMIVideoPreviewView.init()
-        _view.contentMode = .scaleAspectFill;
-        _arg = args as? [String: Any]
-        methodChannel = FlutterMethodChannel(name: "omicallsdk/local_camera_controller/\(viewId)", binaryMessenger: messenger!)
+        methodChannel = messenger.map {
+            FlutterMethodChannel(name: "omicallsdk/local_camera_controller/\(viewId)", binaryMessenger: $0)
+        }
         super.init()
-        methodChannel?.setMethodCallHandler(onMethodCall)
+        OmiVideoCoordinator.shared.host(remote: false, in: _view)
+        methodChannel?.setMethodCallHandler { [weak self] call, result in
+            self?.onMethodCall(call: call, result: result)
+        }
     }
-    
+
     func onMethodCall(call: FlutterMethodCall, result: FlutterResult) {
-            switch(call.method){
+        switch call.method {
             case "permission":
-                result(AVCaptureDevice.authorizationStatus(for: .video) ==  .authorized)
-                break
+                result(AVCaptureDevice.authorizationStatus(for: .video) == .authorized)
             case "refresh":
-                setupViews()
-                break
+                // Kept for compatibility: the SDK handles display itself, so only make sure
+                // setup ran (never prepareForVideoDisplay — see OmiVideoCoordinator)
+                OmiVideoCoordinator.shared.refresh()
+                result(true)
             default:
                 result(FlutterMethodNotImplemented)
-            }
         }
+    }
 
     func view() -> UIView {
         return _view
     }
-
-    func setupViews() {
-        if AVCaptureDevice.authorizationStatus(for: .video) ==  .authorized {
-            DispatchQueue.main.async {[weak self] in
-                guard let self = self else { return }
-                if let videoView = CallManager.shareInstance().getLocalPreviewView(frame: self._view.frame) {
-                    self._view.setView(videoView)
-                }
-            }
-        }
-    }    
 }

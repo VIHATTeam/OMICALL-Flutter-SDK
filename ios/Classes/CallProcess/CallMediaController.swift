@@ -2,8 +2,7 @@
 //  CallMediaController.swift
 //  OmiCall Flutter Plugin
 //
-//  Manages audio (speaker, mute, DTMF, audio outputs) and video (camera toggle,
-//  switch, local/remote preview views) for an active call.
+//  Manages audio (speaker, mute, DTMF, audio outputs) and camera controls for an active call.
 //
 
 import Foundation
@@ -37,7 +36,13 @@ extension CallManager {
 
     func sendDTMF(character: String) {
         guard let call = getAvailableCall() else { return }
-        try? call.sendDTMF(character)
+        if OmiClient.isConsulting() {
+            // CallKit path: OmiKit routes the tone to the answered consult call
+            omiLib.callManager.sendDTMF(for: call, character: character) { _ in }
+        } else {
+            // Direct path: no CallKit round-trip for the normal single-call case
+            try? call.sendDTMF(character)
+        }
     }
 
     func getAudioOutputs() -> [[String: String]] {
@@ -52,25 +57,17 @@ extension CallManager {
         return OmiClient.getCurrentAudio()
     }
 
-    // MARK: - Video
+    // MARK: - Video (OMIVideoCallManager, see OmiVideoCoordinator)
 
     func toggleCamera() {
-        videoManager?.toggleCamera()
+        OmiVideoCoordinator.shared.toggleCamera()
     }
 
     func getCameraStatus() -> Bool {
-        return videoManager?.isCameraOn ?? false
+        return OmiVideoCoordinator.shared.isCameraOn
     }
 
     func switchCamera() {
-        videoManager?.switchCamera()
-    }
-
-    func getLocalPreviewView(frame: CGRect) -> UIView? {
-        return videoManager?.createView(forVideoLocal: frame)
-    }
-
-    func getRemotePreviewView(frame: CGRect) -> UIView? {
-        return videoManager?.createView(forVideoRemote: frame)
+        OmiVideoCoordinator.shared.switchCamera()
     }
 }

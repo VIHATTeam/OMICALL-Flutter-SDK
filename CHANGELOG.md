@@ -2,6 +2,53 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.4.0 [16/10/2026]
+
+### Changed — Native SDK bump
+- **[MAJOR]** OMI Android SDK: `2.7.4` → `2.9.1`
+  - `2.9.1` — consult (attended) transfer; `onTransferStatus`, `onCallHoldChanged`; a failed `forwardCallTo` no longer reports a fake "call ended".
+  - `2.9.0` — OMISIP 2.18 base; call kept on Wi-Fi ↔ 4G switch (408 on re-INVITE); Picture-in-Picture API; fix hung call after NACK deadlock; held customer can no longer hear the agent; RTCP-mux; outgoing video cap 1.5 Mbps.
+  - `2.8.x` — video OMI ↔ Zalo (NACK/PLI, packet recovery, adaptive bitrate, fast first frame); fix incoming-call screen not shown; extra re-INVITE; notification / foreground-service fixes.
+- **[MAJOR]** iOS OmiKit: `1.11.23` → `1.12.0`
+  - `1.12.0` — consult (attended) transfer, same API as Android 2.9.1; CallKit hold toggle fix; account no longer unregistered while another call is live.
+  - `1.11.24`–`1.11.34` — Opus mono; missed-call callback for calls cancelled while ringing; TURN relay overhaul; custom SIP proxy honored; video PiP, connection overlay, network-switch recovery, camera fixes; no audio when answering from the lock screen.
+
+### Added — `register` / `registerWithApiKey` (standardized init)
+- `register({userName, password, realm, fcmToken, host = "", isVideo = true, projectId = ""})`
+- `registerWithApiKey({fullName, userUuid, apiKey, phone, fcmToken, isVideo = true, projectId = ""})`
+- Both return `OmiRegisterResult` (`statusCode`, `message`, `isSuccess`) instead of a raw JSON string; same codes on both platforms (200 / 400 / 500 / 600).
+- `initCallWithUserPassword` and `initCallWithApiKey` are **deprecated** (still work, same behaviour).
+
+### Added — call functions
+- Consult transfer: `startConsultCall(extension, {extraHeaders})` → `OmiConsultStartStatus`, `completeConsultTransfer({extraHeaders})`, `cancelConsult()`, `isConsulting()`, `isConsultOriginalEnded()`, `getActiveCalls()` → `List<OmiCallSummary>`.
+- `rejectCall()` (486 Busy Here) and `dropCall()` (603, stops ringing on every device) — same as the React Native SDK.
+- Listeners: `setConsultStateListener` (`CONSULT_STATE_CHANGED`), `setTransferStatusListener` (`TRANSFER_STATUS`), `setCallHoldChangedListener` (`CALL_HOLD_CHANGED`), with typed events `OmiConsultStateEvent`, `OmiTransferStatusEvent`, `OmiCallHoldEvent`.
+
+### Behaviour changes
+- `host` in username/password login: optional on Android (empty = SDK default, was `MISSING_PARAMS`); honored on iOS (was always `vh.omicrm.com:5222`).
+- Android: `transferCall` failure no longer closes the call — it arrives as `TRANSFER_STATUS` (500, final).
+- iOS: `endCall()` when only the consult call is left now ends it (same as Android).
+
+### Changed — video calls, aligned with the OMICall store apps
+- **iOS:** rendering moved from `OMIVideoViewManager` to `OMIVideoCallManager` (as OMI-APP-IOS-FEATURES). The widgets host two persistent containers (a rebuilt widget re-parents them, no second `setup()` mid-call); the SDK handles rendering, background/foreground, re-INVITE recovery, PiP and the remote-connection overlay. Setup runs once when both widgets have a size (not waiting for CONFIRMED); `setup()` / `cleanup()` run on main, outside the SDK call-state callback; `cleanup()` only at call end. `REMOTE_VIDEO_READY` is sent once per call, also when video arrived before setup (answered from the lock screen), and replayed on `refresh()` for a late listener (both platforms). Fixes main-thread freezes from the synchronous `createViewForVideo*` calls (0.5 s to 9 s per the SDK header).
+- **Android:** as Android-Client — feeds attach as soon as the surface exists and again when the call connects; pictures are fitted 9:16 (was 1280x720 landscape → squashed portrait video); the remote ratio follows `onVideoSize` (square decoder sizes ignored); one `Surface` per `SurfaceTexture`; no per-frame logging; `REMOTE_VIDEO_READY` is now sent on Android too; loudspeaker forced for video calls when the SDK skipped it and no headset/Bluetooth is connected.
+- New: `setVideoPictureInPictureEnabled`, `setPictureInPictureListener` (Android + iOS), `setRemoteConnectionOverlayTexts`, `setRemoteConnectionListener` (iOS), `OmicallsdkPlugin.onUserLeaveHint` / `onPictureInPictureModeChanged` (Android host Activity).
+- `registerVideoEvent` / `removeVideoEvent` are no longer needed (kept as no-ops); `refresh()` is optional.
+
+### Performance & reliability (bridge)
+- Every action now replies: Android actions without a native implementation (`registerVideoEvent`, `removeVideoEvent`, `getCameraStatus`, `getHistoryCallLog`…) and iOS ones (`changeTransport`, bad arguments) used to leave the Dart `Future` pending forever.
+- Events go to Flutter inline when already on the main thread (Android `runOnMain`, iOS `sendEvent`) — no extra message-loop hop for call-state events.
+- Android: coroutine scope uses `Dispatchers.Main.immediate` + `SupervisorJob`; `toggleHold` no longer hops through `Dispatchers.IO`; one shared `Gson` / `Handler`; the call-quality "loading" timer restarts instead of stacking a coroutine per report.
+- iOS: `startCall` / `startCallWithUUID` reply on the main thread (OmiKit can complete on the background queue).
+- iOS: `toggleHold` goes through CallKit (`toggleHoldForCall`) like mute — the lock-screen UI stays in sync and the SDK ignores it while consulting (the held customer can no longer be un-held by hand and overhear). `HOLD` now carries the confirmed state from `OMICallHoldChanged` instead of the value read right after the request.
+- iOS: DTMF goes to the consult call while consulting; the normal single-call path is unchanged (no CallKit round-trip).
+- Dart: event logging only in debug builds.
+
+### Not ported (platform-specific, needs app-side integration)
+- `onVideoQuality`, `onCallReconnectionState`, `onMediaRecovery`, `onMissedCall` (busy second call) on Android.
+
+---
+
 ## 3.3.6 [07/07/2026]
 
 ### Changed — Native SDK bump (no public API change, no bridge code change)

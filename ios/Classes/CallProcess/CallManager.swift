@@ -25,7 +25,6 @@ class CallManager {
     // MARK: - Shared State (accessed by extensions)
 
     let omiLib = OMISIPLib.sharedInstance()
-    var videoManager: OMIVideoViewManager?
     var isSpeaker = false
     var guestPhone: String = ""
     var lastStatusCall: String?
@@ -44,7 +43,7 @@ class CallManager {
 
     // MARK: - Call Control
 
-    /// Start call — OmiClient.startCall is already async, no DispatchQueue needed
+    /// Start call off the main thread (endpoint / SIP setup can block). Completion may arrive on any thread.
     func startCall(_ phoneNumber: String, isVideo: Bool, completion: @escaping (String) -> Void) {
         guestPhone = phoneNumber
         // Run on background thread to avoid blocking UI when SIP connection is slow
@@ -95,6 +94,11 @@ class CallManager {
 
     func endAvailableCall() -> [String: Any] {
         guard let call = getAvailableCall() else {
+            // Only the consult leg is left (customer already hung up): end it, same as Android hangUp
+            if OmiClient.isConsulting() {
+                _ = OmiClient.cancelConsult()
+                return [:]
+            }
             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, ["status": CallState.disconnected.rawValue])
             return [:]
         }
@@ -112,14 +116,19 @@ class CallManager {
         OmiClient.answerIncommingCall(call.uuid)
     }
 
-    func toggleHold() -> Bool {
-        guard let call = getAvailableCall() else { return false }
-        do {
-            try call.toggleHold()
-            return true
-        } catch {
-            print("Error toggling hold: \(error)")
-            return false
+    /// Toggle hold through CallKit (keeps the native UI in sync, and OmiKit ignores it while
+    /// consulting so the held customer cannot overhear). Completion gets the expected state.
+    func toggleHold(completion: @escaping (Bool) -> Void) {
+        guard let call = getAvailableCall() else {
+            completion(false)
+            return
+        }
+        let wasOnHold = call.onHold
+        let ignored = OmiClient.isConsulting()
+        omiLib.callManager.toggleHold(for: call) { error in
+            DispatchQueue.main.async {
+                completion(error == nil && !ignored ? !wasOnHold : wasOnHold)
+            }
         }
     }
 

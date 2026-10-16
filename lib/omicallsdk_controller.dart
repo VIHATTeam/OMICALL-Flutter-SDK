@@ -1,7 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:omicall_flutter_plugin/omicall.dart';
 
 import 'action/action_model.dart';
@@ -19,6 +19,11 @@ class OmicallSDKController {
   Function(Map)? callQualityListener;
   Function(Map)? callLogListener;
   Function(List<dynamic>)? audioChangedListener;
+  Function(OmiConsultStateEvent)? consultStateListener;
+  Function(OmiTransferStatusEvent)? transferStatusListener;
+  Function(OmiCallHoldEvent)? callHoldChangedListener;
+  Function(bool)? pictureInPictureListener;
+  Function(OmiRemoteConnectionEvent)? remoteConnectionListener;
 
   final StreamController<OmiAction> _callStateChangeController =
       StreamController<OmiAction>.broadcast();
@@ -27,7 +32,10 @@ class OmicallSDKController {
     _methodChannel.setMethodCallHandler((call) async {
       final method = call.method;
       final data = call.arguments;
-      debugPrint("method OmicallSDKController:: $method  --> data: $data");
+      // debugPrint is not stripped from release builds; events like CALL_QUALITY are frequent
+      if (kDebugMode) {
+        debugPrint("method OmicallSDKController:: $method  --> data: $data");
+      }
 
       switch (method) {
         case OmiEventList.onMuted:
@@ -75,6 +83,32 @@ class OmicallSDKController {
           final rawData = data["data"];
           final correctData = rawData is List ? rawData : [rawData];
           audioChangedListener?.call(correctData);
+          return;
+        case OmiEventList.onConsultStateChanged:
+          if (data is Map) {
+            consultStateListener?.call(OmiConsultStateEvent.fromMap(data));
+          }
+          return;
+        case OmiEventList.onTransferStatus:
+          if (data is Map) {
+            transferStatusListener?.call(OmiTransferStatusEvent.fromMap(data));
+          }
+          return;
+        case OmiEventList.onPictureInPictureChanged:
+          if (data is Map) {
+            pictureInPictureListener?.call(data['isActive'] == true);
+          }
+          return;
+        case OmiEventList.onRemoteConnectionChanged:
+          if (data is Map) {
+            remoteConnectionListener
+                ?.call(OmiRemoteConnectionEvent.fromMap(data));
+          }
+          return;
+        case OmiEventList.onCallHoldChanged:
+          if (data is Map) {
+            callHoldChangedListener?.call(OmiCallHoldEvent.fromMap(data));
+          }
           return;
         default:
           _callStateChangeController.sink.add(

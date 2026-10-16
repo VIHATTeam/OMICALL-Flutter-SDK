@@ -116,7 +116,10 @@ extension CallManager {
             }
 
             // Blocking SDK calls: writes SIP credentials to NSUserDefaults → SIP init → middleware HTTP
-            OmiClient.initWithUsername(userName, password: password, realm: realm, proxy: "vh.omicrm.com:5222")
+            // Same contract as Android: empty host → OMICall default proxy
+            let host = (params["host"] as? String)?.trimmingCharacters(in: .whitespaces) ?? ""
+            let proxy = host.isEmpty ? "vh.omicrm.com:5222" : host
+            OmiClient.initWithUsername(userName, password: password, realm: realm, proxy: proxy)
             OmiClient.setUserPushNotificationToken(fcmToken)
 
             DispatchQueue.main.async {

@@ -3,6 +3,9 @@ import 'package:permission_handler/permission_handler.dart';
 
 import 'action/action_model.dart';
 import 'constant/names.dart';
+import 'models/consult_transfer.dart';
+import 'models/register_result.dart';
+import 'models/video_call_state.dart';
 import 'omicallsdk_controller.dart';
 
 class OmicallClient {
@@ -51,6 +54,55 @@ class OmicallClient {
 
   void setAudioChangedListener(Function(List<dynamic>) audioChangedListener) {
     _controller.audioChangedListener = audioChangedListener;
+  }
+
+  /// Progress of the consult call started with [startConsultCall].
+  void setConsultStateListener(
+      Function(OmiConsultStateEvent) consultStateListener) {
+    _controller.consultStateListener = consultStateListener;
+  }
+
+  /// REFER progress of [transferCall] and [completeConsultTransfer].
+  void setTransferStatusListener(
+      Function(OmiTransferStatusEvent) transferStatusListener) {
+    _controller.transferStatusListener = transferStatusListener;
+  }
+
+  /// Hold state of any call (customer or consult), with its call id.
+  void setCallHoldChangedListener(
+      Function(OmiCallHoldEvent) callHoldChangedListener) {
+    _controller.callHoldChangedListener = callHoldChangedListener;
+  }
+
+  /// System Picture-in-Picture started (true) / stopped (false) — hide call controls while true.
+  void setPictureInPictureListener(Function(bool) pictureInPictureListener) {
+    _controller.pictureInPictureListener = pictureInPictureListener;
+  }
+
+  /// iOS: health of the other party's media during a video call.
+  void setRemoteConnectionListener(
+      Function(OmiRemoteConnectionEvent) remoteConnectionListener) {
+    _controller.remoteConnectionListener = remoteConnectionListener;
+  }
+
+  void removePictureInPictureListener() {
+    _controller.pictureInPictureListener = null;
+  }
+
+  void removeRemoteConnectionListener() {
+    _controller.remoteConnectionListener = null;
+  }
+
+  void removeConsultStateListener() {
+    _controller.consultStateListener = null;
+  }
+
+  void removeTransferStatusListener() {
+    _controller.transferStatusListener = null;
+  }
+
+  void removeCallHoldChangedListener() {
+    _controller.callHoldChangedListener = null;
   }
 
   void removeCallLogListener() {
@@ -102,6 +154,62 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
+  /// Register a SIP extension with username / password.
+  ///
+  /// [host] is the SIP proxy (`host` or `host:port`); leave it empty to use the OMICall default.
+  /// [fcmToken] is the FCM token on Android and the APNS token on iOS.
+  Future<OmiRegisterResult> register({
+    required String userName,
+    required String password,
+    required String realm,
+    required String fcmToken,
+    String host = "",
+    bool isVideo = true,
+    String projectId = "",
+  }) async {
+    final action = OmiAction(
+      actionName: OmiActionName.INIT_CALL_USER_PASSWORD,
+      data: {
+        'userName': userName,
+        'password': password,
+        'realm': realm,
+        'host': host,
+        'isVideo': isVideo,
+        'fcmToken': fcmToken,
+        'projectId': projectId,
+      },
+    );
+    return OmiRegisterResult.fromNative(await _controller.action(action));
+  }
+
+  /// Register a customer (App-to-App) with an OMICall API key.
+  ///
+  /// [fcmToken] is the FCM token on Android and the APNS token on iOS.
+  Future<OmiRegisterResult> registerWithApiKey({
+    required String fullName,
+    required String userUuid,
+    required String apiKey,
+    required String phone,
+    required String fcmToken,
+    bool isVideo = true,
+    String projectId = "",
+  }) async {
+    final action = OmiAction(
+      actionName: OmiActionName.INIT_CALL_API_KEY,
+      data: {
+        'fullName': fullName,
+        'usrUuid': userUuid,
+        'apiKey': apiKey,
+        'phone': phone,
+        'isVideo': isVideo,
+        'fcmToken': fcmToken,
+        'projectId': projectId,
+      },
+    );
+    return OmiRegisterResult.fromNative(await _controller.action(action));
+  }
+
+  @Deprecated('Use registerWithApiKey(), which returns OmiRegisterResult')
   Future<dynamic> initCallWithApiKey({
     String? usrName,
     String? usrUuid,
@@ -164,6 +272,7 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
+  @Deprecated('Use register(), which returns OmiRegisterResult')
   Future<dynamic> initCallWithUserPassword({
   String? userName,
   String? password,
@@ -425,4 +534,110 @@ class OmicallClient {
     return await _controller.action(action);
   }
 
+  /// Reject a ringing incoming call with 486 Busy Here (other devices of the same
+  /// extension can still answer). Hangs up when the call is already answered.
+  Future<bool> rejectCall() async {
+    final action = OmiAction(actionName: OmiActionName.REJECT_CALL, data: {});
+    return await _controller.action(action) == true;
+  }
+
+  /// Decline a ringing incoming call with 603, which stops ringing on every device of the
+  /// extension. Hangs up when the call is already answered.
+  Future<bool> dropCall() async {
+    final action = OmiAction(actionName: OmiActionName.DROP_CALL, data: {});
+    return await _controller.action(action) == true;
+  }
+
+  /// Consult (attended) transfer, step 1: hold the customer (answered audio call) and call
+  /// [extension]. Follow the consult with [setConsultStateListener].
+  Future<OmiConsultStartStatus> startConsultCall(
+    String extension, {
+    Map<String, String>? extraHeaders,
+  }) async {
+    final action = OmiAction(
+      actionName: OmiActionName.START_CONSULT_CALL,
+      data: {
+        'extension': extension,
+        'extraHeaders': extraHeaders,
+      },
+    );
+    final result = await _controller.action(action);
+    return ExtensionOmiConsultStartStatus.fromRaw(result);
+  }
+
+  /// Consult transfer, step 2a: once the consult is answered, hang it up and transfer the
+  /// customer to the same extension. Returns false when there is no answered consult or the
+  /// customer already ended. Follow the result with [setTransferStatusListener].
+  Future<bool> completeConsultTransfer({
+    Map<String, String>? extraHeaders,
+  }) async {
+    final action = OmiAction(
+      actionName: OmiActionName.COMPLETE_CONSULT_TRANSFER,
+      data: {'extraHeaders': extraHeaders},
+    );
+    return await _controller.action(action) == true;
+  }
+
+  /// Consult transfer, step 2b: end the consult and take the customer off hold.
+  /// [endCall] is not a cancel: during a consult it hangs up the customer.
+  Future<bool> cancelConsult() async {
+    final action = OmiAction(actionName: OmiActionName.CANCEL_CONSULT, data: {});
+    return await _controller.action(action) == true;
+  }
+
+  /// True from [startConsultCall] until the consult call has ended.
+  Future<bool> isConsulting() async {
+    final action = OmiAction(actionName: OmiActionName.IS_CONSULTING, data: {});
+    return await _controller.action(action) == true;
+  }
+
+  /// True while a consult is running but the customer already hung up.
+  Future<bool> isConsultOriginalEnded() async {
+    final action = OmiAction(
+      actionName: OmiActionName.IS_CONSULT_ORIGINAL_ENDED,
+      data: {},
+    );
+    return await _controller.action(action) == true;
+  }
+
+  /// Every live call with its hold state; the consult call has `isConsult == true`.
+  Future<List<OmiCallSummary>> getActiveCalls() async {
+    final action = OmiAction(actionName: OmiActionName.GET_ACTIVE_CALLS, data: {});
+    final result = await _controller.action(action);
+    if (result is! List) return [];
+    return result
+        .whereType<Map>()
+        .map((e) => OmiCallSummary.fromMap(e))
+        .toList();
+  }
+
+  /// Picture-in-Picture for video calls: the remote video moves to a floating window when the
+  /// app goes to the background during a video call, and the SDK closes it at call end.
+  /// Call before the video call starts. Returns whether the device supports PiP.
+  ///
+  /// Android: add `android:supportsPictureInPicture="true"` and `android:resizeableActivity="true"`
+  /// to MainActivity and forward `onUserLeaveHint` / `onPictureInPictureModeChanged` to
+  /// `OmicallsdkPlugin`. iOS 15+: needs `audio` in UIBackgroundModes; add the
+  /// `com.apple.developer.avfoundation.multitasking-camera-access` entitlement to keep sending
+  /// your camera while in PiP.
+  Future<bool> setVideoPictureInPictureEnabled(bool enabled) async {
+    final action = OmiAction(
+      actionName: OmiActionName.SET_PICTURE_IN_PICTURE,
+      data: {'enabled': enabled},
+    );
+    return await _controller.action(action) == true;
+  }
+
+  /// iOS: text of the SDK's remote-connection overlay per state (multi-language apps).
+  /// States without a text keep the SDK's Vietnamese default. No effect on Android.
+  Future<void> setRemoteConnectionOverlayTexts(
+      Map<OmiRemoteConnectionState, String> texts) async {
+    final action = OmiAction(
+      actionName: OmiActionName.SET_REMOTE_CONNECTION_TEXTS,
+      data: {
+        'texts': texts.map((state, text) => MapEntry(state.nativeName, text)),
+      },
+    );
+    await _controller.action(action);
+  }
 }

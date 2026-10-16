@@ -13,9 +13,9 @@ The most important part of the framework is :
 
 | Component | Version |
 |---|---|
-| omicall_flutter_plugin | 3.3.6 |
-| Android OmiSDK (`io.omicrm.vihat:omi-sdk`) | 2.7.4 |
-| iOS OmiKit | 1.11.23 |
+| omicall_flutter_plugin | 3.4.0 |
+| Android OmiSDK (`io.omicrm.vihat:omi-sdk`) | 2.9.1 |
+| iOS OmiKit | 1.12.0 |
 
 ### 📝 Status
 Currently active maintenance and improve performance
@@ -842,71 +842,48 @@ await Firebase.initializeApp();
 
 📝 Notes: *The information below is taken from the API, you should connect with our Technical team for support*
 
-- ✅ func initCall: This func is for employees. They can call any telecommunications number allowed in your business on the OMI system.
+- ✅ `register`: for employees. They can call any telecommunications number allowed in your business on the OMI system.
 
 ```dart
-import 'dart:convert';
-
 String? token = await FirebaseMessaging.instance.getToken();
 if (Platform.isIOS) {
     token = await FirebaseMessaging.instance.getAPNSToken();
 }
 
-final initResult = await OmicallClient.instance.initCallWithUserPassword(
-  userName: String,
-  password: String,
-  realm: String,
-  host: String,
-  isVideo: bool,
-  fcmToken: token,
-  projectId: String,
+final result = await OmicallClient.instance.register(
+  userName: "100",
+  password: "******",
+  realm: "your_realm",
+  fcmToken: token ?? "",
+  host: "",          // optional SIP proxy; empty = OMICall default
+  isVideo: true,
+  projectId: "",     // optional Firebase project id
 );
 
-// Parse JSON response
-final initJson = initResult is String ? jsonDecode(initResult) as Map : {};
-final status = initJson['status'] as int? ?? 0;
-final message = initJson['message'] as String? ?? '';
-
-if (status != 200) {
-  // message: NETWORK_UNAVAILABLE | MISSING_PARAMS | INIT_FAILED
-  showError(message);
+if (!result.isSuccess) {
+  // result.message: NETWORK_UNAVAILABLE | MISSING_PARAMS | INIT_FAILED
+  showError(result.message);
   return;
 }
 // Login successful — proceed
 ```
 <br>
 
-- ✅ func initCallWithApiKey: is usually used for your client, who only has a certain function, calling a fixed number. For example, you can only call your hotline number
+- ✅ `registerWithApiKey`: usually for your customers, who only call a fixed number (for example your hotline).
 
 ```dart
-import 'dart:convert';
-
-String? token = await FirebaseMessaging.instance.getToken();
-if (Platform.isIOS) {
-    token = await FirebaseMessaging.instance.getAPNSToken();
-}
-
-final initResult = await OmicallClient.instance.initCallWithApiKey(
-  usrName: String,
-  usrUuid: String,
-  isVideo: bool,
-  apiKey: String,
-  fcmToken: token,
-  projectId: String,
+final result = await OmicallClient.instance.registerWithApiKey(
+  fullName: "John",
+  userUuid: "user-uuid",
+  apiKey: "your_api_key",
+  phone: "0901234567",
+  fcmToken: token ?? "",
+  isVideo: true,
 );
-
-// Parse JSON response
-final initJson = initResult is String ? jsonDecode(initResult) as Map : {};
-final status = initJson['status'] as int? ?? 0;
-final message = initJson['message'] as String? ?? '';
-
-if (status != 200) {
-  // message: NETWORK_UNAVAILABLE | MISSING_PARAMS | INIT_FAILED
-  showError(message);
-  return;
-}
-// Login successful — proceed
+if (!result.isSuccess) showError(result.message);
 ```
+
+> `initCallWithUserPassword` / `initCallWithApiKey` still work but are **deprecated** since 3.4.0 — they return the raw JSON string. See [Migration Guide](#upgrading-from-33x-to-340).
 
 - ✅ Get call when user open app from killed status(only iOS):
 ```dart
@@ -943,45 +920,49 @@ final result = await OmicallClient.instance.getInitialCall();
 
 #### 📌 Authentication
 
-##### initCallWithUserPassword
+##### register
 Login for employees (can call any number allowed in business)
 
 ```dart
-final initResult = await OmicallClient.instance.initCallWithUserPassword(
-  userName: String,
-  password: String,
-  realm: String,
-  host: String,
-  isVideo: bool,
-  fcmToken: String,
-  projectId: String,
+final OmiRegisterResult result = await OmicallClient.instance.register(
+  userName: String,   // required
+  password: String,   // required
+  realm: String,      // required
+  fcmToken: String,   // required — FCM token (Android) / APNS token (iOS)
+  host: String,       // optional, default "" = OMICall default SIP proxy
+  isVideo: bool,      // optional, default true
+  projectId: String,  // optional, default ""
 );
 ```
 
-**Returns** `Future<dynamic>` — JSON string `{"status": Int, "message": String}`
+##### registerWithApiKey
+Login for customers (call a fixed number, e.g., hotline)
 
-| `status` | `message` | Meaning |
+```dart
+final OmiRegisterResult result = await OmicallClient.instance.registerWithApiKey(
+  fullName: String,   // required
+  userUuid: String,   // required
+  apiKey: String,     // required
+  phone: String,      // required
+  fcmToken: String,   // required
+  isVideo: bool,      // optional, default true
+  projectId: String,  // optional, default ""
+);
+```
+
+**Returns** `Future<OmiRegisterResult>` — same on Android and iOS:
+
+| `statusCode` | `message` | Meaning |
 |----------|-----------|---------|
-| `200` | `INIT_SUCCESS` | Login successful |
+| `200` | `INIT_SUCCESS` | Login successful (`result.isSuccess == true`) |
 | `400` | `MISSING_PARAMS` | Required fields missing |
 | `500` | `INIT_FAILED` | Wrong credentials or SDK error |
 | `600` | `NETWORK_UNAVAILABLE` | No internet connection |
 
-##### initCallWithApiKey
-Login for clients (call fixed number, e.g., hotline)
+> iOS: the SIP stack registers asynchronously, so `register` returns `200` once the credentials are set; a wrong password shows up as a failed call, not as `500`.
 
-```dart
-final initResult = await OmicallClient.instance.initCallWithApiKey(
-  usrName: String,
-  usrUuid: String,
-  isVideo: bool,
-  apiKey: String,
-  fcmToken: String,
-  projectId: String,
-);
-```
-
-**Returns** `Future<dynamic>` — same JSON format as `initCallWithUserPassword` above.
+##### initCallWithUserPassword / initCallWithApiKey (deprecated)
+Same as `register` / `registerWithApiKey` but return the raw JSON string `{"status": Int, "message": String}`.
 
 ##### logout
 Logout current user
@@ -1065,6 +1046,18 @@ OmicallClient.instance.endCall().then((callInfo) {
 */
 ```
 
+##### 📌 Reject / Drop Incoming Call
+
+```dart
+// 486 Busy Here — other devices of the same extension keep ringing
+await OmicallClient.instance.rejectCall();
+
+// 603 Decline — stops ringing on every device of the extension
+await OmicallClient.instance.dropCall();
+```
+
+Both hang up the call instead when it is already answered.
+
 ##### 📌 Toggle Audio (Mute/Unmute)
 Toggle microphone on/off
 
@@ -1099,6 +1092,55 @@ Forward call to another employee
 ```dart
 OmicallClient.instance.transferCall(phoneNumber: "101");
 ```
+
+The PBX result arrives in `setTransferStatusListener` (see below). Since 3.4.0 a failed transfer no
+longer ends the call: you get `TRANSFER_STATUS` with `statusCode: 500, isFinal: true` and the call stays up.
+
+##### 📌 Consult (Attended) Transfer — NEW 3.4.0
+Talk to a colleague before handing the customer over (answered **audio** calls only).
+
+```dart
+final client = OmicallClient.instance;
+
+client.setConsultStateListener((e) {
+  // e.state: dialing → ringing → answered → ended; e.statusCode: SIP code
+  if (e.state == OmiConsultState.answered) showCompleteButton();
+  if (e.state == OmiConsultState.ended) hideConsultUi();
+});
+client.setTransferStatusListener((e) {
+  if (e.isFinal) e.isSuccess ? closeCallScreen() : showError("Transfer failed (${e.statusCode})");
+});
+
+// 1. Hold the customer and call extension 102
+final status = await client.startConsultCall("102");
+if (status != OmiConsultStartStatus.success) showError(status.name);
+
+// 2a. Colleague answered → hand the customer over
+await client.completeConsultTransfer();
+
+// 2b. …or go back to the customer (taken off hold)
+await client.cancelConsult();
+```
+
+| Function | Returns | Description |
+|---|---|---|
+| `startConsultCall(extension, {extraHeaders})` | `OmiConsultStartStatus` | Hold the customer and call `extension` |
+| `completeConsultTransfer({extraHeaders})` | `bool` | Hang up the consult, transfer the customer to the same extension. `false` if not answered yet / customer already ended |
+| `cancelConsult()` | `bool` | End the consult, take the customer off hold |
+| `isConsulting()` | `bool` | A consult is running |
+| `isConsultOriginalEnded()` | `bool` | The customer hung up while the consult is running |
+| `getActiveCalls()` | `List<OmiCallSummary>` | Live calls with hold state; consult call has `isConsult == true` |
+
+`OmiConsultStartStatus`: `success` (200), `emptyExtension` (402), `canNotCallYourself` (403),
+`switchboardNotConnected` (404), `missingAudioPermission` (405), `noActiveCall` (409),
+`consultInProgress` (410), `videoCallNotSupported` (411), `sameAsCustomer` (412).
+
+Rules (same on Android and iOS):
+- The consult call never fires `CALL_STATE_CHANGED`; follow it with `setConsultStateListener`.
+- `endCall()` during a consult hangs up the **customer**; use `cancelConsult()` to cancel.
+- Colleague rejects / does not answer → the consult ends and the customer is taken off hold automatically.
+- Transfer fails or has no result within 30 s → the customer is taken off hold.
+- `toggleHold()` is ignored while consulting; mute / DTMF go to the consult call once answered.
 
 ##### 📌 Get Current User
 Retrieve logged-in user information
@@ -1143,19 +1185,22 @@ Turn video on/off during call
 OmicallClient.instance.toggleVideo();
 ```
 
-##### 📌 Register Video Event
-Listen for remote video readiness
+##### 📌 Remote Video Ready
+`setVideoListener` receives `REMOTE_VIDEO_READY` when the first remote frame is decoded (Android
+and iOS since 3.4.0). `registerVideoEvent()` / `removeVideoEvent()` are kept for compatibility and
+are no longer needed.
 
-```dart
-OmicallClient.instance.registerVideoEvent();
-```
-
-##### 📌 Remove Video Event
-Remove video event listener
-
-```dart
-OmicallClient.instance.removeVideoEvent();
-```
+##### 📌 How video is rendered (3.4.0)
+Same as the OMICall store apps:
+- **Android:** each widget attaches its feed as soon as its surface exists and again when the call
+  connects; the picture is fitted 9:16 and the remote ratio follows the size the peer really sends.
+- **iOS:** the widgets are containers for `OMIVideoCallManager`, which handles rendering,
+  background/foreground, re-INVITE recovery, PiP and the "reconnecting" overlay. Video starts as
+  soon as both widgets are laid out; it does not wait for CONFIRMED.
+- Show `LocalCameraView` / `RemoteCameraView` only after the call is answered (or for an outgoing
+  call): on iOS the camera starts as soon as both widgets are on screen during a video call.
+- Do **not** mirror the local preview yourself (`Transform.scale(scaleX: -1)`): the SDK already
+  mirrors the front camera.
 
 ##### 📌 Local Camera Widget
 Display your camera view
@@ -1184,14 +1229,60 @@ RemoteCameraView(
 ```
 
 ##### 📌 Refresh Camera
-Refresh camera views when needed
+Optional since 3.4.0 (views attach themselves). Safe to call at any time:
 
 ```dart
-// Refresh remote camera
 _remoteController?.refresh();
-
-// Refresh local camera
 _localController?.refresh();
+```
+
+##### 📌 Picture-in-Picture (3.4.0)
+The remote video moves to a floating window when the app goes to the background during a video
+call; the SDK closes it at call end. Enable it once, before the call:
+
+```dart
+final supported = await OmicallClient.instance.setVideoPictureInPictureEnabled(true);
+OmicallClient.instance.setPictureInPictureListener((isActive) {
+  setState(() => _hideControls = isActive); // hide buttons inside the PiP window
+});
+```
+
+Android — `AndroidManifest.xml` (MainActivity):
+```xml
+<activity android:name=".MainActivity"
+    android:supportsPictureInPicture="true"
+    android:resizeableActivity="true"
+    android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation" ... />
+```
+`MainActivity.kt`:
+```kotlin
+override fun onUserLeaveHint() {
+    super.onUserLeaveHint()
+    OmicallsdkPlugin.onUserLeaveHint(this)
+}
+
+override fun onPictureInPictureModeChanged(isInPip: Boolean, newConfig: Configuration) {
+    super.onPictureInPictureModeChanged(isInPip, newConfig)
+    OmicallsdkPlugin.onPictureInPictureModeChanged(isInPip)
+}
+```
+
+iOS 15+: `audio` in `UIBackgroundModes`. To keep sending your camera while in PiP (iOS 16+), add the
+entitlement `com.apple.developer.avfoundation.multitasking-camera-access` (explain it in App
+Review notes); without it the other party sees your video paused while audio continues.
+
+##### 📌 Remote Connection State (iOS, 3.4.0)
+The SDK draws a "reconnecting / weak connection" overlay on the remote video. Translate it, or
+follow the state yourself:
+
+```dart
+OmicallClient.instance.setRemoteConnectionOverlayTexts({
+  OmiRemoteConnectionState.reconnecting: "Reconnecting…",
+  OmiRemoteConnectionState.videoPaused: "Video paused",
+});
+OmicallClient.instance.setRemoteConnectionListener((e) {
+  // e.state: connected | videoPaused | weak | reconnecting | localReconnecting | networkSwitching | uplinkPoor
+});
 ```
 
 ---
@@ -1445,6 +1536,16 @@ OmicallClient.instance.setHoldListener((isOnHold) {
   });
 });
 ```
+
+#### Consult / Transfer / Call Hold Listeners (3.4.0)
+
+```dart
+OmicallClient.instance.setConsultStateListener((OmiConsultStateEvent e) {});   // CONSULT_STATE_CHANGED
+OmicallClient.instance.setTransferStatusListener((OmiTransferStatusEvent e) {}); // TRANSFER_STATUS
+OmicallClient.instance.setCallHoldChangedListener((OmiCallHoldEvent e) {});    // CALL_HOLD_CHANGED: any call, with callId
+```
+
+Remove with `removeConsultStateListener()`, `removeTransferStatusListener()`, `removeCallHoldChangedListener()`.
 
 #### Remote Video Ready Listener
 
@@ -1712,6 +1813,31 @@ OmicallClient.instance.setSpeakerListener((isSpeakerOn) {
 ---
 
 ## Migration Guide
+
+### Upgrading from 3.3.x to 3.4.0
+
+No breaking change. Replace the deprecated init functions:
+
+```dart
+// Before
+final raw = await OmicallClient.instance.initCallWithUserPassword(
+  userName: u, password: p, realm: r, host: h, isVideo: true, fcmToken: t);
+final ok = (jsonDecode(raw) as Map)['status'] == 200;
+
+// After
+final result = await OmicallClient.instance.register(
+  userName: u, password: p, realm: r, host: h, isVideo: true, fcmToken: t);
+final ok = result.isSuccess;
+```
+
+| Deprecated | New | Parameter renames |
+|---|---|---|
+| `initCallWithUserPassword` | `register` | — |
+| `initCallWithApiKey` | `registerWithApiKey` | `usrName` → `fullName`, `usrUuid` → `userUuid` |
+
+Behaviour changes:
+- `host` is now optional on Android (empty = SDK default) and honored on iOS (was always `vh.omicrm.com:5222`).
+- `transferCall` failure no longer ends the call on Android — listen to `setTransferStatusListener`.
 
 ### Upgrading from 2.x.x to 3.x.x
 

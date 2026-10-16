@@ -3,6 +3,8 @@ package vn.vihat.omicall.omicallsdk
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.media.AudioDeviceInfo
+import android.media.AudioManager
 import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Handler
@@ -25,8 +27,11 @@ import vn.vihat.omicall.omicallsdk.constants.*
 import vn.vihat.omicall.omicallsdk.state.CallState
 import vn.vihat.omicall.omicallsdk.videoCall.FLLocalCameraFactory
 import vn.vihat.omicall.omicallsdk.videoCall.FLRemoteCameraFactory
+import vn.vihat.omicall.omicallsdk.videoCall.FLVideoTextureView
+import vn.vihat.omicall.omisdk.pip.OmiPictureInPicture
 import vn.vihat.omicall.omisdk.OmiAccountListener
 import vn.vihat.omicall.omisdk.OmiClient
+import vn.vihat.omicall.omisdk.OmiConsultState
 import vn.vihat.omicall.omisdk.OmiListener
 import vn.vihat.omicall.omisdk.service.NotificationService
 import vn.vihat.omicall.omisdk.utils.OmiSDKUtils
@@ -46,7 +51,17 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     private lateinit var channel: MethodChannel
     private var activity: FlutterActivity? = null
     private var applicationContext: Context? = null
-    private val mainScope = CoroutineScope(Dispatchers.Main)
+    // Main.immediate: no extra frame when already on the main thread (all method calls are);
+    // SupervisorJob: one failed action must not cancel the scope for every later action.
+    private val mainScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val gson = Gson()
+    private var loadingResetJob: Job? = null
+    private var isPipEnabled = false
+    private var isRemoteVideoReadySent = false
+    private val pipListener = OmiPictureInPicture.Listener { active ->
+        runOnMain { channel.invokeMethod(PICTURE_IN_PICTURE_CHANGED, mapOf("isActive" to active)) }
+    }
     private var isIncomming: Boolean = false
     private var callerNumberTemp: String = ""
     private var isAnserCall: Boolean = false
@@ -55,8 +70,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     override fun incomingReceived(callerId: Int?, phoneNumber: String?, isVideo: Boolean?) {
         isIncomming = true
+        resetVideoState()
         callerNumberTemp = phoneNumber ?: ""
-        Handler(Looper.getMainLooper()).post {
+        runOnMain {
             channel.invokeMethod(
                 CALL_STATE_CHANGED, mapOf(
                     "isVideo" to isVideo,
@@ -88,7 +104,12 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         transactionId: String?,
     ) {
         isAnserCall = true
-        Handler(Looper.getMainLooper()).post {
+        if (isVideo == true) {
+            // Same moment as the Android-Client: attach both feeds as soon as the call connects
+            FLVideoTextureView.attachAll()
+            runOnMain { ensureVideoSpeaker() }
+        }
+        runOnMain {
             channel.invokeMethod(
                 CALL_STATE_CHANGED, mapOf(
                     "callerNumber" to phoneNumber,
@@ -106,15 +127,16 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         Log.d("SDK ====> CALL ACTION:::  ", "onCallEnd -> callInfo=$callInfo, statusCode=$statusCode")
         callInfo["status"] = CallState.disconnected.value
         callInfo["code_end_call"] = statusCode
-        Handler(Looper.getMainLooper()).post {
+        runOnMain {
             channel.invokeMethod(CALL_STATE_CHANGED, callInfo)
         }
         isIncomming = false
         isAnserCall = false
+        resetVideoState()
     }
 
     override fun onConnecting() {
-        Handler(Looper.getMainLooper()).post {
+        runOnMain {
             channel.invokeMethod(
                 CALL_STATE_CHANGED, mapOf(
                     "status" to CallState.connecting.value,
@@ -130,7 +152,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     override fun onRinging(callerId: Int, transactionId: String?) {
         val callDirection = OmiClient.callDirection
 
-        Handler(Looper.getMainLooper()).post {
+        runOnMain {
             if (callDirection == "inbound") {
                 channel.invokeMethod(
                     CALL_STATE_CHANGED, mapOf(
@@ -157,8 +179,9 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
 
     override fun onOutgoingStarted(callerId: Int, phoneNumber: String?, isVideo: Boolean?) {
         isIncomming = false
+        resetVideoState()
 
-        Handler(Looper.getMainLooper()).post {
+        runOnMain {
             channel.invokeMethod(
                 CALL_STATE_CHANGED, mapOf(
                     "status" to CallState.calling.value,
@@ -185,13 +208,15 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         numLCN?.let {
             isNeedLoading = it > 2
             if (isNeedLoading) {
-                mainScope.launch {
+                // Restart one timer instead of stacking a coroutine per quality report
+                loadingResetJob?.cancel()
+                loadingResetJob = mainScope.launch {
                     delay(15000)
                     isNeedLoading = false
                 }
             }
         }
-        Handler(Looper.getMainLooper()).post {
+        runOnMain {
             channel.invokeMethod(CALL_QUALITY, mapOf(
                 "quality" to quality,
                 "stat" to stat,
@@ -201,30 +226,97 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     }
 
     override fun onAudioChanged(audioInfo: Map<String, Any>) {
-        Handler(Looper.getMainLooper()).post {
+        runOnMain {
             channel.invokeMethod(AUDIO_CHANGE, mapOf("data" to audioInfo))
         }
     }
 
     override fun onHold(isHold: Boolean) {
-        Handler(Looper.getMainLooper()).post {
+        runOnMain {
             channel.invokeMethod(HOLD, mapOf("isHold" to isHold))
         }
     }
 
     override fun onMuted(isMuted: Boolean) {
-        Handler(Looper.getMainLooper()).post {
+        runOnMain {
             channel.invokeMethod(MUTED, mapOf("isMuted" to isMuted))
         }
     }
 
     override fun onSwitchBoardAnswer(sip: String) {
-        Handler(Looper.getMainLooper()).post {
+        runOnMain {
             channel.invokeMethod(SWITCHBOARD_ANSWER, mapOf("sip" to sip))
         }
     }
 
-    override fun onVideoSize(width: Int, height: Int) {  }
+    override fun onVideoSize(width: Int, height: Int) {
+        FLVideoTextureView.updateRemoteSize(width, height)
+        // First size of the call = remote video is decoding
+        if (width > 0 && height > 0 && !isRemoteVideoReadySent) {
+            isRemoteVideoReadySent = true
+            runOnMain { channel.invokeMethod(REMOTE_VIDEO_READY, mapOf("width" to width, "height" to height)) }
+        }
+    }
+
+    private fun resetVideoState() {
+        isRemoteVideoReadySent = false
+        FLVideoTextureView.resetRemoteSize()
+    }
+
+    /**
+     * SDK workaround from the Android-Client: OmiClient.onCallStarted skips routing video calls to
+     * the loudspeaker when a previous call ended abnormally. Idempotent when the SDK did route it.
+     */
+    private fun ensureVideoSpeaker() {
+        val ctx = applicationContext ?: return
+        try {
+            val client = OmiClient.getInstance(ctx)
+            if (!client.getSpeakerStatus()) {
+                val am = ctx.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+                val externalTypes = setOf(
+                    AudioDeviceInfo.TYPE_WIRED_HEADSET,
+                    AudioDeviceInfo.TYPE_WIRED_HEADPHONES,
+                    AudioDeviceInfo.TYPE_BLUETOOTH_SCO,
+                    AudioDeviceInfo.TYPE_BLUETOOTH_A2DP,
+                )
+                val hasExternal = am.getDevices(AudioManager.GET_DEVICES_OUTPUTS).any { it.type in externalTypes }
+                if (!hasExternal) client.setAudio(2)
+            }
+            // Always sync the Flutter speaker button with the real route, like the client app
+            channel.invokeMethod(SPEAKER, client.getSpeakerStatus())
+        } catch (e: Exception) {
+            Log.e("OMI Flutter", "ensureVideoSpeaker failed", e)
+        }
+    }
+
+    override fun onConsultStateChanged(consultCallId: Int, state: OmiConsultState, statusCode: Int) {
+        runOnMain {
+            channel.invokeMethod(CONSULT_STATE_CHANGED, mapOf(
+                "callId" to consultCallId,
+                "state" to state.ordinal,
+                "statusCode" to statusCode
+            ))
+        }
+    }
+
+    override fun onTransferStatus(callId: Int, statusCode: Int, isFinal: Boolean) {
+        runOnMain {
+            channel.invokeMethod(TRANSFER_STATUS, mapOf(
+                "callId" to callId,
+                "statusCode" to statusCode,
+                "isFinal" to isFinal
+            ))
+        }
+    }
+
+    override fun onCallHoldChanged(callId: Int, isHold: Boolean) {
+        runOnMain {
+            channel.invokeMethod(CALL_HOLD_CHANGED, mapOf(
+                "callId" to callId,
+                "isHold" to isHold
+            ))
+        }
+    }
 
     private val accountListener = object : OmiAccountListener {
         override fun onAccountStatus(online: Boolean) {
@@ -257,6 +349,11 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             OmiClient.getInstance(applicationContext!!, false)
             OmiClient.getInstance(applicationContext!!).addCallStateListener(this)
             OmiClient.getInstance(applicationContext!!).setDebug(false)
+            OmiPictureInPicture.addListener(pipListener)
+            // Late listener (screen opened after the first frame): refresh replays the event
+            FLVideoTextureView.onRefreshed = {
+                if (isRemoteVideoReadySent) runOnMain { channel.invokeMethod(REMOTE_VIDEO_READY, mapOf<String, Any>()) }
+            }
             ProcessLifecycleOwner.get().lifecycle.addObserver(OmiClient.getInstance(applicationContext!!))
         } catch(e: Throwable) {
             e.printStackTrace()
@@ -266,6 +363,8 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
     override fun onMethodCall(@NonNull call: MethodCall, @NonNull result: Result) {
         if (call.method == "action") {
             handleAction(call, result)
+        } else {
+            result.notImplemented()
         }
     }
 
@@ -341,7 +440,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
             INIT_CALL_USER_PASSWORD -> {
                 mainScope.launch {
-                    val gson = Gson()
                     val cm = applicationContext?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
                     if (cm?.activeNetwork == null) {
                         result.success(gson.toJson(mapOf("status" to 600, "message" to "NETWORK_UNAVAILABLE")))
@@ -350,11 +448,12 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     val userName = dataOmi["userName"] as? String
                     val password = dataOmi["password"] as? String
                     val realm = dataOmi["realm"] as? String
-                    val host = dataOmi["host"] as? String
+                    // Optional: null/blank lets the SDK use its default SIP host
+                    val host = (dataOmi["host"] as? String)?.takeIf { it.isNotBlank() }
                     val isVideo = dataOmi["isVideo"] as? Boolean
                     val firebaseToken = dataOmi["fcmToken"] as? String
                     val projectId = dataOmi["projectId"] as? String ?: ""
-                    if (userName == null || password == null || realm == null || host == null || firebaseToken == null) {
+                    if (userName == null || password == null || realm == null || firebaseToken == null) {
                         result.success(gson.toJson(mapOf("status" to 400, "message" to "MISSING_PARAMS")))
                         return@launch
                     }
@@ -372,7 +471,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
             }
             INIT_CALL_API_KEY -> {
                 mainScope.launch {
-                    val gson = Gson()
                     val cm = applicationContext?.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
                     if (cm?.activeNetwork == null) {
                         result.success(gson.toJson(mapOf("status" to 600, "message" to "NETWORK_UNAVAILABLE")))
@@ -430,8 +528,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     "message" to messageCall(startCallResult.value),
                 )
 
-                val gson = Gson()
-
                 val jsonData = gson.toJson(dataSend)
                 result.success(jsonData)
             }
@@ -465,20 +561,12 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 }
             }
             TOGGLE_HOLD -> {
-                mainScope.launch {
-                    try {
-                        val rawResult = withContext(Dispatchers.IO) {
-                            OmiClient.getInstance(applicationContext!!).toggleHold()
-                        }
-                        println("Raw result from toggleHold(): $rawResult")
-                        // Nếu rawResult là Unit, gán false; nếu không, ép sang Boolean (nếu có thể).
-                        val newStatus = if (rawResult == Unit) false else rawResult as? Boolean ?: false
-                        println("New status after evaluation: $newStatus")
-                        result.success(newStatus)
-//                        channel.invokeMethod(HOLD, newStatus)
-                    } catch (e: Exception) {
-                        result.error("TOGGLE_HOLD_EXCEPTION", "Exception occurred: ${e.message}", e)
-                    }
+                // Non-blocking SIP command (no thread hop needed); the new state arrives via onHold → HOLD
+                try {
+                    OmiClient.getInstance(applicationContext!!).toggleHold()
+                    result.success(false)
+                } catch (e: Exception) {
+                    result.error("TOGGLE_HOLD_EXCEPTION", "Exception occurred: ${e.message}", e)
                 }
             }
             TOGGLE_SPEAK -> {
@@ -486,7 +574,6 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                 result.success(newStatus)
                 channel.invokeMethod(SPEAKER, newStatus)
             }
-            REGISTER -> {}
             SEND_DTMF -> {
                 val character = dataOmi["character"] as String
                 var characterCode: Int? = character.toIntOrNull()
@@ -624,12 +711,90 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     result.success(transferResult)
                 }
             }
+            REJECT_CALL -> {
+                val client = OmiClient.getInstance(applicationContext!!)
+                if (isIncomming && !isAnserCall) {
+                    client.declineWithCode(true) // 486 Busy Here
+                } else {
+                    client.hangUp()
+                }
+                result.success(true)
+            }
+            DROP_CALL -> {
+                val client = OmiClient.getInstance(applicationContext!!)
+                if (isIncomming && !isAnserCall) {
+                    client.declineWithCode(false) // 603 Decline, stops ringing on all devices
+                } else {
+                    client.hangUp()
+                }
+                result.success(true)
+            }
+            START_CONSULT_CALL -> {
+                val extension = dataOmi["extension"] as? String ?: ""
+                OmiClient.getInstance(applicationContext!!).startConsultCall(
+                    extension,
+                    extraHeadersOf(dataOmi)
+                ) { status ->
+                    runOnMain { result.success(status.value) }
+                }
+            }
+            COMPLETE_CONSULT_TRANSFER -> {
+                result.success(
+                    OmiClient.getInstance(applicationContext!!).completeConsultTransfer(extraHeadersOf(dataOmi))
+                )
+            }
+            CANCEL_CONSULT -> {
+                result.success(OmiClient.getInstance(applicationContext!!).cancelConsult())
+            }
+            IS_CONSULTING -> {
+                result.success(OmiClient.getInstance(applicationContext!!).isConsulting())
+            }
+            IS_CONSULT_ORIGINAL_ENDED -> {
+                result.success(OmiClient.getInstance(applicationContext!!).isConsultOriginalEnded())
+            }
+            SET_PICTURE_IN_PICTURE -> {
+                // The SDK arms PiP only while a video call is up and disarms it at call end
+                isPipEnabled = dataOmi["enabled"] as? Boolean ?: false
+                activity?.let { OmiPictureInPicture.setEnabled(it, isPipEnabled) }
+                result.success(applicationContext?.let { OmiPictureInPicture.isSupported(it) } ?: false)
+            }
+            GET_ACTIVE_CALLS -> {
+                val calls = OmiClient.getInstance(applicationContext!!).getActiveCalls().map {
+                    mapOf(
+                        "callId" to it.callId,
+                        "uuid" to it.uuid,
+                        "number" to it.number,
+                        "state" to it.state,
+                        "isHold" to it.isHold,
+                        "isConsult" to it.isConsult
+                    )
+                }
+                result.success(calls)
+            }
+            // Actions without an Android implementation (iOS-only, or legacy): reply so the
+            // Dart Future completes instead of hanging forever.
+            else -> result.success(null)
         }
+    }
+
+    /** Run on the main thread; inline when already there to avoid a message-loop hop. */
+    private fun runOnMain(block: () -> Unit) {
+        if (Looper.myLooper() == Looper.getMainLooper()) block() else mainHandler.post(block)
+    }
+
+    /** Flutter sends `extraHeaders` as Map<String, Any?>; keep only string values. */
+    private fun extraHeadersOf(dataOmi: Map<String, Any>): Map<String, String>? {
+        val raw = dataOmi["extraHeaders"] as? Map<*, *> ?: return null
+        return raw.entries
+            .mapNotNull { (k, v) -> if (k is String && v is String) k to v else null }
+            .toMap()
     }
 
     override fun onDetachedFromEngine(@NonNull binding: FlutterPlugin.FlutterPluginBinding) {
         channel.setMethodCallHandler(null)
         OmiClient.getInstance(applicationContext!!).removeCallStateListener(this)
+        OmiPictureInPicture.removeListener(pipListener)
+        FLVideoTextureView.onRefreshed = null
         mainScope.cancel()
     }
 
@@ -637,10 +802,13 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         Log.d("SDK", "onAttachedToActivity!")
         binding.addOnNewIntentListener(this)
         activity = binding.activity as FlutterActivity
+        // Recreated Activity: PiP must be re-armed on the new instance
+        if (isPipEnabled) OmiPictureInPicture.setEnabled(binding.activity, true)
     }
 
     override fun onDetachedFromActivity() {
         Log.d("SDK", "onDetachedFromActivity!")
+        activity?.let { if (isPipEnabled) OmiPictureInPicture.setEnabled(it, false) }
         activity = null
     }
 
@@ -648,6 +816,7 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
         Log.d("SDK", "onReattachedToActivityForConfigChanges!")
         binding.addOnNewIntentListener(this)
         activity = binding.activity as FlutterActivity
+        if (isPipEnabled) OmiPictureInPicture.setEnabled(binding.activity, true)
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
@@ -705,6 +874,16 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     }
                 }
             }
+        }
+
+        /** Forward from the host `Activity.onUserLeaveHint()` (PiP on Android 8-11). */
+        fun onUserLeaveHint(activity: android.app.Activity) {
+            OmiPictureInPicture.onUserLeaveHint(activity)
+        }
+
+        /** Forward from the host `Activity.onPictureInPictureModeChanged(isInPip, newConfig)`. */
+        fun onPictureInPictureModeChanged(isInPip: Boolean) {
+            OmiPictureInPicture.onPictureInPictureModeChanged(isInPip)
         }
 
         fun onRequestPermissionsResult(

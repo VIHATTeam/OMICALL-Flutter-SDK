@@ -33,20 +33,23 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       let remoteFactory = FLRemoteCameraFactory(messenger: registrar.messenger())
       registrar.register(remoteFactory, withId: "omicallsdk/remote_camera_view")
       registrar.addApplicationDelegate(instance)
+      OmiVideoCoordinator.shared.start()
   }
 
 
   func sendEvent(_ event: String, _ body: [String : Any]) {
+      // OmiKit posts most notifications on main: deliver inline instead of waiting a run-loop turn
+      if Thread.isMainThread {
+          channel?.invokeMethod(event, arguments: body)
+          return
+      }
       DispatchQueue.main.async {[weak self] in
-          guard let self = self else { return }
-          if let channelTemp = self.channel {
-              channelTemp.invokeMethod(event, arguments: body)
-          }
+          self?.channel?.invokeMethod(event, arguments: body)
       }
   }
     
   func sendCameraEvent() {
-      let cameraStatus = CallManager.shareInstance().videoManager?.isCameraOn ?? false
+      let cameraStatus = CallManager.shareInstance().getCameraStatus()
       DispatchQueue.main.async { [weak self] in
           self?.channel.invokeMethod(VIDEO, arguments: cameraStatus)
       }
@@ -56,13 +59,6 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
       let isMuted = CallManager.shareInstance().getAvailableCall()?.muted ?? false
       DispatchQueue.main.async { [weak self] in
           self?.channel.invokeMethod(MUTED, arguments: isMuted)
-      }
-  }
-
-  func sendHoldStatus() {
-      let isHold = CallManager.shareInstance().getAvailableCall()?.onHold ?? false
-      DispatchQueue.main.async { [weak self] in
-          self?.channel.invokeMethod(HOLD, arguments: isHold)
       }
   }
 
@@ -76,15 +72,14 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
 
   public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
       if(call.method != "action") {
+          result(FlutterMethodNotImplemented)
           return
       }
-      guard  let data =  call.arguments as? [String:Any] else  {
-          return
-      }
-      guard let dataOmi = data["data"] as? [String:Any] else {
-          return
-      }
-      guard let action = data["actionName"] as? String else {
+      // Always reply: an unanswered call leaves the Dart Future pending forever
+      guard let data = call.arguments as? [String:Any],
+            let dataOmi = data["data"] as? [String:Any],
+            let action = data["actionName"] as? String else {
+          result(nil)
           return
       }
 
@@ -130,8 +125,11 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           }
           let isVideo = dataOmi["isVideo"] as? Bool ?? false
           CallManager.shareInstance().startCall(phoneNumber, isVideo: isVideo) { callResult in
-              self.sendMuteStatus()
-              result(callResult)
+              // OmiKit may complete on the background queue; FlutterResult belongs on main
+              DispatchQueue.main.async {
+                  self.sendMuteStatus()
+                  result(callResult)
+              }
           }
           break
       case END_CALL:
@@ -156,14 +154,11 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           }
           break
       case TOGGLE_HOLD:
-            CallManager.shareInstance().toggleHold()
-            sendHoldStatus()
-            if let call = CallManager.shareInstance().getAvailableCall() {
-                result(call.onHold)
-            } else {
-                result(false)
-            }
-            break
+          // New state is pushed by OMICallHoldChanged → HOLD event once the re-INVITE is done
+          CallManager.shareInstance().toggleHold { isHold in
+              result(isHold)
+          }
+          break
       case SEND_DTMF:
           guard let character = dataOmi["character"] as? String else {
               result(false)
@@ -195,8 +190,10 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           }
           let isVideoUuid = dataOmi["isVideo"] as? Bool ?? false
           CallManager.shareInstance().startCallWithUuid(uuid, isVideo: isVideoUuid) { callResult in
-              self.sendMuteStatus()
-              result(callResult)
+              DispatchQueue.main.async {
+                  self.sendMuteStatus()
+                  result(callResult)
+              }
           }
           break
       case LOG_OUT:
@@ -204,11 +201,10 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
           result(true)
           break
       case REGISTER_VIDEO_EVENT:
-          CallManager.shareInstance().registerVideoEvent()
+          // REMOTE_VIDEO_READY now comes from OMIVideoCallManager's delegate; kept for compatibility
           result(true)
           break
       case REMOVE_VIDEO_EVENT:
-          CallManager.shareInstance().removeVideoEvent()
           result(true)
           break
       case GET_CURRENT_USER:
@@ -257,8 +253,35 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
         }
         let value = CallManager.shareInstance().transferCall(phoneNumber)
         result(value)
+      case REJECT_CALL:
+          result(CallManager.shareInstance().rejectCall())
+      case DROP_CALL:
+          result(CallManager.shareInstance().dropCall())
+      case START_CONSULT_CALL:
+          let ext = dataOmi["extension"] as? String ?? ""
+          let headers = dataOmi["extraHeaders"] as? [String: String]
+          CallManager.shareInstance().startConsultCall(ext, extraHeaders: headers) { status in
+              result(status)
+          }
+      case COMPLETE_CONSULT_TRANSFER:
+          result(OmiClient.completeConsultTransfer(dataOmi["extraHeaders"] as? [String: String]))
+      case CANCEL_CONSULT:
+          result(OmiClient.cancelConsult())
+      case IS_CONSULTING:
+          result(OmiClient.isConsulting())
+      case IS_CONSULT_ORIGINAL_ENDED:
+          result(OmiClient.isConsultOriginalEnded())
+      case SET_PICTURE_IN_PICTURE:
+          let enabled = dataOmi["enabled"] as? Bool ?? false
+          result(OmiVideoCoordinator.shared.setPictureInPictureEnabled(enabled))
+      case SET_REMOTE_CONNECTION_TEXTS:
+          OmiVideoCoordinator.shared.setOverlayTexts(dataOmi["texts"] as? [String: String] ?? [:])
+          result(true)
+      case GET_ACTIVE_CALLS:
+          result(CallManager.shareInstance().getActiveCalls())
       default:
-          break
+          // Actions without an iOS implementation (Android-only, or legacy)
+          result(nil)
       }
 
   }

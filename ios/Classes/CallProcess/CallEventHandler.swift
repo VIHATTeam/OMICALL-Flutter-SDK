@@ -22,19 +22,10 @@ extension CallManager {
         nc.addObserver(self, selector: #selector(switchBoardAnswer(_:)), name: NSNotification.Name.OMICallSwitchBoardAnswer, object: nil)
         nc.addObserver(self, selector: #selector(updateNetworkHealth(_:)), name: NSNotification.Name.OMICallNetworkQuality, object: nil)
         nc.addObserver(self, selector: #selector(audioChanged(_:)), name: NSNotification.Name.OMICallAudioRouteChange, object: nil)
+        registerConsultEvents()
         if showMissedCall {
             self.showMissedCall()
         }
-    }
-
-    func registerVideoEvent() {
-        // Remove before add to prevent duplicate observers on repeated calls
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.OMICallVideoInfo, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(videoUpdate(_:)), name: NSNotification.Name.OMICallVideoInfo, object: nil)
-    }
-
-    func removeVideoEvent() {
-        NotificationCenter.default.removeObserver(self, name: NSNotification.Name.OMICallVideoInfo, object: nil)
     }
 
     // MARK: - Missed Call
@@ -104,14 +95,6 @@ extension CallManager {
         SwiftOmikitPlugin.instance?.sendEvent(CALL_QUALITY, ["quality": state, "stat": stat, "isNeedLoading": false])
     }
 
-    @objc func videoUpdate(_ notification: NSNotification) {
-        guard let userInfo = notification.userInfo,
-              let state = userInfo[OMIVideoInfoState] as? Int else { return }
-        if state == 1 {
-            SwiftOmikitPlugin.instance?.sendEvent(REMOTE_VIDEO_READY, [:])
-        }
-    }
-
     @objc func switchBoardAnswer(_ notification: NSNotification) {
         guard let userInfo = notification.userInfo,
               let sip = userInfo[OMINotificationSIPKey] as? String else { return }
@@ -175,11 +158,10 @@ extension CallManager {
             SwiftOmikitPlugin.instance?.sendEvent(CALL_STATE_CHANGED, dataToSend)
         }
 
+        OmiVideoCoordinator.shared.callStateChanged(call, state: callState)
+
         switch callState {
         case OMICallState.confirmed.rawValue:
-            if videoManager == nil && call.isVideo {
-                videoManager = OMIVideoViewManager()
-            }
             isSpeaker = call.isVideo
             lastStatusCall = "answered"
             SwiftOmikitPlugin.instance?.sendMuteStatus()
@@ -189,7 +171,6 @@ extension CallManager {
 
         case OMICallState.disconnected.rawValue:
             tempCallInfo = buildCallInfo(call: call)
-            videoManager = nil
             lastStatusCall = nil
             guestPhone = ""
 

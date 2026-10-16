@@ -32,5 +32,15 @@ class OmiActionName {
   static const String GET_HISTORY_CALL_LOG = "GET_HISTORY_CALL_LOG";
   static const String CHANGE_TRANSPORT = "CHANGE_TRANSPORT";
   static const String TRANSFER_CALL = "TRANSFER_CALL";
-  
+  static const String REJECT_CALL = "REJECT_CALL";
+  static const String DROP_CALL = "DROP_CALL";
+  static const String START_CONSULT_CALL = "START_CONSULT_CALL";
+  static const String COMPLETE_CONSULT_TRANSFER = "COMPLETE_CONSULT_TRANSFER";
+  static const String CANCEL_CONSULT = "CANCEL_CONSULT";
+  static const String IS_CONSULTING = "IS_CONSULTING";
+  static const String IS_CONSULT_ORIGINAL_ENDED = "IS_CONSULT_ORIGINAL_ENDED";
+  static const String GET_ACTIVE_CALLS = "GET_ACTIVE_CALLS";
+  static const String SET_PICTURE_IN_PICTURE = "SET_PICTURE_IN_PICTURE";
+  static const String SET_REMOTE_CONNECTION_TEXTS =
+      "SET_REMOTE_CONNECTION_TEXTS";
 }
