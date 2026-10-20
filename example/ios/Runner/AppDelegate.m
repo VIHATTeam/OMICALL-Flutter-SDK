@@ -5,7 +5,11 @@
 #import "AppDelegate.h"
 #import "GeneratedPluginRegistrant.h"
 #import <OmiKit/OmiKit.h>
-#import <omicall_flutter_plugin/omicall_flutter_plugin-Swift.h>
+#if __has_include(<omicall_flutter_plugin/omicall_flutter_plugin-Swift.h>)
+#import <omicall_flutter_plugin/omicall_flutter_plugin-Swift.h>  // CocoaPods
+#else
+@import omicall_flutter_plugin;  // Swift Package Manager
+#endif
 #import <FirebaseCore/FirebaseCore.h>
 
 @implementation AppDelegate

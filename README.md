@@ -15,7 +15,7 @@ The most important part of the framework is :
 |---|---|
 | omicall_flutter_plugin | 3.4.0 |
 | Android OmiSDK (`io.omicrm.vihat:omi-sdk`) | 2.9.1 |
-| iOS OmiKit | 1.12.0 |
+| iOS OmiKit | 1.12.1 (CocoaPods or Swift Package Manager) |
 | Android minimum | minSdk 24, compileSdk 35 |
 | iOS minimum | 13.0 |
 
@@ -651,6 +651,34 @@ class MainActivity: FlutterActivity() {
 
 <br>*Now let's continue configuring iOS, let's go 🚀*<br>
 
+#### 🚀 iOS: CocoaPods or Swift Package Manager
+
+The plugin supports both. CocoaPods stays the default; with Swift Package Manager enabled
+(Flutter's upcoming default) Flutter takes `ios/omicall_flutter_plugin/Package.swift`, which pulls
+OmiKit from `https://github.com/VIHATTeam/OmiKit.git` (1.12.x).
+
+```yaml
+# your app's pubspec.yaml — enable SPM for this project only
+flutter:
+  config:
+    enable-swift-package-manager: true
+```
+or globally: `flutter config --enable-swift-package-manager`.
+
+With SPM, the Objective-C `omicall_flutter_plugin-Swift.h` header does not exist. In an
+Objective-C `AppDelegate.m` import the plugin like this (works with both):
+
+```objc
+#if __has_include(<omicall_flutter_plugin/omicall_flutter_plugin-Swift.h>)
+#import <omicall_flutter_plugin/omicall_flutter_plugin-Swift.h>  // CocoaPods
+#else
+@import omicall_flutter_plugin;  // Swift Package Manager
+#endif
+```
+
+A Swift `AppDelegate` keeps `import omicall_flutter_plugin` / `import OmiKit` in both cases.
+The setup below (AppDelegate, Info.plist, capabilities) is the same for both.
+
 #### 🚀 iOS(Object-C):
 
 
@@ -681,7 +709,11 @@ class MainActivity: FlutterActivity() {
 
 ```objc
 #import <OmiKit/OmiKit.h>
-#import <omicall_flutter_plugin/omicall_flutter_plugin-Swift.h>
+#if __has_include(<omicall_flutter_plugin/omicall_flutter_plugin-Swift.h>)
+#import <omicall_flutter_plugin/omicall_flutter_plugin-Swift.h>  // CocoaPods
+#else
+@import omicall_flutter_plugin;  // Swift Package Manager
+#endif
 ```
 <br></br>
 - 📌 Add these lines into `didFinishLaunchingWithOptions`:
@@ -1989,7 +2021,9 @@ Video calls:
 
 Native setup:
 - Android: Maven credentials are `omicallUsername` / `omicallPassword` in `android/local.properties`.
-- iOS: minimum deployment target is now 13.0; run `pod install` to get OmiKit 1.12.0.
+- iOS: minimum deployment target is now 13.0; run `pod install` to get OmiKit 1.12.1.
+- iOS: Swift Package Manager is supported. If you enable it and your `AppDelegate.m` imports
+  `omicall_flutter_plugin-Swift.h`, switch to the conditional import shown in iOS setup.
 
 ### Upgrading from 2.x.x to 3.x.x
 

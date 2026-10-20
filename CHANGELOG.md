@@ -9,9 +9,14 @@ All notable changes to this project will be documented in this file.
   - `2.9.1` — consult (attended) transfer; `onTransferStatus`, `onCallHoldChanged`; a failed `forwardCallTo` no longer reports a fake "call ended".
   - `2.9.0` — OMISIP 2.18 base; call kept on Wi-Fi ↔ 4G switch (408 on re-INVITE); Picture-in-Picture API; fix hung call after NACK deadlock; held customer can no longer hear the agent; RTCP-mux; outgoing video cap 1.5 Mbps.
   - `2.8.x` — video OMI ↔ Zalo (NACK/PLI, packet recovery, adaptive bitrate, fast first frame); fix incoming-call screen not shown; extra re-INVITE; notification / foreground-service fixes.
-- **[MAJOR]** iOS OmiKit: `1.11.23` → `1.12.0`
+- **[MAJOR]** iOS OmiKit: `1.11.23` → `1.12.1`
+  - `1.12.1` — Opus always offers 48 kHz and the packet time no longer changes mid-call (fixes distorted, delayed audio after a re-INVITE that offered Opus 24 kHz). No API change.
   - `1.12.0` — consult (attended) transfer, same API as Android 2.9.1; CallKit hold toggle fix; account no longer unregistered while another call is live.
   - `1.11.24`–`1.11.34` — Opus mono; missed-call callback for calls cancelled while ringing; TURN relay overhaul; custom SIP proxy honored; video PiP, connection overlay, network-switch recovery, camera fixes; no audio when answering from the lock screen.
+
+### Added — Swift Package Manager (iOS)
+- `ios/omicall_flutter_plugin/Package.swift`: the plugin installs through SPM as well as CocoaPods (OmiKit from `github.com/VIHATTeam/OmiKit`, `upToNextMinor` 1.12.1). Sources are shared with CocoaPods through symlinks to `ios/Classes`.
+- Objective-C apps on SPM import the plugin with `@import omicall_flutter_plugin;` (the CocoaPods-only `omicall_flutter_plugin-Swift.h` does not exist there) — see README iOS setup; the example's `AppDelegate.m` uses a conditional import that works with both.
 
 ### Added — `register` / `registerWithApiKey` (standardized init)
 - `register({userName, password, realm, fcmToken, host = "", isVideo = true, projectId = ""})`

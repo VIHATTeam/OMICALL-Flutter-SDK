@@ -81,3 +81,7 @@ android/local.*
 Claude.md
 docs/*
 /docs/*
+# Swift Package Manager build output (ios/omicall_flutter_plugin)
+ios/omicall_flutter_plugin/.build/
+ios/omicall_flutter_plugin/.swiftpm/
+ios/omicall_flutter_plugin/Package.resolved
