@@ -13,9 +13,9 @@ The most important part of the framework is :
 
 | Component | Version |
 |---|---|
-| omicall_flutter_plugin | 3.4.0 |
-| Android OmiSDK (`io.omicrm.vihat:omi-sdk`) | 2.9.1 |
-| iOS OmiKit | 1.12.1 (CocoaPods or Swift Package Manager) |
+| omicall_flutter_plugin | 3.4.1 |
+| Android OmiSDK (`io.omicrm.vihat:omi-sdk`) | 2.9.5 |
+| iOS OmiKit | 1.12.3 (CocoaPods or Swift Package Manager) |
 | Android minimum | minSdk 24, compileSdk 35 |
 | iOS minimum | 13.0 |
 
@@ -51,7 +51,7 @@ Install via pubspec.yaml:
 
 ```yaml
 dependencies:
-  omicall_flutter_plugin: ^3.4.0
+  omicall_flutter_plugin: ^3.4.1
 ```
 
 Minimum setup:
@@ -653,31 +653,58 @@ class MainActivity: FlutterActivity() {
 
 #### 🚀 iOS: CocoaPods or Swift Package Manager
 
-The plugin supports both. CocoaPods stays the default; with Swift Package Manager enabled
-(Flutter's upcoming default) Flutter takes `ios/omicall_flutter_plugin/Package.swift`, which pulls
-OmiKit from `https://github.com/VIHATTeam/OmiKit.git` (1.12.x).
+The plugin supports both, with the same OmiKit version:
+- **CocoaPods** (default): OmiKit is bundled inside the plugin (`ios/Frameworks/OmiKit.xcframework`),
+  so `pod install` does not fetch OmiKit from CocoaPods Trunk (Trunk becomes read-only on 2026-12-02).
+- **Swift Package Manager** (Flutter's upcoming default): Flutter takes
+  `ios/omicall_flutter_plugin/Package.swift`, which pulls OmiKit from
+  `https://github.com/VIHATTeam/OmiKit.git` (1.12.x, from 1.12.3).
 
-```yaml
-# your app's pubspec.yaml — enable SPM for this project only
-flutter:
-  config:
-    enable-swift-package-manager: true
-```
-or globally: `flutter config --enable-swift-package-manager`.
+##### 📦 Install with Swift Package Manager
 
-With SPM, the Objective-C `omicall_flutter_plugin-Swift.h` header does not exist. In an
-Objective-C `AppDelegate.m` import the plugin like this (works with both):
+Requirements: `omicall_flutter_plugin` **3.4.0 or later** (older versions have no `Package.swift`),
+a Flutter version with Swift Package Manager support (tested on Flutter 3.47.1 / Xcode 26.6),
+iOS 13.0+.
 
-```objc
-#if __has_include(<omicall_flutter_plugin/omicall_flutter_plugin-Swift.h>)
-#import <omicall_flutter_plugin/omicall_flutter_plugin-Swift.h>  // CocoaPods
-#else
-@import omicall_flutter_plugin;  // Swift Package Manager
-#endif
-```
+1. Enable SPM — for this app only (recommended):
+   ```yaml
+   # your app's pubspec.yaml
+   flutter:
+     config:
+       enable-swift-package-manager: true
+   ```
+   or for every project on the machine: `flutter config --enable-swift-package-manager`.
+2. Do **not** add OmiKit yourself: remove any `pod 'OmiKit'` line from `ios/Podfile` and do not add
+   the OmiKit package in Xcode. The plugin brings OmiKit; a second copy fails to build or link.
+3. Objective-C `AppDelegate.m` only — the CocoaPods header `omicall_flutter_plugin-Swift.h` does not
+   exist with SPM. Import the plugin like this (works with both):
+   ```objc
+   #if __has_include(<omicall_flutter_plugin/omicall_flutter_plugin-Swift.h>)
+   #import <omicall_flutter_plugin/omicall_flutter_plugin-Swift.h>  // CocoaPods
+   #else
+   @import omicall_flutter_plugin;  // Swift Package Manager
+   #endif
+   ```
+   A Swift `AppDelegate` keeps `import omicall_flutter_plugin` / `import OmiKit` unchanged.
+4. Build: `flutter build ios` (or `flutter run`). The first build adds the Swift package to
+   `Runner.xcodeproj` and resolves OmiKit from GitHub; plugins without SPM support (for example
+   `permission_handler_apple`) keep using CocoaPods automatically.
 
-A Swift `AppDelegate` keeps `import omicall_flutter_plugin` / `import OmiKit` in both cases.
-The setup below (AppDelegate, Info.plist, capabilities) is the same for both.
+Moving an existing CocoaPods app: steps 1–3, then build. Flutter removes the plugin and its OmiKit
+pod from the Pods project by itself; `pod deintegrate` is not needed. To go back to CocoaPods set
+`enable-swift-package-manager: false`.
+
+The setup below (AppDelegate, Info.plist, capabilities) is the same for CocoaPods and SPM.
+
+**SPM troubleshooting**
+
+| Error | Cause / fix |
+|---|---|
+| `'omicall_flutter_plugin/omicall_flutter_plugin-Swift.h' file not found` | Objective-C AppDelegate still uses the CocoaPods import → use the conditional import of step 3 |
+| Duplicate OmiKit symbols / `OmiKit` found twice | OmiKit added by the app as well → remove `pod 'OmiKit'` / the Xcode package (step 2) |
+| `The following plugins do not support Swift Package Manager: omicall_flutter_plugin` | Plugin older than 3.4.0 → upgrade |
+| `unable to override package 'omicall_flutter_plugin' because its identity ... doesn't match` | The app is inside another folder that contains the plugin source (e.g. a `path:` dependency on a parent directory, like this repo's `example/`) → depend on the plugin from pub.dev / a separate folder |
+| Package resolution fails or hangs | Network to github.com is required the first time; retry, or delete `build/ios/SourcePackages` and build again |
 
 #### 🚀 iOS(Object-C):
 
@@ -2021,9 +2048,9 @@ Video calls:
 
 Native setup:
 - Android: Maven credentials are `omicallUsername` / `omicallPassword` in `android/local.properties`.
-- iOS: minimum deployment target is now 13.0; run `pod install` to get OmiKit 1.12.1.
-- iOS: Swift Package Manager is supported. If you enable it and your `AppDelegate.m` imports
-  `omicall_flutter_plugin-Swift.h`, switch to the conditional import shown in iOS setup.
+- iOS: minimum deployment target is now 13.0; run `pod install` (OmiKit is bundled in the plugin,
+  no separate `OmiKit` pod).
+- iOS: Swift Package Manager is supported — see [Install with Swift Package Manager](#-install-with-swift-package-manager).
 
 ### Upgrading from 2.x.x to 3.x.x
 

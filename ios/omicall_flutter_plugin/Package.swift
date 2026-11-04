@@ -23,7 +23,7 @@ let package = Package(
     ],
     dependencies: [
         // upToNextMinor: take 1.12.x fixes, never 1.13 automatically
-        .package(url: "https://github.com/VIHATTeam/OmiKit.git", .upToNextMinor(from: "1.12.1"))
+        .package(url: "https://github.com/VIHATTeam/OmiKit.git", .upToNextMinor(from: "1.12.3"))
     ],
     targets: [
         // Swift only. `Classes/OmikitPlugin.m` (CocoaPods) is replaced by OmikitPluginShim.swift:

@@ -36,3 +36,7 @@ Icon?
 /Flutter/Generated.xcconfig
 /Flutter/ephemeral/
 /Flutter/flutter_export_environment.sh
+
+# Vendored OmiKit (CocoaPods). Not in git: fetched by scripts/update-omikit.sh
+# (publish.sh runs it). Still published to pub.dev via ios/.pubignore.
+Frameworks/

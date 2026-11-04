@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.4.1 [04/11/2026]
+
+### Changed — Native SDK bump (no public API change, no bridge code change)
+- OMI Android SDK: `2.9.1` → `2.9.5`
+  - `2.9.5` — turning the loudspeaker off with a wired headset plugged in now routes audio back to the headset.
+  - `2.9.4` — GNU build-id on `libpjsua2.so` / `libopenh264.so`: native crashes symbolicate on Crashlytics.
+  - `2.9.3` — loudspeaker / earpiece on incoming calls through ConnectionService is now requested from Telecom (it had no effect before); `getSpeakerStatus()` / `getCurrentAudio()` report the route Telecom really applied, and `onAudioChanged` fires when Telecom changes it.
+  - `2.9.2` — one REGISTER per account creation (was 3); a call returned by the PBX after a blind transfer is no longer missed.
+- iOS OmiKit: `1.12.1` → `1.12.3`
+  - `1.12.3` — no audio after a Wi-Fi ↔ cellular switch during an incoming call; log upload for VoIP pushes that never got an INVITE; new optional `setLogWhitelist` / `OMICall.pushPayload` (not exposed by the plugin yet).
+  - `1.12.2` — consult transfer: final transfer status when the PBX ends the transfer with BYE; consult no longer refused (404) on incoming calls answered from a push; cancelling a ringing consult no longer drops the customer call.
+
+### Changed — iOS packaging
+- CocoaPods: OmiKit is now bundled in the plugin (`ios/Frameworks/OmiKit.xcframework`) instead of the `OmiKit` pod, because CocoaPods Trunk becomes read-only on 2026-12-02 and new OmiKit versions are published only on GitHub. Apps keep running `pod install`; remove any explicit `pod 'OmiKit'` line from your Podfile. Update the bundled copy with `scripts/update-omikit.sh <version>`.
+- Swift Package Manager: OmiKit from 1.12.3 (`upToNextMinor`). Verified with Flutter 3.47.1 / Xcode 26.6: new app, app with a full OmiKit AppDelegate, and an app moved from CocoaPods (plugin 3.3.6) to SPM.
+- README: step-by-step "Install with Swift Package Manager" (enable SPM, no extra OmiKit, Objective-C import, moving from CocoaPods) and an SPM troubleshooting table.
+- Repo: `ios/Frameworks/` is git-ignored (fetched by `scripts/update-omikit.sh`); `ios/.pubignore` keeps it in the published package, and `publish.sh` vendors the OmiKit version pinned in the podspec before publishing.
+
 ## 3.4.0 [16/10/2026]
 
 ### Changed — Native SDK bump
