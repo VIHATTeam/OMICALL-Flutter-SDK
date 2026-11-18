@@ -160,6 +160,9 @@ class OmicallClient {
   ///
   /// [host] is the SIP proxy (`host` or `host:port`); leave it empty to use the OMICall default.
   /// [fcmToken] is the FCM token on Android and the APNS token on iOS.
+  /// [isSkipDevices]: `true` = the SDK does not add this device on the OMI backend; the app adds
+  /// it through its own API (see [getDeviceId], [getAppId], [getFcmToken], [getVoipToken]).
+  /// Without that, the device receives no incoming-call push.
   Future<OmiRegisterResult> register({
     required String userName,
     required String password,
@@ -168,6 +171,7 @@ class OmicallClient {
     String host = "",
     bool isVideo = true,
     String projectId = "",
+    bool isSkipDevices = false,
   }) async {
     final action = OmiAction(
       actionName: OmiActionName.INIT_CALL_USER_PASSWORD,
@@ -179,6 +183,7 @@ class OmicallClient {
         'isVideo': isVideo,
         'fcmToken': fcmToken,
         'projectId': projectId,
+        'isSkipDevices': isSkipDevices,
       },
     );
     return OmiRegisterResult.fromNative(await _controller.action(action));
@@ -283,6 +288,7 @@ class OmicallClient {
   String? fcmToken,
   bool isVideo = true,
   String projectId = "",
+  bool isSkipDevices = false,
 }) async {
   final action = OmiAction(
     actionName: OmiActionName.INIT_CALL_USER_PASSWORD,
@@ -294,6 +300,7 @@ class OmicallClient {
       'fcmToken': fcmToken,
       'host': host,
       'projectId': projectId,
+      'isSkipDevices': isSkipDevices,
     },
   );
   return await _controller.action(action);

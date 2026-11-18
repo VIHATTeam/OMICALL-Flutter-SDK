@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## 3.4.2 [17/11/2026]
+
+### Added
+- `isSkipDevices` (default `false`) on `register()` and `initCallWithUserPassword()`: `true` makes the SDK skip adding the device on the OMI backend, so the app adds it through its own API (`getDeviceId`, `getAppId`, `getFcmToken`, `getVoipToken`, `getProjectId`). Uses `OmiClient.register(..., isSkipDevices)` (Android) and `initWithUsername:password:realm:proxy:isSkipDevices:` (iOS). Username/password login only.
+
 ## 3.4.1 [04/11/2026]
 
 ### Changed — Native SDK bump (no public API change, no bridge code change)

@@ -454,8 +454,11 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                         result.success(gson.toJson(mapOf("status" to 400, "message" to "MISSING_PARAMS")))
                         return@launch
                     }
+                    // true: the app adds the device on the OMI backend through its own API
+                    val isSkipDevices = dataOmi["isSkipDevices"] as? Boolean ?: false
                     val registerResult = OmiClient.register(
-                        userName, password, realm, isVideo ?: true, firebaseToken, host, projectId
+                        userName, password, realm, isVideo ?: true, firebaseToken, host, projectId,
+                        isSkipDevices = isSkipDevices
                     )
                     requestPermission(isVideo ?: true)
                     val response = if (registerResult) {

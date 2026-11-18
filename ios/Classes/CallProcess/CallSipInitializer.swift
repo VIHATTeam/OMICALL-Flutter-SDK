@@ -119,7 +119,11 @@ extension CallManager {
             // Same contract as Android: empty host → OMICall default proxy
             let host = (params["host"] as? String)?.trimmingCharacters(in: .whitespaces) ?? ""
             let proxy = host.isEmpty ? "vh.omicrm.com:5222" : host
-            OmiClient.initWithUsername(userName, password: password, realm: realm, proxy: proxy)
+            // true: the app adds the device on the OMI backend through its own API.
+            // OmiKit stores the flag, so the token refresh below does not add the device either.
+            let isSkipDevices = params["isSkipDevices"] as? Bool ?? false
+            OmiClient.initWithUsername(userName, password: password, realm: realm, proxy: proxy,
+                                       isSkipDevices: isSkipDevices)
             OmiClient.setUserPushNotificationToken(fcmToken)
 
             DispatchQueue.main.async {

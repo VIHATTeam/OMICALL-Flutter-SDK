@@ -13,7 +13,7 @@ The most important part of the framework is :
 
 | Component | Version |
 |---|---|
-| omicall_flutter_plugin | 3.4.1 |
+| omicall_flutter_plugin | 3.4.2 |
 | Android OmiSDK (`io.omicrm.vihat:omi-sdk`) | 2.9.5 |
 | iOS OmiKit | 1.12.3 (CocoaPods or Swift Package Manager) |
 | Android minimum | minSdk 24, compileSdk 35 |
@@ -51,7 +51,7 @@ Install via pubspec.yaml:
 
 ```yaml
 dependencies:
-  omicall_flutter_plugin: ^3.4.1
+  omicall_flutter_plugin: ^3.4.2
 ```
 
 Minimum setup:
@@ -1037,8 +1037,11 @@ final OmiRegisterResult result = await OmicallClient.instance.register(
   host: String,       // optional, default "" = OMICall default SIP proxy
   isVideo: bool,      // optional, default true
   projectId: String,  // optional, default ""
+  isSkipDevices: bool, // optional, default false — see "Register the device yourself"
 );
 ```
+
+`initCallWithUserPassword` (deprecated) takes the same `isSkipDevices` parameter.
 
 ##### registerWithApiKey
 Login for customers (call a fixed number, e.g., hotline)
@@ -1075,6 +1078,34 @@ Logout current user
 ```dart
 OmicallClient.instance.logout();
 ```
+
+##### Register the device yourself (`isSkipDevices`, 3.4.2)
+
+By default (`isSkipDevices: false`) the SDK adds the device (push token, VoIP token, device id,
+app id) on the OMI backend after login, so incoming calls can wake the app by push.
+
+Pass `isSkipDevices: true` when your backend adds the device instead. The SDK still logs in to the
+switchboard but skips its own "add device" call; send the values below to your API:
+
+```dart
+final result = await OmicallClient.instance.register(
+  userName: u, password: p, realm: r, fcmToken: token,
+  isSkipDevices: true,
+);
+if (result.isSuccess) {
+  await myApi.addOmiDevice(
+    deviceId: await OmicallClient.instance.getDeviceId(),
+    appId: await OmicallClient.instance.getAppId(),
+    fcmToken: await OmicallClient.instance.getFcmToken(),
+    voipToken: await OmicallClient.instance.getVoipToken(),   // iOS only
+    projectId: await OmicallClient.instance.getProjectId(),
+  );
+}
+```
+
+- Only for username/password login (`register` / `initCallWithUserPassword`); the API-key login
+  has no such option.
+- If nobody adds the device, it receives **no incoming-call push**, and `needsReLogin()` returns true.
 
 ##### Device info & backend registration (3.4.0)
 Same names and behaviour as the React Native SDK — use them to check or add this device on the
