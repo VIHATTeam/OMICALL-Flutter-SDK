@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## 3.4.2 [17/11/2026]
 
+### Changed — Android SDK `2.9.5` → `2.9.7` (no public API change)
+- `2.9.7` — incoming call no longer lost when it reaches a stopping SIP stack ("ghost" ringing screen that cannot be answered); the stack unregisters before stopping so the PBX pushes the next call to the new registration. Calls removed while the stack stops now end with `CALL_STATE_CHANGED` disconnected (487 if not answered), so the ringing screen closes.
+- `2.9.6` — native crash when the TCP connection to the PBX fails; crash registering threads while the stack stops; ANRs when answering, on slow DNS and when the service stops; `ForegroundServiceDidNotStartInTimeException`; thread leak each time the app goes to background.
+
 ### Added
 - `setPhoneNumberMask({enabled, mode})` / `getPhoneNumberMask()`: mask phone numbers on the SDK's native call UI (Android notification and call screen, iOS CallKit). `OmiPhoneMaskMode` follows the role API `hide_phone_type` values (`ExtensionOmiPhoneMaskMode.fromApiValue`). Uses `setCanShowPhoneNumber` + `setPhoneMaskMode` (Android) and `setIsPartialPhoneNumber` + `setPhoneMaskPolicy` (iOS). iOS OmiKit 1.12.3 still renders `hide_middle_keep_last` with the first 3 digits (web and Android keep 4).
 - `isSkipDevices` on `register()` and `initCallWithUserPassword()`: `false` (default) = OMI employee flow, the SDK registers the device; `true` = custom flow for your own users (drivers, collaborators…), the SDK skips the device registration and your backend calls the OMI add-device API (`deviceId` from `getDeviceId()`, `appId` from `getAppId()`, FCM token on Android, `getVoipToken()` on iOS). Uses `OmiClient.register(..., isSkipDevices)` (Android) and `initWithUsername:password:realm:proxy:isSkipDevices:` (iOS). Username/password login only.
