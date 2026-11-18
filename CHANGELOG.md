@@ -6,7 +6,7 @@ All notable changes to this project will be documented in this file.
 
 ### Added
 - `setPhoneNumberMask({enabled, mode})` / `getPhoneNumberMask()`: mask phone numbers on the SDK's native call UI (Android notification and call screen, iOS CallKit). `OmiPhoneMaskMode` follows the role API `hide_phone_type` values (`ExtensionOmiPhoneMaskMode.fromApiValue`). Uses `setCanShowPhoneNumber` + `setPhoneMaskMode` (Android) and `setIsPartialPhoneNumber` + `setPhoneMaskPolicy` (iOS). iOS OmiKit 1.12.3 still renders `hide_middle_keep_last` with the first 3 digits (web and Android keep 4).
-- `isSkipDevices` (default `false`) on `register()` and `initCallWithUserPassword()`: `true` makes the SDK skip adding the device on the OMI backend, so the app adds it through its own API (`getDeviceId`, `getAppId`, `getFcmToken`, `getVoipToken`, `getProjectId`). Uses `OmiClient.register(..., isSkipDevices)` (Android) and `initWithUsername:password:realm:proxy:isSkipDevices:` (iOS). Username/password login only.
+- `isSkipDevices` on `register()` and `initCallWithUserPassword()`: `false` (default) = OMI employee flow, the SDK registers the device; `true` = custom flow for your own users (drivers, collaborators…), the SDK skips the device registration and your backend calls the OMI add-device API (`deviceId` from `getDeviceId()`, `appId` from `getAppId()`, FCM token on Android, `getVoipToken()` on iOS). Uses `OmiClient.register(..., isSkipDevices)` (Android) and `initWithUsername:password:realm:proxy:isSkipDevices:` (iOS). Username/password login only.
 
 ## 3.4.1 [04/11/2026]
 

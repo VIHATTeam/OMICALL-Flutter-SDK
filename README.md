@@ -1037,7 +1037,7 @@ final OmiRegisterResult result = await OmicallClient.instance.register(
   host: String,       // optional, default "" = OMICall default SIP proxy
   isVideo: bool,      // optional, default true
   projectId: String,  // optional, default ""
-  isSkipDevices: bool, // optional, default false — see "Register the device yourself"
+  isSkipDevices: bool, // optional, default false (OMI employee flow) — see "Custom user flow"
 );
 ```
 
@@ -1079,48 +1079,81 @@ Logout current user
 OmicallClient.instance.logout();
 ```
 
-##### Register the device yourself (`isSkipDevices`, 3.4.2)
+##### Custom user flow — register the device yourself (`isSkipDevices`, 3.4.2)
 
-By default (`isSkipDevices: false`) the SDK adds the device (push token, VoIP token, device id,
-app id) on the OMI backend after login, so incoming calls can wake the app by push.
+A device must be registered on the OMI backend to receive incoming calls by push. `isSkipDevices`
+chooses the flow:
 
-Pass `isSkipDevices: true` when your backend adds the device instead. The SDK still logs in to the
-switchboard but skips its own "add device" call; send the values below to your API:
+| `isSkipDevices` | Flow | Who registers the device |
+|---|---|---|
+| `false` (**default**) | **OMI employee flow** — agents of your OMI switchboard | The SDK, right after `register()`. Nothing to do |
+| `true` | **Custom flow** — your own users, e.g. drivers, collaborators | **Your backend**, with the OMI "add device" API below |
 
-```dart
-final result = await OmicallClient.instance.register(
-  userName: u, password: p, realm: r, fcmToken: token,
-  isSkipDevices: true,
-);
-if (result.isSuccess) {
-  await myApi.addOmiDevice(
-    deviceId: await OmicallClient.instance.getDeviceId(),
-    appId: await OmicallClient.instance.getAppId(),
-    fcmToken: await OmicallClient.instance.getFcmToken(),
-    voipToken: await OmicallClient.instance.getVoipToken(),   // iOS only
-    projectId: await OmicallClient.instance.getProjectId(),
-  );
+`isSkipDevices` is a parameter of `register()` and `initCallWithUserPassword()` (username/password
+login only; the API-key login has no such option). With `true` the SDK still logs in to the
+switchboard; it only skips the OMI employee device registration.
+
+**Add-device API** (called by your backend)
+- Agent (employee): `POST /sdk-app/call-center/agent-extension/add-device`
+- Customer: `POST /sdk-app/call-center/customer-extension/add-device`
+
+```json
+{
+  "extension": "11111112",
+  "uuid": "xxx-xxx-xxx",
+  "device": {
+    "projectId": "project-2025",
+    "appId": "vn.company.app",
+    "deviceId": "device-id",
+    "token": "fcm-token",
+    "type": "ANDROID",
+    "voipToken": ""
+  }
 }
 ```
 
-- Only for username/password login (`register` / `initCallWithUserPassword`); the API-key login
-  has no such option.
-- If nobody adds the device, it receives **no incoming-call push**, and `needsReLogin()` returns true.
+| Field | Android | iOS |
+|---|---|---|
+| `extension`, `uuid` | From your own API (the extension you log in with) | Same |
+| `device.projectId` | Your Firebase project id | Same |
+| `device.appId` | `getAppId()` (package name) | `getAppId()` (bundle id) |
+| `device.deviceId` | `getDeviceId()` — **always use this value**, the SDK checks the device by it | Same |
+| `device.token` | FCM token (`FirebaseMessaging.instance.getToken()`) | `""` (not used) |
+| `device.type` | `"ANDROID"` | `"IOS"` |
+| `device.voipToken` | `""` (not used) | `getVoipToken()` (PushKit token) |
+
+```dart
+final client = OmicallClient.instance;
+
+final device = {
+  'projectId': myFirebaseProjectId,
+  'appId': await client.getAppId(),
+  'deviceId': await client.getDeviceId(),
+  'token': Platform.isAndroid ? (await FirebaseMessaging.instance.getToken() ?? '') : '',
+  'type': Platform.isIOS ? 'IOS' : 'ANDROID',
+  'voipToken': Platform.isIOS ? (await client.getVoipToken() ?? '') : '',
+};
+await myBackend.addOmiDevice(extension: extension, uuid: uuid, device: device);
+
+final result = await client.register(
+  userName: extension, password: password, realm: realm,
+  fcmToken: pushToken,          // FCM token (Android) / APNS token (iOS), as usual
+  isSkipDevices: true,
+);
+```
+
+- `getDeviceId()`, `getAppId()` and `getVoipToken()` work before `register()`. The iOS VoIP token
+  exists once PushKit has issued it; send it again if it was still empty.
+- If nobody registers the device, it receives **no incoming-call push**, and `needsReLogin()`
+  returns true.
 
 ##### Mask phone numbers on the call UI (3.4.2)
 
 Hide part of the caller's number on the SDK's native call UI — the incoming-call notification and
 call screen on Android, CallKit on iOS. Numbers your Flutter UI shows are not affected. Same API on
-both platforms; the modes are the `hide_phone_type` values of the OMI role API:
+both platforms: pass one of the `OmiPhoneMaskMode` values.
 
 ```dart
-// From the role API
-await OmicallClient.instance.setPhoneNumberMask(
-  enabled: true,
-  mode: ExtensionOmiPhoneMaskMode.fromApiValue(role.hidePhoneType),
-);
-
-// Or directly
 await OmicallClient.instance.setPhoneNumberMask(enabled: true, mode: OmiPhoneMaskMode.hideLast3);
 await OmicallClient.instance.setPhoneNumberMask(enabled: false); // show full numbers
 
@@ -1129,19 +1162,36 @@ final config = await OmicallClient.instance.getPhoneNumberMask(); // OmiPhoneMas
 
 Four masking modes (example number `0987654321`):
 
-| # | `OmiPhoneMaskMode` | `hide_phone_type` (role API) | What it does | Web / Android | iOS (OmiKit 1.12.3) |
-|---|---|---|---|---|---|
-| 0 | `hideLastKeepFirst3` (default) | `hide_last_keep_first_3` | Keep the first 3 digits | `098*******` | `098*******` |
-| 1 | `hideLast3` | `hide_last_3` | Hide the last 3 digits | `0987654***` | `0987654***` |
-| 2 | `hideLastKeepFirst4` | `hide_last_keep_first_4` | Keep the first 4 digits | `0987******` | `0987******` |
-| 3 | `hideMiddleKeepLast` | `hide_middle_keep_last` | Keep the first digits and the last 3 | `0987***321` | ⚠️ `098****321` |
+| # | `OmiPhoneMaskMode` | What it does | Result |
+|---|---|---|---|
+| 0 | `hideLastKeepFirst3` (default) | Keep the first 3 digits | `098*******` |
+| 1 | `hideLast3` | Hide the last 3 digits | `0987654***` |
+| 2 | `hideLastKeepFirst4` | Keep the first 4 digits | `0987******` |
+| 3 | `hideMiddleKeepLast` | Keep the first 4 and the last 3 digits | `0987***321` |
 
-- `enabled: false` (default): full numbers. `enabled: true`: masked with `mode`.
-- The setting is kept across app launches; apply the role value again after each login.
-- Internal extensions are not masked. Threshold today: Android skips numbers of up to 8
-  characters, iOS masks only numbers of 7 digits or more.
-- ⚠️ Mode 3 on iOS keeps the first 3 digits instead of 4 (OmiKit 1.12.3); it will match web and
-  Android once OmiKit is fixed — no plugin change needed.
+Internal extensions are not masked (Android: numbers of up to 8 characters; iOS: numbers shorter
+than 7 digits).
+
+**Default: full numbers are shown** (`enabled: false`). If you do not mask, you do not need to call
+anything.
+
+**Where / when to call it**
+- Right after a successful login (`register()` / `registerWithApiKey()`), with the setting of the
+  logged-in account — before any call comes in. It applies from the next incoming call.
+- Call it again whenever the account's setting changes.
+- The setting is kept across app launches and is **not** reset by `logout()`. If another account can
+  log in on the same device, call it after every login, or reset it on logout:
+
+```dart
+final result = await OmicallClient.instance.register(/* ... */);
+if (result.isSuccess) {
+  await OmicallClient.instance.setPhoneNumberMask(enabled: true, mode: OmiPhoneMaskMode.hideLast3);
+}
+
+// On logout, back to full numbers for the next account
+await OmicallClient.instance.setPhoneNumberMask(enabled: false);
+await OmicallClient.instance.logout();
+```
 
 ##### Device info & backend registration (3.4.0)
 Same names and behaviour as the React Native SDK — use them to check or add this device on the
