@@ -8,6 +8,7 @@ import 'models/consult_transfer.dart';
 import 'models/register_result.dart';
 import 'models/video_call_state.dart';
 import 'models/device_info.dart';
+import 'models/phone_mask.dart';
 import 'omicallsdk_controller.dart';
 
 class OmicallClient {
@@ -714,5 +715,30 @@ class OmicallClient {
       if (d.deviceId == deviceId) return d.sipNumber;
     }
     return null;
+  }
+
+  // MARK: - Phone number masking (native call UI)
+
+  /// Mask phone numbers on the SDK's native call UI: the incoming-call notification and call
+  /// screen on Android, CallKit on iOS. Numbers shown by your Flutter UI are not affected.
+  ///
+  /// With the OMI role API pass `ExtensionOmiPhoneMaskMode.fromApiValue(role.hidePhoneType)`.
+  /// Kept across app launches.
+  Future<void> setPhoneNumberMask({
+    required bool enabled,
+    OmiPhoneMaskMode mode = OmiPhoneMaskMode.hideLastKeepFirst3,
+  }) async {
+    final action = OmiAction(
+      actionName: OmiActionName.SET_PHONE_NUMBER_MASK,
+      data: {'enabled': enabled, 'mode': mode.index},
+    );
+    await _controller.action(action);
+  }
+
+  /// Current masking configuration (default: disabled, [OmiPhoneMaskMode.hideLastKeepFirst3]).
+  Future<OmiPhoneMaskConfig> getPhoneNumberMask() async {
+    final result = await _controller
+        .action(OmiAction(actionName: OmiActionName.GET_PHONE_NUMBER_MASK, data: {}));
+    return OmiPhoneMaskConfig.fromMap(result is Map ? result : const {});
   }
 }

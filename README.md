@@ -1107,6 +1107,42 @@ if (result.isSuccess) {
   has no such option.
 - If nobody adds the device, it receives **no incoming-call push**, and `needsReLogin()` returns true.
 
+##### Mask phone numbers on the call UI (3.4.2)
+
+Hide part of the caller's number on the SDK's native call UI — the incoming-call notification and
+call screen on Android, CallKit on iOS. Numbers your Flutter UI shows are not affected. Same API on
+both platforms; the modes are the `hide_phone_type` values of the OMI role API:
+
+```dart
+// From the role API
+await OmicallClient.instance.setPhoneNumberMask(
+  enabled: true,
+  mode: ExtensionOmiPhoneMaskMode.fromApiValue(role.hidePhoneType),
+);
+
+// Or directly
+await OmicallClient.instance.setPhoneNumberMask(enabled: true, mode: OmiPhoneMaskMode.hideLast3);
+await OmicallClient.instance.setPhoneNumberMask(enabled: false); // show full numbers
+
+final config = await OmicallClient.instance.getPhoneNumberMask(); // OmiPhoneMaskConfig(enabled, mode)
+```
+
+Four masking modes (example number `0987654321`):
+
+| # | `OmiPhoneMaskMode` | `hide_phone_type` (role API) | What it does | Web / Android | iOS (OmiKit 1.12.3) |
+|---|---|---|---|---|---|
+| 0 | `hideLastKeepFirst3` (default) | `hide_last_keep_first_3` | Keep the first 3 digits | `098*******` | `098*******` |
+| 1 | `hideLast3` | `hide_last_3` | Hide the last 3 digits | `0987654***` | `0987654***` |
+| 2 | `hideLastKeepFirst4` | `hide_last_keep_first_4` | Keep the first 4 digits | `0987******` | `0987******` |
+| 3 | `hideMiddleKeepLast` | `hide_middle_keep_last` | Keep the first digits and the last 3 | `0987***321` | ⚠️ `098****321` |
+
+- `enabled: false` (default): full numbers. `enabled: true`: masked with `mode`.
+- The setting is kept across app launches; apply the role value again after each login.
+- Internal extensions are not masked. Threshold today: Android skips numbers of up to 8
+  characters, iOS masks only numbers of 7 digits or more.
+- ⚠️ Mode 3 on iOS keeps the first 3 digits instead of 4 (OmiKit 1.12.3); it will match web and
+  Android once OmiKit is fixed — no plugin change needed.
+
 ##### Device info & backend registration (3.4.0)
 Same names and behaviour as the React Native SDK — use them to check or add this device on the
 OMI backend yourself:

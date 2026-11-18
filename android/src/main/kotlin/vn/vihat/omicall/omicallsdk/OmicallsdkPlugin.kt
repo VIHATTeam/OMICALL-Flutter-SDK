@@ -833,6 +833,22 @@ class OmicallsdkPlugin : FlutterPlugin, MethodCallHandler, ActivityAware,
                     })
                 }
             }
+            // Index 0..3 = Utils.MaskMode order (same order as iOS OMIPhoneMaskPolicy / hide_phone_type)
+            SET_PHONE_NUMBER_MASK -> {
+                val client = OmiClient.getInstance(applicationContext!!)
+                val enabled = dataOmi["enabled"] as? Boolean ?: false
+                val modeIndex = (dataOmi["mode"] as? Number)?.toInt() ?: 0
+                client.setPhoneMaskMode(Utils.MaskMode.values().getOrElse(modeIndex) { Utils.MaskMode.HIDE_MIDDLE })
+                client.setCanShowPhoneNumber(!enabled) // Android stores "can see" = not masked
+                result.success(true)
+            }
+            GET_PHONE_NUMBER_MASK -> {
+                val ctx = applicationContext!!
+                result.success(mapOf(
+                    "enabled" to !Utils.getCanShowPhoneNumber(ctx),
+                    "mode" to OmiClient.getInstance(ctx).getPhoneMaskMode().ordinal
+                ))
+            }
             GET_ACTIVE_CALLS -> {
                 val calls = OmiClient.getInstance(applicationContext!!).getActiveCalls().map {
                     mapOf(

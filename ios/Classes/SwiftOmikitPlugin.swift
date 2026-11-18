@@ -301,6 +301,18 @@ public class SwiftOmikitPlugin: NSObject, FlutterPlugin {
               }
               DispatchQueue.main.async { result(value) }
           }
+      // Index 0..3 = OMIPhoneMaskPolicy (same order as Android Utils.MaskMode / hide_phone_type)
+      case SET_PHONE_NUMBER_MASK:
+          let enabled = dataOmi["enabled"] as? Bool ?? false
+          let mode = dataOmi["mode"] as? Int ?? 0
+          OmiClient.setPhoneMaskPolicy(OMIPhoneMaskPolicy(rawValue: mode) ?? .keepLeading3)
+          OmiClient.setIsPartialPhoneNumber(enabled)
+          result(true)
+      case GET_PHONE_NUMBER_MASK:
+          result([
+              "enabled": OmiClient.isPartialPhoneNumber(),
+              "mode": OmiClient.phoneMaskPolicy().rawValue,
+          ])
       case GET_ACTIVE_CALLS:
           result(CallManager.shareInstance().getActiveCalls())
       default:

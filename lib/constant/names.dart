@@ -53,4 +53,6 @@ class OmiActionName {
   static const String IS_CURRENT_DEVICE_REGISTERED =
       "IS_CURRENT_DEVICE_REGISTERED";
   static const String NEEDS_RE_LOGIN = "NEEDS_RE_LOGIN";
+  static const String SET_PHONE_NUMBER_MASK = "SET_PHONE_NUMBER_MASK";
+  static const String GET_PHONE_NUMBER_MASK = "GET_PHONE_NUMBER_MASK";
 }

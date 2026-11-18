@@ -8,4 +8,5 @@ export 'models/register_result.dart';
 export 'models/consult_transfer.dart';
 export 'models/video_call_state.dart';
 export 'models/device_info.dart';
+export 'models/phone_mask.dart';
 export 'utils/call_quality_tracker.dart';
